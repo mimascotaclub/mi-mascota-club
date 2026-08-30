@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Mascota Club — Registro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amarillo:#FFCE00;
+    --turquesa:#47C9C9;
+    --negro:#151515;
+    --blanco:#FFFFFF;
+    --gris-suave:#F7F7F5;
+    --gris-linea:#E4E2DC;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Lato',sans-serif;
+    background:var(--negro);
+    color:var(--negro);
+    overflow:hidden;
+  }
+
+  /* ---------- Barra de progreso ---------- */
+  .progreso-wrap{
+    position:fixed; top:0; left:0; right:0; height:4px;
+    background:rgba(255,255,255,0.08); z-index:50;
+  }
+  .progreso-bar{
+    height:100%; width:0%;
+    background:var(--amarillo);
+    transition:width .45s cubic-bezier(.65,0,.35,1);
+  }
+  .progreso-texto{
+    position:fixed; top:18px; right:24px; z-index:50;
+    font-size:13px; font-weight:700; letter-spacing:.04em;
+    color:rgba(255,255,255,0.55);
+  }
+  .btn-volver{
+    position:fixed; top:14px; left:20px; z-index:50;
+    background:none; border:none; color:rgba(255,255,255,0.55);
+    font-family:'Lato',sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; display:flex; align-items:center; gap:6px;
+    padding:8px; opacity:0; transition:opacity .3s;
+  }
+  .btn-volver.visible{opacity:1;}
+  .btn-volver:hover{color:var(--blanco);}
+
+  /* ---------- Escenario de pasos ---------- */
+  .stage{
+    position:relative; height:100vh; width:100vw;
+    background:var(--negro);
+  }
+  .paso{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 24px;
+    opacity:0; pointer-events:none;
+    transform:translateX(40px);
+    transition:opacity .45s cubic-bezier(.65,0,.35,1), transform .45s cubic-bezier(.65,0,.35,1);
+  }
+  .paso.activo{
+    opacity:1; pointer-events:auto; transform:translateX(0);
+  }
+  .paso.saliendo{
+    opacity:0; transform:translateX(-40px);
+  }
+
+  .paso-inner{ width:100%; max-width:520px; }
+
+  .eyebrow{
+    color:var(--turquesa); font-weight:900; font-size:13px;
+    letter-spacing:.12em; text-transform:uppercase; margin:0 0 14px;
+  }
+  .pregunta{
+    color:var(--blanco); font-size:clamp(24px,4.2vw,38px); font-weight:900;
+    line-height:1.15; margin:0 0 28px;
+  }
+  .pregunta .pet-name{ color:var(--amarillo); }
+
+  input[type=text], input[type=email]{
+    width:100%; background:transparent; border:none;
+    border-bottom:2px solid rgba(255,255,255,0.25);
+    color:var(--blanco); font-family:'Lato',sans-serif;
+    font-size:clamp(20px,3vw,28px); font-weight:700;
+    padding:10px 2px 14px; outline:none;
+    transition:border-color .25s;
+  }
+  input::placeholder{ color:rgba(255,255,255,0.3); font-weight:400; }
+  input:focus{ border-bottom-color:var(--amarillo); }
+
+  .hint{ color:rgba(255,255,255,0.4); font-size:14px; margin-top:10px; }
+
+  /* ---------- Opciones tipo tarjeta (especie) ---------- */
+  .opciones-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px;
+  }
+  .opcion-card{
+    background:rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.12);
+    border-radius:16px; padding:24px 16px; text-align:center;
+    cursor:pointer; transition:all .2s;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .opcion-card .emoji{ font-size:34px; }
+  .opcion-card span.label{ color:var(--blanco); font-weight:700; font-size:16px; }
+  .opcion-card:hover{ border-color:var(--turquesa); transform:translateY(-2px); }
+  .opcion-card.selected{ border-color:var(--amarillo); background:rgba(255,206,0,0.08); }
+
+  /* ---------- Select estilizado + buscador ---------- */
+  .select-wrap{ position:relative; }
+  .select-fake{
+    width:100%; background:rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.15); border-radius:12px;
+    padding:16px 18px; color:var(--blanco); font-size:18px; font-weight:700;
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+    transition:border-color .2s;
+  }
+  .select-fake:hover, .select-fake.abierto{ border-color:var(--turquesa); }
+  .select-fake .chevron{ color:var(--turquesa); transition:transform .2s; }
+  .select-fake.abierto .chevron{ transform:rotate(180deg); }
+
+  .dropdown-panel{
+    position:absolute; top:calc(100% + 8px); left:0; right:0;
+    background:#1E1E1E; border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px; max-height:280px; overflow:hidden;
+    display:none; flex-direction:column; z-index:20;
+    box-shadow:0 20px 40px rgba(0,0,0,0.4);
+  }
+  .dropdown-panel.abierto{ display:flex; }
+  .dropdown-search{
+    padding:10px; border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .dropdown-search input{
+    border-bottom:none; font-size:15px; font-weight:400;
+    background:rgba(255,255,255,0.05); border-radius:8px; padding:10px 12px;
+  }
+  .dropdown-list{ overflow-y:auto; padding:6px; }
+  .dropdown-item{
+    padding:11px 12px; color:var(--blanco); font-size:15px;
+    border-radius:8px; cursor:pointer;
+  }
+  .dropdown-item:hover, .dropdown-item.hl{ background:rgba(255,206,0,0.12); color:var(--amarillo); }
+
+  /* ---------- Botón continuar ---------- */
+  .btn-continuar{
+    margin-top:32px; background:var(--amarillo); color:var(--negro);
+    border:none; border-radius:100px; padding:16px 34px;
+    font-family:'Lato',sans-serif; font-weight:900; font-size:16px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:10px;
+    transition:transform .15s, box-shadow .15s;
+    opacity:.4; pointer-events:none;
+  }
+  .btn-continuar.activo{ opacity:1; pointer-events:auto; }
+  .btn-continuar:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(255,206,0,0.25); }
+  .btn-continuar:active{ transform:translateY(0); }
+  .tecla-enter{
+    font-size:11px; background:rgba(0,0,0,0.15); padding:3px 7px;
+    border-radius:5px; font-weight:700;
+  }
+
+  /* ---------- Pantalla final ---------- */
+  .final-check{
+    width:84px; height:84px; border-radius:50%;
+    background:var(--turquesa); display:flex; align-items:center; justify-content:center;
+    margin:0 auto 24px; animation:pop .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop{ from{ transform:scale(0); } to{ transform:scale(1); } }
+  .final-check svg{ width:40px; height:40px; }
+  .resumen{
+    background:rgba(255,255,255,0.04); border-radius:14px; padding:18px 20px;
+    margin-top:22px; text-align:left;
+  }
+  .resumen-row{ display:flex; justify-content:space-between; padding:7px 0; font-size:14px;
+    border-bottom:1px solid rgba(255,255,255,0.06); color:rgba(255,255,255,0.8); }
+  .resumen-row:last-child{ border-bottom:none; }
+  .resumen-row b{ color:var(--blanco); }
+
+  /* ---------- Casillas de código (estilo GitHub) ---------- */
+  .codigo-boxes{ display:flex; gap:10px; margin-top:8px; }
+  .codigo-box{
+    width:52px; height:60px; text-align:center;
+    font-size:26px; font-weight:900; color:var(--blanco);
+    background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.18);
+    border-radius:10px; outline:none; transition:border-color .2s, transform .15s;
+  }
+  .codigo-box:focus{ border-color:var(--amarillo); transform:translateY(-2px); }
+  .codigo-box.error{ border-color:#FF5C5C; animation:shake .35s; }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  .codigo-estado{ margin-top:14px; font-size:14px; min-height:20px; }
+  .codigo-estado.ok{ color:var(--turquesa); }
+  .codigo-estado.err{ color:#FF7A7A; }
+  .reenviar-link{ background:none; border:none; color:var(--turquesa); font-weight:700;
+    font-family:'Lato',sans-serif; font-size:14px; cursor:pointer; padding:0; text-decoration:underline; }
+  .reenviar-link:disabled{ color:rgba(255,255,255,0.3); cursor:default; text-decoration:none; }
+  .spinner{
+    width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.2);
+    border-top-color:var(--amarillo); border-radius:50%; animation:girar .7s linear infinite;
+    display:inline-block; vertical-align:middle; margin-right:8px;
+  }
+  @keyframes girar{ to{ transform:rotate(360deg); } }
+
+  /* ---------- Tarjetas de plan ---------- */
+  .planes-grid{ display:flex; flex-direction:column; gap:14px; margin-top:6px; }
+  .plan-card{
+    background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.12);
+    border-radius:16px; padding:20px 22px; cursor:pointer; transition:all .2s;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .plan-card:hover{ border-color:var(--turquesa); }
+  .plan-card.selected{ border-color:var(--amarillo); background:rgba(255,206,0,0.07); }
+  .plan-nombre{ color:var(--blanco); font-weight:900; font-size:17px; }
+  .plan-desc{ color:rgba(255,255,255,0.5); font-size:13px; margin-top:4px; }
+  .plan-precio{ color:var(--amarillo); font-weight:900; font-size:18px; white-space:nowrap; }
+
+  @media (prefers-reduced-motion: reduce){
+    .paso, .progreso-bar, .final-check{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progreso-wrap"><div class="progreso-bar" id="progresoBar"></div></div>
+<div class="progreso-texto" id="progresoTexto">1 / 9</div>
+<button class="btn-volver" id="btnVolver">← Atrás</button>
+
+<div class="stage" id="stage"></div>
+
+<input type="text" name="sitio_web" id="honeypot" style="position:absolute; left:-9999px;" tabindex="-1" autocomplete="off">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Reemplaza por tu URL y publishable key reales (las mismas que usa app.js)
+  const SUPABASE_URL = "https://mzsqyjxqnomsbqzhygkx.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_KdIYZfFtnfO2e7VaMMfWAA_GBT79hZ1";
+  window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<script>
+/* ============================================================
+   MI MASCOTA CLUB — FORMULARIO PASO A PASO (demo integrable)
+   Vanilla JS, sin dependencias. Diseñado para pegar dentro de
+   js/app.js reemplazando el formulario de registro de socio actual.
+   ============================================================ */
+
+const RAZAS_PERRO = ["Mestizo/No sé","Labrador Retriever","Golden Retriever","Pastor Alemán","Bulldog Francés","Chihuahua","Poodle","Beagle","Yorkshire Terrier","Boxer","Dachshund (Salchicha)","Husky Siberiano","Rottweiler","Shih Tzu","Border Collie","Cocker Spaniel","Schnauzer","Pug","Dálmata","Doberman","Gran Danés","San Bernardo","Akita","Basset Hound","Bichón Frisé","Bull Terrier","Cane Corso","Chow Chow","Collie","Fox Terrier","Galgo","Jack Russell Terrier","Maltés","Mastín","Pastor Belga","Pekinés","Pit Bull Terrier","Pointer","Samoyedo","Setter Irlandés","Weimaraner","West Highland Terrier","Whippet","Otra raza"];
+const RAZAS_GATO = ["Mestizo/No sé","Común Europeo","Persa","Siamés","Maine Coon","Bengalí","Ragdoll","Sphynx (sin pelo)","British Shorthair","Angora Turco","Azul Ruso","Abisinio","Bombay","Exótico de Pelo Corto","Himalayo","Manx","Scottish Fold","Otra raza"];
+
+const preguntas = [
+  { id:"nombre", tipo:"texto", eyebrow:"Empecemos", pregunta:"¿Cuál es tu nombre completo?", placeholder:"Ej: Jaime Florian" },
+  { id:"mascota", tipo:"texto", eyebrow:"Ahora tu compañero/a", pregunta:"¿Cómo se llama tu mascota?", placeholder:"Ej: Olivia" },
+  { id:"especie", tipo:"opciones", eyebrow:"Un poco más de {mascota}", pregunta:"¿{mascota} es...?", opciones:[
+      {value:"perro", emoji:"🐶", label:"Perro"},
+      {value:"gato", emoji:"🐱", label:"Gato"},
+      {value:"otro", emoji:"🐾", label:"Otro"}
+    ]},
+  { id:"raza", tipo:"select-buscable", eyebrow:"Casi listo con {mascota}", pregunta:"¿Cuál es su raza?", placeholder:"Buscar raza..." },
+  { id:"edad", tipo:"select", eyebrow:"Datos de salud", pregunta:"¿Qué edad tiene {mascota}?",
+      opciones:["Menos de 1 año","1 a 3 años","4 a 7 años","8 a 10 años","Más de 10 años"] },
+  { id:"peso", tipo:"select", eyebrow:"Casi terminamos", pregunta:"¿Cuánto pesa aproximadamente?",
+      opciones:["Menos de 5 kg","5 a 10 kg","11 a 20 kg","21 a 35 kg","Más de 35 kg"] },
+  { id:"tamano", tipo:"select", eyebrow:"Última de {mascota}", pregunta:"¿Cómo describirías su tamaño?",
+      opciones:["Pequeño","Mediano","Grande","Gigante"] },
+  { id:"direccion", tipo:"texto", eyebrow:"Sobre ti", pregunta:"¿Cuál es tu dirección?", placeholder:"Calle, número, comuna" },
+  { id:"celular", tipo:"texto", eyebrow:"Para contactarte", pregunta:"¿Cuál es tu número de celular?", placeholder:"+56 9 1234 5678" },
+  { id:"correo", tipo:"email", eyebrow:"Verifiquemos tu correo", pregunta:"¿A qué correo te enviamos tu carnet?", placeholder:"tucorreo@ejemplo.com" },
+  { id:"codigo", tipo:"codigo", eyebrow:"Confirma que eres tú", pregunta:"Ingresa el código" },
+  { id:"plan", tipo:"plan", eyebrow:"Último paso", pregunta:"Elige tu plan" },
+];
+
+const respuestas = {};
+let pasoActual = 0;
+const stage = document.getElementById('stage');
+const progresoBar = document.getElementById('progresoBar');
+const progresoTexto = document.getElementById('progresoTexto');
+const btnVolver = document.getElementById('btnVolver');
+
+function interpolar(str){
+  return str.replace('{mascota}', respuestas.mascota || 'tu mascota');
+}
+
+function razasSegunEspecie(){
+  if(respuestas.especie === 'gato') return RAZAS_GATO;
+  return RAZAS_PERRO; // default perro/otro
+}
+
+function renderPaso(index, direccion){
+  const q = preguntas[index];
+  const div = document.createElement('div');
+  div.className = 'paso';
+  div.dataset.id = q.id;
+
+  let camposHtml = '';
+
+  if(q.tipo === 'texto' || q.tipo === 'email'){
+    camposHtml = `
+      <input type="${q.tipo==='email'?'email':'text'}" id="campo-${q.id}" placeholder="${q.placeholder}" autocomplete="off" value="${respuestas[q.id]||''}">
+      <div class="hint">Presiona Enter para continuar</div>
+    `;
+  }
+
+  if(q.tipo === 'opciones'){
+    camposHtml = `<div class="opciones-grid">` + q.opciones.map(op => `
+      <div class="opcion-card ${respuestas[q.id]===op.value?'selected':''}" data-value="${op.value}">
+        <span class="emoji">${op.emoji}</span><span class="label">${op.label}</span>
+      </div>`).join('') + `</div>`;
+  }
+
+  if(q.tipo === 'select'){
+    camposHtml = `
+      <div class="select-wrap">
+        <div class="select-fake" id="selectFake-${q.id}">
+          <span id="selectLabel-${q.id}">${respuestas[q.id] || 'Selecciona una opción'}</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="dropdown-panel" id="dropdown-${q.id}">
+          <div class="dropdown-list">
+            ${q.opciones.map(op => `<div class="dropdown-item" data-value="${op}">${op}</div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  if(q.tipo === 'codigo'){
+    camposHtml = `
+      <p style="color:rgba(255,255,255,0.55); font-size:15px; margin:-10px 0 18px;">
+        Enviamos un código de 6 dígitos a <b style="color:var(--blanco);">${respuestas.correo||''}</b>
+      </p>
+      <div class="codigo-boxes">
+        ${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" class="codigo-box" id="cbox-${i}">`).join('')}
+      </div>
+      <div class="codigo-estado" id="codigoEstado"></div>
+      <div style="margin-top:10px;">
+        <button class="reenviar-link" id="btnReenviar">Reenviar código</button>
+      </div>
+    `;
+  }
+
+  if(q.tipo === 'plan'){
+    camposHtml = `<div class="planes-grid">
+      <div class="plan-card selected" data-plan="free">
+        <div><div class="plan-nombre">Free</div><div class="plan-desc">Directorio, carnet digital y descuentos base</div></div>
+        <div class="plan-precio">Gratis</div>
+      </div>
+      <div class="plan-card" data-plan="pro">
+        <div><div class="plan-nombre">Pro</div><div class="plan-desc">Incluye calificar negocios y ver reputación</div></div>
+        <div class="plan-precio">$2.990/mes</div>
+      </div>
+      <div class="plan-card" data-plan="premium">
+        <div><div class="plan-nombre">Premium</div><div class="plan-desc">Todo lo anterior + beneficios exclusivos</div></div>
+        <div class="plan-precio">$4.990/mes</div>
+      </div>
+    </div>`;
+  }
+
+  if(q.tipo === 'select-buscable'){
+    const razas = razasSegunEspecie();
+    camposHtml = `
+      <div class="select-wrap">
+        <div class="select-fake" id="selectFake-${q.id}">
+          <span id="selectLabel-${q.id}">${respuestas[q.id] || 'Selecciona una raza'}</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="dropdown-panel" id="dropdown-${q.id}">
+          <div class="dropdown-search"><input type="text" id="buscarRaza" placeholder="${q.placeholder}"></div>
+          <div class="dropdown-list" id="listaRazas">
+            ${razas.map(op => `<div class="dropdown-item" data-value="${op}">${op}</div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  div.innerHTML = `
+    <div class="paso-inner">
+      <p class="eyebrow">${q.eyebrow ? interpolar(q.eyebrow) : ''}</p>
+      <h1 class="pregunta">${interpolar(q.pregunta).replace(respuestas.mascota||'§§§', `<span class="pet-name">${respuestas.mascota||''}</span>`)}</h1>
+      ${camposHtml}
+      <button class="btn-continuar" id="btnContinuar">Continuar <span class="tecla-enter">↵</span></button>
+    </div>
+  `;
+
+  stage.appendChild(div);
+  requestAnimationFrame(()=> div.classList.add('activo'));
+
+  // ---- lógica según tipo ----
+  if(q.tipo === 'texto' || q.tipo === 'email'){
+    const input = div.querySelector('input');
+    const btn = div.querySelector('#btnContinuar');
+    setTimeout(()=> input.focus(), 250);
+    function validar(){
+      const val = input.value.trim();
+      const ok = q.tipo==='email' ? /\S+@\S+\.\S+/.test(val) : val.length>0;
+      btn.classList.toggle('activo', ok);
+      respuestas[q.id] = val;
+    }
+    input.addEventListener('input', validar);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter' && btn.classList.contains('activo')) avanzar(); });
+    validar();
+    btn.addEventListener('click', ()=> btn.classList.contains('activo') && avanzar());
+  }
+
+  if(q.tipo === 'opciones'){
+    const btn = div.querySelector('#btnContinuar');
+    div.querySelectorAll('.opcion-card').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        div.querySelectorAll('.opcion-card').forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        respuestas[q.id] = card.dataset.value;
+        btn.classList.add('activo');
+        setTimeout(avanzar, 350);
+      });
+    });
+  }
+
+  if(q.tipo === 'select' || q.tipo === 'select-buscable'){
+    const fake = div.querySelector(`#selectFake-${q.id}`);
+    const panel = div.querySelector(`#dropdown-${q.id}`);
+    const label = div.querySelector(`#selectLabel-${q.id}`);
+    const btn = div.querySelector('#btnContinuar');
+    fake.addEventListener('click', ()=>{
+      panel.classList.toggle('abierto');
+      fake.classList.toggle('abierto');
+    });
+    panel.querySelectorAll('.dropdown-item').forEach(item=>{
+      item.addEventListener('click', ()=>{
+        respuestas[q.id] = item.dataset.value;
+        label.textContent = item.dataset.value;
+        panel.classList.remove('abierto');
+        fake.classList.remove('abierto');
+        btn.classList.add('activo');
+        setTimeout(avanzar, 300);
+      });
+    });
+    if(q.tipo === 'select-buscable'){
+      const buscador = div.querySelector('#buscarRaza');
+      buscador.addEventListener('input', ()=>{
+        const term = buscador.value.toLowerCase();
+        div.querySelectorAll('#listaRazas .dropdown-item').forEach(it=>{
+          it.style.display = it.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+      });
+    }
+    if(respuestas[q.id]) btn.classList.add('activo');
+  }
+
+  if(q.tipo === 'codigo'){
+    const boxes = [...div.querySelectorAll('.codigo-box')];
+    const estado = div.querySelector('#codigoEstado');
+    const btnReenviar = div.querySelector('#btnReenviar');
+    const btn = div.querySelector('#btnContinuar');
+
+    async function enviarCodigo(){
+      estado.className = 'codigo-estado';
+      estado.innerHTML = `<span class="spinner"></span> Enviando código...`;
+      btnReenviar.disabled = true;
+      try{
+        const r = await fetch('/.netlify/functions/enviar-codigo', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email: respuestas.correo })
+        });
+        const data = await r.json();
+        if(data.ok){
+          estado.className = 'codigo-estado ok';
+          estado.textContent = 'Código enviado. Revisa tu bandeja de entrada.';
+        } else {
+          estado.className = 'codigo-estado err';
+          estado.textContent = data.mensaje || 'No se pudo enviar el código.';
+        }
+      } catch(e){
+        estado.className = 'codigo-estado err';
+        estado.textContent = 'Error de conexión. Intenta de nuevo.';
+      }
+      setTimeout(()=> btnReenviar.disabled = false, 20000);
+    }
+
+    enviarCodigo(); // se envía apenas se llega a este paso
+    btnReenviar.addEventListener('click', enviarCodigo);
+
+    boxes.forEach((box, i)=>{
+      box.addEventListener('input', ()=>{
+        box.value = box.value.replace(/[^0-9]/g,'');
+        if(box.value && i < boxes.length-1) boxes[i+1].focus();
+        chequearCompleto();
+      });
+      box.addEventListener('keydown', e=>{
+        if(e.key==='Backspace' && !box.value && i>0) boxes[i-1].focus();
+      });
+      box.addEventListener('paste', e=>{
+        e.preventDefault();
+        const texto = (e.clipboardData.getData('text')||'').replace(/[^0-9]/g,'').slice(0,6);
+        texto.split('').forEach((d,idx)=>{ if(boxes[idx]) boxes[idx].value = d; });
+        boxes[Math.min(texto.length,6)-1]?.focus();
+        chequearCompleto();
+      });
+    });
+
+    async function chequearCompleto(){
+      const codigo = boxes.map(b=>b.value).join('');
+      if(codigo.length !== 6) return;
+      estado.className = 'codigo-estado';
+      estado.innerHTML = `<span class="spinner"></span> Verificando...`;
+      try{
+        const { data, error } = await window.supabase.rpc('verificar_codigo_email', {
+          p_email: respuestas.correo, p_codigo: codigo
+        });
+        if(error || !data){
+          estado.className = 'codigo-estado err';
+          estado.textContent = 'Código incorrecto o vencido.';
+          boxes.forEach(b=> b.classList.add('error'));
+          setTimeout(()=> boxes.forEach(b=> b.classList.remove('error')), 400);
+          return;
+        }
+        estado.className = 'codigo-estado ok';
+        estado.textContent = '¡Correo verificado!';
+        respuestas.correo_verificado = true;
+        btn.classList.add('activo');
+        setTimeout(avanzar, 500);
+      } catch(e){
+        estado.className = 'codigo-estado err';
+        estado.textContent = 'Error de conexión al verificar.';
+      }
+    }
+    setTimeout(()=> boxes[0].focus(), 300);
+  }
+
+  if(q.tipo === 'plan'){
+    const btn = div.querySelector('#btnContinuar');
+    respuestas.plan = respuestas.plan || 'free';
+    btn.textContent = 'Confirmar registro';
+    btn.classList.add('activo');
+    div.querySelectorAll('.plan-card').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        div.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        respuestas.plan = card.dataset.plan;
+        btn.textContent = card.dataset.plan === 'free' ? 'Confirmar registro' : 'Ir a pagar';
+      });
+    });
+    btn.addEventListener('click', ()=>{
+      if(respuestas.plan !== 'free'){
+        alert('Aquí se conectará el checkout de Mercado Pago (pendiente de integrar).');
+      }
+      avanzar();
+    });
+  }
+
+  btnVolver.classList.toggle('visible', index > 0);
+  progresoBar.style.width = ((index+1)/preguntas.length*100) + '%';
+  progresoTexto.textContent = `${index+1} / ${preguntas.length}`;
+
+  return div;
+}
+
+function avanzar(){
+  const actualDiv = stage.querySelector('.paso.activo');
+  if(actualDiv) actualDiv.classList.add('saliendo');
+  pasoActual++;
+  if(pasoActual >= preguntas.length){
+    setTimeout(mostrarFinal, 400);
+    return;
+  }
+  const nuevo = renderPaso(pasoActual, 1);
+  setTimeout(()=>{ if(actualDiv) actualDiv.remove(); }, 460);
+}
+
+function retroceder(){
+  if(pasoActual===0) return;
+  const actualDiv = stage.querySelector('.paso.activo');
+  if(actualDiv) actualDiv.classList.add('saliendo');
+  pasoActual--;
+  const nuevo = renderPaso(pasoActual, -1);
+  setTimeout(()=>{ if(actualDiv) actualDiv.remove(); }, 460);
+}
+
+btnVolver.addEventListener('click', retroceder);
+
+function mostrarFinal(){
+  // Chequeo silencioso de bot: si el campo invisible tiene texto, no era humano.
+  const honeypot = document.getElementById('honeypot');
+  if(honeypot && honeypot.value){
+    console.warn('Registro descartado (honeypot activado).');
+    return;
+  }
+  progresoBar.style.width = '100%';
+  progresoTexto.style.opacity = 0;
+  btnVolver.classList.remove('visible');
+  const div = document.createElement('div');
+  div.className = 'paso';
+  div.innerHTML = `
+    <div class="paso-inner" style="text-align:center;">
+      <div class="final-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#151515" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h1 class="pregunta">¡Bienvenido al club, ${respuestas.nombre.split(' ')[0]}!</h1>
+      <p style="color:rgba(255,255,255,0.6); font-size:15px;">Te enviamos el carnet de ${respuestas.mascota} a ${respuestas.correo}</p>
+      <div class="resumen">
+        <div class="resumen-row"><span>Dueño/a</span><b>${respuestas.nombre}</b></div>
+        <div class="resumen-row"><span>Mascota</span><b>${respuestas.mascota}</b></div>
+        <div class="resumen-row"><span>Especie / Raza</span><b>${respuestas.especie} · ${respuestas.raza}</b></div>
+        <div class="resumen-row"><span>Edad / Peso / Tamaño</span><b>${respuestas.edad} · ${respuestas.peso} · ${respuestas.tamano}</b></div>
+        <div class="resumen-row"><span>Celular</span><b>${respuestas.celular}</b></div>
+        <div class="resumen-row"><span>Plan</span><b>${(respuestas.plan||'free').toUpperCase()}</b></div>
+      </div>
+    </div>
+  `;
+  stage.appendChild(div);
+  requestAnimationFrame(()=> div.classList.add('activo'));
+}
+
+// arranque
+renderPaso(0, 1);
+</script>
+</body>
+</html>
