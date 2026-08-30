@@ -1,0 +1,12 @@
+# Mi Mascota Club es un sitio de una sola página (SPA) que simula rutas propias
+# para el directorio (ej. /directorio/veterinaria) usando el historial del navegador.
+# Sin esta regla, entrar directo a esa URL o refrescar la página daría un error 404
+# en Netlify, porque físicamente no existe una carpeta /directorio en el sitio.
+# Esta regla le dice a Netlify: "para cualquier URL que empiece con /directorio,
+# sirve igual el index.html" — el JavaScript del sitio (js/app.js) lee la URL
+# y muestra la vista del directorio correspondiente.
+/directorio/*    /index.html  200
+/directorio      /index.html  200
+/especialistas/* /index.html  200
+/especialistas   /index.html  200
+/negocio/*       /index.html  200

@@ -1,0 +1,72 @@
+<!-- ============================================================
+     PLANTILLA DE CORREO — MI MASCOTA CLUB
+     ============================================================
+     Cómo usar en EmailJS:
+     1) Abre tu template "Welcome" → pestaña "Content".
+     2) Haz clic en "Edit Content" (arriba a la derecha del recuadro).
+     3) Debería aparecer una opción para ver/editar el código fuente
+        (a veces un ícono "</>" o "Source code" o "HTML").
+     4) Borra todo lo que haya ahí y pega ESTE archivo completo.
+     5) Guarda (Save).
+     La URL del logo abajo ya apunta a tu sitio en Netlify, así que
+     se va a ver bien en cualquier cliente de correo (Gmail, Outlook, etc).
+     ============================================================ -->
+<div style="background-color:#F1E9D2;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" style="max-width:520px;margin:0 auto;border-collapse:collapse;">
+
+    <!-- Header con logo -->
+    <tr>
+      <td style="background-color:#151515;padding:28px 32px;border-radius:16px 16px 0 0;text-align:center;">
+        <img src="https://tranquil-torte-695e25.netlify.app/assets/images/logo-email.png" alt="Mi Mascota Club" width="180" style="display:block;margin:0 auto;border:0;">
+      </td>
+    </tr>
+
+    <!-- Cuerpo del correo -->
+    <tr>
+      <td style="background-color:#FFFFFF;padding:36px 32px;">
+        <p style="font-size:16px;color:#151515;line-height:1.6;margin:0 0 16px;">
+          Hola <b>{{to_name}}</b>,
+        </p>
+        <p style="font-size:16px;color:#151515;line-height:1.6;margin:0 0 20px;">
+          ¡Gracias por sumarte a <b>Mi Mascota Club</b>! 🐾
+        </p>
+
+        <table role="presentation" width="100%" style="background-color:#FFF8DE;border-radius:12px;margin:0 0 20px;">
+          <tr>
+            <td style="padding:16px 20px;">
+              <p style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:#8a8a8a;margin:0 0 4px;font-weight:bold;">Tu código de registro</p>
+              <p style="font-size:22px;color:#151515;margin:0;font-weight:bold;font-family:'Courier New',monospace;">{{codigo}}</p>
+            </td>
+          </tr>
+        </table>
+
+        <p style="font-size:16px;color:#151515;line-height:1.6;margin:0 0 20px;font-weight:bold;">
+          Somos una comunidad que amamos a las mascotas.
+        </p>
+
+        <p style="font-size:14px;color:#3a3a3a;line-height:1.6;margin:0 0 24px;">
+          Comparte esta noticia con algún amigo que también tenga mascota, o cuéntalo en tu Instagram — mientras más seamos, más beneficios podemos conseguir juntos.
+        </p>
+
+        <table role="presentation" style="background-color:#EAF9F9;border-radius:12px;margin:0 0 4px;">
+          <tr>
+            <td style="padding:16px 20px;">
+              <p style="font-size:14px;color:#151515;line-height:1.6;margin:0;font-style:italic;">
+                {{mensaje_extra}}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td style="background-color:#FFF8DE;padding:20px 32px;border-radius:0 0 16px 16px;text-align:center;">
+        <p style="font-size:13px;color:#6b7280;margin:0 0 6px;">Con cariño, el equipo de <b>Mi Mascota Club</b> 🐾</p>
+        <p style="font-size:11px;color:#9a9a9a;margin:0;">Piloto Santiago · Este correo se envió porque te registraste en mimascotaclub</p>
+      </td>
+    </tr>
+
+  </table>
+</div>

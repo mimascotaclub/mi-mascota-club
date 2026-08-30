@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Mascota Club — El carnet de tu mascota</title>
+
+<!-- TIPOGRAFÍA: si cambias las fuentes en css/styles.css, actualiza también este link -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+
+<!-- Librería para generar los códigos QR del carnet -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Cliente de Supabase: conecta la app a tu base de datos real -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Mapa: Leaflet + OpenStreetMap (gratis, sin llave ni tarjeta) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- EmailJS: envía el correo de bienvenida al registrarse, sin backend propio -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+<div class="announce-bar" id="announceBar">🎉 <b>Nuevo en el club:</b> cada semana sumamos más negocios y beneficios.</div>
+
+<nav>
+  <div class="navbar">
+    <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
+    <div class="navlinks">
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-btn" onclick="toggleDropdown('exploreDropdown')">Explorar <span class="caret">▾</span></button>
+        <div class="nav-dropdown-panel wide" id="exploreDropdown">
+          <div class="dd-col">
+            <div class="dd-col-title">🐾 Para mi mascota</div>
+            <div id="ddMascotaList"></div>
+          </div>
+          <div class="dd-col">
+            <div class="dd-col-title">🙂 Para mí</div>
+            <div id="ddDuenoList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-btn" onclick="toggleDropdown('beneficiosDropdown')">Beneficios <span class="caret">▾</span></button>
+        <div class="nav-dropdown-panel wide" id="beneficiosDropdown">
+          <div class="dd-col">
+            <div class="dd-col-title">🐶 Para tu mascota</div>
+            <div id="ddBeneficiosMascota"></div>
+          </div>
+          <div class="dd-col">
+            <div class="dd-col-title">👤 Para ti</div>
+            <div id="ddBeneficiosDueno"></div>
+          </div>
+        </div>
+      </div>
+      <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();">Especialistas</a>
+      <a href="#duenos" onclick="event.preventDefault(); mostrarFormulario('dueno');">Mi Mascota</a>
+      <a href="#planes">Planes</a>
+    </div>
+    <a href="#negocios" class="btn btn-primary btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap" style="text-align:center;max-width:760px;">
+    <h1 style="font-size:44px;">Encuentra todo lo que necesitas <em>para tu mascota</em></h1>
+    <p class="lead" style="margin:0 auto 26px;">Negocios, productos, servicios y beneficios.</p>
+    <div class="hero-search-wrap">
+      <input id="heroSearch" class="hero-search" type="text" placeholder="Necesito una veterinaria..." onkeydown="if(event.key==='Enter'){event.preventDefault(); irABuscar();}">
+      <button class="btn btn-primary hero-search-btn" onclick="irABuscar()">Explorar</button>
+    </div>
+    <div class="hero-note mono" id="liveBeneficiosCount" style="display:none;justify-content:center;margin-top:18px;color:var(--forest-2);font-weight:600;"></div>
+  </div>
+
+  <div class="fan-carousel">
+    <div class="fan-track" id="fanTrack"></div>
+  </div>
+
+  <div class="wrap" style="text-align:center;margin-top:36px;">
+    <p style="font-size:12px;color:#8a8a8a;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">✓ Negocios verificados</p>
+  </div>
+  <div class="trust-marquee">
+    <div class="trust-track" id="trustTrack"></div>
+  </div>
+</header>
+
+
+
+<section id="categorias" style="padding-top:48px;padding-bottom:48px;">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:26px;">
+      <span class="eyebrow">Explora por categoría</span>
+      <h2 style="font-size:26px;">Todo lo que necesitas, organizado</h2>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<section id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Cómo funciona</span>
+      <h2>De buscar en cinco apps distintas a tener todo en una.</h2>
+      <p>Descubres, reservas o compras, y ahorras con los beneficios del club — todo asociado al perfil de tu mascota.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01 — Descubre</div><h3>Encuentra por categoría y comuna</h3><p>Veterinarias, peluquerías, paseadores, hoteles y tiendas cerca de ti.</p></div>
+      <div class="step"><div class="num">02 — Reserva o compra</div><h3>Contacta directo, sin vueltas</h3><p>Escribe por WhatsApp o agenda con el negocio.</p></div>
+      <div class="step"><div class="num">03 — Ahorra</div><h3>Muestra tu carnet con QR</h3><p>El negocio valida tu visita y aplicas tu descuento de socio al instante.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="directorio" class="band">
+  <div class="page-banner" id="dirBanner"></div>
+  <div class="wrap">
+    <div class="featured-strip-wrap" id="featuredStripWrap" style="display:none;">
+      <div class="section-head" style="margin-bottom:14px;">
+        <span class="eyebrow" style="color:var(--yellow-dark);background:rgba(255,206,0,0.18);">★ Destacados</span>
+      </div>
+      <div class="featured-strip" id="featuredStrip"></div>
+    </div>
+    <div class="section-head" style="margin-bottom:22px;margin-top:30px;">
+      <span class="eyebrow" id="dirEyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Directorio</span>
+    </div>
+    <div class="dir-controls">
+      <button class="btn btn-sm btn-primary" id="tabTodos" onclick="setDirTipo('')">Todos</button>
+      <button class="btn btn-sm btn-outline" id="tabMascota" onclick="setDirTipo('mascota')">Para tu mascota</button>
+      <button class="btn btn-sm btn-outline" id="tabDueno" onclick="setDirTipo('dueno')">Para ti como dueño</button>
+    </div>
+    <div class="dir-controls">
+      <input id="dirSearch" type="text" placeholder="Buscar negocio o especialista...">
+      <select id="dirCat"><option value="">Todas las categorías</option></select>
+      <select id="dirComuna"><option value="">Todas las comunas</option></select>
+    </div>
+    <div class="dir-status" id="dirStatus"><span class="spinner"></span>Cargando directorio...</div>
+    <div class="dir-grid" id="dirGrid"></div>
+  </div>
+</section>
+
+<section id="fichaNegocio" class="band">
+  <div class="page-banner" id="fichaBanner"></div>
+  <div class="wrap ficha-page-wrap" id="fichaContent"></div>
+</section>
+
+<section id="negocios" style="display:none;">
+  <div class="wrap split" id="negociosSplit">
+    <div class="panel" id="panelNegocio">
+      <span class="tag">Para negocios y especialistas</span>
+      <div style="font-size:12px;margin:6px 0 0;"><a href="#" onclick="event.preventDefault(); mostrarFormulario('dueno');" style="color:var(--brass);">¿Vienes a registrar tu mascota? Cambia aquí →</a></div>
+      <h3>Súmate como negocio fundador</h3>
+      <p class="desc">Aparece en el directorio y valida visitas de socios. Gratis los primeros meses.</p>
+      <div class="wizard-steps" id="wizardSteps-biz">
+        <div class="wizard-step" data-step="1"><div class="wizard-dot">1</div><div class="wizard-label">Tu negocio</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="2"><div class="wizard-dot">2</div><div class="wizard-label">Tus datos</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="3"><div class="wizard-dot">3</div><div class="wizard-label">Crear ficha</div></div>
+      </div>
+      <form id="bizForm">
+        <div class="form-step" data-wizard="biz" data-step="1">
+          <div class="field">
+            <label>Tipo de ficha</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn btn-sm btn-primary" id="fichaNegocioBtn" onclick="setBizEsEspecialista(false)">🏪 Negocio</button>
+              <button type="button" class="btn btn-sm btn-outline" id="fichaEspecialistaBtn" onclick="setBizEsEspecialista(true)">🧑‍⚕️ Especialista individual</button>
+            </div>
+            <div style="font-size:12px;color:#7a8377;margin-top:8px;line-height:1.4;">Un especialista es <b>una sola persona</b> que ofrece un servicio (ej. etólogo, nutricionista, adiestrador) y aparece en la página de Especialistas. Un negocio es un local o marca.</div>
+          </div>
+          <div class="field">
+            <label>¿Tu negocio es...?</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn btn-sm btn-primary" id="tipoMascotaBtn" onclick="setBizTipo('mascota')">Para mascotas</button>
+              <button type="button" class="btn btn-sm btn-outline" id="tipoDuenoBtn" onclick="setBizTipo('dueno')">Para dueños</button>
+            </div>
+            <div id="bizFormHint" style="font-size:12px;color:#7a8377;margin-top:8px;line-height:1.4;"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="bizName">Nombre del negocio</label><input id="bizName" required placeholder="Ej: Veterinaria Los Robles"></div>
+            <div class="field"><label for="bizCat">Categoría</label>
+              <select id="bizCat" required>
+                <option value="">Selecciona</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="bizRegion">Región</label>
+              <select id="bizRegion" required onchange="poblarComunas('bizRegion','bizComuna')"></select>
+            </div>
+            <div class="field"><label for="bizComuna">Comuna</label>
+              <select id="bizComuna" required></select>
+            </div>
+          </div>
+          <div class="field"><label for="bizDireccion">Dirección</label><input id="bizDireccion" placeholder="Ej: Av. Providencia 1234, local 5"></div>
+          <div class="field"><label for="bizServicios">Especialidad o top 3 servicios</label><input id="bizServicios" placeholder="Ej: Baño, Corte, Guardería de día" required></div>
+          <div class="field"><label for="bizHorario">Horario de atención</label><input id="bizHorario" placeholder="Ej: Lun a Vie 10:00-19:00"></div>
+          <div class="field"><label for="bizRedes">Instagram / sitio web</label><input id="bizRedes" placeholder="Ej: @mi_negocio"></div>
+          <div class="field">
+            <label for="bizDescripcion">Descripción de tu negocio</label>
+            <textarea id="bizDescripcion" rows="2" style="width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--paper-line);font-family:var(--font-body);font-size:16px;background:var(--parchment);" placeholder="Cuéntale a los socios qué los hace especiales"></textarea>
+          </div>
+          <div class="field">
+            <label for="bizLogo">Logo de tu negocio (opcional)</label>
+            <input type="file" id="bizLogo" accept="image/*">
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-brass" style="width:100%;justify-content:center;" onclick="wizardNext('biz')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="biz" data-step="2">
+          <div class="section-head" style="margin:0 0 16px;max-width:none;">
+            <h3 style="font-size:16px;margin:0 0 4px;">Tus datos de contacto</h3>
+            <p style="font-size:12.5px;">Correo y teléfono por separado, para que podamos contactarte sin confusiones.</p>
+          </div>
+          <div class="field-row">
+            <div class="field field-validated" id="fieldBizTelefono">
+              <label for="bizTelefono">Teléfono de contacto</label>
+              <div class="input-icon-wrap tel-wrap">
+                <span class="tel-prefix">+56 9</span>
+                <input id="bizTelefono" type="tel" required inputmode="numeric" maxlength="9" placeholder="1234 5678" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="bizTelefonoMsg"></small>
+            </div>
+            <div class="field field-validated" id="fieldBizEmail">
+              <label for="bizEmail">Email de contacto</label>
+              <div class="input-icon-wrap">
+                <input id="bizEmail" type="email" required placeholder="negocio@ejemplo.com" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="bizEmailMsg"></small>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('biz')">← Atrás</button>
+            <button type="button" class="btn btn-brass" onclick="wizardNext('biz')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="biz" data-step="3">
+          <div class="field-row">
+            <div class="field"><label for="bizBeneficioTipo">Tipo de beneficio para socios</label>
+              <select id="bizBeneficioTipo" required>
+                <option value="">Selecciona</option>
+                <option>Descuento</option><option>Regalo</option><option>Promoción</option><option>Otro</option>
+              </select>
+            </div>
+            <div class="field"><label for="bizBeneficioDetalle">Detalle del beneficio</label><input id="bizBeneficioDetalle" placeholder="Ej: 15% en corte de pelo" required></div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('biz')">← Atrás</button>
+            <button type="submit" id="bizSubmitBtn" class="btn btn-brass" style="justify-content:center;">Quiero ser negocio fundador</button>
+          </div>
+        </div>
+      </form>
+      <div class="price-hint">Plan negocio (referencial, a validar): <b>$5.000–$20.000 CLP/mes</b>. Gratis durante el piloto.</div>
+      <div class="waitlist"><div class="waitlist-count" id="bizCount">Cargando...</div><div id="bizList"></div></div>
+    </div>
+
+    <div class="panel" id="duenos">
+      <span class="tag" style="color:var(--forest-2);">Para dueños de mascotas</span>
+      <div style="font-size:12px;margin:6px 0 0;"><a href="#" onclick="event.preventDefault(); mostrarFormulario('negocio');" style="color:var(--forest-2);">¿Vienes a registrar tu negocio? Cambia aquí →</a></div>
+      <h3>Crea el carnet de tu mascota</h3>
+      <p class="desc">Regístrate gratis y arma el perfil de tu mascota. Tu carnet incluye un QR único para validar tus visitas.</p>
+      <div class="card-stage" style="margin-bottom:22px;">
+        <div class="credencial" style="transform:rotate(1deg);">
+          <div class="cred-badge">Miembro Free</div>
+          <div class="cred-top">
+            <div class="cred-brand"><img src="assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
+            <div class="cred-id" id="credId">MMC00000</div>
+          </div>
+          <div class="cred-photo" id="credPhoto"><img src="assets/favicon.svg" alt=""></div>
+          <div class="cred-name" id="credName">Tu mascota</div>
+          <div class="cred-breed" id="credBreed">Escribe su nombre para previsualizar →</div>
+          <div class="cred-row"><div>Comuna<b id="credComuna">Santiago</b></div><div>Estado<b style="color:var(--sage);">Activo</b></div></div>
+        </div>
+      </div>
+      <div class="wizard-steps" id="wizardSteps-owner">
+        <div class="wizard-step" data-step="1"><div class="wizard-dot">1</div><div class="wizard-label">Tu mascota</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="2"><div class="wizard-dot">2</div><div class="wizard-label">Tus datos</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="3"><div class="wizard-dot">3</div><div class="wizard-label">Crear ficha</div></div>
+      </div>
+      <form id="ownerForm">
+        <div class="form-step" data-wizard="owner" data-step="1">
+          <div class="field-row">
+            <div class="field"><label for="petName">Nombre de tu mascota</label><input id="petName" required placeholder="Ej: Mona" oninput="updateCard()"></div>
+            <div class="field"><label for="petSpecies">Especie</label>
+              <select id="petSpecies" onchange="updateCard()">
+                <option value="Perro">Perro</option><option value="Gato">Gato</option><option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label for="petBreed">Raza (opcional)</label><input id="petBreed" placeholder="Ej: Mestiza" oninput="updateCard()"></div>
+          <div class="field-row three">
+            <div class="field"><label for="petEdad">Edad (años)</label><input type="number" id="petEdad" min="0" step="0.5" placeholder="Ej: 3"></div>
+            <div class="field"><label for="petPeso">Peso (kg)</label><input type="number" id="petPeso" min="0" step="0.1" placeholder="Ej: 12" oninput="sugerirTamano()"></div>
+            <div class="field"><label for="petTamano">Tamaño</label>
+              <select id="petTamano">
+                <option value="">Selecciona</option>
+                <option value="S">S — hasta 10 kg</option>
+                <option value="M">M — 10 a 25 kg</option>
+                <option value="L">L — 25 a 40 kg</option>
+                <option value="XL">XL — más de 40 kg</option>
+              </select>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="wizardNext('owner')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="owner" data-step="2">
+          <div class="section-head" style="margin:0 0 16px;max-width:none;">
+            <h3 style="font-size:16px;margin:0 0 4px;">Tus datos</h3>
+            <p style="font-size:12.5px;">Para identificarte a ti, no solo a tu mascota, cuando visites un negocio con beneficio para el dueño.</p>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="ownerRepNombre">Tu nombre completo</label><input id="ownerRepNombre" required placeholder="Ej: Juan Pérez"></div>
+            <div class="field field-validated" id="fieldOwnerRut">
+              <label for="ownerRepRut">Tu RUT</label>
+              <div class="input-icon-wrap">
+                <input id="ownerRepRut" required placeholder="Ej: 12.345.678-9" autocomplete="off" inputmode="text">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="ownerRepRutMsg"></small>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field field-validated" id="fieldOwnerTelefono">
+              <label for="ownerRepTelefono">Tu teléfono</label>
+              <div class="input-icon-wrap tel-wrap">
+                <span class="tel-prefix">+56 9</span>
+                <input id="ownerRepTelefono" type="tel" required inputmode="numeric" maxlength="9" placeholder="1234 5678" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="ownerRepTelefonoMsg"></small>
+            </div>
+            <div class="field field-validated" id="fieldOwnerEmail">
+              <label for="ownerEmail">Tu email</label>
+              <div class="input-icon-wrap">
+                <input id="ownerEmail" type="email" required placeholder="tucorreo@ejemplo.com" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="ownerEmailMsg"></small>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="ownerRegion">Tu región</label>
+              <select id="ownerRegion" required onchange="poblarComunas('ownerRegion','ownerComuna'); updateCard();"></select>
+            </div>
+            <div class="field"><label for="ownerComuna">Tu comuna</label>
+              <select id="ownerComuna" required onchange="updateCard()"></select>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('owner')">← Atrás</button>
+            <button type="button" class="btn btn-primary" onclick="wizardNext('owner')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="owner" data-step="3">
+          <div class="section-head" style="margin:0 0 16px;max-width:none;">
+            <h3 style="font-size:16px;margin:0 0 4px;">Ficha de tu mascota</h3>
+          </div>
+          <div class="field">
+            <label for="petFoto">Foto de tu mascota (opcional)</label>
+            <input type="file" id="petFoto" accept="image/*">
+          </div>
+          <div class="field">
+            <label>Documentos — receta, cartola de vacunas (opcional, máx. 2)</label>
+            <input type="file" id="petDoc1" accept="image/*">
+            <input type="file" id="petDoc2" accept="image/*" style="margin-top:8px;">
+          </div>
+          <div class="field">
+            <label for="petNotas">Notas médicas (alergias, medicamentos, veterinario tratante...)</label>
+            <textarea id="petNotas" rows="2" style="width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--paper-line);font-family:var(--font-body);font-size:16px;background:var(--parchment);"></textarea>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('owner')">← Atrás</button>
+            <button type="submit" id="ownerSubmitBtn" class="btn btn-primary" style="justify-content:center;">Crear carnet y unirme gratis</button>
+          </div>
+        </div>
+      </form>
+      <div class="price-hint">Las fotos se comprimen automáticamente al guardar.</div>
+      <div class="price-hint">Membresía premium (referencial, a validar): <b>$2.000–$5.000 CLP/mes</b>. El registro es gratis.</div>
+      <div class="waitlist"><div class="waitlist-count" id="ownerCount">Cargando...</div><div id="ownerList"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="validar" class="band" style="display:none;">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Para negocios</span>
+      <h2>Validar una visita</h2>
+      <p>Con tu código de negocio (te lo entregamos al registrarte) y el código QR del carnet del socio, registra la compra y su descuento en segundos.</p>
+    </div>
+    <div class="panel full" style="max-width:520px;">
+      <form id="validarForm">
+        <div class="field-row three">
+          <div class="field"><label for="valBizCode">Tu código de negocio</label><input id="valBizCode" required placeholder="NEG0001" style="text-transform:uppercase;"></div>
+          <div class="field"><label for="valSocioCode">Código del socio</label><input id="valSocioCode" required placeholder="MMC00001" style="text-transform:uppercase;"></div>
+          <div class="field"><label for="valMonto">Monto compra (CLP)</label><input id="valMonto" type="number" min="1" required placeholder="15000"></div>
+        </div>
+        <button type="submit" id="validarSubmitBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Validar y registrar compra</button>
+      </form>
+      <div class="validar-result" id="validarResult"></div>
+    </div>
+  </div>
+</section>
+
+<section id="planes" class="band">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Planes</span>
+      <h2>Elige tu nivel en el club</h2>
+      <p>Precios referenciales, a validar con el mercado. <b>Por ahora, todos los planes están disponibles gratis durante el piloto</b> — esto es la hoja de ruta de hacia dónde vamos.</p>
+    </div>
+
+    <h3 style="font-size:20px;margin:0 0 18px;">Para dueños de mascota</h3>
+    <div class="pricing-grid" style="margin-bottom:56px;">
+      <div class="pricing-card">
+        <div class="pricing-icon">🆓</div>
+        <div class="pricing-name">GRATIS</div>
+        <div class="pricing-price">$0<span>/mes</span></div>
+        <div class="pricing-desc">Pertenece.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> 🐾 1 mascota</li>
+          <li><span class="pricing-check">✓</span> 🎫 Carnet digital</li>
+          <li><span class="pricing-check">✓</span> 🔎 Explora todo</li>
+          <li><span class="pricing-check">✓</span> ❤️ Guarda favoritos</li>
+        </ul>
+        <a href="#duenos" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('dueno');">Empezar gratis</a>
+        <div class="pricing-note">Sin tarjeta, sin compromiso</div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-icon">⭐</div>
+        <div class="pricing-name">PRO</div>
+        <div class="pricing-price">$3.990<span>/mes</span></div>
+        <div class="pricing-desc">Beneficios para tu mascota.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> 🐶 2 mascotas</li>
+          <li><span class="pricing-check">✓</span> 🎁 Beneficios exclusivos para mascotas</li>
+          <li><span class="pricing-check">✓</span> 💰 Descuentos en servicios y productos</li>
+          <li><span class="pricing-check">✓</span> ⭐ Ofertas especiales</li>
+        </ul>
+        <a href="#duenos" class="btn btn-primary pricing-cta" onclick="event.preventDefault(); mostrarFormulario('dueno');">Empezar gratis</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-icon">👑</div>
+        <div class="pricing-name">PREMIUM</div>
+        <div class="pricing-price">$6.990<span>/mes</span></div>
+        <div class="pricing-desc">Beneficios para tu mascota y para ti.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> 🐶 4 mascotas</li>
+          <li><span class="pricing-check">✓</span> 🐾 Todos los beneficios para mascotas</li>
+          <li><span class="pricing-check">✓</span> 👤 Beneficios exclusivos para ti</li>
+          <li><span class="pricing-check">✓</span> ☕🎾🏨 Cafés, deporte y hoteles</li>
+          <li><span class="pricing-check">✓</span> 👑 Beneficios VIP</li>
+        </ul>
+        <a href="#duenos" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('dueno');">Empezar gratis</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+    </div>
+
+    <h3 style="font-size:20px;margin:0 0 18px;">Para negocios y especialistas</h3>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-icon">🆓</div>
+        <div class="pricing-name">PRESENCIA</div>
+        <div class="pricing-price">$0<span>/mes</span></div>
+        <div class="pricing-desc">Estoy en Mi Mascota Club.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Ficha pública (nombre, categoría, contacto, redes)</li>
+          <li><span class="pricing-check">✓</span> Apareces en el directorio y búsquedas</li>
+          <li><span class="pricing-check">✓</span> Puedes solicitar verificación</li>
+        </ul>
+        <a href="#negocios" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('negocio');">Sumar mi negocio</a>
+        <div class="pricing-note">Gratis para siempre</div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-icon">⭐</div>
+        <div class="pricing-name">DESTACADO</div>
+        <div class="pricing-price">$14.990<span>/mes</span></div>
+        <div class="pricing-desc">Quiero que me encuentren.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Todo lo de Presencia</li>
+          <li><span class="pricing-check">✓</span> ✓ Sello de negocio verificado</li>
+          <li><span class="pricing-check">✓</span> Logo en el Home del club</li>
+          <li><span class="pricing-check">✓</span> Posición destacada en búsquedas</li>
+          <li><span class="pricing-check">✓</span> Perfil enriquecido (fotos, precios, promos)</li>
+          <li><span class="pricing-check">✓</span> Puede publicar beneficios exclusivos</li>
+          <li><span class="pricing-check">✓</span> Estadísticas básicas de tu ficha</li>
+        </ul>
+        <a href="#negocios" class="btn btn-primary pricing-cta" onclick="event.preventDefault(); mostrarFormulario('negocio');">Sumar mi negocio</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-icon">👑</div>
+        <div class="pricing-name">PREMIUM</div>
+        <div class="pricing-price">$29.990<span>/mes</span></div>
+        <div class="pricing-desc">Quiero conseguir clientes.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Todo lo de Destacado</li>
+          <li><span class="pricing-check">✓</span> Máxima exposición en Home, categorías y búsquedas</li>
+          <li><span class="pricing-check">✓</span> Apareces en "Recomendados" y "Cerca de ti"</li>
+          <li><span class="pricing-check">✓</span> Beneficio y promociones destacadas</li>
+          <li><span class="pricing-check">✓</span> Estadísticas avanzadas (visitas, clics, WhatsApp)</li>
+          <li><span class="pricing-check">✓</span> Sello "Miembro Premium"</li>
+        </ul>
+        <a href="#negocios" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('negocio');">Sumar mi negocio</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="panel" style="display:none;">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Panel privado</span>
+      <h2>Ver todos los registros y resultados</h2>
+      <p>Acceso solo para el equipo del club.</p>
+    </div>
+    <div id="adminLockWrap">
+      <div class="admin-lock">
+        <div style="font-family:var(--font-mono);font-size:12px;color:#7a8377;">Inicia sesión como administrador</div>
+        <input id="adminEmail" type="email" placeholder="Tu email" autocomplete="username">
+        <input id="adminPass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+        <button class="btn btn-brass" id="adminLoginBtn" style="width:100%;justify-content:center;" onclick="tryUnlock()">Entrar</button>
+        <div id="adminError" style="color:var(--rust);font-size:12.5px;margin-top:10px;display:none;">Clave incorrecta.</div>
+      </div>
+    </div>
+    <div id="adminPanel" style="display:none;">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="n" id="statBiz">0</div><div class="l">Negocios inscritos</div></div>
+        <div class="stat-card"><div class="n" id="statOwners">0</div><div class="l">Mascotas / dueños</div></div>
+        <div class="stat-card"><div class="n" id="statClientes">0</div><div class="l">Clientes que compraron</div></div>
+        <div class="stat-card"><div class="n" id="statGMV">$0</div><div class="l">Ventas generadas (GMV)</div></div>
+      </div>
+      <div class="admin-table">
+        <h4>Resumen por negocio (ROI) <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
+        <div class="table-row head"><span>Negocio</span><span>Visitas</span><span>Monto total</span><span>Ticket prom.</span></div>
+        <div id="adminRoiTable"></div>
+      </div>
+      <div class="admin-table">
+        <h4>Últimas visitas validadas</h4>
+        <div class="table-row head"><span>Negocio</span><span>Mascota</span><span>Monto</span><span>Fecha</span></div>
+        <div id="adminCanjesTable"></div>
+      </div>
+      <div class="admin-table">
+        <h4>Negocios</h4>
+        <div class="table-row head"><span>Nombre</span><span>Categoría</span><span>Comuna</span><span>Contacto</span></div>
+        <div id="adminBizTable"></div>
+      </div>
+      <div class="admin-table">
+        <h4>Dueños y mascotas</h4>
+        <div class="table-row head"><span>Mascota</span><span>Especie</span><span>Comuna</span><span>Email</span></div>
+        <div id="adminOwnerTable"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div class="logo"><img src="assets/logo.svg" alt="Mi Mascota Club" style="height:28px;"></div>
+    <div class="foot-note">MVP conectado a base de datos, con validación de visitas por QR. Precios de ejemplo, a validar.</div>
+    <div class="foot-links" style="display:flex;gap:18px;font-size:12.5px;font-weight:700;">
+      <a href="#validar" onclick="event.preventDefault(); mostrarSeccion('validar');" style="color:var(--ink);">Validar una visita</a>
+      <a href="#" onclick="event.preventDefault(); abrirCalificaciones();" style="color:var(--ink);">⭐ Calificar (Premium)</a>
+      <a href="#panel" onclick="event.preventDefault(); mostrarSeccion('panel');" style="color:var(--ink);">Panel privado</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target.id==='modalOverlay') closeModal()"><div class="modal-box" id="modalBox"></div></div>
+
+<div class="modal-overlay" id="mapModalOverlay" onclick="if(event.target.id==='mapModalOverlay') cerrarMapa()">
+  <div class="map-modal-box">
+    <div class="map-modal-header">
+      <div id="mapModalTitle" style="font-family:var(--font-display);font-weight:900;font-size:18px;">Mapa de Mi Mascota Club</div>
+      <button class="modal-close" onclick="cerrarMapa()">✕</button>
+    </div>
+    <div id="mapContainer" style="width:100%;height:100%;"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

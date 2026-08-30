@@ -1,0 +1,2607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Mascota Club — El carnet de tu mascota</title>
+
+<!-- TIPOGRAFÍA: si cambias las fuentes en css/styles.css, actualiza también este link -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ======================================================================
+   MI MASCOTA CLUB — HOJA DE ESTILOS (identidad de marca aplicada)
+   ======================================================================
+   1) TIPOGRAFÍA → --font-display / --font-body (Lato, Google Fonts)
+   2) COLORES → variables :root (tomados de tu logo: #FFCE00 y #47C9C9)
+   3) LOGO → assets/logo.svg (color) y assets/logo-blanco.svg (para fondos oscuros)
+   4) IMÁGENES → assets/images/
+   ====================================================================== */
+
+:root{
+  --font-display: 'Lato', sans-serif;
+  --font-body: 'Lato', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace; /* solo para códigos (MMC00001, NEG0001) */
+
+  --ink:#1A1A1A;
+  --paper:#FFFFFF;
+  --paper-tint-yellow:#FFF8DE;
+  --paper-tint-teal:#EAF9F9;
+  --line: rgba(26,26,26,0.10);
+
+  --yellow:#FFCE00;
+  --yellow-dark:#E0B400;
+  --teal:#47C9C9;
+  --teal-dark:#2FA8A8;
+  --black:#151515;
+  --gray:#6B7280;
+  --rust:#D65A3A;
+  --sage:#3FAE7A;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; overflow-x:hidden; width:100%;}
+body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased; overflow-x:hidden; width:100%; }
+h1,h2,h3,.display{ font-family:var(--font-display); font-weight:900; }
+.mono{ font-family:var(--font-mono); letter-spacing:0.02em; }
+a{color:inherit;}
+.wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+
+nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.92); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
+.navbar{ display:flex; align-items:center; justify-content:space-between; flex-wrap:nowrap; gap:10px; padding:14px 28px; max-width:1180px; margin:0 auto; }
+.logo{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:900; font-size:19px; text-decoration:none; cursor:pointer; }
+.logo img, .logo svg{ height:34px; width:auto; }
+.navlinks{ display:flex; align-items:center; gap:24px; font-size:14px; font-weight:700; height:40px; }
+.navlinks a{ text-decoration:none; opacity:0.75; transition:opacity .15s; line-height:1; display:flex; align-items:center; height:100%; }
+
+.btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:999px; font-weight:800; font-size:14.5px; border:2px solid transparent; cursor:pointer; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease; }
+
+.btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+.btn:focus-visible{ outline:3px solid var(--teal-dark); outline-offset:2px; }
+.btn-primary{ background:var(--yellow); color:var(--black); box-shadow:0 3px 0 var(--yellow-dark); }
+
+.btn-outline{ background:#fff; border-color:var(--ink); color:var(--ink); }
+.btn-brass{ background:var(--teal); color:#fff; box-shadow:0 3px 0 var(--teal-dark); }
+.btn-navy{ background:var(--black); color:#fff; }
+.btn-sm{ padding:9px 15px; font-size:13px; }
+
+.hero{ padding:64px 0 56px; position:relative; overflow:hidden; background:var(--paper-tint-yellow); }
+.hero-grid{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center; }
+.hero-grid > *{ min-width:0; }
+.eyebrow{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-body); font-weight:800; font-size:12.5px; letter-spacing:0.04em; text-transform:uppercase; color:var(--black); background:#fff; padding:7px 14px; border-radius:999px; margin-bottom:20px; border:2px solid var(--ink); }
+.hero h1{ font-size:52px; line-height:1.06; font-weight:900; margin:0 0 18px; letter-spacing:-0.01em; }
+.hero h1 em{ font-style:normal; color:var(--teal-dark); }
+.hero p.lead{ font-size:18px; line-height:1.55; color:#3a3a3a; max-width:480px; margin:0 0 28px; font-weight:500; }
+.hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px; }
+.hero-note{ font-size:13.5px; color:#4a4a4a; display:flex; align-items:center; gap:8px; font-weight:600; }
+.hero-note .dot{ width:7px; height:7px; border-radius:50%; background:var(--sage); }
+
+.card-stage{ display:flex; justify-content:center; align-items:center; min-width:0; width:100%; }
+.credencial{ width:100%; max-width:340px; min-width:0; border-radius:22px; background:var(--black); color:#fff; padding:26px 24px 22px; position:relative; box-shadow:0 24px 50px -18px rgba(21,21,21,0.35); transform:rotate(2deg); transition:transform .35s ease; }
+
+.credencial::before{ content:""; position:absolute; inset:10px; border:1.5px dashed rgba(255,255,255,0.18); border-radius:16px; pointer-events:none; }
+.cred-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+.cred-brand{ display:flex; align-items:center; gap:7px; font-size:12px; font-weight:800; letter-spacing:0.03em; }
+.cred-brand img,.cred-brand svg{ height:20px; width:auto; }
+.cred-id{ font-family:var(--font-mono); font-size:11px; color:var(--yellow); font-weight:700; }
+.cred-photo{ width:66px; height:66px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; margin-bottom:14px; border:3px solid var(--yellow); }
+.cred-photo img,.cred-photo svg{ width:34px; height:34px; }
+.cred-name{ font-family:var(--font-display); font-size:26px; font-weight:900; margin:0 0 2px; }
+.cred-breed{ font-size:13px; color:#cfcfcf; margin-bottom:16px; font-weight:600; }
+.cred-row{ display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:10.5px; color:#9a9a9a; border-top:1px solid rgba(255,255,255,0.15); padding-top:12px; margin-top:4px; text-transform:uppercase; letter-spacing:0.05em; }
+.cred-row b{ display:block; color:#fff; font-size:12.5px; font-weight:700; margin-top:3px; letter-spacing:0; text-transform:none; }
+.cred-badge{ position:absolute; top:-12px; right:22px; background:var(--yellow); color:var(--black); font-family:var(--font-body); font-size:11px; font-weight:800; padding:6px 12px; border-radius:8px; box-shadow:0 3px 8px rgba(0,0,0,0.25); }
+.cred-qr{ display:flex; justify-content:center; margin-top:16px; background:#fff; border-radius:12px; padding:10px; }
+
+section{ padding:64px 0; }
+.section-head{ max-width:640px; margin-bottom:38px; }
+.section-head .eyebrow{ margin-bottom:14px; }
+.section-head h2{ font-size:34px; font-weight:900; margin:0 0 12px; line-height:1.15; }
+.section-head p{ font-size:16px; color:#4a4a4a; line-height:1.6; margin:0; font-weight:500; }
+.band{ background:var(--paper-tint-teal); }
+
+/* Categorías (grilla de íconos) */
+.cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.cat-tile{ background:#fff; border:2px solid var(--line); border-radius:18px; padding:20px 16px; text-align:center; cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+
+.cat-tile .ic{ width:52px; height:52px; border-radius:14px; background:var(--paper-tint-yellow); display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 12px; }
+.cat-tile.dueno .ic{ background:var(--paper-tint-teal); }
+.cat-tile .lbl{ font-size:13px; font-weight:800; }
+
+.steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.step{ background:#fff; border:2px solid var(--line); border-radius:20px; padding:26px 24px; }
+.step .num{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:var(--yellow); font-family:var(--font-display); font-size:14px; color:var(--black); font-weight:900; margin-bottom:16px; }
+.step h3{ font-size:19px; margin:0 0 8px; font-weight:900; }
+.step p{ font-size:14.5px; color:#5a5a5a; line-height:1.55; margin:0; font-weight:500; }
+
+.dir-controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
+.dir-controls input, .dir-controls select{ padding:12px 14px; border-radius:12px; border:2px solid var(--line); background:#fff; font-size:16px; font-family:var(--font-body); font-weight:600; }
+.dir-controls input{ flex:1; min-width:220px; }
+.dir-status{ font-family:var(--font-mono); font-size:11.5px; color:#8a8a8a; margin-bottom:18px; }
+.dir-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; }
+.biz-card{ background:#fff; border:2px solid var(--line); border-radius:20px; overflow:hidden; position:relative; transition:box-shadow .15s ease, transform .15s ease; cursor:pointer; text-align:left; }
+
+.biz-photo{ height:120px; display:flex; align-items:center; justify-content:center; font-size:40px; position:relative; }
+.biz-photo .founder-badge{ position:absolute; top:10px; right:10px; font-family:var(--font-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:0.04em; background:rgba(255,255,255,0.92); color:var(--black); padding:4px 9px; border-radius:6px; font-weight:700; }
+.biz-body{ padding:16px 18px 18px; }
+.biz-card h3{ font-size:16.5px; margin:0 0 4px; font-weight:900; font-family:var(--font-display); }
+.biz-cat{ font-size:12px; color:var(--teal-dark); font-weight:800; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.02em; }
+.biz-cat .tag-dueno{ color:var(--rust); }
+.biz-meta{ font-size:13px; color:#5a5a5a; margin-bottom:0; line-height:1.5; font-weight:500; }
+.empty-state{ text-align:center; padding:50px 20px; color:#6b7280; font-size:14.5px; font-weight:600; }
+
+.split{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.split.single{ grid-template-columns:1fr; max-width:640px; margin:0 auto; }
+.panel{ background:#fff; border:2px solid var(--line); border-radius:22px; padding:32px; }
+.panel.full{ grid-column:1/-1; }
+.panel .tag{ font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--rust); margin-bottom:10px; display:block; font-weight:700; }
+.panel h3{ font-size:23px; margin:0 0 8px; font-weight:900; }
+.panel p.desc{ font-size:14.5px; color:#5a5a5a; line-height:1.55; margin:0 0 22px; font-weight:500; }
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:13px; font-weight:800; margin-bottom:6px; }
+.field input, .field select, .field textarea{ width:100%; padding:12px 13px; border-radius:11px; border:2px solid var(--line); font-size:16px; font-family:var(--font-body); background:var(--paper-tint-yellow); font-weight:600; }
+.field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-row.three{ grid-template-columns:1fr 1fr 1fr; }
+.price-hint{ font-family:var(--font-mono); font-size:11.5px; color:#8a8a8a; margin-top:16px; line-height:1.5; }
+.price-hint b{ color:var(--ink); }
+.waitlist{ margin-top:22px; }
+.waitlist-count{ font-family:var(--font-mono); font-size:12px; color:var(--teal-dark); font-weight:800; margin-bottom:8px; }
+.waitlist-item{ display:flex; justify-content:space-between; font-size:13.5px; padding:9px 0; border-top:1px solid var(--line); font-weight:600; }
+.waitlist-item span.small{ color:#8a8a8a; font-size:12px; font-weight:500; }
+.toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0; background:var(--black); color:#fff; padding:13px 22px; border-radius:12px; font-size:14px; font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,0.3); transition:all .25s ease; pointer-events:none; z-index:200; max-width:min(90vw,420px); }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.banner-warn{ background:var(--paper-tint-yellow); border:2px solid var(--yellow); color:#5a4a00; font-size:13px; font-weight:700; padding:12px 18px; border-radius:12px; margin-bottom:24px; }
+
+.validar-result{ margin-top:18px; padding:16px; border-radius:14px; background:var(--paper-tint-teal); border:2px dashed var(--teal); font-size:13.5px; display:none; font-weight:600; }
+.validar-result.show{ display:block; }
+.validar-result .big{ font-family:var(--font-display); font-size:22px; color:var(--teal-dark); font-weight:900; }
+
+.admin-lock{ max-width:380px; margin:0 auto; text-align:center; background:#fff; border:2px solid var(--line); border-radius:20px; padding:32px; }
+.admin-lock input{ width:100%; padding:13px 14px; border-radius:11px; border:2px solid var(--line); font-size:16px; margin:14px 0; text-align:center; font-family:var(--font-mono); }
+.stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:30px; }
+.stat-card{ background:var(--black); color:#fff; border-radius:16px; padding:20px 18px; }
+.stat-card .n{ font-family:var(--font-display); font-size:28px; font-weight:900; color:var(--yellow); }
+.stat-card .l{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8; margin-top:4px; }
+.admin-table{ background:#fff; border:2px solid var(--line); border-radius:18px; overflow:hidden; margin-bottom:26px; }
+.admin-table h4{ margin:0; padding:16px 20px; font-size:14px; font-weight:900; border-bottom:2px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+.table-row{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:10px; padding:12px 20px; font-size:13.5px; border-top:1px solid var(--line); align-items:center; font-weight:600; }
+.table-row.head{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; color:#8a8a8a; border-top:none; font-weight:700; }
+.table-row span.dim{ color:#8a8a8a; font-size:12.5px; font-weight:500; }
+.refresh-btn{ background:none; border:2px solid var(--line); border-radius:10px; padding:5px 10px; font-size:11.5px; cursor:pointer; font-family:var(--font-mono); font-weight:700; }
+
+.modal-overlay{ position:fixed; inset:0; background:rgba(21,21,21,0.55); display:none; align-items:center; justify-content:center; z-index:150; padding:20px; }
+.modal-overlay.show{ display:flex; }
+.modal-box{ background:#fff; border-radius:22px; max-width:420px; width:100%; padding:28px; position:relative; max-height:88vh; overflow-y:auto; }
+.modal-close{ position:absolute; top:14px; right:14px; background:var(--paper-tint-yellow); border:none; font-size:18px; cursor:pointer; color:var(--ink); width:32px; height:32px; border-radius:50%; }
+
+.ficha{ background:var(--paper-tint-yellow); border:2px solid var(--line); border-radius:18px; padding:22px; }
+.ficha h3{ margin:0 0 4px; font-size:20px; font-weight:900; }
+.ficha .row{ display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-top:1.5px dashed rgba(26,26,26,0.15); font-weight:600; }
+.ficha .row b{ font-weight:800; }
+.spinner{ display:inline-block; width:13px; height:13px; border:2px solid rgba(0,0,0,0.15); border-top-color:var(--black); border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; margin-right:6px; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+footer{ padding:44px 0; border-top:2px solid var(--line); background:var(--paper-tint-yellow); }
+.foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; }
+.foot-row .logo{ font-size:16px; }
+.foot-note{ font-size:12.5px; color:#6b7280; font-weight:600; }
+
+@media (max-width: 880px){
+  .hero-grid{ grid-template-columns:1fr; }
+  .card-stage{ order:-1; margin-bottom:10px; }
+  .hero h1{ font-size:36px; }
+  .steps, .split, .stat-grid{ grid-template-columns:1fr; }
+  .cat-grid{ grid-template-columns:repeat(2,1fr); }
+  .navlinks{ display:none; }
+  .field-row, .field-row.three{ grid-template-columns:1fr; }
+  .table-row{ grid-template-columns:1fr 1fr; }
+  .navbar{ padding:10px 14px; }
+  .logo img{ height:28px !important; }
+  .navbar > a.btn{ font-size:11.5px; padding:8px 12px; white-space:nowrap; }
+  .announce-bar{ font-size:11.5px; padding:7px 12px; }
+}
+
+.ficha-icon{ width:56px; height:56px; border-radius:14px; background:var(--paper-tint-teal); display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:14px; }
+
+.btn:active{ transform:scale(0.97); }
+.biz-card:active, .cat-tile:active{ transform:scale(0.98); }
+
+/* En pantallas táctiles (Android/iOS), los estados :hover pueden quedar "pegados"
+   después de tocar, dando sensación de que el diseño se mueve o queda desalineado.
+   Los limitamos a dispositivos que de verdad tienen mouse/hover real. */
+@media (hover: hover) and (pointer: fine){
+  .navlinks a:hover{ opacity:1; }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn-primary:hover{ box-shadow:0 5px 0 var(--yellow-dark); }
+  .credencial:hover{ transform:rotate(0deg) translateY(-4px); }
+  .cat-tile:hover{ transform:translateY(-3px); border-color:var(--teal); box-shadow:0 10px 24px -14px rgba(71,201,201,0.5); }
+  .biz-card:hover{ box-shadow:0 16px 32px -18px rgba(21,21,21,0.25); transform:translateY(-3px); }
+  .modal-close:hover{ background:var(--yellow); }
+}
+
+/* Mapa (Leaflet) */
+.map-modal-box{ background:#fff; border-radius:18px; width:min(1000px,94vw); height:min(720px,88vh); display:flex; flex-direction:column; overflow:hidden; }
+.map-modal-header{ display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:2px solid var(--line); flex-shrink:0; }
+.cat-tile .map-link{ display:block; margin-top:8px; font-size:11px; color:var(--teal-dark); font-weight:700; text-decoration:underline; }
+.leaflet-popup-content{ font-family:var(--font-body); font-size:13px; }
+.leaflet-popup-content b{ font-family:var(--font-display); font-size:14px; }
+
+/* Tarjetas de precio (estilo referencia) */
+.pricing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.pricing-card{ background:#fff; border:2px solid var(--line); border-radius:22px; padding:28px 26px; display:flex; flex-direction:column; }
+.pricing-card.featured{ background:var(--ink); border-color:var(--ink); color:#fff; transform:scale(1.03); box-shadow:0 20px 40px -18px rgba(21,21,21,0.4); }
+.pricing-icon{ width:44px; height:44px; border-radius:12px; background:var(--paper-tint-yellow); display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:16px; }
+.pricing-card.featured .pricing-icon{ background:rgba(255,255,255,0.15); }
+.pricing-name{ font-family:var(--font-display); font-weight:900; font-size:17px; margin-bottom:4px; }
+.pricing-price{ font-family:var(--font-display); font-weight:900; font-size:32px; margin:6px 0 2px; }
+.pricing-price span{ font-size:14px; font-weight:600; opacity:0.6; }
+.pricing-desc{ font-size:13px; opacity:0.65; margin-bottom:18px; }
+.pricing-divider{ border:none; border-top:1.5px solid var(--line); margin:0 0 18px; }
+.pricing-card.featured .pricing-divider{ border-top-color:rgba(255,255,255,0.2); }
+.pricing-features{ list-style:none; margin:0 0 22px; padding:0; flex:1; }
+.pricing-features li{ display:flex; align-items:flex-start; gap:9px; font-size:13.5px; margin-bottom:11px; line-height:1.4; }
+.pricing-check{ flex-shrink:0; width:18px; height:18px; border-radius:5px; background:var(--teal); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; margin-top:1px; }
+.pricing-card.featured .pricing-check{ background:var(--yellow); color:var(--ink); }
+.pricing-cta{ width:100%; text-align:center; justify-content:center; }
+.pricing-note{ text-align:center; font-size:11px; opacity:0.55; margin-top:10px; }
+
+/* Íconos de contacto circulares en la tarjeta del directorio (estilo referencia) */
+.biz-icons-row{ display:flex; gap:8px; margin-top:12px; }
+.biz-icon-btn{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; border:1.5px solid var(--line); background:#fff; color:var(--ink); }
+.biz-icon-btn.primary{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+/* ======================= Nueva identidad de navegación y hero ======================= */
+
+.announce-bar{ background:var(--yellow); color:var(--black); text-align:center; font-size:13.5px; padding:9px 16px; font-weight:600; }
+.announce-bar b{ font-weight:900; }
+
+/* Menús desplegables */
+.nav-dropdown{ position:relative; display:flex; align-items:center; height:100%; }
+.nav-dropdown-btn{ background:none; border:none; font-family:var(--font-body); font-size:14px; font-weight:700; color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:4px; padding:0; opacity:0.75; height:100%; line-height:1; }
+.nav-dropdown-btn:hover{ opacity:1; }
+.caret{ font-size:10px; transition:transform .15s ease; }
+.nav-dropdown.open .caret{ transform:rotate(180deg); }
+.nav-dropdown-panel{ display:none; position:absolute; top:calc(100% + 14px); left:50%; transform:translateX(-50%); background:#fff; border:2px solid var(--line); border-radius:18px; box-shadow:0 20px 40px -16px rgba(21,21,21,0.25); padding:20px; z-index:60; }
+.nav-dropdown.open .nav-dropdown-panel{ display:flex; gap:28px; }
+.nav-dropdown-panel.wide{ width:440px; }
+.dd-col{ flex:1; min-width:0; }
+.dd-col-title{ font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--gray); margin-bottom:10px; }
+.dd-item{ display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:8px; font-size:13.5px; font-weight:600; cursor:pointer; text-align:left; width:100%; background:none; border:none; color:var(--ink); }
+.dd-item:hover{ background:var(--paper-tint-yellow); }
+.dd-benefit{ padding:9px 8px; border-radius:8px; margin-bottom:2px; }
+.dd-benefit .pct{ font-size:12px; font-weight:900; color:var(--teal-dark); display:block; }
+.dd-benefit .nm{ font-size:12.5px; color:#3a3a3a; font-weight:600; }
+
+/* Buscador del hero */
+.hero{ padding:56px 0 40px; overflow:hidden; }
+.hero-search-wrap{ display:flex; gap:10px; max-width:560px; margin:0 auto; background:#fff; border:2px solid var(--ink); border-radius:999px; padding:6px; }
+.hero-search{ flex:1; border:none; background:none; padding:12px 18px; font-size:15px; font-family:var(--font-body); font-weight:600; cursor:text; }
+.hero-search:focus{ outline:none; }
+.hero-search-btn{ flex-shrink:0; }
+
+/* Carrusel circular/fanned de categorías */
+.fan-carousel{ overflow-x:hidden; overflow-y:visible; margin-top:44px; padding:34px 0 50px; }
+.fan-track{ display:flex; gap:22px; width:max-content; animation:fanScroll 34s linear infinite; }
+.fan-carousel:hover .fan-track{ animation-play-state:paused; }
+@keyframes fanScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.fan-card{ width:150px; height:190px; border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; flex-shrink:0; box-shadow:0 16px 30px -14px rgba(21,21,21,0.25); cursor:pointer; transition:transform .15s ease; }
+.fan-card:hover{ transform:scale(1.04) !important; }
+.fan-card .fan-emoji{ font-size:46px; }
+.fan-card .fan-label{ font-family:var(--font-display); font-weight:900; font-size:14px; color:var(--ink); text-align:center; padding:0 10px; }
+.fan-card:nth-child(odd){ margin-top:0; transform:rotate(-3deg); }
+.fan-card:nth-child(even){ margin-top:26px; transform:rotate(3deg); }
+
+/* Marquesina de negocios */
+.trust-marquee{ overflow:hidden; margin-top:14px; }
+.trust-track{ display:flex; gap:16px; width:max-content; animation:fanScroll 26s linear infinite; }
+.trust-marquee:hover .trust-track{ animation-play-state:paused; }
+.trust-card{ flex-shrink:0; padding:16px 26px; background:#fff; border:2px dashed var(--line); border-radius:14px; font-family:var(--font-display); font-weight:900; font-size:14px; color:var(--gray); display:flex; align-items:center; gap:8px; white-space:nowrap; cursor:pointer; transition:transform .15s ease; }
+.trust-card:hover{ transform:translateY(-2px); }
+.trust-card.real{ border-style:solid; border-color:var(--teal); color:var(--ink); }
+
+@media (max-width: 880px){
+  .navlinks{ display:none; }
+  .nav-dropdown-panel.wide{ width:88vw; }
+  .hero h1{ font-size:30px; }
+  .hero-search-wrap{ flex-direction:column; border-radius:22px; }
+  .pricing-grid{ grid-template-columns:1fr; }
+  .pricing-card.featured{ transform:none; }
+}
+
+/* ======================= Wizard de registro (3 pasos) ======================= */
+.wizard-steps{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:26px; }
+.wizard-step{ display:flex; flex-direction:column; align-items:center; gap:8px; flex:0 0 auto; }
+.wizard-dot{ width:30px; height:30px; border-radius:50%; border:2px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:900; font-size:13px; color:var(--gray); transition:all .2s ease; flex-shrink:0; }
+.wizard-label{ font-size:11px; font-weight:800; color:var(--gray); text-align:center; max-width:88px; line-height:1.3; }
+.wizard-line{ flex:1; height:2px; background:var(--line); margin-top:14px; }
+.wizard-step.active .wizard-dot{ border-color:var(--teal-dark); color:var(--teal-dark); background:var(--paper-tint-teal); }
+.wizard-step.active .wizard-label{ color:var(--ink); }
+.wizard-step.done .wizard-dot{ border-color:var(--sage); background:var(--sage); color:#fff; }
+#wizardSteps-biz .wizard-step.active .wizard-dot{ border-color:var(--yellow-dark); color:var(--yellow-dark); background:var(--paper-tint-yellow); }
+.form-step{ display:none; }
+.form-step.active{ display:block; animation:stepFade .2s ease; }
+@keyframes stepFade{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:translateY(0); } }
+.wizard-nav{ display:flex; gap:10px; margin-top:6px; }
+.wizard-nav .btn{ flex:1; }
+.wizard-nav .btn-back{ flex:0 0 auto; padding:12px 18px; }
+
+/* ======================= Campos validados en vivo (RUT, teléfono CL, correo) ======================= */
+.input-icon-wrap{ position:relative; display:flex; align-items:center; }
+.input-icon-wrap input{ padding-right:38px !important; }
+.field-check{ position:absolute; right:11px; top:50%; transform:translateY(-50%) scale(0.6); width:20px; height:20px; border-radius:50%; background:var(--sage); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; opacity:0; transition:opacity .18s ease, transform .18s ease; pointer-events:none; }
+.field-validated.is-valid .field-check{ opacity:1; transform:translateY(-50%) scale(1); }
+.field-validated.is-valid .input-icon-wrap:not(.tel-wrap) input{ border-color:var(--sage) !important; }
+.field-validated.is-invalid .input-icon-wrap:not(.tel-wrap) input{ border-color:var(--rust) !important; }
+.field-msg{ display:block; font-size:11.5px; margin-top:5px; min-height:14px; font-weight:600; }
+.field-validated.is-invalid .field-msg{ color:var(--rust); }
+.field-validated.is-valid .field-msg{ color:var(--sage); }
+.tel-wrap{ border:2px solid var(--line); border-radius:11px; background:var(--paper-tint-yellow); padding-right:38px; transition:border-color .18s ease; }
+.tel-wrap .tel-prefix{ padding:0 2px 0 13px; font-weight:800; color:#7a8377; white-space:nowrap; font-size:15px; }
+.tel-wrap input{ border:none !important; background:transparent !important; padding:12px 6px !important; border-radius:0 !important; }
+.field-validated.is-valid .tel-wrap{ border-color:var(--sage) !important; }
+.field-validated.is-invalid .tel-wrap{ border-color:var(--rust) !important; }
+
+@media (max-width: 880px){
+  .wizard-dot{ width:26px; height:26px; font-size:12px; }
+  .wizard-label{ font-size:9.5px; max-width:62px; }
+}
+
+/* ======================= Directorio como página propia (/directorio/...) =======================
+   El directorio deja de ser "una sección más" del home: por defecto queda OCULTO de la
+   página principal, y solo se muestra —a pantalla completa, como si fuera otra página—
+   cuando el body tiene la clase .pagina-directorio (la pone js/app.js según la URL). */
+#directorio{ display:none; }
+
+body.pagina-directorio .hero,
+body.pagina-directorio #categorias,
+body.pagina-directorio #como-funciona,
+body.pagina-directorio #negocios,
+body.pagina-directorio #validar,
+body.pagina-directorio #planes,
+body.pagina-directorio #panel{
+  display:none !important;
+}
+body.pagina-directorio #directorio{
+  display:block;
+  min-height:calc(100vh - 140px);
+}
+body.pagina-directorio .announce-bar{ display:none; }
+
+/* ======================= Ficha de negocio/especialista como página propia (/negocio/...) =======================
+   Misma idea que el directorio: por defecto oculta, y se muestra a pantalla completa
+   —con el resto del home oculto— cuando el body tiene la clase .pagina-ficha. */
+#fichaNegocio{ display:none; }
+body.pagina-ficha .hero,
+body.pagina-ficha #categorias,
+body.pagina-ficha #como-funciona,
+body.pagina-ficha #negocios,
+body.pagina-ficha #validar,
+body.pagina-ficha #planes,
+body.pagina-ficha #panel,
+body.pagina-ficha #directorio{
+  display:none !important;
+}
+body.pagina-ficha #fichaNegocio{
+  display:block;
+  min-height:calc(100vh - 140px);
+}
+body.pagina-ficha .announce-bar{ display:none; }
+
+/* ======================= Banner de página (5 slides, degradados) =======================
+   Se usa arriba del directorio, de especialistas y de la ficha de cada negocio.
+   Rota sola cada 5s (renderPageBanner en js/app.js); si solo hay 1 slide (ficha de un
+   negocio puntual) no rota y no muestra los puntos. Medidas recomendadas para las fotos
+   reales que reemplacen el degradado: ver README / mensaje de chat. */
+.page-banner{ position:relative; height:260px; overflow:hidden; }
+.page-banner-slide{
+  position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:flex-start;
+  background-size:cover; background-position:center; opacity:0; transition:opacity 900ms ease;
+}
+.page-banner-slide.active{ opacity:1; }
+.page-banner-overlay{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(21,21,21,0.55) 0%, rgba(21,21,21,0.05) 60%); }
+.page-banner-text{ position:relative; z-index:2; padding:0 28px 30px; max-width:1180px; margin:0 auto; width:100%; }
+.page-banner-eyebrow{ display:inline-block; font-family:var(--font-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.16); border:1.5px solid rgba(255,255,255,0.55); padding:4px 10px; border-radius:999px; margin-bottom:10px; }
+.page-banner-cat{ font-family:var(--font-display); font-weight:900; font-size:30px; color:#fff; text-shadow:0 2px 14px rgba(0,0,0,0.35); line-height:1.1; margin:0; }
+.page-banner-dots{ position:absolute; z-index:3; right:20px; bottom:16px; display:flex; gap:7px; }
+.page-banner-dot{ width:7px; height:7px; border-radius:999px; background:rgba(255,255,255,0.45); cursor:pointer; transition:background .2s, transform .2s; }
+.page-banner-dot.active{ background:#fff; transform:scale(1.3); }
+@media (min-width:768px){
+  .page-banner{ height:340px; }
+  .page-banner-cat{ font-size:40px; }
+}
+
+/* ======================= Fila de negocios destacados (antes del directorio) ======================= */
+.featured-strip-wrap{ margin:34px 0 6px; }
+.featured-strip{ display:flex; gap:16px; overflow-x:auto; padding:4px 2px 14px; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; }
+.featured-strip::-webkit-scrollbar{ height:6px; }
+.featured-strip::-webkit-scrollbar-thumb{ background:var(--line); border-radius:99px; }
+.featured-strip .biz-card{ min-width:230px; max-width:230px; scroll-snap-align:start; flex:0 0 auto; }
+.founder-badge.badge-destacado{ background:var(--yellow); color:var(--black); }
+
+/* ======================= Ficha de negocio a página completa ======================= */
+.ficha-page-wrap{ padding:36px 0 64px; }
+.ficha-page{ display:grid; grid-template-columns:1.3fr 0.9fr; gap:34px; align-items:start; }
+.ficha-page > *{ min-width:0; }
+.ficha-page-main{ background:#fff; border:2px solid var(--line); border-radius:22px; padding:30px; }
+.ficha-page-main h1{ font-size:26px; margin:0 0 6px; }
+.ficha-page-side{ background:#fff; border:2px solid var(--line); border-radius:22px; padding:24px; }
+.ficha-page-side .row{ display:flex; justify-content:space-between; gap:10px; font-size:13.5px; padding:10px 0; border-top:1.5px dashed rgba(26,26,26,0.15); font-weight:600; }
+.ficha-page-side .row:first-child{ border-top:none; }
+.ficha-page-side .row b{ font-weight:800; text-align:right; }
+
+/* ---------------- Validación bidireccional (calificaciones) ---------------- */
+.rep-summary{ display:flex; align-items:center; gap:12px; margin:10px 0 16px; flex-wrap:wrap; }
+.rep-stars{ font-family:var(--font-display); font-weight:900; font-size:20px; color:var(--yellow-dark); letter-spacing:1px; }
+.rep-avg{ font-family:var(--font-display); font-weight:900; font-size:15px; color:var(--ink); }
+.rep-count{ font-size:12.5px; color:#8a8a8a; font-weight:600; }
+.rep-premium-pill{ display:inline-flex; align-items:center; gap:5px; background:var(--paper-tint-teal); color:var(--teal-dark); font-size:11.5px; font-weight:800; padding:5px 10px; border-radius:20px; }
+.rep-empty{ font-size:13px; color:#8a8a8a; font-weight:600; }
+.rep-locked{ background:var(--paper-tint-yellow); border:1.5px dashed var(--yellow-dark); border-radius:14px; padding:14px 16px; font-size:12.5px; font-weight:600; color:#6b5a10; margin-top:6px; }
+.rep-comment{ border-top:1.5px dashed rgba(26,26,26,0.12); padding:12px 0; }
+.rep-comment:first-child{ border-top:none; }
+.rep-comment .rc-head{ display:flex; justify-content:space-between; font-size:12px; color:#8a8a8a; font-weight:700; margin-bottom:4px; }
+.rep-comment .rc-stars{ color:var(--yellow-dark); font-weight:900; }
+.rep-comment p{ font-size:13.5px; margin:0; line-height:1.5; }
+
+.star-picker{ display:flex; gap:6px; margin:6px 0 4px; }
+.star-picker button{ background:none; border:none; font-size:30px; line-height:1; cursor:pointer; opacity:0.3; padding:0; transition:opacity .15s, transform .15s; }
+.star-picker button.on{ opacity:1; transform:scale(1.08); }
+
+.cal-pending-row{ border:2px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+.cal-pending-row .cp-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13.5px; font-weight:800; }
+.cal-pending-row .cp-meta{ font-size:11.5px; color:#8a8a8a; font-weight:600; margin-top:2px; }
+.ficha-page-logo{ width:64px; height:64px; border-radius:16px; object-fit:cover; margin-bottom:14px; }
+.ficha-page-icon{ width:64px; height:64px; border-radius:16px; background:var(--paper-tint-teal); display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:14px; }
+@media (max-width:880px){
+  .ficha-page{ grid-template-columns:1fr; }
+}
+
+</style>
+
+<!-- Librería para generar los códigos QR del carnet -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Cliente de Supabase: conecta la app a tu base de datos real -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Mapa: Leaflet + OpenStreetMap (gratis, sin llave ni tarjeta) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- EmailJS: envía el correo de bienvenida al registrarse, sin backend propio -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+<div class="announce-bar" id="announceBar">🎉 <b>Nuevo en el club:</b> cada semana sumamos más negocios y beneficios.</div>
+
+<nav>
+  <div class="navbar">
+    <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NDkzLjU3IDExNTAuODciPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICNmZmNlMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogIzQ3YzljOTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMDA0LjIxLDMxOC4yMmwtMjE2LjQtMTcwLjUtMTQ0LjAyLTExMy40N2MtNTcuOTMtNDUuNjYtMTM4Ljg3LTQ1LjY2LTE5Ni43NywwTDg2LjYsMzE4LjIyQzMxLjU3LDM2MS41OCwwLDQyNi42NCwwLDQ5Ni43MnY1NDguMWMwLDU4LjQ4LDQ3LjU3LDEwNi4wNSwxMDYuMDUsMTA2LjA1aDE3My4xOWMtMTcuMzEtNTguMTQtLjk0LTE0NS4wNyw3NS4yLTIxNi41LDgwLjQ3LTc1LjQ5LDEwMS4yNS0xNTguNjIsMTkwLjEyLTE2MC43MSw4OC44NiwyLjU5LDEwOS4xOCw4NS44MywxODkuMjIsMTYxLjc3LDc1LjA5LDcxLjI0LDk0LjIzLDE1Ny40LDc5LjM4LDIxNS40NGgxNzEuNmM1OC40OCwwLDEwNi4wNS00Ny41NywxMDYuMDUtMTA2LjA1VjQ5Ni43MmMwLTcwLjA4LTMxLjU3LTEzNS4xNC04Ni42LTE3OC41Wk0yOTAuNzYsODI3LjE3Yy00NS42MSwyOC42Ni0xMTguNjQtNS40Ni0xNjMuMS03Ni4yMS00NC40Ni03MC43NS00My41My0xNTEuMzUsMi4wOC0xODAuMDEsNDUuNjEtMjguNjYsMTE4LjYzLDUuNDYsMTYzLjEsNzYuMjEsNDQuNDYsNzAuNzUsNDMuNTMsMTUxLjM1LTIuMDgsMTgwLjAxWk00MTYuODUsNjYwLjI2Yy01Ni40OCw2LjE1LTEwOS45OS01OS44OS0xMTkuNTMtMTQ3LjUtOS41NC04Ny42MSwyOC41Mi0xNjMuNjEsODUtMTY5Ljc2LDU2LjQ4LTYuMTUsMTEwLDU5Ljg5LDExOS41MywxNDcuNSw5LjU0LDg3LjYxLTI4LjUyLDE2My42Mi04NSwxNjkuNzZaTTY3My44LDY3My4zMWMtNTUuMTMtMTMuNzMtODIuNTYtOTQuMTgtNjEuMjctMTc5LjY5LDIxLjI5LTg1LjUyLDgzLjI1LTE0My43MSwxMzguMzgtMTI5Ljk5LDU1LjEzLDEzLjczLDgyLjU2LDk0LjE4LDYxLjI3LDE3OS42OS0yMS4yOSw4NS41Mi04My4yNSwxNDMuNzEtMTM4LjM4LDEyOS45OVpNOTQ4LjE0LDgwMS40Yy01My42Miw2NC4wOS0xMzAuNTgsODguMDMtMTcxLjksNTMuNDYtNDEuMzItMzQuNTctMzEuMzUtMTE0LjU1LDIyLjI3LTE3OC42NCw1My42Mi02NC4wOSwxMzAuNTgtODguMDMsMTcxLjktNTMuNDYsNDEuMzIsMzQuNTcsMzEuMzUsMTE0LjU1LTIyLjI3LDE3OC42NFoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTcxNy4zMiwxMTUwLjg3YzkuNTMtMzcuMjctMi43NS05Mi41OS01MC45Ny0xMzguMzMtNTEuNC00OC43Ni02NC40NC0xMDIuMi0xMjEuNDktMTAzLjg3LTU3LjA2LDEuMzUtNzAuNCw1NC43Mi0xMjIuMDcsMTAzLjE5LTQ4Ljg4LDQ1Ljg2LTU5LjQsMTAxLjY3LTQ4LjI4LDEzOS4wMWgzNDIuODFaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggZD0iTTE1NDUuNzEsNTA0LjIxYzQuOTEtMTguODIsNS43My01Mi4zOCwzMC4yOC01Mi4zOCwxOC4wMS44MiwzNi44MywyLjQ2LDU0Ljg0LDQuMDksOC4xOSwwLDEzLjEsNC45MSwxNC43MywxMy45MiwyNS4zNywxMjUuMjMsNjMuMDIsMjQ4LDk1Ljc2LDM3MS42LDEuNjQsNi41NCwwLDEyLjI3LTQuOTEsMTcuMTktMTguODMsMjAuNDYtNDMuMzgsMzEuMS02OS41NywzOS4yOS05LDMuMjctMTQuNzMtMS42NC0xNi4zNy0xMi4yOC0xMy4wOS03MS4yMS0yMi4xLTE0MS42LTQ0LjItMjA3LjA4LTksNDkuMTEtMTkuNjQsOTUuNzYtMjguNjUsMTQxLjYtMi40NSwxMy45MS05LjgyLDIyLjkyLTI0LjU1LDIzLjczLTIxLjI4LjgyLTQyLjU2LjgyLTYzLjg0LDAtMTQuNzMtLjgyLTIyLjEtOS0yNS4zNy0yMy43My05LTQ2LjY1LTE4LjgzLTkyLjQ5LTI4LjY1LTE0MC43OC0xNS41NSw2Ni4zLTI3LjgzLDEzMy40MS00MS43NCwxOTkuNzEtMi40NSw5LjgyLTUuNzMsMjIuMS0xOC4wMSwxOC44My0yNi4xOS04LjE5LTUwLjc1LTE4LjAxLTY5LjU3LTM5LjI5LTUuNzMtNC45MS02LjU1LTEwLjY0LTQuOTEtMTguMDEsMzAuMjgtMTI0LjQxLDc2Ljk0LTI3NC4xOSw5NC45NS0zNjkuMTQsMi40NS05LjgyLDYuNTUtMTUuNTUsMTYuMzctMTYuMzcsMTguMDEtLjgyLDM2LjAxLTIuNDYsNTQuMDItMy4yOCwxMy4xLDAsMTcuMTksMy4yOCwyMC40NiwxNi4zNywxMi4yOCw1MS41NiwyMi45Miw5OS44NiwzNC4zOCwxNDguMTUsOC4xOC00MC4xMSwxNi4zNy03Ni4xMiwyNC41NS0xMTIuMTRaIi8+CiAgICA8cGF0aCBkPSJNMTg2NC4wOSw4OTUuNDVjLTIzLjc0LDQuOTEtNTIuMzgtMS42NC03MC4zOS03LjM3LTktNC45MS0xMy4wOS0xMC42NC0xMi4yOC0yMS4yOCw0LjA5LTk3LjQsMTMuMS0xOTEuNTMsMC0yODIuMzgtLjgyLTguMTktLjgyLTE0LjczLDguMTktMTguODIsMjEuMjgtOS4wMSw0Mi41Ni0xNi4zNyw2Ni4zLTEzLjkyLDEzLjEsMS42NCwxNi4zNyw1LjczLDE2LjM3LDE4LjAxLTQuMDksMTE2LjIyLTcuMzcsMjEzLjYzLDIuNDYsMzA5LjM4LjgyLDkuODItMS42NCwxNC43NC0xMC42NCwxNi4zN1pNMTg3Ny4xOCw0ODQuNTdjMCwyNi4xOS0yMS4yOCw0Ny40Ny00Ny40Nyw0OC4yOS0yNi4xOSwwLTQ4LjI5LTIyLjEtNDguMjktNDkuMTFzMjEuMjgtNDguMjksNDguMjktNDguMjksNDguMjksMjIuMSw0Ny40Nyw0OS4xMVoiLz4KICAgIDxwYXRoIGQ9Ik0yMzIzLjI0LDUwNC4yMWM0LjkxLTE4LjgyLDUuNzMtNTIuMzgsMzAuMjgtNTIuMzgsMTguMDEuODIsMzYuODMsMi40Niw1NC44NCw0LjA5LDguMTksMCwxMy4xLDQuOTEsMTQuNzMsMTMuOTIsMjUuMzcsMTI1LjIzLDYzLjAyLDI0OCw5NS43NiwzNzEuNiwxLjY0LDYuNTQsMCwxMi4yNy00LjkxLDE3LjE5LTE4LjgzLDIwLjQ2LTQzLjM4LDMxLjEtNjkuNTcsMzkuMjktOSwzLjI3LTE0LjczLTEuNjQtMTYuMzctMTIuMjgtMTMuMDktNzEuMjEtMjIuMS0xNDEuNi00NC4yLTIwNy4wOC05LDQ5LjExLTE5LjY0LDk1Ljc2LTI4LjY1LDE0MS42LTIuNDUsMTMuOTEtOS44MiwyMi45Mi0yNC41NSwyMy43My0yMS4yOC44Mi00Mi41Ni44Mi02My44NCwwLTE0LjczLS44Mi0yMi4xLTktMjUuMzctMjMuNzMtOS00Ni42NS0xOC44My05Mi40OS0yOC42NS0xNDAuNzgtMTUuNTUsNjYuMy0yNy44MywxMzMuNDEtNDEuNzQsMTk5LjcxLTIuNDUsOS44Mi01LjczLDIyLjEtMTguMDEsMTguODMtMjYuMTktOC4xOS01MC43NS0xOC4wMS02OS41Ny0zOS4yOS01LjczLTQuOTEtNi41NS0xMC42NC00LjkxLTE4LjAxLDMwLjI4LTEyNC40MSw3Ni45NC0yNzQuMTksOTQuOTUtMzY5LjE0LDIuNDUtOS44Miw2LjU1LTE1LjU1LDE2LjM3LTE2LjM3LDE4LjAxLS44MiwzNi4wMS0yLjQ2LDU0LjAyLTMuMjgsMTMuMSwwLDE3LjE5LDMuMjgsMjAuNDYsMTYuMzcsMTIuMjgsNTEuNTYsMjIuOTIsOTkuODYsMzQuMzgsMTQ4LjE1LDguMTgtNDAuMTEsMTYuMzctNzYuMTIsMjQuNTUtMTEyLjE0WiIvPgogICAgPHBhdGggZD0iTTI3NjIuNzYsNTQxLjg2YzIzLjczLTcuMzcsNjYuMjktMTguMDEsNjQuNjYsMTUuNTUtNS43MywxMjAuMzItNC45MSwyMTcuNzIuODIsMzE0LjMsMi40NSwzNC4zNy01Ni40OCwyMS4yOC03My42NiwxMy45Mi0xNy4xOS02LjU1LTE4LjgzLTktMTguMDEtMjcuODMtNDQuMiwyMS4yOC03NC40OCwyOS40Ny0xMTYuMjIsMjEuMjgtMTAzLjk1LTI4LjY1LTk4LjIyLTE4MC44OS01Mi4zOC0yNDYuMzYsNDEuNzQtNjguNzUsMTE1LjQtODAuMjEsMTcxLjA2LTU0Ljg0LTMuMjgtMjcuMDEtMi40Ni0yOC42NSwyMy43NC0zNi4wMVpNMjY2MS4yNiw2NjMuODJjLTI2LjE5LDIwLjQ3LTM2LjgzLDYxLjM5LTI2LjE5LDkzLjMxLDYuNTUsMjAuNDcsMjMuNzQsMzIuNzQsNDUuMDIsMzEuOTIsNDguMjktNS43Myw0OS45My03My42Niw0My4zOC0xMDguODYtOS44Mi0zMy41Ni00MC45Mi0zMC4yOS02Mi4yMS0xNi4zN1oiLz4KICAgIDxwYXRoIGQ9Ik0yODcyLjQyLDg2MS4wOGMtMjMuNzQtMjIuMS0yMi4xLTI1LjM3LTExLjQ2LTUyLjM4LDYuNTUtMTYuMzcsMzYuMDEtNjUuNDgsNTQuODQtNDAuOTIsMTMuMDksMTUuNTUsNDUuMDIsMzUuMTksNjQuNjYsMzUuMTksMTEuNDYtLjgyLDE0Ljc0LTcuMzcsMTEuNDYtMTgtNS43My0xOS42NC0zOC40Ny0zNC4zOC01Ny4yOS00NS4wMi02MC41Ny0yMy43NC03NS4zLTcyLjAzLTU5Ljc1LTExOC42OCwzMi43NC03Ni45NCwxMjIuNzctOTQuMTIsMTkxLjUyLTUwLjc1LDUuNzMsNC4wOSw4LjE5LDkuMDEsNy4zNywxNi4zNy0yLjQ1LDIzLjc0LTguMTgsNDUuODMtMjIuMSw2Ni4zLTcuMzcsMTAuNjQtMTAuNjQsMTEuNDYtMTkuNjQsMS42NC05LjgyLTkuODItMjIuMS0xNi4zNy0zNS4yLTIwLjQ3LTEwLjY0LTEuNjQtMjUuMzctLjgyLTI4LjY1LDExLjQ2LTMuMjgsMTMuOTIsMTIuMjcsMjAuNDcsMjAuNDYsMjcuMDEsMzguNDcsMjUuMzcsNzEuMjEsNDcuNDcsODYuNzYsOTEuNjcsMjIuMSw2OC43Ni0yNy4wMSwxMzUuODctOTQuOTQsMTM1Ljg3LTQxLjc0LS44Mi03OC41Ny0xMS40Ni0xMDguMDQtMzkuMjhaIi8+CiAgICA8cGF0aCBkPSJNMzI2Ni45Miw2NTEuNTRjLTYxLjM4LTYuNTUtNzYuMTIsNjcuMTEtNjMuODQsMTA4Ljg1LDkuODIsMzUuMiwzNi44Myw0OS4xMSw3NC40OCw0MC45MiwxNy4xOS00LjkxLDI4LjY1LTE3LjE5LDQ1LjgzLTEyLjI3LDE1LjU1LDUuNzMsMjYuMTksMTUuNTUsMzQuMzgsMjkuNDYsMTUuNTUsMzMuNTYtNDIuNTYsNjcuOTMtNzIuMDMsNzIuODUtNzYuOTQsMTguMDEtMTQ4Ljk2LTE4LjgyLTE3MS44OS05Ni41OC0yOS40Ni05OS44NiwyOS40Ny0yMTkuMzUsMTM1LjA1LTIzNy4zNiw0OS4xMS00LjA5LDg3LjU4LDEzLjA5LDExNC41OSw1My4yLDMuMjcsNC45MSw0LjkxLDExLjQ2LDQuMDksMTcuMTktMi40NiwyMS4yOC0yMS4yOCw1Mi4zOC00MS43NSw2Ny4xMS0xOC4wMS0yMC40Ni0zNC4zNy0zOC40Ny01OC45My00My4zOFoiLz4KICAgIDxwYXRoIGQ9Ik0zNDU3LjYyLDg2NS4xNmMtNzUuMy01NS42Ni05My4zMS0xNzAuMjQtMzcuNjUtMjQ1LjU0LDU4LjExLTcyLjg0LDE1Ni4zMy03Mi44NCwyMTUuMjYtOS44Miw1OS43NSw2NC42Niw2MC41NywxNjYuMTUsOS44MiwyMzEuNjMtNDcuNDcsNTguMTEtMTI2Ljg2LDY3LjkzLTE4Ny40MywyMy43M1pNMzU0MS4xLDc2NS4zMWM0OC4yOS02LjU1LDcyLjAzLTYzLjAzLDQ1LjAyLTk5Ljg2LTM3LjY1LTQ1LjAxLTk0Ljk0LDEuNjQtOTUuNzYsNDUuMDItLjgyLDMxLjkyLDIyLjEsNTcuMyw1MC43NSw1NC44NFoiLz4KICAgIDxwYXRoIGQ9Ik0zODY4LjQ4LDU2OC4wNmMuODIsMTMuOTEuODIsMjcuODIsMCw0MS43NC0xLjY0LDE2LjM3LTcuMzcsMjAuNDYtMjMuNzQsMTkuNjRoLTEyLjI4Yy00LjA5LDIyLjkyLTEuNjQsMTEwLjUuODIsMTMyLjYsMi40NiwxOC44MiwxMS40NiwzMi43NCwyOS40Nyw0MC45Miw4LjE5LDQuMDksMTIuMjcsOS44MiwxMi4yNywxOS42NCwwLDE2LjM3LS44MiwzMy41Ni0xLjY0LDUwLjc1LS44MiwxMC42NC02LjU0LDE2LjM3LTE3LjE5LDE5LjY0LTIzLjc0LDQuOTEtNjMuMDIuODItODMuNDktMjYuMTktNDUuMDItNTguOTMtMzYuMDEtMTY1LjM0LTM2LjAxLTIzMi40NS0xMC42NC0yLjQ1LTIzLjc0LDE1LjU1LTI1LjM3LTIyLjEtLjgyLTEzLjkyLjgyLTI3LjgzLDIuNDYtNDEuNzUsMS42NC0xMi4yNywzLjI3LTE0LjczLDE2LjM3LTE0LjczLDIuNDYsMCw0LjkxLDAsOS0uODIsMS42NC0xMy4wOSwyLjQ2LTI2LjE5LDMuMjgtMzkuMjgsMC0xMC42NCw0LjA5LTE3LjE5LDEzLjkyLTE5LjY0LDIyLjkyLTguMTksNDcuNDctMTMuMSw3Mi4wMy0xMy4xLDEyLjI3LDAsMTYuMzcsNC4wOSwxNS41NSwxNy4xOS0xLjY0LDE0LjczLTMuMjcsMjguNjUtNC45MSw0My4zOCwyMy43NC0xLjY0LDI3LjgzLDEuNjQsMjkuNDcsMjQuNTZaIi8+CiAgICA8cGF0aCBkPSJNNDEyNi4zLDU0MS44NmMyMy43NC03LjM3LDY2LjMtMTguMDEsNjQuNjYsMTUuNTUtNS43MywxMjAuMzItNC45MSwyMTcuNzIuODIsMzE0LjMsMi40NSwzNC4zNy01Ni40OCwyMS4yOC03My42NiwxMy45Mi0xNy4xOS02LjU1LTE4LjgzLTktMTguMDEtMjcuODMtNDQuMiwyMS4yOC03NC40OCwyOS40Ny0xMTYuMjIsMjEuMjgtMTAzLjk1LTI4LjY1LTk4LjIyLTE4MC44OS01Mi4zOC0yNDYuMzYsNDEuNzQtNjguNzUsMTE1LjQtODAuMjEsMTcxLjA2LTU0Ljg0LTMuMjgtMjcuMDEtMi40Ni0yOC42NSwyMy43My0zNi4wMVpNNDAyNC44MSw2NjMuODJjLTI2LjE5LDIwLjQ3LTM2LjgzLDYxLjM5LTI2LjE5LDkzLjMxLDYuNTUsMjAuNDcsMjMuNzQsMzIuNzQsNDUuMDIsMzEuOTIsNDguMjktNS43Myw0OS45My03My42Niw0My4zOC0xMDguODYtOS44Mi0zMy41Ni00MC45Mi0zMC4yOS02Mi4yMS0xNi4zN1oiLz4KICAgIDxwYXRoIGQ9Ik00NjU2LjY1LDU3OS41MmMtNDIuNTYtMzYuODMtMTA4Ljg2LTI4LjY1LTE0MC43OCwxOC0zOC40Nyw1OC45My0zNy42NSwxNDEuNiwyNi4xOSwxNzcuNjEsMzYuODMsMTguODIsODQuMzEsNC4wOSwxMTIuOTUtMjAuNDcsMTMuMDktMTAuNjQsMTUuNTUtMTAuNjQsMjcuMDEsMS42NCwxNy4xOSwxNy4xOSwzMC4yOCwzNi44MywzNy42NSw2MC41NiwxLjY0LDUuNzMsMS42NCw5LjgyLTIuNDYsMTQuNzQtMzYuMDIsNDcuNDctODMuNDksNzAuMzktMTQzLjIzLDY4Ljc1LTEwNC43Ny00LjkxLTE3NC4zNC04Mi42Ni0xODEuNzEtMTg4LjI1LTE3LjE5LTE3Mi43LDEzNS4wNS0zMjUuNzYsMjg4LjkyLTIzNC4wOCw5LjAxLDUuNzMsMzkuMjksMjQuNTUsMzMuNTYsMzguNDctNi41NSwyOS40Ny0yMC40Niw1NC4wMi00Ni42NSw3Mi44NS00LjA5LTQuMDktOC4xOS02LjU1LTExLjQ2LTkuODJaIi8+CiAgICA8cGF0aCBkPSJNNDgzNi43MSw0NDYuOTJjMTEuNDYuODIsMTQuNzMsNC4wOSwxNC43MywxNi4zNy0yLjQ2LDExOS41LTQuMDksMTgyLjUyLTQuMDksMjk1LjQ3LDEuNjQsMzAuMjktMy4yNyw2Ny45MywxMy45Miw2Ni4zLDcuMzctLjgyLDEyLjI4LDIuNDYsMTMuMDksOSwuODIsMTMuMSwyLjQ2LDIzLjc0LDIuNDYsMzcuNjUuODIsNS43My00LjkxLDEyLjI4LTEwLjY0LDE0LjczLTI4LjY1LDE0Ljc0LTEwOS42OCwxOC44My0xMTAuNS00NS44MywwLTE1My44OCwyLjQ1LTI0Ni4zNiwyLjQ1LTM3MC43Ny44Mi0yMS4yOCwxMS40Ni0yMS4yOCwyNi4xOS0yMS4yOCwxNy4xOS0xLjY0LDM1LjItMS42NCw1Mi4zOC0xLjY0WiIvPgogICAgPHBhdGggZD0iTTUwNzQuMDcsNzM3LjQ4YzEwLjY0LTUwLjc1LDEyLjI4LTEwMS40OSw5LjgyLTE1Mi4yNC0uODItMjIuMSwwLTIzLjc0LDIyLjkyLTI0LjU2LDE0Ljc0LS44MiwyOC42NS0uODIsNDIuNTYsMCwxOC44My44MiwyMS4yOSw0LjA5LDIyLjEsMjIuMS44Miw5OS44NSwxMC42NCwzMDMuNjYtMTI2Ljg3LDMxNC4zLTE0NC4wNS0xMC42NC0xNDAuNzgtMjA3LjktMTMzLjQxLTMwNi45MywxLjY0LTExLjQ2LDYuNTUtMTcuMTksMTYuMzctMjAuNDYsMTUuNTUtNS43MywzMS45Mi03LjM3LDQ4LjI5LTguMTksMTYuMzcuODIsMjMuNzQsNi41NSwyMy43NCwyMC40NiwwLDcwLjM5LTEuNjQsMTM4LjMzLDEzLjA5LDE3NC4zNCwyMS4yOCw1Mi4zOCw1NC4wMiwyMi4xLDYxLjM4LTE4LjgzWiIvPgogICAgPHBhdGggZD0iTTU0OTEuNDksNzAxLjQ3YzIwLjQ2LDE2MC40Mi0xMTMuNzcsMjE3LjcyLTI0NS41NSwxOTIuMzQtMTkuNjQtMy4yOC00MS43NC0uODItNDEuNzQtMjMuNzQuODItMjE3LjcyLDIuNDUtMzExLjg0LTIuNDYtNDA1Ljk3LDAtOSwyLjQ2LTEzLjkyLDkuODItMTUuNTUsMjguNjUtNy4zNyw1My4yLTEwLjY0LDgxLjAzLTEwLjY0LDEzLjkyLjgyLDE2LjM3LDQuMDksMTQuNzMsMTcuMTktMy4yNyw0MC4xLTguMTgsNzUuMy04LjE4LDExMS4zMSw5MS42Ny0zMC4yOCwxODEuNywzNi44MywxOTIuMzQsMTM1LjA1Wk01Mjk0LjIzLDgwMS4zMmM1NC44NCwxMy45MiwxMzAuMTQtMTguODIsMTEzLjc3LTgzLjQ5LTEwLjY0LTQ3LjQ3LTcyLjAzLTY5LjU3LTExMy43Ny00NS44M3YxMjkuMzJaIi8+CiAgPC9nPgo8L3N2Zz4=" alt="Mi Mascota Club" style="height:38px;"></a>
+    <div class="navlinks">
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-btn" onclick="toggleDropdown('exploreDropdown')">Explorar <span class="caret">▾</span></button>
+        <div class="nav-dropdown-panel wide" id="exploreDropdown">
+          <div class="dd-col">
+            <div class="dd-col-title">🐾 Para mi mascota</div>
+            <div id="ddMascotaList"></div>
+          </div>
+          <div class="dd-col">
+            <div class="dd-col-title">🙂 Para mí</div>
+            <div id="ddDuenoList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-btn" onclick="toggleDropdown('beneficiosDropdown')">Beneficios <span class="caret">▾</span></button>
+        <div class="nav-dropdown-panel wide" id="beneficiosDropdown">
+          <div class="dd-col">
+            <div class="dd-col-title">🐶 Para tu mascota</div>
+            <div id="ddBeneficiosMascota"></div>
+          </div>
+          <div class="dd-col">
+            <div class="dd-col-title">👤 Para ti</div>
+            <div id="ddBeneficiosDueno"></div>
+          </div>
+        </div>
+      </div>
+      <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();">Especialistas</a>
+      <a href="#duenos" onclick="event.preventDefault(); mostrarFormulario('dueno');">Mi Mascota</a>
+      <a href="#planes">Planes</a>
+    </div>
+    <a href="#negocios" class="btn btn-primary btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap" style="text-align:center;max-width:760px;">
+    <h1 style="font-size:44px;">Encuentra todo lo que necesitas <em>para tu mascota</em></h1>
+    <p class="lead" style="margin:0 auto 26px;">Negocios, productos, servicios y beneficios.</p>
+    <div class="hero-search-wrap">
+      <input id="heroSearch" class="hero-search" type="text" placeholder="Necesito una veterinaria..." onkeydown="if(event.key==='Enter'){event.preventDefault(); irABuscar();}">
+      <button class="btn btn-primary hero-search-btn" onclick="irABuscar()">Explorar</button>
+    </div>
+    <div class="hero-note mono" id="liveBeneficiosCount" style="display:none;justify-content:center;margin-top:18px;color:var(--forest-2);font-weight:600;"></div>
+  </div>
+
+  <div class="fan-carousel">
+    <div class="fan-track" id="fanTrack"></div>
+  </div>
+
+  <div class="wrap" style="text-align:center;margin-top:36px;">
+    <p style="font-size:12px;color:#8a8a8a;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">✓ Negocios verificados</p>
+  </div>
+  <div class="trust-marquee">
+    <div class="trust-track" id="trustTrack"></div>
+  </div>
+</header>
+
+
+
+<section id="categorias" style="padding-top:48px;padding-bottom:48px;">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:26px;">
+      <span class="eyebrow">Explora por categoría</span>
+      <h2 style="font-size:26px;">Todo lo que necesitas, organizado</h2>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<section id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Cómo funciona</span>
+      <h2>De buscar en cinco apps distintas a tener todo en una.</h2>
+      <p>Descubres, reservas o compras, y ahorras con los beneficios del club — todo asociado al perfil de tu mascota.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01 — Descubre</div><h3>Encuentra por categoría y comuna</h3><p>Veterinarias, peluquerías, paseadores, hoteles y tiendas cerca de ti.</p></div>
+      <div class="step"><div class="num">02 — Reserva o compra</div><h3>Contacta directo, sin vueltas</h3><p>Escribe por WhatsApp o agenda con el negocio.</p></div>
+      <div class="step"><div class="num">03 — Ahorra</div><h3>Muestra tu carnet con QR</h3><p>El negocio valida tu visita y aplicas tu descuento de socio al instante.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="directorio" class="band">
+  <div class="page-banner" id="dirBanner"></div>
+  <div class="wrap">
+    <div class="featured-strip-wrap" id="featuredStripWrap" style="display:none;">
+      <div class="section-head" style="margin-bottom:14px;">
+        <span class="eyebrow" style="color:var(--yellow-dark);background:rgba(255,206,0,0.18);">★ Destacados</span>
+      </div>
+      <div class="featured-strip" id="featuredStrip"></div>
+    </div>
+    <div class="section-head" style="margin-bottom:22px;margin-top:30px;">
+      <span class="eyebrow" id="dirEyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Directorio</span>
+    </div>
+    <div class="dir-controls">
+      <button class="btn btn-sm btn-primary" id="tabTodos" onclick="setDirTipo('')">Todos</button>
+      <button class="btn btn-sm btn-outline" id="tabMascota" onclick="setDirTipo('mascota')">Para tu mascota</button>
+      <button class="btn btn-sm btn-outline" id="tabDueno" onclick="setDirTipo('dueno')">Para ti como dueño</button>
+    </div>
+    <div class="dir-controls">
+      <input id="dirSearch" type="text" placeholder="Buscar negocio o especialista...">
+      <select id="dirCat"><option value="">Todas las categorías</option></select>
+      <select id="dirComuna"><option value="">Todas las comunas</option></select>
+    </div>
+    <div class="dir-status" id="dirStatus"><span class="spinner"></span>Cargando directorio...</div>
+    <div class="dir-grid" id="dirGrid"></div>
+  </div>
+</section>
+
+<section id="fichaNegocio" class="band">
+  <div class="page-banner" id="fichaBanner"></div>
+  <div class="wrap ficha-page-wrap" id="fichaContent"></div>
+</section>
+
+<section id="negocios" style="display:none;">
+  <div class="wrap split" id="negociosSplit">
+    <div class="panel" id="panelNegocio">
+      <span class="tag">Para negocios y especialistas</span>
+      <div style="font-size:12px;margin:6px 0 0;"><a href="#" onclick="event.preventDefault(); mostrarFormulario('dueno');" style="color:var(--brass);">¿Vienes a registrar tu mascota? Cambia aquí →</a></div>
+      <h3>Súmate como negocio fundador</h3>
+      <p class="desc">Aparece en el directorio y valida visitas de socios. Gratis los primeros meses.</p>
+      <div class="wizard-steps" id="wizardSteps-biz">
+        <div class="wizard-step" data-step="1"><div class="wizard-dot">1</div><div class="wizard-label">Tu negocio</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="2"><div class="wizard-dot">2</div><div class="wizard-label">Tus datos</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="3"><div class="wizard-dot">3</div><div class="wizard-label">Crear ficha</div></div>
+      </div>
+      <form id="bizForm">
+        <div class="form-step" data-wizard="biz" data-step="1">
+          <div class="field">
+            <label>Tipo de ficha</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn btn-sm btn-primary" id="fichaNegocioBtn" onclick="setBizEsEspecialista(false)">🏪 Negocio</button>
+              <button type="button" class="btn btn-sm btn-outline" id="fichaEspecialistaBtn" onclick="setBizEsEspecialista(true)">🧑‍⚕️ Especialista individual</button>
+            </div>
+            <div style="font-size:12px;color:#7a8377;margin-top:8px;line-height:1.4;">Un especialista es <b>una sola persona</b> que ofrece un servicio (ej. etólogo, nutricionista, adiestrador) y aparece en la página de Especialistas. Un negocio es un local o marca.</div>
+          </div>
+          <div class="field">
+            <label>¿Tu negocio es...?</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn btn-sm btn-primary" id="tipoMascotaBtn" onclick="setBizTipo('mascota')">Para mascotas</button>
+              <button type="button" class="btn btn-sm btn-outline" id="tipoDuenoBtn" onclick="setBizTipo('dueno')">Para dueños</button>
+            </div>
+            <div id="bizFormHint" style="font-size:12px;color:#7a8377;margin-top:8px;line-height:1.4;"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="bizName">Nombre del negocio</label><input id="bizName" required placeholder="Ej: Veterinaria Los Robles"></div>
+            <div class="field"><label for="bizCat">Categoría</label>
+              <select id="bizCat" required>
+                <option value="">Selecciona</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="bizRegion">Región</label>
+              <select id="bizRegion" required onchange="poblarComunas('bizRegion','bizComuna')"></select>
+            </div>
+            <div class="field"><label for="bizComuna">Comuna</label>
+              <select id="bizComuna" required></select>
+            </div>
+          </div>
+          <div class="field"><label for="bizDireccion">Dirección</label><input id="bizDireccion" placeholder="Ej: Av. Providencia 1234, local 5"></div>
+          <div class="field"><label for="bizServicios">Especialidad o top 3 servicios</label><input id="bizServicios" placeholder="Ej: Baño, Corte, Guardería de día" required></div>
+          <div class="field"><label for="bizHorario">Horario de atención</label><input id="bizHorario" placeholder="Ej: Lun a Vie 10:00-19:00"></div>
+          <div class="field"><label for="bizRedes">Instagram / sitio web</label><input id="bizRedes" placeholder="Ej: @mi_negocio"></div>
+          <div class="field">
+            <label for="bizDescripcion">Descripción de tu negocio</label>
+            <textarea id="bizDescripcion" rows="2" style="width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--paper-line);font-family:var(--font-body);font-size:16px;background:var(--parchment);" placeholder="Cuéntale a los socios qué los hace especiales"></textarea>
+          </div>
+          <div class="field">
+            <label for="bizLogo">Logo de tu negocio (opcional)</label>
+            <input type="file" id="bizLogo" accept="image/*">
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-brass" style="width:100%;justify-content:center;" onclick="wizardNext('biz')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="biz" data-step="2">
+          <div class="section-head" style="margin:0 0 16px;max-width:none;">
+            <h3 style="font-size:16px;margin:0 0 4px;">Tus datos de contacto</h3>
+            <p style="font-size:12.5px;">Correo y teléfono por separado, para que podamos contactarte sin confusiones.</p>
+          </div>
+          <div class="field-row">
+            <div class="field field-validated" id="fieldBizTelefono">
+              <label for="bizTelefono">Teléfono de contacto</label>
+              <div class="input-icon-wrap tel-wrap">
+                <span class="tel-prefix">+56 9</span>
+                <input id="bizTelefono" type="tel" required inputmode="numeric" maxlength="9" placeholder="1234 5678" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="bizTelefonoMsg"></small>
+            </div>
+            <div class="field field-validated" id="fieldBizEmail">
+              <label for="bizEmail">Email de contacto</label>
+              <div class="input-icon-wrap">
+                <input id="bizEmail" type="email" required placeholder="negocio@ejemplo.com" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="bizEmailMsg"></small>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('biz')">← Atrás</button>
+            <button type="button" class="btn btn-brass" onclick="wizardNext('biz')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="biz" data-step="3">
+          <div class="field-row">
+            <div class="field"><label for="bizBeneficioTipo">Tipo de beneficio para socios</label>
+              <select id="bizBeneficioTipo" required>
+                <option value="">Selecciona</option>
+                <option>Descuento</option><option>Regalo</option><option>Promoción</option><option>Otro</option>
+              </select>
+            </div>
+            <div class="field"><label for="bizBeneficioDetalle">Detalle del beneficio</label><input id="bizBeneficioDetalle" placeholder="Ej: 15% en corte de pelo" required></div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('biz')">← Atrás</button>
+            <button type="submit" id="bizSubmitBtn" class="btn btn-brass" style="justify-content:center;">Quiero ser negocio fundador</button>
+          </div>
+        </div>
+      </form>
+      <div class="price-hint">Plan negocio (referencial, a validar): <b>$5.000–$20.000 CLP/mes</b>. Gratis durante el piloto.</div>
+      <div class="waitlist"><div class="waitlist-count" id="bizCount">Cargando...</div><div id="bizList"></div></div>
+    </div>
+
+    <div class="panel" id="duenos">
+      <span class="tag" style="color:var(--forest-2);">Para dueños de mascotas</span>
+      <div style="font-size:12px;margin:6px 0 0;"><a href="#" onclick="event.preventDefault(); mostrarFormulario('negocio');" style="color:var(--forest-2);">¿Vienes a registrar tu negocio? Cambia aquí →</a></div>
+      <h3>Crea el carnet de tu mascota</h3>
+      <p class="desc">Regístrate gratis y arma el perfil de tu mascota. Tu carnet incluye un QR único para validar tus visitas.</p>
+      <div class="card-stage" style="margin-bottom:22px;">
+        <div class="credencial" style="transform:rotate(1deg);">
+          <div class="cred-badge">Miembro Free</div>
+          <div class="cred-top">
+            <div class="cred-brand"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZmZjZTAwOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIHN0cm9rZTogIzAwMDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogMTA7CiAgICAgICAgc3Ryb2tlLXdpZHRoOiAyMHB4OwogICAgICB9CgogICAgICAuY2xzLTMgewogICAgICAgIGZpbGw6ICM0N2M5Yzk7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxnPgogICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNDQwLjAzLDE1Mi44M2wtODYuOC02OC4zOS01Ny43Ny00NS41MmMtMjMuMjQtMTguMzItNTUuNy0xOC4zMi03OC45MywwbC0xNDQuNTcsMTEzLjkxYy0yMi4wNywxNy4zOS0zNC43NCw0My40OS0zNC43NCw3MS42djIxOS44NWMwLDIzLjQ2LDE5LjA4LDQyLjU0LDQyLjU0LDQyLjU0aDY5LjQ3Yy02Ljk0LTIzLjMyLS4zOC01OC4xOSwzMC4xNi04Ni44NCwzMi4yOC0zMC4yOCw0MC42MS02My42Miw3Ni4yNi02NC40NywzNS42NCwxLjA0LDQzLjc5LDM0LjQzLDc1LjksNjQuODksMzAuMTIsMjguNTcsMzcuOCw2My4xMywzMS44NCw4Ni40Mmg2OC44M2MyMy40NiwwLDQyLjU0LTE5LjA4LDQyLjU0LTQyLjU0di0yMTkuODVjMC0yOC4xMS0xMi42Ni01NC4yMS0zNC43NC03MS42Wk0xNTMuODYsMzU2Ljk4Yy0xOC4zLDExLjUtNDcuNTktMi4xOS02NS40Mi0zMC41Ny0xNy44My0yOC4zOC0xNy40Ni02MC43MS44My03Mi4yMSwxOC4zLTExLjUsNDcuNTksMi4xOSw2NS40MiwzMC41NywxNy44MywyOC4zOCwxNy40Niw2MC43MS0uODMsNzIuMjFaTTIwNC40MywyOTAuMDJjLTIyLjY1LDIuNDctNDQuMTItMjQuMDItNDcuOTUtNTkuMTYtMy44My0zNS4xNCwxMS40NC02NS42MywzNC4wOS02OC4wOSwyMi42NS0yLjQ3LDQ0LjEyLDI0LjAyLDQ3Ljk1LDU5LjE2LDMuODMsMzUuMTQtMTEuNDQsNjUuNjMtMzQuMDksNjguMDlaTTMwNy41LDI5NS4yNmMtMjIuMTEtNS41MS0zMy4xMi0zNy43OC0yNC41OC03Mi4wOCw4LjU0LTM0LjMsMzMuMzktNTcuNjUsNTUuNS01Mi4xNCwyMi4xMSw1LjUxLDMzLjEyLDM3Ljc4LDI0LjU4LDcyLjA4LTguNTQsMzQuMy0zMy4zOSw1Ny42NS01NS41LDUyLjE0Wk00MTcuNTQsMzQ2LjY0Yy0yMS41MSwyNS43MS01Mi4zOCwzNS4zMS02OC45NSwyMS40NS0xNi41Ny0xMy44Ny0xMi41Ny00NS45NSw4LjkzLTcxLjY2LDIxLjUxLTI1LjcxLDUyLjM4LTM1LjMxLDY4Ljk1LTIxLjQ1LDE2LjU3LDEzLjg3LDEyLjU3LDQ1Ljk1LTguOTMsNzEuNjZaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0zMDQuNTEsNDMxLjMzYy0yMC42Mi0xOS41Ni0yNS44NS00MS00OC43My00MS42Ni0yMi44OS41NC0yOC4yNCwyMS45NS00OC45Niw0MS4zOS0xOS42MSwxOC40LTIzLjgzLDQwLjc4LTE5LjM3LDU1Ljc2aDEzNy41MWMzLjgyLTE0Ljk1LTEuMS0zNy4xNC0yMC40NC01NS40OVoiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik00NDAuMDMsMTUyLjgzbC04Ni44LTY4LjM5LTU3Ljc3LTQ1LjUyYy0yMy4yNC0xOC4zMi01NS43LTE4LjMyLTc4LjkzLDBsLTE0NC41NywxMTMuOTFjLTIyLjA3LDE3LjM5LTM0Ljc0LDQzLjQ5LTM0Ljc0LDcxLjZ2MjE5Ljg1YzAsMjMuNDYsMTkuMDgsNDIuNTQsNDIuNTQsNDIuNTRoNjkuNDdjLTYuOTQtMjMuMzItLjM4LTU4LjE5LDMwLjE2LTg2Ljg0LDMyLjI4LTMwLjI4LDQwLjYxLTYzLjYyLDc2LjI2LTY0LjQ3LDM1LjY0LDEuMDQsNDMuNzksMzQuNDMsNzUuOSw2NC44OSwzMC4xMiwyOC41NywzNy44LDYzLjEzLDMxLjg0LDg2LjQyaDY4LjgzYzIzLjQ2LDAsNDIuNTQtMTkuMDgsNDIuNTQtNDIuNTR2LTIxOS44NWMwLTI4LjExLTEyLjY2LTU0LjIxLTM0Ljc0LTcxLjZaTTE1My44NiwzNTYuOThjLTE4LjMsMTEuNS00Ny41OS0yLjE5LTY1LjQyLTMwLjU3LTE3LjgzLTI4LjM4LTE3LjQ2LTYwLjcxLjg0LTcyLjIxLDE4LjMtMTEuNSw0Ny41OSwyLjE5LDY1LjQyLDMwLjU3LDE3LjgzLDI4LjM4LDE3LjQ2LDYwLjcxLS44NCw3Mi4yMVpNMjA0LjQzLDI5MC4wMmMtMjIuNjUsMi40Ny00NC4xMi0yNC4wMi00Ny45NS01OS4xNi0zLjgzLTM1LjE0LDExLjQ0LTY1LjYzLDM0LjA5LTY4LjA5LDIyLjY1LTIuNDcsNDQuMTIsMjQuMDIsNDcuOTUsNTkuMTYsMy44MywzNS4xNC0xMS40NCw2NS42My0zNC4wOSw2OC4wOVpNMzA3LjUsMjk1LjI2Yy0yMi4xMS01LjUxLTMzLjEyLTM3Ljc4LTI0LjU4LTcyLjA4LDguNTQtMzQuMywzMy4zOS01Ny42NSw1NS41LTUyLjE0LDIyLjExLDUuNTEsMzMuMTIsMzcuNzgsMjQuNTgsNzIuMDgtOC41NCwzNC4zLTMzLjM5LDU3LjY1LTU1LjUsNTIuMTRaTTQxNy41NCwzNDYuNjRjLTIxLjUxLDI1LjcxLTUyLjM4LDM1LjMxLTY4Ljk1LDIxLjQ1LTE2LjU3LTEzLjg3LTEyLjU3LTQ1Ljk1LDguOTMtNzEuNjYsMjEuNTEtMjUuNzEsNTIuMzgtMzUuMzEsNjguOTUtMjEuNDUsMTYuNTcsMTMuODcsMTIuNTcsNDUuOTUtOC45Myw3MS42NloiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTMyNC45Niw0ODYuODJjMy44Mi0xNC45NS0xLjEtMzcuMTQtMjAuNDQtNTUuNDktMjAuNjItMTkuNTYtMjUuODUtNDAuOTktNDguNzMtNDEuNjYtMjIuODkuNTQtMjguMjQsMjEuOTUtNDguOTYsNDEuMzktMTkuNjEsMTguNC0yMy44Miw0MC43OC0xOS4zNyw1NS43NmgxMzcuNTFaIi8+CiAgPC9nPgo8L3N2Zz4=" alt=""> MI MASCOTA CLUB</div>
+            <div class="cred-id" id="credId">MMC00000</div>
+          </div>
+          <div class="cred-photo" id="credPhoto"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZmZjZTAwOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIHN0cm9rZTogIzAwMDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogMTA7CiAgICAgICAgc3Ryb2tlLXdpZHRoOiAyMHB4OwogICAgICB9CgogICAgICAuY2xzLTMgewogICAgICAgIGZpbGw6ICM0N2M5Yzk7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxnPgogICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNDQwLjAzLDE1Mi44M2wtODYuOC02OC4zOS01Ny43Ny00NS41MmMtMjMuMjQtMTguMzItNTUuNy0xOC4zMi03OC45MywwbC0xNDQuNTcsMTEzLjkxYy0yMi4wNywxNy4zOS0zNC43NCw0My40OS0zNC43NCw3MS42djIxOS44NWMwLDIzLjQ2LDE5LjA4LDQyLjU0LDQyLjU0LDQyLjU0aDY5LjQ3Yy02Ljk0LTIzLjMyLS4zOC01OC4xOSwzMC4xNi04Ni44NCwzMi4yOC0zMC4yOCw0MC42MS02My42Miw3Ni4yNi02NC40NywzNS42NCwxLjA0LDQzLjc5LDM0LjQzLDc1LjksNjQuODksMzAuMTIsMjguNTcsMzcuOCw2My4xMywzMS44NCw4Ni40Mmg2OC44M2MyMy40NiwwLDQyLjU0LTE5LjA4LDQyLjU0LTQyLjU0di0yMTkuODVjMC0yOC4xMS0xMi42Ni01NC4yMS0zNC43NC03MS42Wk0xNTMuODYsMzU2Ljk4Yy0xOC4zLDExLjUtNDcuNTktMi4xOS02NS40Mi0zMC41Ny0xNy44My0yOC4zOC0xNy40Ni02MC43MS44My03Mi4yMSwxOC4zLTExLjUsNDcuNTksMi4xOSw2NS40MiwzMC41NywxNy44MywyOC4zOCwxNy40Niw2MC43MS0uODMsNzIuMjFaTTIwNC40MywyOTAuMDJjLTIyLjY1LDIuNDctNDQuMTItMjQuMDItNDcuOTUtNTkuMTYtMy44My0zNS4xNCwxMS40NC02NS42MywzNC4wOS02OC4wOSwyMi42NS0yLjQ3LDQ0LjEyLDI0LjAyLDQ3Ljk1LDU5LjE2LDMuODMsMzUuMTQtMTEuNDQsNjUuNjMtMzQuMDksNjguMDlaTTMwNy41LDI5NS4yNmMtMjIuMTEtNS41MS0zMy4xMi0zNy43OC0yNC41OC03Mi4wOCw4LjU0LTM0LjMsMzMuMzktNTcuNjUsNTUuNS01Mi4xNCwyMi4xMSw1LjUxLDMzLjEyLDM3Ljc4LDI0LjU4LDcyLjA4LTguNTQsMzQuMy0zMy4zOSw1Ny42NS01NS41LDUyLjE0Wk00MTcuNTQsMzQ2LjY0Yy0yMS41MSwyNS43MS01Mi4zOCwzNS4zMS02OC45NSwyMS40NS0xNi41Ny0xMy44Ny0xMi41Ny00NS45NSw4LjkzLTcxLjY2LDIxLjUxLTI1LjcxLDUyLjM4LTM1LjMxLDY4Ljk1LTIxLjQ1LDE2LjU3LDEzLjg3LDEyLjU3LDQ1Ljk1LTguOTMsNzEuNjZaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0zMDQuNTEsNDMxLjMzYy0yMC42Mi0xOS41Ni0yNS44NS00MS00OC43My00MS42Ni0yMi44OS41NC0yOC4yNCwyMS45NS00OC45Niw0MS4zOS0xOS42MSwxOC40LTIzLjgzLDQwLjc4LTE5LjM3LDU1Ljc2aDEzNy41MWMzLjgyLTE0Ljk1LTEuMS0zNy4xNC0yMC40NC01NS40OVoiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik00NDAuMDMsMTUyLjgzbC04Ni44LTY4LjM5LTU3Ljc3LTQ1LjUyYy0yMy4yNC0xOC4zMi01NS43LTE4LjMyLTc4LjkzLDBsLTE0NC41NywxMTMuOTFjLTIyLjA3LDE3LjM5LTM0Ljc0LDQzLjQ5LTM0Ljc0LDcxLjZ2MjE5Ljg1YzAsMjMuNDYsMTkuMDgsNDIuNTQsNDIuNTQsNDIuNTRoNjkuNDdjLTYuOTQtMjMuMzItLjM4LTU4LjE5LDMwLjE2LTg2Ljg0LDMyLjI4LTMwLjI4LDQwLjYxLTYzLjYyLDc2LjI2LTY0LjQ3LDM1LjY0LDEuMDQsNDMuNzksMzQuNDMsNzUuOSw2NC44OSwzMC4xMiwyOC41NywzNy44LDYzLjEzLDMxLjg0LDg2LjQyaDY4LjgzYzIzLjQ2LDAsNDIuNTQtMTkuMDgsNDIuNTQtNDIuNTR2LTIxOS44NWMwLTI4LjExLTEyLjY2LTU0LjIxLTM0Ljc0LTcxLjZaTTE1My44NiwzNTYuOThjLTE4LjMsMTEuNS00Ny41OS0yLjE5LTY1LjQyLTMwLjU3LTE3LjgzLTI4LjM4LTE3LjQ2LTYwLjcxLjg0LTcyLjIxLDE4LjMtMTEuNSw0Ny41OSwyLjE5LDY1LjQyLDMwLjU3LDE3LjgzLDI4LjM4LDE3LjQ2LDYwLjcxLS44NCw3Mi4yMVpNMjA0LjQzLDI5MC4wMmMtMjIuNjUsMi40Ny00NC4xMi0yNC4wMi00Ny45NS01OS4xNi0zLjgzLTM1LjE0LDExLjQ0LTY1LjYzLDM0LjA5LTY4LjA5LDIyLjY1LTIuNDcsNDQuMTIsMjQuMDIsNDcuOTUsNTkuMTYsMy44MywzNS4xNC0xMS40NCw2NS42My0zNC4wOSw2OC4wOVpNMzA3LjUsMjk1LjI2Yy0yMi4xMS01LjUxLTMzLjEyLTM3Ljc4LTI0LjU4LTcyLjA4LDguNTQtMzQuMywzMy4zOS01Ny42NSw1NS41LTUyLjE0LDIyLjExLDUuNTEsMzMuMTIsMzcuNzgsMjQuNTgsNzIuMDgtOC41NCwzNC4zLTMzLjM5LDU3LjY1LTU1LjUsNTIuMTRaTTQxNy41NCwzNDYuNjRjLTIxLjUxLDI1LjcxLTUyLjM4LDM1LjMxLTY4Ljk1LDIxLjQ1LTE2LjU3LTEzLjg3LTEyLjU3LTQ1Ljk1LDguOTMtNzEuNjYsMjEuNTEtMjUuNzEsNTIuMzgtMzUuMzEsNjguOTUtMjEuNDUsMTYuNTcsMTMuODcsMTIuNTcsNDUuOTUtOC45Myw3MS42NloiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTMyNC45Niw0ODYuODJjMy44Mi0xNC45NS0xLjEtMzcuMTQtMjAuNDQtNTUuNDktMjAuNjItMTkuNTYtMjUuODUtNDAuOTktNDguNzMtNDEuNjYtMjIuODkuNTQtMjguMjQsMjEuOTUtNDguOTYsNDEuMzktMTkuNjEsMTguNC0yMy44Miw0MC43OC0xOS4zNyw1NS43NmgxMzcuNTFaIi8+CiAgPC9nPgo8L3N2Zz4=" alt=""></div>
+          <div class="cred-name" id="credName">Tu mascota</div>
+          <div class="cred-breed" id="credBreed">Escribe su nombre para previsualizar →</div>
+          <div class="cred-row"><div>Comuna<b id="credComuna">Santiago</b></div><div>Estado<b style="color:var(--sage);">Activo</b></div></div>
+        </div>
+      </div>
+      <div class="wizard-steps" id="wizardSteps-owner">
+        <div class="wizard-step" data-step="1"><div class="wizard-dot">1</div><div class="wizard-label">Tu mascota</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="2"><div class="wizard-dot">2</div><div class="wizard-label">Tus datos</div></div>
+        <div class="wizard-line"></div>
+        <div class="wizard-step" data-step="3"><div class="wizard-dot">3</div><div class="wizard-label">Crear ficha</div></div>
+      </div>
+      <form id="ownerForm">
+        <div class="form-step" data-wizard="owner" data-step="1">
+          <div class="field-row">
+            <div class="field"><label for="petName">Nombre de tu mascota</label><input id="petName" required placeholder="Ej: Mona" oninput="updateCard()"></div>
+            <div class="field"><label for="petSpecies">Especie</label>
+              <select id="petSpecies" onchange="updateCard()">
+                <option value="Perro">Perro</option><option value="Gato">Gato</option><option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label for="petBreed">Raza (opcional)</label><input id="petBreed" placeholder="Ej: Mestiza" oninput="updateCard()"></div>
+          <div class="field-row three">
+            <div class="field"><label for="petEdad">Edad (años)</label><input type="number" id="petEdad" min="0" step="0.5" placeholder="Ej: 3"></div>
+            <div class="field"><label for="petPeso">Peso (kg)</label><input type="number" id="petPeso" min="0" step="0.1" placeholder="Ej: 12" oninput="sugerirTamano()"></div>
+            <div class="field"><label for="petTamano">Tamaño</label>
+              <select id="petTamano">
+                <option value="">Selecciona</option>
+                <option value="S">S — hasta 10 kg</option>
+                <option value="M">M — 10 a 25 kg</option>
+                <option value="L">L — 25 a 40 kg</option>
+                <option value="XL">XL — más de 40 kg</option>
+              </select>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="wizardNext('owner')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="owner" data-step="2">
+          <div class="section-head" style="margin:0 0 16px;max-width:none;">
+            <h3 style="font-size:16px;margin:0 0 4px;">Tus datos</h3>
+            <p style="font-size:12.5px;">Para identificarte a ti, no solo a tu mascota, cuando visites un negocio con beneficio para el dueño.</p>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="ownerRepNombre">Tu nombre completo</label><input id="ownerRepNombre" required placeholder="Ej: Juan Pérez"></div>
+            <div class="field field-validated" id="fieldOwnerRut">
+              <label for="ownerRepRut">Tu RUT</label>
+              <div class="input-icon-wrap">
+                <input id="ownerRepRut" required placeholder="Ej: 12.345.678-9" autocomplete="off" inputmode="text">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="ownerRepRutMsg"></small>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field field-validated" id="fieldOwnerTelefono">
+              <label for="ownerRepTelefono">Tu teléfono</label>
+              <div class="input-icon-wrap tel-wrap">
+                <span class="tel-prefix">+56 9</span>
+                <input id="ownerRepTelefono" type="tel" required inputmode="numeric" maxlength="9" placeholder="1234 5678" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="ownerRepTelefonoMsg"></small>
+            </div>
+            <div class="field field-validated" id="fieldOwnerEmail">
+              <label for="ownerEmail">Tu email</label>
+              <div class="input-icon-wrap">
+                <input id="ownerEmail" type="email" required placeholder="tucorreo@ejemplo.com" autocomplete="off">
+                <span class="field-check">✓</span>
+              </div>
+              <small class="field-msg" id="ownerEmailMsg"></small>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="ownerRegion">Tu región</label>
+              <select id="ownerRegion" required onchange="poblarComunas('ownerRegion','ownerComuna'); updateCard();"></select>
+            </div>
+            <div class="field"><label for="ownerComuna">Tu comuna</label>
+              <select id="ownerComuna" required onchange="updateCard()"></select>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('owner')">← Atrás</button>
+            <button type="button" class="btn btn-primary" onclick="wizardNext('owner')">Continuar →</button>
+          </div>
+        </div>
+
+        <div class="form-step" data-wizard="owner" data-step="3">
+          <div class="section-head" style="margin:0 0 16px;max-width:none;">
+            <h3 style="font-size:16px;margin:0 0 4px;">Ficha de tu mascota</h3>
+          </div>
+          <div class="field">
+            <label for="petFoto">Foto de tu mascota (opcional)</label>
+            <input type="file" id="petFoto" accept="image/*">
+          </div>
+          <div class="field">
+            <label>Documentos — receta, cartola de vacunas (opcional, máx. 2)</label>
+            <input type="file" id="petDoc1" accept="image/*">
+            <input type="file" id="petDoc2" accept="image/*" style="margin-top:8px;">
+          </div>
+          <div class="field">
+            <label for="petNotas">Notas médicas (alergias, medicamentos, veterinario tratante...)</label>
+            <textarea id="petNotas" rows="2" style="width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--paper-line);font-family:var(--font-body);font-size:16px;background:var(--parchment);"></textarea>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline btn-back" onclick="wizardBack('owner')">← Atrás</button>
+            <button type="submit" id="ownerSubmitBtn" class="btn btn-primary" style="justify-content:center;">Crear carnet y unirme gratis</button>
+          </div>
+        </div>
+      </form>
+      <div class="price-hint">Las fotos se comprimen automáticamente al guardar.</div>
+      <div class="price-hint">Membresía premium (referencial, a validar): <b>$2.000–$5.000 CLP/mes</b>. El registro es gratis.</div>
+      <div class="waitlist"><div class="waitlist-count" id="ownerCount">Cargando...</div><div id="ownerList"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="validar" class="band" style="display:none;">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Para negocios</span>
+      <h2>Validar una visita</h2>
+      <p>Con tu código de negocio (te lo entregamos al registrarte) y el código QR del carnet del socio, registra la compra y su descuento en segundos.</p>
+    </div>
+    <div class="panel full" style="max-width:520px;">
+      <form id="validarForm">
+        <div class="field-row three">
+          <div class="field"><label for="valBizCode">Tu código de negocio</label><input id="valBizCode" required placeholder="NEG0001" style="text-transform:uppercase;"></div>
+          <div class="field"><label for="valSocioCode">Código del socio</label><input id="valSocioCode" required placeholder="MMC00001" style="text-transform:uppercase;"></div>
+          <div class="field"><label for="valMonto">Monto compra (CLP)</label><input id="valMonto" type="number" min="1" required placeholder="15000"></div>
+        </div>
+        <button type="submit" id="validarSubmitBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Validar y registrar compra</button>
+      </form>
+      <div class="validar-result" id="validarResult"></div>
+    </div>
+  </div>
+</section>
+
+<section id="planes" class="band">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Planes</span>
+      <h2>Elige tu nivel en el club</h2>
+      <p>Precios referenciales, a validar con el mercado. <b>Por ahora, todos los planes están disponibles gratis durante el piloto</b> — esto es la hoja de ruta de hacia dónde vamos.</p>
+    </div>
+
+    <h3 style="font-size:20px;margin:0 0 18px;">Para dueños de mascota</h3>
+    <div class="pricing-grid" style="margin-bottom:56px;">
+      <div class="pricing-card">
+        <div class="pricing-icon">🆓</div>
+        <div class="pricing-name">GRATIS</div>
+        <div class="pricing-price">$0<span>/mes</span></div>
+        <div class="pricing-desc">Pertenece.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> 🐾 1 mascota</li>
+          <li><span class="pricing-check">✓</span> 🎫 Carnet digital</li>
+          <li><span class="pricing-check">✓</span> 🔎 Explora todo</li>
+          <li><span class="pricing-check">✓</span> ❤️ Guarda favoritos</li>
+        </ul>
+        <a href="#duenos" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('dueno');">Empezar gratis</a>
+        <div class="pricing-note">Sin tarjeta, sin compromiso</div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-icon">⭐</div>
+        <div class="pricing-name">PRO</div>
+        <div class="pricing-price">$3.990<span>/mes</span></div>
+        <div class="pricing-desc">Beneficios para tu mascota.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> 🐶 2 mascotas</li>
+          <li><span class="pricing-check">✓</span> 🎁 Beneficios exclusivos para mascotas</li>
+          <li><span class="pricing-check">✓</span> 💰 Descuentos en servicios y productos</li>
+          <li><span class="pricing-check">✓</span> ⭐ Ofertas especiales</li>
+        </ul>
+        <a href="#duenos" class="btn btn-primary pricing-cta" onclick="event.preventDefault(); mostrarFormulario('dueno');">Empezar gratis</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-icon">👑</div>
+        <div class="pricing-name">PREMIUM</div>
+        <div class="pricing-price">$6.990<span>/mes</span></div>
+        <div class="pricing-desc">Beneficios para tu mascota y para ti.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> 🐶 4 mascotas</li>
+          <li><span class="pricing-check">✓</span> 🐾 Todos los beneficios para mascotas</li>
+          <li><span class="pricing-check">✓</span> 👤 Beneficios exclusivos para ti</li>
+          <li><span class="pricing-check">✓</span> ☕🎾🏨 Cafés, deporte y hoteles</li>
+          <li><span class="pricing-check">✓</span> 👑 Beneficios VIP</li>
+        </ul>
+        <a href="#duenos" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('dueno');">Empezar gratis</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+    </div>
+
+    <h3 style="font-size:20px;margin:0 0 18px;">Para negocios y especialistas</h3>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-icon">🆓</div>
+        <div class="pricing-name">PRESENCIA</div>
+        <div class="pricing-price">$0<span>/mes</span></div>
+        <div class="pricing-desc">Estoy en Mi Mascota Club.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Ficha pública (nombre, categoría, contacto, redes)</li>
+          <li><span class="pricing-check">✓</span> Apareces en el directorio y búsquedas</li>
+          <li><span class="pricing-check">✓</span> Puedes solicitar verificación</li>
+        </ul>
+        <a href="#negocios" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('negocio');">Sumar mi negocio</a>
+        <div class="pricing-note">Gratis para siempre</div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-icon">⭐</div>
+        <div class="pricing-name">DESTACADO</div>
+        <div class="pricing-price">$14.990<span>/mes</span></div>
+        <div class="pricing-desc">Quiero que me encuentren.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Todo lo de Presencia</li>
+          <li><span class="pricing-check">✓</span> ✓ Sello de negocio verificado</li>
+          <li><span class="pricing-check">✓</span> Logo en el Home del club</li>
+          <li><span class="pricing-check">✓</span> Posición destacada en búsquedas</li>
+          <li><span class="pricing-check">✓</span> Perfil enriquecido (fotos, precios, promos)</li>
+          <li><span class="pricing-check">✓</span> Puede publicar beneficios exclusivos</li>
+          <li><span class="pricing-check">✓</span> Estadísticas básicas de tu ficha</li>
+        </ul>
+        <a href="#negocios" class="btn btn-primary pricing-cta" onclick="event.preventDefault(); mostrarFormulario('negocio');">Sumar mi negocio</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-icon">👑</div>
+        <div class="pricing-name">PREMIUM</div>
+        <div class="pricing-price">$29.990<span>/mes</span></div>
+        <div class="pricing-desc">Quiero conseguir clientes.</div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Todo lo de Destacado</li>
+          <li><span class="pricing-check">✓</span> Máxima exposición en Home, categorías y búsquedas</li>
+          <li><span class="pricing-check">✓</span> Apareces en "Recomendados" y "Cerca de ti"</li>
+          <li><span class="pricing-check">✓</span> Beneficio y promociones destacadas</li>
+          <li><span class="pricing-check">✓</span> Estadísticas avanzadas (visitas, clics, WhatsApp)</li>
+          <li><span class="pricing-check">✓</span> Sello "Miembro Premium"</li>
+        </ul>
+        <a href="#negocios" class="btn btn-outline pricing-cta" onclick="event.preventDefault(); mostrarFormulario('negocio');">Sumar mi negocio</a>
+        <div class="pricing-note">Disponible gratis durante el piloto</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="panel" style="display:none;">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Panel privado</span>
+      <h2>Ver todos los registros y resultados</h2>
+      <p>Acceso solo para el equipo del club.</p>
+    </div>
+    <div id="adminLockWrap">
+      <div class="admin-lock">
+        <div style="font-family:var(--font-mono);font-size:12px;color:#7a8377;">Inicia sesión como administrador</div>
+        <input id="adminEmail" type="email" placeholder="Tu email" autocomplete="username">
+        <input id="adminPass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+        <button class="btn btn-brass" id="adminLoginBtn" style="width:100%;justify-content:center;" onclick="tryUnlock()">Entrar</button>
+        <div id="adminError" style="color:var(--rust);font-size:12.5px;margin-top:10px;display:none;">Clave incorrecta.</div>
+      </div>
+    </div>
+    <div id="adminPanel" style="display:none;">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="n" id="statBiz">0</div><div class="l">Negocios inscritos</div></div>
+        <div class="stat-card"><div class="n" id="statOwners">0</div><div class="l">Mascotas / dueños</div></div>
+        <div class="stat-card"><div class="n" id="statClientes">0</div><div class="l">Clientes que compraron</div></div>
+        <div class="stat-card"><div class="n" id="statGMV">$0</div><div class="l">Ventas generadas (GMV)</div></div>
+      </div>
+      <div class="admin-table">
+        <h4>Resumen por negocio (ROI) <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
+        <div class="table-row head"><span>Negocio</span><span>Visitas</span><span>Monto total</span><span>Ticket prom.</span></div>
+        <div id="adminRoiTable"></div>
+      </div>
+      <div class="admin-table">
+        <h4>Últimas visitas validadas</h4>
+        <div class="table-row head"><span>Negocio</span><span>Mascota</span><span>Monto</span><span>Fecha</span></div>
+        <div id="adminCanjesTable"></div>
+      </div>
+      <div class="admin-table">
+        <h4>Negocios</h4>
+        <div class="table-row head"><span>Nombre</span><span>Categoría</span><span>Comuna</span><span>Contacto</span></div>
+        <div id="adminBizTable"></div>
+      </div>
+      <div class="admin-table">
+        <h4>Dueños y mascotas</h4>
+        <div class="table-row head"><span>Mascota</span><span>Especie</span><span>Comuna</span><span>Email</span></div>
+        <div id="adminOwnerTable"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div class="logo"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NDkzLjU3IDExNTAuODciPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICNmZmNlMDA7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogIzQ3YzljOTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMDA0LjIxLDMxOC4yMmwtMjE2LjQtMTcwLjUtMTQ0LjAyLTExMy40N2MtNTcuOTMtNDUuNjYtMTM4Ljg3LTQ1LjY2LTE5Ni43NywwTDg2LjYsMzE4LjIyQzMxLjU3LDM2MS41OCwwLDQyNi42NCwwLDQ5Ni43MnY1NDguMWMwLDU4LjQ4LDQ3LjU3LDEwNi4wNSwxMDYuMDUsMTA2LjA1aDE3My4xOWMtMTcuMzEtNTguMTQtLjk0LTE0NS4wNyw3NS4yLTIxNi41LDgwLjQ3LTc1LjQ5LDEwMS4yNS0xNTguNjIsMTkwLjEyLTE2MC43MSw4OC44NiwyLjU5LDEwOS4xOCw4NS44MywxODkuMjIsMTYxLjc3LDc1LjA5LDcxLjI0LDk0LjIzLDE1Ny40LDc5LjM4LDIxNS40NGgxNzEuNmM1OC40OCwwLDEwNi4wNS00Ny41NywxMDYuMDUtMTA2LjA1VjQ5Ni43MmMwLTcwLjA4LTMxLjU3LTEzNS4xNC04Ni42LTE3OC41Wk0yOTAuNzYsODI3LjE3Yy00NS42MSwyOC42Ni0xMTguNjQtNS40Ni0xNjMuMS03Ni4yMS00NC40Ni03MC43NS00My41My0xNTEuMzUsMi4wOC0xODAuMDEsNDUuNjEtMjguNjYsMTE4LjYzLDUuNDYsMTYzLjEsNzYuMjEsNDQuNDYsNzAuNzUsNDMuNTMsMTUxLjM1LTIuMDgsMTgwLjAxWk00MTYuODUsNjYwLjI2Yy01Ni40OCw2LjE1LTEwOS45OS01OS44OS0xMTkuNTMtMTQ3LjUtOS41NC04Ny42MSwyOC41Mi0xNjMuNjEsODUtMTY5Ljc2LDU2LjQ4LTYuMTUsMTEwLDU5Ljg5LDExOS41MywxNDcuNSw5LjU0LDg3LjYxLTI4LjUyLDE2My42Mi04NSwxNjkuNzZaTTY3My44LDY3My4zMWMtNTUuMTMtMTMuNzMtODIuNTYtOTQuMTgtNjEuMjctMTc5LjY5LDIxLjI5LTg1LjUyLDgzLjI1LTE0My43MSwxMzguMzgtMTI5Ljk5LDU1LjEzLDEzLjczLDgyLjU2LDk0LjE4LDYxLjI3LDE3OS42OS0yMS4yOSw4NS41Mi04My4yNSwxNDMuNzEtMTM4LjM4LDEyOS45OVpNOTQ4LjE0LDgwMS40Yy01My42Miw2NC4wOS0xMzAuNTgsODguMDMtMTcxLjksNTMuNDYtNDEuMzItMzQuNTctMzEuMzUtMTE0LjU1LDIyLjI3LTE3OC42NCw1My42Mi02NC4wOSwxMzAuNTgtODguMDMsMTcxLjktNTMuNDYsNDEuMzIsMzQuNTcsMzEuMzUsMTE0LjU1LTIyLjI3LDE3OC42NFoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTcxNy4zMiwxMTUwLjg3YzkuNTMtMzcuMjctMi43NS05Mi41OS01MC45Ny0xMzguMzMtNTEuNC00OC43Ni02NC40NC0xMDIuMi0xMjEuNDktMTAzLjg3LTU3LjA2LDEuMzUtNzAuNCw1NC43Mi0xMjIuMDcsMTAzLjE5LTQ4Ljg4LDQ1Ljg2LTU5LjQsMTAxLjY3LTQ4LjI4LDEzOS4wMWgzNDIuODFaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggZD0iTTE1NDUuNzEsNTA0LjIxYzQuOTEtMTguODIsNS43My01Mi4zOCwzMC4yOC01Mi4zOCwxOC4wMS44MiwzNi44MywyLjQ2LDU0Ljg0LDQuMDksOC4xOSwwLDEzLjEsNC45MSwxNC43MywxMy45MiwyNS4zNywxMjUuMjMsNjMuMDIsMjQ4LDk1Ljc2LDM3MS42LDEuNjQsNi41NCwwLDEyLjI3LTQuOTEsMTcuMTktMTguODMsMjAuNDYtNDMuMzgsMzEuMS02OS41NywzOS4yOS05LDMuMjctMTQuNzMtMS42NC0xNi4zNy0xMi4yOC0xMy4wOS03MS4yMS0yMi4xLTE0MS42LTQ0LjItMjA3LjA4LTksNDkuMTEtMTkuNjQsOTUuNzYtMjguNjUsMTQxLjYtMi40NSwxMy45MS05LjgyLDIyLjkyLTI0LjU1LDIzLjczLTIxLjI4LjgyLTQyLjU2LjgyLTYzLjg0LDAtMTQuNzMtLjgyLTIyLjEtOS0yNS4zNy0yMy43My05LTQ2LjY1LTE4LjgzLTkyLjQ5LTI4LjY1LTE0MC43OC0xNS41NSw2Ni4zLTI3LjgzLDEzMy40MS00MS43NCwxOTkuNzEtMi40NSw5LjgyLTUuNzMsMjIuMS0xOC4wMSwxOC44My0yNi4xOS04LjE5LTUwLjc1LTE4LjAxLTY5LjU3LTM5LjI5LTUuNzMtNC45MS02LjU1LTEwLjY0LTQuOTEtMTguMDEsMzAuMjgtMTI0LjQxLDc2Ljk0LTI3NC4xOSw5NC45NS0zNjkuMTQsMi40NS05LjgyLDYuNTUtMTUuNTUsMTYuMzctMTYuMzcsMTguMDEtLjgyLDM2LjAxLTIuNDYsNTQuMDItMy4yOCwxMy4xLDAsMTcuMTksMy4yOCwyMC40NiwxNi4zNywxMi4yOCw1MS41NiwyMi45Miw5OS44NiwzNC4zOCwxNDguMTUsOC4xOC00MC4xMSwxNi4zNy03Ni4xMiwyNC41NS0xMTIuMTRaIi8+CiAgICA8cGF0aCBkPSJNMTg2NC4wOSw4OTUuNDVjLTIzLjc0LDQuOTEtNTIuMzgtMS42NC03MC4zOS03LjM3LTktNC45MS0xMy4wOS0xMC42NC0xMi4yOC0yMS4yOCw0LjA5LTk3LjQsMTMuMS0xOTEuNTMsMC0yODIuMzgtLjgyLTguMTktLjgyLTE0LjczLDguMTktMTguODIsMjEuMjgtOS4wMSw0Mi41Ni0xNi4zNyw2Ni4zLTEzLjkyLDEzLjEsMS42NCwxNi4zNyw1LjczLDE2LjM3LDE4LjAxLTQuMDksMTE2LjIyLTcuMzcsMjEzLjYzLDIuNDYsMzA5LjM4LjgyLDkuODItMS42NCwxNC43NC0xMC42NCwxNi4zN1pNMTg3Ny4xOCw0ODQuNTdjMCwyNi4xOS0yMS4yOCw0Ny40Ny00Ny40Nyw0OC4yOS0yNi4xOSwwLTQ4LjI5LTIyLjEtNDguMjktNDkuMTFzMjEuMjgtNDguMjksNDguMjktNDguMjksNDguMjksMjIuMSw0Ny40Nyw0OS4xMVoiLz4KICAgIDxwYXRoIGQ9Ik0yMzIzLjI0LDUwNC4yMWM0LjkxLTE4LjgyLDUuNzMtNTIuMzgsMzAuMjgtNTIuMzgsMTguMDEuODIsMzYuODMsMi40Niw1NC44NCw0LjA5LDguMTksMCwxMy4xLDQuOTEsMTQuNzMsMTMuOTIsMjUuMzcsMTI1LjIzLDYzLjAyLDI0OCw5NS43NiwzNzEuNiwxLjY0LDYuNTQsMCwxMi4yNy00LjkxLDE3LjE5LTE4LjgzLDIwLjQ2LTQzLjM4LDMxLjEtNjkuNTcsMzkuMjktOSwzLjI3LTE0LjczLTEuNjQtMTYuMzctMTIuMjgtMTMuMDktNzEuMjEtMjIuMS0xNDEuNi00NC4yLTIwNy4wOC05LDQ5LjExLTE5LjY0LDk1Ljc2LTI4LjY1LDE0MS42LTIuNDUsMTMuOTEtOS44MiwyMi45Mi0yNC41NSwyMy43My0yMS4yOC44Mi00Mi41Ni44Mi02My44NCwwLTE0LjczLS44Mi0yMi4xLTktMjUuMzctMjMuNzMtOS00Ni42NS0xOC44My05Mi40OS0yOC42NS0xNDAuNzgtMTUuNTUsNjYuMy0yNy44MywxMzMuNDEtNDEuNzQsMTk5LjcxLTIuNDUsOS44Mi01LjczLDIyLjEtMTguMDEsMTguODMtMjYuMTktOC4xOS01MC43NS0xOC4wMS02OS41Ny0zOS4yOS01LjczLTQuOTEtNi41NS0xMC42NC00LjkxLTE4LjAxLDMwLjI4LTEyNC40MSw3Ni45NC0yNzQuMTksOTQuOTUtMzY5LjE0LDIuNDUtOS44Miw2LjU1LTE1LjU1LDE2LjM3LTE2LjM3LDE4LjAxLS44MiwzNi4wMS0yLjQ2LDU0LjAyLTMuMjgsMTMuMSwwLDE3LjE5LDMuMjgsMjAuNDYsMTYuMzcsMTIuMjgsNTEuNTYsMjIuOTIsOTkuODYsMzQuMzgsMTQ4LjE1LDguMTgtNDAuMTEsMTYuMzctNzYuMTIsMjQuNTUtMTEyLjE0WiIvPgogICAgPHBhdGggZD0iTTI3NjIuNzYsNTQxLjg2YzIzLjczLTcuMzcsNjYuMjktMTguMDEsNjQuNjYsMTUuNTUtNS43MywxMjAuMzItNC45MSwyMTcuNzIuODIsMzE0LjMsMi40NSwzNC4zNy01Ni40OCwyMS4yOC03My42NiwxMy45Mi0xNy4xOS02LjU1LTE4LjgzLTktMTguMDEtMjcuODMtNDQuMiwyMS4yOC03NC40OCwyOS40Ny0xMTYuMjIsMjEuMjgtMTAzLjk1LTI4LjY1LTk4LjIyLTE4MC44OS01Mi4zOC0yNDYuMzYsNDEuNzQtNjguNzUsMTE1LjQtODAuMjEsMTcxLjA2LTU0Ljg0LTMuMjgtMjcuMDEtMi40Ni0yOC42NSwyMy43NC0zNi4wMVpNMjY2MS4yNiw2NjMuODJjLTI2LjE5LDIwLjQ3LTM2LjgzLDYxLjM5LTI2LjE5LDkzLjMxLDYuNTUsMjAuNDcsMjMuNzQsMzIuNzQsNDUuMDIsMzEuOTIsNDguMjktNS43Myw0OS45My03My42Niw0My4zOC0xMDguODYtOS44Mi0zMy41Ni00MC45Mi0zMC4yOS02Mi4yMS0xNi4zN1oiLz4KICAgIDxwYXRoIGQ9Ik0yODcyLjQyLDg2MS4wOGMtMjMuNzQtMjIuMS0yMi4xLTI1LjM3LTExLjQ2LTUyLjM4LDYuNTUtMTYuMzcsMzYuMDEtNjUuNDgsNTQuODQtNDAuOTIsMTMuMDksMTUuNTUsNDUuMDIsMzUuMTksNjQuNjYsMzUuMTksMTEuNDYtLjgyLDE0Ljc0LTcuMzcsMTEuNDYtMTgtNS43My0xOS42NC0zOC40Ny0zNC4zOC01Ny4yOS00NS4wMi02MC41Ny0yMy43NC03NS4zLTcyLjAzLTU5Ljc1LTExOC42OCwzMi43NC03Ni45NCwxMjIuNzctOTQuMTIsMTkxLjUyLTUwLjc1LDUuNzMsNC4wOSw4LjE5LDkuMDEsNy4zNywxNi4zNy0yLjQ1LDIzLjc0LTguMTgsNDUuODMtMjIuMSw2Ni4zLTcuMzcsMTAuNjQtMTAuNjQsMTEuNDYtMTkuNjQsMS42NC05LjgyLTkuODItMjIuMS0xNi4zNy0zNS4yLTIwLjQ3LTEwLjY0LTEuNjQtMjUuMzctLjgyLTI4LjY1LDExLjQ2LTMuMjgsMTMuOTIsMTIuMjcsMjAuNDcsMjAuNDYsMjcuMDEsMzguNDcsMjUuMzcsNzEuMjEsNDcuNDcsODYuNzYsOTEuNjcsMjIuMSw2OC43Ni0yNy4wMSwxMzUuODctOTQuOTQsMTM1Ljg3LTQxLjc0LS44Mi03OC41Ny0xMS40Ni0xMDguMDQtMzkuMjhaIi8+CiAgICA8cGF0aCBkPSJNMzI2Ni45Miw2NTEuNTRjLTYxLjM4LTYuNTUtNzYuMTIsNjcuMTEtNjMuODQsMTA4Ljg1LDkuODIsMzUuMiwzNi44Myw0OS4xMSw3NC40OCw0MC45MiwxNy4xOS00LjkxLDI4LjY1LTE3LjE5LDQ1LjgzLTEyLjI3LDE1LjU1LDUuNzMsMjYuMTksMTUuNTUsMzQuMzgsMjkuNDYsMTUuNTUsMzMuNTYtNDIuNTYsNjcuOTMtNzIuMDMsNzIuODUtNzYuOTQsMTguMDEtMTQ4Ljk2LTE4LjgyLTE3MS44OS05Ni41OC0yOS40Ni05OS44NiwyOS40Ny0yMTkuMzUsMTM1LjA1LTIzNy4zNiw0OS4xMS00LjA5LDg3LjU4LDEzLjA5LDExNC41OSw1My4yLDMuMjcsNC45MSw0LjkxLDExLjQ2LDQuMDksMTcuMTktMi40NiwyMS4yOC0yMS4yOCw1Mi4zOC00MS43NSw2Ny4xMS0xOC4wMS0yMC40Ni0zNC4zNy0zOC40Ny01OC45My00My4zOFoiLz4KICAgIDxwYXRoIGQ9Ik0zNDU3LjYyLDg2NS4xNmMtNzUuMy01NS42Ni05My4zMS0xNzAuMjQtMzcuNjUtMjQ1LjU0LDU4LjExLTcyLjg0LDE1Ni4zMy03Mi44NCwyMTUuMjYtOS44Miw1OS43NSw2NC42Niw2MC41NywxNjYuMTUsOS44MiwyMzEuNjMtNDcuNDcsNTguMTEtMTI2Ljg2LDY3LjkzLTE4Ny40MywyMy43M1pNMzU0MS4xLDc2NS4zMWM0OC4yOS02LjU1LDcyLjAzLTYzLjAzLDQ1LjAyLTk5Ljg2LTM3LjY1LTQ1LjAxLTk0Ljk0LDEuNjQtOTUuNzYsNDUuMDItLjgyLDMxLjkyLDIyLjEsNTcuMyw1MC43NSw1NC44NFoiLz4KICAgIDxwYXRoIGQ9Ik0zODY4LjQ4LDU2OC4wNmMuODIsMTMuOTEuODIsMjcuODIsMCw0MS43NC0xLjY0LDE2LjM3LTcuMzcsMjAuNDYtMjMuNzQsMTkuNjRoLTEyLjI4Yy00LjA5LDIyLjkyLTEuNjQsMTEwLjUuODIsMTMyLjYsMi40NiwxOC44MiwxMS40NiwzMi43NCwyOS40Nyw0MC45Miw4LjE5LDQuMDksMTIuMjcsOS44MiwxMi4yNywxOS42NCwwLDE2LjM3LS44MiwzMy41Ni0xLjY0LDUwLjc1LS44MiwxMC42NC02LjU0LDE2LjM3LTE3LjE5LDE5LjY0LTIzLjc0LDQuOTEtNjMuMDIuODItODMuNDktMjYuMTktNDUuMDItNTguOTMtMzYuMDEtMTY1LjM0LTM2LjAxLTIzMi40NS0xMC42NC0yLjQ1LTIzLjc0LDE1LjU1LTI1LjM3LTIyLjEtLjgyLTEzLjkyLjgyLTI3LjgzLDIuNDYtNDEuNzUsMS42NC0xMi4yNywzLjI3LTE0LjczLDE2LjM3LTE0LjczLDIuNDYsMCw0LjkxLDAsOS0uODIsMS42NC0xMy4wOSwyLjQ2LTI2LjE5LDMuMjgtMzkuMjgsMC0xMC42NCw0LjA5LTE3LjE5LDEzLjkyLTE5LjY0LDIyLjkyLTguMTksNDcuNDctMTMuMSw3Mi4wMy0xMy4xLDEyLjI3LDAsMTYuMzcsNC4wOSwxNS41NSwxNy4xOS0xLjY0LDE0LjczLTMuMjcsMjguNjUtNC45MSw0My4zOCwyMy43NC0xLjY0LDI3LjgzLDEuNjQsMjkuNDcsMjQuNTZaIi8+CiAgICA8cGF0aCBkPSJNNDEyNi4zLDU0MS44NmMyMy43NC03LjM3LDY2LjMtMTguMDEsNjQuNjYsMTUuNTUtNS43MywxMjAuMzItNC45MSwyMTcuNzIuODIsMzE0LjMsMi40NSwzNC4zNy01Ni40OCwyMS4yOC03My42NiwxMy45Mi0xNy4xOS02LjU1LTE4LjgzLTktMTguMDEtMjcuODMtNDQuMiwyMS4yOC03NC40OCwyOS40Ny0xMTYuMjIsMjEuMjgtMTAzLjk1LTI4LjY1LTk4LjIyLTE4MC44OS01Mi4zOC0yNDYuMzYsNDEuNzQtNjguNzUsMTE1LjQtODAuMjEsMTcxLjA2LTU0Ljg0LTMuMjgtMjcuMDEtMi40Ni0yOC42NSwyMy43My0zNi4wMVpNNDAyNC44MSw2NjMuODJjLTI2LjE5LDIwLjQ3LTM2LjgzLDYxLjM5LTI2LjE5LDkzLjMxLDYuNTUsMjAuNDcsMjMuNzQsMzIuNzQsNDUuMDIsMzEuOTIsNDguMjktNS43Myw0OS45My03My42Niw0My4zOC0xMDguODYtOS44Mi0zMy41Ni00MC45Mi0zMC4yOS02Mi4yMS0xNi4zN1oiLz4KICAgIDxwYXRoIGQ9Ik00NjU2LjY1LDU3OS41MmMtNDIuNTYtMzYuODMtMTA4Ljg2LTI4LjY1LTE0MC43OCwxOC0zOC40Nyw1OC45My0zNy42NSwxNDEuNiwyNi4xOSwxNzcuNjEsMzYuODMsMTguODIsODQuMzEsNC4wOSwxMTIuOTUtMjAuNDcsMTMuMDktMTAuNjQsMTUuNTUtMTAuNjQsMjcuMDEsMS42NCwxNy4xOSwxNy4xOSwzMC4yOCwzNi44MywzNy42NSw2MC41NiwxLjY0LDUuNzMsMS42NCw5LjgyLTIuNDYsMTQuNzQtMzYuMDIsNDcuNDctODMuNDksNzAuMzktMTQzLjIzLDY4Ljc1LTEwNC43Ny00LjkxLTE3NC4zNC04Mi42Ni0xODEuNzEtMTg4LjI1LTE3LjE5LTE3Mi43LDEzNS4wNS0zMjUuNzYsMjg4LjkyLTIzNC4wOCw5LjAxLDUuNzMsMzkuMjksMjQuNTUsMzMuNTYsMzguNDctNi41NSwyOS40Ny0yMC40Niw1NC4wMi00Ni42NSw3Mi44NS00LjA5LTQuMDktOC4xOS02LjU1LTExLjQ2LTkuODJaIi8+CiAgICA8cGF0aCBkPSJNNDgzNi43MSw0NDYuOTJjMTEuNDYuODIsMTQuNzMsNC4wOSwxNC43MywxNi4zNy0yLjQ2LDExOS41LTQuMDksMTgyLjUyLTQuMDksMjk1LjQ3LDEuNjQsMzAuMjktMy4yNyw2Ny45MywxMy45Miw2Ni4zLDcuMzctLjgyLDEyLjI4LDIuNDYsMTMuMDksOSwuODIsMTMuMSwyLjQ2LDIzLjc0LDIuNDYsMzcuNjUuODIsNS43My00LjkxLDEyLjI4LTEwLjY0LDE0LjczLTI4LjY1LDE0Ljc0LTEwOS42OCwxOC44My0xMTAuNS00NS44MywwLTE1My44OCwyLjQ1LTI0Ni4zNiwyLjQ1LTM3MC43Ny44Mi0yMS4yOCwxMS40Ni0yMS4yOCwyNi4xOS0yMS4yOCwxNy4xOS0xLjY0LDM1LjItMS42NCw1Mi4zOC0xLjY0WiIvPgogICAgPHBhdGggZD0iTTUwNzQuMDcsNzM3LjQ4YzEwLjY0LTUwLjc1LDEyLjI4LTEwMS40OSw5LjgyLTE1Mi4yNC0uODItMjIuMSwwLTIzLjc0LDIyLjkyLTI0LjU2LDE0Ljc0LS44MiwyOC42NS0uODIsNDIuNTYsMCwxOC44My44MiwyMS4yOSw0LjA5LDIyLjEsMjIuMS44Miw5OS44NSwxMC42NCwzMDMuNjYtMTI2Ljg3LDMxNC4zLTE0NC4wNS0xMC42NC0xNDAuNzgtMjA3LjktMTMzLjQxLTMwNi45MywxLjY0LTExLjQ2LDYuNTUtMTcuMTksMTYuMzctMjAuNDYsMTUuNTUtNS43MywzMS45Mi03LjM3LDQ4LjI5LTguMTksMTYuMzcuODIsMjMuNzQsNi41NSwyMy43NCwyMC40NiwwLDcwLjM5LTEuNjQsMTM4LjMzLDEzLjA5LDE3NC4zNCwyMS4yOCw1Mi4zOCw1NC4wMiwyMi4xLDYxLjM4LTE4LjgzWiIvPgogICAgPHBhdGggZD0iTTU0OTEuNDksNzAxLjQ3YzIwLjQ2LDE2MC40Mi0xMTMuNzcsMjE3LjcyLTI0NS41NSwxOTIuMzQtMTkuNjQtMy4yOC00MS43NC0uODItNDEuNzQtMjMuNzQuODItMjE3LjcyLDIuNDUtMzExLjg0LTIuNDYtNDA1Ljk3LDAtOSwyLjQ2LTEzLjkyLDkuODItMTUuNTUsMjguNjUtNy4zNyw1My4yLTEwLjY0LDgxLjAzLTEwLjY0LDEzLjkyLjgyLDE2LjM3LDQuMDksMTQuNzMsMTcuMTktMy4yNyw0MC4xLTguMTgsNzUuMy04LjE4LDExMS4zMSw5MS42Ny0zMC4yOCwxODEuNywzNi44MywxOTIuMzQsMTM1LjA1Wk01Mjk0LjIzLDgwMS4zMmM1NC44NCwxMy45MiwxMzAuMTQtMTguODIsMTEzLjc3LTgzLjQ5LTEwLjY0LTQ3LjQ3LTcyLjAzLTY5LjU3LTExMy43Ny00NS44M3YxMjkuMzJaIi8+CiAgPC9nPgo8L3N2Zz4=" alt="Mi Mascota Club" style="height:28px;"></div>
+    <div class="foot-note">MVP conectado a base de datos, con validación de visitas por QR. Precios de ejemplo, a validar.</div>
+    <div class="foot-links" style="display:flex;gap:18px;font-size:12.5px;font-weight:700;">
+      <a href="#validar" onclick="event.preventDefault(); mostrarSeccion('validar');" style="color:var(--ink);">Validar una visita</a>
+      <a href="#" onclick="event.preventDefault(); abrirCalificaciones();" style="color:var(--ink);">⭐ Calificar (Premium)</a>
+      <a href="#panel" onclick="event.preventDefault(); mostrarSeccion('panel');" style="color:var(--ink);">Panel privado</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target.id==='modalOverlay') closeModal()"><div class="modal-box" id="modalBox"></div></div>
+
+<div class="modal-overlay" id="mapModalOverlay" onclick="if(event.target.id==='mapModalOverlay') cerrarMapa()">
+  <div class="map-modal-box">
+    <div class="map-modal-header">
+      <div id="mapModalTitle" style="font-family:var(--font-display);font-weight:900;font-size:18px;">Mapa de Mi Mascota Club</div>
+      <button class="modal-close" onclick="cerrarMapa()">✕</button>
+    </div>
+    <div id="mapContainer" style="width:100%;height:100%;"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================================
+   MI MASCOTA CLUB — LÓGICA DE LA APP (conectada a Supabase)
+   ======================================================================
+   Datos reales, para siempre, en tu propia base de datos. Los datos
+   sensibles (socios, canjes) NUNCA se leen directo desde el navegador —
+   solo a través de funciones seguras (RPC) definidas en supabase-schema.sql.
+   El panel privado usa un inicio de sesión real (Supabase Auth), no una
+   clave escondida en el código.
+   ====================================================================== */
+
+(function(){
+'use strict';
+
+const SUPABASE_URL = "https://ybnibsruzkgtuycgecun.supabase.co";
+const SUPABASE_KEY = "sb_publishable_pBEeTEOopiaqqFKgH1nKLw_B4QRdepP";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ---------------- Correo de bienvenida (EmailJS) ----------------
+   PASO PENDIENTE PARA TI: crea una cuenta gratis en emailjs.com, conecta tu Gmail,
+   crea UNA plantilla de correo, y reemplaza estos 3 valores. Mientras estén vacíos,
+   el sitio funciona igual — simplemente no se envía el correo (no rompe nada).
+   Instrucciones completas al final del mensaje del chat.
+------------------------------------------------------------------- */
+const EMAILJS_PUBLIC_KEY = "9eL8mW9_T5HjOEAYe";   // Account → General → Public Key
+const EMAILJS_SERVICE_ID = "service_ch7ncxl";      // Email Services → tu servicio de Gmail
+const EMAILJS_TEMPLATE_ID = "template_u9x5p1i";    // Email Templates → tu plantilla
+
+if(EMAILJS_PUBLIC_KEY && window.emailjs){ emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
+
+async function enviarCorreoBienvenida(params){
+  if(!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID){
+    console.log('EmailJS no configurado todavía — se omite el envío de correo.');
+    return;
+  }
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
+  }catch(e){
+    console.error('No se pudo enviar el correo de bienvenida:', e);
+  }
+}
+
+const negociosSeed = [
+  {nombre:"Veterinaria Los Robles", cat:"Veterinaria", tipo:"mascota", comuna:"Ñuñoa", meta:"Consultas, vacunas y urgencias.", demo:true, destacado:true},
+  {nombre:"Pelu Copito", cat:"Peluquería", tipo:"mascota", comuna:"Providencia", meta:"Baño y corte a domicilio.", demo:true, destacado:true},
+  {nombre:"Paseos Rex", cat:"Paseador", tipo:"mascota", comuna:"La Reina", meta:"Paseos grupales y GPS en vivo.", demo:true},
+  {nombre:"Hotel Huellitas", cat:"Hotel / Pensión", tipo:"mascota", comuna:"Vitacura", meta:"Estadías cortas y largas, cámaras 24/7.", demo:true, destacado:true},
+  {nombre:"Barbería El Roble", cat:"Barbería", tipo:"dueno", comuna:"Ñuñoa", meta:"15% de descuento para socios del club.", demo:true},
+  {nombre:"Pádel Club Vitacura", cat:"Deporte", tipo:"dueno", comuna:"Vitacura", meta:"Hora de cancha con precio socio.", demo:true},
+  {nombre:"Café Con Patas", cat:"Café", tipo:"dueno", comuna:"Providencia", meta:"Café pet-friendly, 2x1 los martes para socios.", demo:true},
+  {nombre:"Valentina Ríos — Etóloga", cat:"Salud", tipo:"mascota", comuna:"Providencia", meta:"Consultas de conducta canina y felina, a domicilio u online.", demo:true, esEspecialista:true},
+  {nombre:"Camila Soto — Nutrición Animal", cat:"Salud", tipo:"mascota", comuna:"Ñuñoa", meta:"Planes de alimentación personalizados para tu mascota.", demo:true, esEspecialista:true},
+];
+const iconByCat = {
+  "Veterinaria":"🩺","Peluquería":"✂️","Paseador":"🦮","Hotel / Pensión":"🏠","Tienda":"🛍️","Alimentos":"🍖",
+  "Salud":"💊","Accesorios":"🎾","Adiestramiento":"🏋️","Fotografía":"📷",
+  "Barbería":"💈","Café":"☕","Restaurante":"🍽️","Belleza":"💅","Deporte":"🏓","Hotel":"🏨","Otro":"🎁"
+};
+const CATS_MASCOTA = ["Veterinaria","Peluquería","Paseador","Hotel / Pensión","Tienda","Alimentos","Salud","Accesorios","Adiestramiento","Fotografía"];
+const CATS_DUENO = ["Café","Restaurante","Hotel","Deporte","Barbería","Belleza","Tienda","Otro"];
+const DESCUENTO_EJEMPLO = 0.10;
+
+/* ---------------- Regiones y comunas de Chile (16 regiones, 346 comunas) ----------------
+   Se usa para el selector en cascada Región → Comuna de los formularios de dueños y
+   negocios. La Región Metropolitana queda preseleccionada por defecto (piloto en Santiago). */
+const CHILE_REGIONES = [
+  { region: "Metropolitana de Santiago", comunas: ["Alhué","Buin","Calera de Tango","Cerrillos","Cerro Navia","Colina","Conchalí","Curacaví","El Bosque","El Monte","Estación Central","Huechuraba","Independencia","Isla de Maipo","La Cisterna","La Florida","La Granja","La Pintana","La Reina","Lampa","Las Condes","Lo Barnechea","Lo Espejo","Lo Prado","Macul","Maipú","María Pinto","Melipilla","Ñuñoa","Padre Hurtado","Paine","Pedro Aguirre Cerda","Peñaflor","Peñalolén","Pirque","Providencia","Pudahuel","Puente Alto","Quilicura","Quinta Normal","Recoleta","Renca","San Bernardo","San Joaquín","San José de Maipo","San Miguel","San Pedro","San Ramón","Santiago","Talagante","Tiltil","Vitacura"] },
+  { region: "Arica y Parinacota", comunas: ["Arica","Camarones","General Lagos","Putre"] },
+  { region: "Tarapacá", comunas: ["Alto Hospicio","Camiña","Colchane","Huara","Iquique","Pica","Pozo Almonte"] },
+  { region: "Antofagasta", comunas: ["Antofagasta","Calama","María Elena","Mejillones","Ollagüe","San Pedro de Atacama","Sierra Gorda","Taltal","Tocopilla"] },
+  { region: "Atacama", comunas: ["Alto del Carmen","Caldera","Chañaral","Copiapó","Diego de Almagro","Freirina","Huasco","Tierra Amarilla","Vallenar"] },
+  { region: "Coquimbo", comunas: ["Andacollo","Canela","Combarbalá","Coquimbo","Illapel","La Higuera","La Serena","Los Vilos","Monte Patria","Ovalle","Paiguano","Punitaqui","Río Hurtado","Salamanca","Vicuña"] },
+  { region: "Valparaíso", comunas: ["Algarrobo","Cabildo","Calera","Calle Larga","Cartagena","Casablanca","Catemu","Concón","El Quisco","El Tabo","Hijuelas","Isla de Pascua","Juan Fernández","La Cruz","La Ligua","Limache","Llaillay","Los Andes","Nogales","Olmué","Panquehue","Papudo","Petorca","Puchuncaví","Putaendo","Quillota","Quilpué","Quintero","Rinconada","San Antonio","San Esteban","San Felipe","Santa María","Santo Domingo","Valparaíso","Villa Alemana","Viña del Mar","Zapallar"] },
+  { region: "Libertador Bernardo O'Higgins", comunas: ["Chépica","Chimbarongo","Codegua","Coínco","Coltauco","Doñihue","Graneros","La Estrella","Las Cabras","Litueche","Lolol","Machalí","Malloa","Marchihue","Mostazal","Nancagua","Navidad","Olivar","Palmilla","Paredones","Peralillo","Peumo","Pichidegua","Pichilemu","Placilla","Pumanque","Quinta de Tilcoco","Rancagua","Rengo","Requínoa","San Fernando","San Vicente","Santa Cruz"] },
+  { region: "Maule", comunas: ["Cauquenes","Chanco","Colbún","Constitución","Curepto","Curicó","Empedrado","Hualañé","Licantén","Linares","Longaví","Maule","Molina","Parral","Pelarco","Pelluhue","Pencahue","Rauco","Retiro","Río Claro","Romeral","Sagrada Familia","San Clemente","San Javier","San Rafael","Talca","Teno","Vichuquén","Villa Alegre","Yerbas Buenas"] },
+  { region: "Ñuble", comunas: ["Bulnes","Chillán","Chillán Viejo","Cobquecura","Coelemu","Coihueco","El Carmen","Ninhue","Ñiquén","Pemuco","Pinto","Portezuelo","Quillón","Quirihue","Ránquil","San Carlos","San Fabián","San Ignacio","San Nicolás","Treguaco","Yungay"] },
+  { region: "Biobío", comunas: ["Alto Biobío","Antuco","Arauco","Cabrero","Cañete","Chiguayante","Concepción","Contulmo","Coronel","Curanilahue","Florida","Hualpén","Hualqui","Laja","Lebu","Los Álamos","Los Ángeles","Lota","Mulchén","Nacimiento","Negrete","Penco","Quilaco","Quilleco","San Pedro de la Paz","San Rosendo","Santa Bárbara","Santa Juana","Talcahuano","Tirúa","Tomé","Tucapel","Yumbel"] },
+  { region: "La Araucanía", comunas: ["Angol","Carahue","Cholchol","Collipulli","Cunco","Curacautín","Curarrehue","Ercilla","Freire","Galvarino","Gorbea","Lautaro","Loncoche","Lonquimay","Los Sauces","Lumaco","Melipeuco","Nueva Imperial","Padre Las Casas","Perquenco","Pitrufquén","Pucón","Purén","Renaico","Saavedra","Temuco","Teodoro Schmidt","Toltén","Traiguén","Victoria","Vilcún","Villarrica"] },
+  { region: "Los Ríos", comunas: ["Corral","Futrono","La Unión","Lago Ranco","Lanco","Los Lagos","Máfil","Mariquina","Paillaco","Panguipulli","Río Bueno","Valdivia"] },
+  { region: "Los Lagos", comunas: ["Ancud","Calbuco","Castro","Chaitén","Chonchi","Cochamó","Curaco de Vélez","Dalcahue","Fresia","Frutillar","Futaleufú","Hualaihué","Llanquihue","Los Muermos","Maullín","Osorno","Palena","Puerto Montt","Puerto Octay","Puerto Varas","Puqueldón","Purranque","Puyehue","Queilén","Quellón","Quemchi","Quinchao","Río Negro","San Juan de la Costa","San Pablo"] },
+  { region: "Aysén", comunas: ["Aysén","Chile Chico","Cisnes","Cochrane","Coyhaique","Guaitecas","Lago Verde","O'Higgins","Río Ibáñez","Tortel"] },
+  { region: "Magallanes y la Antártica Chilena", comunas: ["Antártica","Cabo de Hornos","Laguna Blanca","Natales","Porvenir","Primavera","Punta Arenas","Río Verde","San Gregorio","Timaukel","Torres del Paine"] },
+];
+const REGION_POR_DEFECTO = "Metropolitana de Santiago";
+
+/* Rellena un <select> de regiones. */
+function poblarRegiones(selectId){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Selecciona tu región</option>' +
+    CHILE_REGIONES.map(r => `<option value="${r.region}">${r.region}</option>`).join('');
+}
+/* Rellena el <select> de comunas según la región elegida en otro <select>. */
+function poblarComunas(regionSelectId, comunaSelectId){
+  const regionSel = document.getElementById(regionSelectId);
+  const comunaSel = document.getElementById(comunaSelectId);
+  if(!regionSel || !comunaSel) return;
+  const region = CHILE_REGIONES.find(r => r.region === regionSel.value);
+  const comunaPrevia = comunaSel.value;
+  comunaSel.innerHTML = '<option value="">Selecciona tu comuna</option>' +
+    (region ? region.comunas.map(c => `<option value="${c}">${c}</option>`).join('') : '');
+  if(region && region.comunas.includes(comunaPrevia)) comunaSel.value = comunaPrevia;
+}
+/* Deja el selector de región/comuna de un formulario ('owner' o 'biz') en su estado inicial:
+   Región Metropolitana preseleccionada (piloto en Santiago) y su lista de comunas cargada. */
+function resetRegionComuna(prefix){
+  const regionSel = document.getElementById(prefix + 'Region');
+  if(!regionSel) return;
+  regionSel.value = REGION_POR_DEFECTO;
+  poblarComunas(prefix + 'Region', prefix + 'Comuna');
+}
+
+/* ---------------- Planes de membresía de los socios (dueños) ----------------
+   Por ahora todo registro nuevo queda en plan "free" — más adelante esto se conecta
+   a una pasarela de pago real y el plan se actualizará según el estado de la suscripción. */
+const PLAN_LABELS = { free: "Miembro Free", pro: "Miembro Pro", premium: "Miembro Premium" };
+function planLabel(plan){ return PLAN_LABELS[plan] || PLAN_LABELS.free; }
+
+let bizTipoActual = 'mascota';
+let dirTipoFiltro = '';
+let negociosReal = [];
+let sociosCount = 0;
+let canjesCount = 0;
+let modoDirectorioEspecialistas = false;
+let bizEsEspecialista = false;
+
+/* Alterna, en el paso 1 del formulario de negocio, si la ficha que se está creando es
+   de un NEGOCIO (local/marca) o de un ESPECIALISTA individual (una sola persona que
+   ofrece un servicio: etólogo, nutricionista, adiestrador, etc.). Se guarda en la
+   columna es_especialista de la tabla negocios y decide si aparece en /especialistas. */
+function setBizEsEspecialista(val){
+  bizEsEspecialista = val;
+  const btnNegocio = document.getElementById('fichaNegocioBtn');
+  const btnEsp = document.getElementById('fichaEspecialistaBtn');
+  if(btnNegocio) btnNegocio.className = 'btn btn-sm ' + (!val ? 'btn-primary' : 'btn-outline');
+  if(btnEsp) btnEsp.className = 'btn btn-sm ' + (val ? 'btn-primary' : 'btn-outline');
+  const nameInput = document.getElementById('bizName');
+  if(nameInput) nameInput.placeholder = val ? 'Ej: Camila Soto — Nutrición animal' : 'Ej: Veterinaria Los Robles';
+}
+
+function setBizTipo(tipo){
+  bizTipoActual = tipo;
+  document.getElementById('tipoMascotaBtn').className = 'btn btn-sm ' + (tipo==='mascota' ? 'btn-primary' : 'btn-outline');
+  document.getElementById('tipoDuenoBtn').className = 'btn btn-sm ' + (tipo==='dueno' ? 'btn-primary' : 'btn-outline');
+  const cats = tipo === 'mascota' ? CATS_MASCOTA : CATS_DUENO;
+  document.getElementById('bizCat').innerHTML = '<option value="">Selecciona</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+  document.getElementById('bizFormHint').textContent = tipo === 'mascota'
+    ? 'Beneficio para la mascota (ej. veterinaria, peluquería, tienda).'
+    : 'Beneficio para el dueño, sin relación directa con mascotas (ej. barbería, café, deporte) — así premiamos a quien tiene mascota, no solo su gasto en ella.';
+}
+function setDirTipo(tipo){
+  dirTipoFiltro = tipo;
+  document.getElementById('tabTodos').className = 'btn btn-sm ' + (tipo==='' ? 'btn-primary' : 'btn-outline');
+  document.getElementById('tabMascota').className = 'btn btn-sm ' + (tipo==='mascota' ? 'btn-primary' : 'btn-outline');
+  document.getElementById('tabDueno').className = 'btn btn-sm ' + (tipo==='dueno' ? 'btn-primary' : 'btn-outline');
+  renderDirectory();
+}
+function renderCatGrid(){
+  const el = document.getElementById('catGrid');
+  if(!el) return;
+  const all = [...CATS_MASCOTA.map(c=>({cat:c, tipo:'mascota'})), ...CATS_DUENO.map(c=>({cat:c, tipo:'dueno'}))];
+  el.innerHTML = all.map(({cat,tipo}) => `
+    <div class="cat-tile ${tipo==='dueno'?'dueno':''}" onclick="filtrarPorCategoria('${cat.replace(/'/g,"\\'")}','${tipo}')">
+      <div class="ic">${iconByCat[cat]||'🐾'}</div>
+      <div class="lbl">${cat}</div>
+      <span class="map-link" onclick="event.stopPropagation(); abrirMapa('${cat.replace(/'/g,"\\'")}')">📍 Ver en el mapa</span>
+    </div>`).join('');
+}
+function filtrarPorCategoria(cat, tipo){
+  irADirectorio({ cat, tipo });
+}
+function filtrarPorNegocio(nombre){
+  irADirectorio({ q: nombre });
+}
+
+/* ---------------- Directorio como página propia (/directorio/...) ----------------
+   El directorio ya NO vive "más abajo" en la página de inicio: es su propia vista,
+   con su propia URL (ej. /directorio/veterinaria), a la que se llega con una
+   navegación real (history.pushState) en vez de un simple scroll. Como el sitio
+   sigue siendo un único archivo index.html (sin backend), esto se logra con un
+   router muy simple en el navegador: cambiamos la URL visible y mostramos u
+   ocultamos secciones según corresponda — el archivo _redirects de Netlify hace
+   que refrescar o entrar directo a /directorio/algo siga funcionando. */
+function slugify(s){
+  return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-+|-+$)/g,'');
+}
+const DIR_CATS_INDEX = [
+  ...CATS_MASCOTA.map(c => ({ cat:c, tipo:'mascota', slug:slugify(c) })),
+  ...CATS_DUENO.map(c => ({ cat:c, tipo:'dueno', slug:slugify(c) })),
+];
+function catBySlug(slug){ return DIR_CATS_INDEX.find(c => c.slug === slug) || null; }
+
+/* ---------------- Banner de página (5 slides, degradados de marca) ----------------
+   Reutilizable: se usa arriba del directorio, de especialistas y de la ficha de cada
+   negocio. Rota sola cada 5000ms con un fundido; si solo hay 1 slide (ficha de un
+   negocio puntual) no rota y no muestra los puntos. Cuando el usuario suba fotos reales,
+   basta con agregar "img" a cada slide (ver BANNER_DIRECTORIO / BANNER_ESPECIALISTAS más
+   abajo) — mientras no haya foto, se usa el degradado de esa posición. */
+const PAGE_BANNER_GRADIENTS = [
+  'linear-gradient(135deg,#FFCE00,#47C9C9)',
+  'linear-gradient(135deg,#47C9C9,#151515)',
+  'linear-gradient(135deg,#D65A3A,#FFCE00)',
+  'linear-gradient(135deg,#3FAE7A,#47C9C9)',
+  'linear-gradient(135deg,#151515,#D65A3A)'
+];
+const BANNER_DIRECTORIO = [
+  { cat: 'Veterinarias y salud' },
+  { cat: 'Peluquería y estética' },
+  { cat: 'Paseadores y hoteles' },
+  { cat: 'Tiendas y accesorios' },
+  { cat: 'Beneficios para ti como dueño' },
+];
+const BANNER_ESPECIALISTAS = [
+  { cat: 'Etología y conducta' },
+  { cat: 'Nutrición animal' },
+  { cat: 'Adiestramiento' },
+  { cat: 'Fisioterapia y rehabilitación' },
+  { cat: 'Especialistas para ti como dueño' },
+];
+let pageBannerTimers = {};
+function renderPageBanner(containerId, slides){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  clearInterval(pageBannerTimers[containerId]);
+  slides = slides && slides.length ? slides : [{ cat: 'Mi Mascota Club' }];
+  el.innerHTML = slides.map((s,i) => `
+    <div class="page-banner-slide ${i===0?'active':''}" style="background:${s.img ? `url('${s.img}') center/cover no-repeat` : PAGE_BANNER_GRADIENTS[i % PAGE_BANNER_GRADIENTS.length]};">
+      <div class="page-banner-overlay"></div>
+      <div class="page-banner-text">
+        <span class="page-banner-eyebrow">Mi Mascota Club</span>
+        <h2 class="page-banner-cat">${s.cat}</h2>
+      </div>
+    </div>`).join('') +
+    (slides.length > 1 ? `<div class="page-banner-dots">${slides.map((_,i)=>`<span class="page-banner-dot ${i===0?'active':''}" data-i="${i}" onclick="irASlideBanner('${containerId}',${i})"></span>`).join('')}</div>` : '');
+  if(slides.length <= 1) return;
+  let idx = 0;
+  pageBannerTimers[containerId] = setInterval(() => {
+    idx = (idx + 1) % slides.length;
+    mostrarSlideBanner(containerId, idx);
+  }, 5000);
+}
+function mostrarSlideBanner(containerId, idx){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.querySelectorAll('.page-banner-slide').forEach((s,i) => s.classList.toggle('active', i===idx));
+  el.querySelectorAll('.page-banner-dot').forEach((d,i) => d.classList.toggle('active', i===idx));
+}
+function irASlideBanner(containerId, idx){
+  clearInterval(pageBannerTimers[containerId]);
+  mostrarSlideBanner(containerId, idx);
+  pageBannerTimers[containerId] = setInterval(() => {
+    const el = document.getElementById(containerId);
+    const total = el ? el.querySelectorAll('.page-banner-slide').length : 0;
+    if(!total) return;
+    const activo = [...el.querySelectorAll('.page-banner-slide')].findIndex(s=>s.classList.contains('active'));
+    mostrarSlideBanner(containerId, (activo + 1) % total);
+  }, 5000);
+}
+
+/* Navega DE VERDAD al directorio (cambia la URL con pushState) con los filtros dados.
+   opts: { cat, tipo, comuna, q } — todos opcionales. */
+function irADirectorio(opts){
+  opts = opts || {};
+  let path = '/directorio';
+  if(opts.cat){
+    const found = DIR_CATS_INDEX.find(c => c.cat === opts.cat && (!opts.tipo || c.tipo === opts.tipo));
+    if(found) path += '/' + found.slug;
+  }
+  history.pushState({ directorio:true, ...opts }, '', path);
+  mostrarPaginaDirectorio(opts);
+}
+/* Igual que irADirectorio, pero para la nueva vista /especialistas — solo cambia el
+   prefijo de la URL y agrega la bandera "especialistas" que filtra el listado. */
+function irAEspecialistas(opts){
+  opts = opts || {};
+  let path = '/especialistas';
+  if(opts.cat){
+    const found = DIR_CATS_INDEX.find(c => c.cat === opts.cat && (!opts.tipo || c.tipo === opts.tipo));
+    if(found) path += '/' + found.slug;
+  }
+  history.pushState({ especialistas:true, ...opts }, '', path);
+  mostrarPaginaDirectorio({ ...opts, especialistas:true });
+}
+function volverAlInicio(){
+  document.body.classList.remove('pagina-directorio');
+  document.body.classList.remove('pagina-ficha');
+  if(location.pathname !== '/') history.pushState({}, '', '/');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function mostrarPaginaDirectorio(opts){
+  opts = opts || {};
+  document.body.classList.remove('pagina-ficha');
+  document.body.classList.add('pagina-directorio');
+  modoDirectorioEspecialistas = !!opts.especialistas;
+  const eyebrow = document.getElementById('dirEyebrow');
+  if(eyebrow) eyebrow.textContent = modoDirectorioEspecialistas ? 'Especialistas' : 'Directorio';
+  renderPageBanner('dirBanner', modoDirectorioEspecialistas ? BANNER_ESPECIALISTAS : BANNER_DIRECTORIO);
+  const featuredWrap = document.getElementById('featuredStripWrap');
+  if(modoDirectorioEspecialistas){
+    if(featuredWrap) featuredWrap.style.display = 'none';
+  } else {
+    renderFeaturedStrip();
+  }
+  document.getElementById('dirSearch').value = opts.q || '';
+  document.getElementById('dirCat').value = opts.cat || '';
+  document.getElementById('dirComuna').value = opts.comuna || '';
+  setDirTipo(opts.tipo || ''); // setDirTipo ya llama a renderDirectory()
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+}
+/* Lee la URL actual (al cargar la página o al usar atrás/adelante del navegador)
+   y muestra la vista que corresponda: /directorio, /especialistas o /negocio/slug. */
+function manejarRutaActual(){
+  const path = location.pathname.replace(/\/+$/,'') || '/';
+  const parts = path.split('/').filter(Boolean);
+  if(parts[0] === 'directorio'){
+    const found = parts[1] ? catBySlug(parts[1]) : null;
+    mostrarPaginaDirectorio(found ? { cat: found.cat, tipo: found.tipo } : {});
+  } else if(parts[0] === 'especialistas'){
+    const found = parts[1] ? catBySlug(parts[1]) : null;
+    mostrarPaginaDirectorio(found ? { cat: found.cat, tipo: found.tipo, especialistas:true } : { especialistas:true });
+  } else if(parts[0] === 'negocio' && parts[1]){
+    mostrarPaginaFichaPorSlug(parts[1]);
+  } else {
+    document.body.classList.remove('pagina-directorio');
+    document.body.classList.remove('pagina-ficha');
+  }
+}
+window.addEventListener('popstate', manejarRutaActual);
+
+/* ---------------- Flujo de entrada: elegir camino antes de mostrar el formulario ---------------- */
+function abrirElegirCamino(){
+  openModal(`
+    <div style="text-align:center;padding:6px 2px 4px;">
+      <h3 style="margin:0 0 6px;">¿Cómo quieres unirte?</h3>
+      <p style="font-size:13.5px;color:#5a6259;margin:0 0 22px;">Elige un camino para continuar.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button type="button" class="btn btn-brass" style="width:100%;justify-content:center;" onclick="mostrarFormulario('negocio')">🏪 Soy un negocio</button>
+        <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="mostrarFormulario('dueno')">🐾 Quiero registrar mi mascota</button>
+      </div>
+    </div>
+  `);
+}
+function mostrarFormulario(tipo){
+  closeModal();
+  // Si veníamos de la página del directorio, volvemos primero al inicio para
+  // que el formulario aparezca en la página principal, como siempre.
+  if(document.body.classList.contains('pagina-directorio')) volverAlInicio();
+  const section = document.getElementById('negocios');
+  const panelNegocio = document.getElementById('panelNegocio');
+  const panelDueno = document.getElementById('duenos');
+  const split = document.getElementById('negociosSplit');
+  section.style.display = '';
+  if(split) split.classList.add('single');
+  if(tipo === 'negocio'){
+    panelNegocio.style.display = '';
+    panelDueno.style.display = 'none';
+  }else{
+    panelNegocio.style.display = 'none';
+    panelDueno.style.display = '';
+  }
+  wizardReset('owner');
+  wizardReset('biz');
+  setTimeout(() => section.scrollIntoView({behavior:'smooth'}), 50);
+}
+
+/* ---------------- Wizard de pasos para los formularios de registro ---------------- */
+const wizardState = { owner: 1, biz: 1 };
+const wizardTotalSteps = { owner: 3, biz: 3 };
+
+function wizardRender(prefix){
+  const step = wizardState[prefix];
+  document.querySelectorAll(`.form-step[data-wizard="${prefix}"]`).forEach(el=>{
+    el.classList.toggle('active', Number(el.dataset.step) === step);
+  });
+  const indicator = document.getElementById(`wizardSteps-${prefix}`);
+  if(indicator){
+    indicator.querySelectorAll('.wizard-step').forEach(el=>{
+      const n = Number(el.dataset.step);
+      el.classList.toggle('active', n === step);
+      el.classList.toggle('done', n < step);
+    });
+  }
+}
+
+function wizardValidarPaso(prefix, step){
+  const stepEl = document.querySelector(`.form-step[data-wizard="${prefix}"][data-step="${step}"]`);
+  if(!stepEl) return true;
+  const invalidos = [];
+  stepEl.querySelectorAll('input[required], select[required], textarea[required]').forEach(el=>{
+    if(!el.checkValidity()) invalidos.push(el);
+  });
+  stepEl.querySelectorAll('.field-validated').forEach(f=>{
+    const input = f.querySelector('input');
+    if(input && input.hasAttribute('required') && !f.classList.contains('is-valid')){
+      f.classList.add('is-invalid');
+      if(!invalidos.includes(input)) invalidos.push(input);
+    }
+  });
+  if(invalidos.length){
+    invalidos[0].focus();
+    toast('Revisa los datos marcados antes de continuar.');
+    return false;
+  }
+  return true;
+}
+
+function wizardNext(prefix){
+  if(!wizardValidarPaso(prefix, wizardState[prefix])) return;
+  wizardState[prefix] = Math.min(wizardState[prefix] + 1, wizardTotalSteps[prefix]);
+  wizardRender(prefix);
+}
+function wizardBack(prefix){
+  wizardState[prefix] = Math.max(wizardState[prefix] - 1, 1);
+  wizardRender(prefix);
+}
+function wizardReset(prefix){
+  wizardState[prefix] = 1;
+  wizardRender(prefix);
+}
+
+/* ---------------- Validación y formato en vivo: RUT, teléfono CL, correo ----------------
+   Objetivo: que un dato mal escrito NUNCA pueda guardarse. Cada campo se formatea
+   automáticamente mientras se escribe (un solo formato posible) y muestra un check
+   verde + borde verde apenas queda válido, o el mensaje de error si no. */
+function soloDigitos(v){ return (v||'').replace(/\D/g,''); }
+
+function limpiarRut(v){ return (v||'').replace(/[^0-9kK]/g,'').toUpperCase(); }
+function formatearRut(v){
+  const limpio = limpiarRut(v).replace(/^0+(?=.)/,'');
+  if(!limpio) return '';
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  const cuerpoFmt = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return cuerpoFmt ? `${cuerpoFmt}-${dv}` : dv;
+}
+function validarRut(v){
+  const limpio = limpiarRut(v);
+  if(limpio.length < 2) return false;
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  if(!/^\d+$/.test(cuerpo)) return false;
+  let suma = 0, multiplo = 2;
+  for(let i = cuerpo.length - 1; i >= 0; i--){
+    suma += parseInt(cuerpo[i], 10) * multiplo;
+    multiplo = multiplo === 7 ? 2 : multiplo + 1;
+  }
+  const resto = 11 - (suma % 11);
+  const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+  return dv === dvEsperado;
+}
+function validarEmail(v){
+  const s = (v||'').trim();
+  // Formato general de correo: local@dominio.tld — sin espacios, sin puntos dobles,
+  // sin empezar/terminar en punto, con un dominio y una extensión de al menos 2 letras.
+  const re = /^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,24}$/;
+  if(!re.test(s)) return false;
+  if(/\.\./.test(s)) return false;
+  const local = s.split('@')[0];
+  const localLimpio = local.toLowerCase();
+  // Rechaza correos obviamente inventados: la parte antes del @ hecha del mismo
+  // carácter repetido (ej. "0000000000@gmail.com", "1111@hotmail.com" o "kkkkkk@gmail.com").
+  if(/^(.)\1{3,}$/i.test(localLimpio)) return false;
+  // Rechaza secuencias de teclado obvias como "asdf", "qwerty", "1234", "12345678".
+  const SECUENCIAS_FALSAS = ['asdf','asdfg','qwerty','qwert','zxcv','1234','12345','123456','1234567','12345678'];
+  if(SECUENCIAS_FALSAS.includes(localLimpio)) return false;
+  // La parte local debe tener al menos 2 caracteres reales.
+  if(localLimpio.replace(/[^a-z0-9]/g,'').length < 2) return false;
+  return true;
+}
+
+function formatearTelefonoInput(v){
+  const d = soloDigitos(v).slice(0, 8);
+  return d.length > 4 ? d.slice(0,4) + ' ' + d.slice(4) : d;
+}
+function validarTelefonoParcial(v){
+  const d = soloDigitos(v);
+  if(d.length !== 8) return false;
+  if(d[0] === '0') return false; // los celulares chilenos no empiezan con 0 tras el +56 9
+  if(/^(\d)\1{7}$/.test(d)) return false; // rechaza números inventados como 0000 0000 o 1111 1111
+  return true;
+}
+function telefonoCompleto(v){ return '+56 9 ' + formatearTelefonoInput(v); }
+
+function marcarCampo(fieldEl, msgEl, estado, mensaje){
+  fieldEl.classList.remove('is-valid', 'is-invalid');
+  if(estado === 'valid') fieldEl.classList.add('is-valid');
+  else if(estado === 'invalid') fieldEl.classList.add('is-invalid');
+  if(msgEl) msgEl.textContent = mensaje || '';
+}
+
+function initRutField(inputId, fieldId, msgId){
+  const input = document.getElementById(inputId), field = document.getElementById(fieldId), msg = document.getElementById(msgId);
+  input.addEventListener('input', () => {
+    input.value = formatearRut(input.value);
+    input.setSelectionRange(input.value.length, input.value.length);
+    if(!input.value){ marcarCampo(field, msg, null, ''); return; }
+    marcarCampo(field, msg, validarRut(input.value) ? 'valid' : 'invalid',
+      validarRut(input.value) ? 'RUT válido' : 'RUT inválido — revisa el dígito verificador');
+  });
+}
+function initEmailField(inputId, fieldId, msgId){
+  const input = document.getElementById(inputId), field = document.getElementById(fieldId), msg = document.getElementById(msgId);
+  input.addEventListener('input', () => {
+    if(!input.value.trim()){ marcarCampo(field, msg, null, ''); return; }
+    marcarCampo(field, msg, validarEmail(input.value) ? 'valid' : 'invalid',
+      validarEmail(input.value) ? 'Correo válido' : 'Ingresa un correo válido, ej: juan@mail.com');
+  });
+}
+function initTelefonoField(inputId, fieldId, msgId){
+  const input = document.getElementById(inputId), field = document.getElementById(fieldId), msg = document.getElementById(msgId);
+  input.addEventListener('input', () => {
+    input.value = formatearTelefonoInput(input.value);
+    if(!input.value){ marcarCampo(field, msg, null, ''); return; }
+    marcarCampo(field, msg, validarTelefonoParcial(input.value) ? 'valid' : 'invalid',
+      validarTelefonoParcial(input.value) ? 'Número válido' : 'Ingresa los 8 dígitos de tu celular');
+  });
+}
+function resetValidacionesForm(formEl){
+  formEl.querySelectorAll('.field-validated').forEach(f=>{
+    f.classList.remove('is-valid', 'is-invalid');
+    const m = f.querySelector('.field-msg');
+    if(m) m.textContent = '';
+  });
+}
+function mostrarSeccion(id){
+  if(document.body.classList.contains('pagina-directorio')) volverAlInicio();
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = '';
+  setTimeout(() => el.scrollIntoView({behavior:'smooth'}), 50);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+}
+function openModal(html){
+  document.getElementById('modalBox').innerHTML = `<button class="modal-close" onclick="closeModal()">✕</button>${html}`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+function formatCLP(n){ return '$' + Math.round(n).toLocaleString('es-CL'); }
+
+async function loadAll(){
+  try{
+    const { data, error } = await supabase.from('negocios').select('*').order('created_at', { ascending: true });
+    if(error) throw error;
+    negociosReal = (data||[]).map(n => ({
+      id: n.id, codigo: n.codigo, nombre: n.nombre, cat: n.cat, tipo: n.tipo, comuna: n.comuna,
+      contacto: n.contacto, servicios: n.servicios, meta: n.meta, founderNumber: n.founder_number,
+      beneficioTipo: n.beneficio_tipo, beneficioDetalle: n.beneficio_detalle,
+      logo: n.logo, direccion: n.direccion, horario: n.horario, redesSociales: n.redes_sociales,
+      descripcion: n.descripcion, verificado: n.verificado, createdAt: n.created_at, demo:false,
+      esEspecialista: !!n.es_especialista, destacado: !!n.destacado
+    }));
+  }catch(e){ console.error(e); negociosReal = []; }
+  try{
+    const { data } = await supabase.rpc('contar_socios');
+    sociosCount = data || 0;
+  }catch(e){ sociosCount = 0; }
+  try{
+    const { data } = await supabase.rpc('contar_canjes');
+    canjesCount = data || 0;
+  }catch(e){ canjesCount = 0; }
+  renderDirectory();
+  updateCounts();
+  renderDropdowns();
+  renderTrustMarquee();
+  const status = document.getElementById('dirStatus');
+  if(status) status.style.display = 'none';
+}
+
+function updateCounts(){
+  document.getElementById('bizCount').textContent = `${negociosReal.length} negocio${negociosReal.length===1?'':'s'} inscrito${negociosReal.length===1?'':'s'}`;
+  document.getElementById('ownerCount').textContent = `${sociosCount} mascota${sociosCount===1?'':'s'} inscrita${sociosCount===1?'':'s'}`;
+  const liveCounter = document.getElementById('liveBeneficiosCount');
+  if(liveCounter) liveCounter.textContent = `${combinedNegocios().length} beneficios activos ahora`;
+}
+
+/* ---------------- Directorio ---------------- */
+function combinedNegocios(){ return [...negociosReal, ...negociosSeed]; }
+
+function refreshFilterOptions(){
+  const all = combinedNegocios();
+  const cats = [...new Set(all.map(n=>n.cat))];
+  const comunas = [...new Set(all.map(n=>n.comuna))].sort();
+  const catSelect = document.getElementById('dirCat'), comunaSelect = document.getElementById('dirComuna');
+  const curCat = catSelect.value, curComuna = comunaSelect.value;
+  catSelect.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option ${c===curCat?'selected':''}>${c}</option>`).join('');
+  comunaSelect.innerHTML = '<option value="">Todas las comunas</option>' + comunas.map(c=>`<option ${c===curComuna?'selected':''}>${c}</option>`).join('');
+}
+
+/* Íconos circulares de contacto para la tarjeta del directorio.
+   Se arman solo con los datos que el negocio realmente completó al registrarse. */
+function bizContactIcons(n){
+  const icons = [];
+  const contacto = n.contacto || '';
+  const telefono = n.telefono || (contacto.match(/\+?56\s?9\s?\d{4}\s?\d{4}/) || [])[0] || '';
+  const email = n.email || (contacto.match(/[^\s·|]+@[^\s·|]+\.[^\s·|]+/) || [])[0] || '';
+  if(telefono){
+    const digits = telefono.replace(/\D/g,'');
+    const wa = digits.length===9 ? '56'+digits : digits.startsWith('56') ? digits : '56'+digits.replace(/^0+/,'');
+    icons.push(`<a href="https://wa.me/${wa}" target="_blank" rel="noopener" class="biz-icon-btn primary" title="WhatsApp" onclick="event.stopPropagation()">💬</a>`);
+  }
+  if(email){
+    icons.push(`<a href="mailto:${email}" class="biz-icon-btn${telefono?'':' primary'}" title="Correo" onclick="event.stopPropagation()">✉️</a>`);
+  }
+  if(n.redesSociales){
+    const raw = n.redesSociales.trim();
+    const url = /^https?:\/\//i.test(raw) ? raw : `https://instagram.com/${raw.replace(/^@/,'')}`;
+    icons.push(`<a href="${url}" target="_blank" rel="noopener" class="biz-icon-btn" title="Instagram / sitio web" onclick="event.stopPropagation()">📷</a>`);
+  }
+  if(n.direccion){
+    const q = encodeURIComponent(`${n.direccion}, ${n.comuna}`);
+    icons.push(`<a href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener" class="biz-icon-btn" title="Cómo llegar" onclick="event.stopPropagation()">📍</a>`);
+  }
+  if(n.horario){
+    icons.push(`<span class="biz-icon-btn" title="Horario: ${n.horario}" onclick="event.stopPropagation()">🕒</span>`);
+  }
+  return icons.length ? `<div class="biz-icons-row">${icons.join('')}</div>` : '';
+}
+
+/* Palabras genéricas que no aportan al buscar (para que "Necesito un paseador"
+   encuentre igual la categoría "Paseador" en vez de buscar la frase completa). */
+const BUSQUEDA_STOPWORDS = new Set(['necesito','quiero','busco','buscar','buscando','un','una','unos','unas','el','la','los','las','de','del','al','en','con','para','mi','tu','que','algo','algun','alguna']);
+function palabrasClaveBusqueda(q){
+  return q.toLowerCase().split(/\s+/).filter(w => w && !BUSQUEDA_STOPWORDS.has(w));
+}
+/* Contenido interno (sin el <div class="biz-card"> exterior) de una tarjeta del
+   directorio. Se comparte entre la grilla normal y la fila de "Destacados" para no
+   duplicar el markup. destacado=true agrega la etiqueta ★ Destacado en vez del badge
+   normal (Ejemplo / Verificado / Fundador #). */
+function bizCardInnerHTML(n, destacado){
+  const headerBg = n.tipo === 'dueno' ? 'linear-gradient(135deg, #FFE699, var(--yellow))' : 'linear-gradient(135deg, #B9EDED, var(--teal))';
+  const badge = destacado ? '★ Destacado' : (n.demo ? 'Ejemplo' : (n.verificado ? '✓ Verificado' : 'Fundador #'+String(n.founderNumber||'').padStart(3,'0')));
+  return `
+      <div class="biz-photo" style="background:${n.logo ? '#fff' : headerBg};">
+        <span class="founder-badge${destacado?' badge-destacado':''}">${badge}</span>
+        ${n.logo ? `<img src="${n.logo}" alt="${n.nombre}" style="width:70px;height:70px;object-fit:cover;border-radius:14px;">` : (iconByCat[n.cat]||'🐾')}
+      </div>
+      <div class="biz-body">
+        <h3>${n.nombre}</h3>
+        <div class="biz-cat"><span class="${n.tipo==='dueno'?'tag-dueno':''}">${n.cat}</span> · ${n.comuna}</div>
+        <div class="biz-meta">${n.meta||'Negocio fundador del club.'}</div>
+        ${n.beneficioDetalle ? `<div class="biz-meta" style="color:var(--teal-dark);font-weight:700;margin-top:4px;">🎁 ${n.beneficioTipo}: ${n.beneficioDetalle}</div>` : ''}
+        ${bizContactIcons(n)}
+      </div>`;
+}
+function renderDirectory(){
+  refreshFilterOptions();
+  const qRaw = document.getElementById('dirSearch').value.trim().toLowerCase();
+  const cat = document.getElementById('dirCat').value, comuna = document.getElementById('dirComuna').value;
+  const grid = document.getElementById('dirGrid');
+  const keywords = qRaw ? palabrasClaveBusqueda(qRaw) : [];
+  const filtered = combinedNegocios().filter(n => {
+    const texto = `${n.nombre} ${n.cat} ${n.comuna} ${n.meta||''} ${n.servicios||''} ${n.descripcion||''}`.toLowerCase();
+    const coincideBusqueda = !qRaw || (keywords.length ? keywords.some(k => texto.includes(k)) : texto.includes(qRaw));
+    return coincideBusqueda && (!cat || n.cat===cat) && (!comuna || n.comuna===comuna) &&
+      (!dirTipoFiltro || n.tipo===dirTipoFiltro) &&
+      (!modoDirectorioEspecialistas || n.esEspecialista===true);
+  });
+  grid.innerHTML = '';
+  if(filtered.length===0){
+    const msg = modoDirectorioEspecialistas
+      ? 'Todavía no hay especialistas registrados con esos filtros.'
+      : 'No encontramos negocios con esos filtros todavía.';
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">${msg} Sé el primero en <a href="#negocios" onclick="event.preventDefault(); abrirElegirCamino();" style="color:var(--brass);text-decoration:underline;">sumar tu ficha</a>.</div>`;
+    return;
+  }
+  filtered.forEach(n=>{
+    const el = document.createElement('div');
+    el.className='biz-card';
+    el.innerHTML = bizCardInnerHTML(n, false);
+    el.addEventListener('click', ()=>irANegocio(n));
+    grid.appendChild(el);
+  });
+}
+
+/* Fila de negocios "Destacados" arriba del directorio (antes del listado completo).
+   Se eligen a mano en Supabase: columna "destacado" (boolean) en la tabla negocios —
+   no hay ninguna lógica automática de selección. Máximo 10 a la vez. */
+function renderFeaturedStrip(){
+  const wrap = document.getElementById('featuredStripWrap');
+  const track = document.getElementById('featuredStrip');
+  if(!track || !wrap) return;
+  const destacados = combinedNegocios().filter(n => n.destacado === true).slice(0, 10);
+  if(!destacados.length){ wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  track.innerHTML = '';
+  destacados.forEach(n=>{
+    const el = document.createElement('div');
+    el.className='biz-card';
+    el.innerHTML = bizCardInnerHTML(n, true);
+    el.addEventListener('click', ()=>irANegocio(n));
+    track.appendChild(el);
+  });
+}
+
+/* ---------------- Ficha de negocio/especialista como página propia (/negocio/slug) ----------------
+   Antes esto era un modal (showFicha). Ahora es una vista a pantalla completa, con el
+   mismo banner con degradado/foto que el resto de las páginas nuevas, para que se vea
+   igual de cuidada que el directorio — los datos siguen siendo exactamente los mismos
+   que ya se guardaban en Supabase, solo cambia cómo se muestran. */
+function negocioSlug(n){ return slugify(n.nombre) || 'negocio'; }
+/* Nota/limitación conocida (igual que con las categorías): si algún día dos negocios
+   tienen el mismo nombre exacto, esta búsqueda por slug encuentra el primero. No afecta
+   la navegación normal del sitio (siempre se hace clic en la tarjeta correcta). */
+function negocioPorSlug(slug){ return combinedNegocios().find(n => negocioSlug(n) === slug) || null; }
+
+function irANegocio(n){
+  history.pushState({ negocio:true, slug: negocioSlug(n) }, '', '/negocio/' + negocioSlug(n));
+  mostrarPaginaFicha(n);
+}
+function mostrarPaginaFichaPorSlug(slug){
+  const n = negocioPorSlug(slug);
+  if(n){ mostrarPaginaFicha(n); return; }
+  document.body.classList.remove('pagina-directorio');
+  document.body.classList.add('pagina-ficha');
+  document.getElementById('fichaContent').innerHTML = `<div class="empty-state">No encontramos esta ficha. <a href="/directorio" onclick="event.preventDefault(); irADirectorio({});" style="color:var(--brass);text-decoration:underline;">Volver al directorio →</a></div>`;
+}
+function mostrarPaginaFicha(n){
+  document.body.classList.remove('pagina-directorio');
+  document.body.classList.add('pagina-ficha');
+  renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
+  document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+  if(!n.demo && n.codigo) cargarReputacionNegocio(n);
+}
+function renderFichaContenido(n){
+  return `
+    <div class="ficha-page">
+      <div class="ficha-page-main">
+        ${n.logo ? `<img src="${n.logo}" alt="${n.nombre}" class="ficha-page-logo">` : `<div class="ficha-page-icon">${iconByCat[n.cat]||'🐾'}</div>`}
+        <h1>${n.nombre} ${n.verificado ? '<span style="color:var(--teal-dark);font-size:15px;">✓ Verificado</span>' : (n.esEspecialista ? '<span style="color:var(--teal-dark);font-size:15px;">🧑‍⚕️ Especialista</span>' : '')}</h1>
+        <div class="biz-cat">${n.cat} · ${n.comuna}</div>
+        ${n.descripcion ? `<p style="font-size:14.5px;color:#3a3a3a;line-height:1.6;margin:16px 0;">${n.descripcion}</p>` : ''}
+        ${n.beneficioDetalle ? `<div class="biz-meta" style="color:var(--teal-dark);font-weight:700;font-size:14.5px;margin:8px 0 4px;">🎁 Beneficio de socio — ${n.beneficioTipo}: ${n.beneficioDetalle}</div>` : ''}
+        ${!n.demo && n.codigo ? `<div id="repSummaryBox" class="rep-empty">Cargando reputación…</div>` : ''}
+        ${bizContactIcons(n)}
+      </div>
+      <div class="ficha-page-side">
+        <div class="row"><span>Estado</span><b style="color:var(--forest-2);">${n.demo ? 'Ejemplo de directorio' : 'Activo · gratis (piloto)'}</b></div>
+        <div class="row"><span>Tipo de beneficio</span><b>${n.tipo==='dueno' ? 'Para el dueño' : 'Para la mascota'}</b></div>
+        ${n.servicios ? `<div class="row"><span>Especialidad</span><b>${n.servicios}</b></div>` : ''}
+        ${n.direccion ? `<div class="row"><span>Dirección</span><b>${n.direccion}</b></div>` : ''}
+        ${n.horario ? `<div class="row"><span>Horario</span><b>${n.horario}</b></div>` : ''}
+        ${n.redesSociales ? `<div class="row"><span>Redes / contacto</span><b>${n.redesSociales}</b></div>` : ''}
+        ${!n.demo ? `<div class="row"><span>N° fundador</span><b>#${String(n.founderNumber||'').padStart(3,'0')}</b></div>` : ''}
+        ${!n.demo ? `<div class="row"><span>Código</span><b>${n.codigo||'—'}</b></div>` : ''}
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:12.5px;color:#5a6259;">← <a href="/directorio" onclick="event.preventDefault(); irADirectorio({});" style="color:var(--brass);text-decoration:underline;">Volver al directorio</a></div>
+  `;
+}
+
+/* ---------------- Carnet + QR ---------------- */
+function updateCard(){
+  const name = document.getElementById('petName').value.trim();
+  const species = document.getElementById('petSpecies').value;
+  const breed = document.getElementById('petBreed').value.trim();
+  const comuna = document.getElementById('ownerComuna').value.trim();
+  document.getElementById('credName').textContent = name || 'Tu mascota';
+  document.getElementById('credBreed').textContent = breed ? `${species} · ${breed}` : (name ? species : 'Escribe su nombre para previsualizar →');
+  document.getElementById('credComuna').textContent = comuna || 'Santiago';
+}
+function renderQR(elId, text){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = '';
+  try{
+    if(typeof QRCode !== 'undefined'){ new QRCode(el, { text, width:120, height:120, correctLevel: QRCode.CorrectLevel.M }); }
+    else { el.innerHTML = `<div style="font-family:var(--font-mono);font-size:11px;text-align:center;">${text}</div>`; }
+  }catch(e){ el.innerHTML = `<div style="font-family:var(--font-mono);font-size:11px;text-align:center;">${text}</div>`; }
+}
+
+/* ---------------- Compartir carnet en Instagram (SIN código ni QR) ---------------- */
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
+}
+function loadImage(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+    img.src = src;
+  });
+}
+function drawImageCover(ctx, img, x, y, w, h){
+  const ir = img.width / img.height, tr = w / h;
+  let sx, sy, sw, sh;
+  if(ir > tr){ sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; }
+  else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh) / 2; }
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+function drawPawIcon(ctx, cx, cy, size, color){
+  ctx.fillStyle = color;
+  const padR = size * 0.16;
+  [[-0.32,-0.38],[-0.11,-0.5],[0.11,-0.5],[0.32,-0.38]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(cx + dx*size, cy + dy*size, padR, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.beginPath(); ctx.ellipse(cx, cy + 0.08*size, size*0.28, size*0.22, 0, 0, Math.PI*2); ctx.fill();
+}
+async function generateShareCardBlob(record){
+  try{
+    if(document.fonts && document.fonts.load){
+      await Promise.all([document.fonts.load('900 84px Lato'), document.fonts.load('900 52px Lato'),
+        document.fonts.load('700 40px Lato'), document.fonts.load('600 34px Lato')]);
+    }
+  }catch(e){}
+  const W = 1080, H = 1920;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0, '#1E1E1E'); grad.addColorStop(1, '#111111');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha = 0.07;
+  for(let i=0;i<12;i++){ drawPawIcon(ctx, Math.random()*W, Math.random()*H, 60+Math.random()*70, '#FFCE00'); }
+  ctx.globalAlpha = 1;
+  const pad = 64;
+  ctx.fillStyle = '#FFFFFF';
+  roundRect(ctx, pad, 230, W-pad*2, 1260, 52); ctx.fill();
+  const photoSize = 420, photoY = 320;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(W/2, photoY+photoSize/2, photoSize/2, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+  if(record.foto){
+    try{ const img = await loadImage(record.foto); drawImageCover(ctx, img, W/2-photoSize/2, photoY, photoSize, photoSize); }
+    catch(e){ ctx.fillStyle = '#47C9C9'; ctx.fillRect(W/2-photoSize/2, photoY, photoSize, photoSize); }
+  } else { ctx.fillStyle = '#47C9C9'; ctx.fillRect(W/2-photoSize/2, photoY, photoSize, photoSize); }
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(W/2, photoY+photoSize/2, photoSize/2, 0, Math.PI*2);
+  ctx.lineWidth = 14; ctx.strokeStyle = '#FFCE00'; ctx.stroke();
+  if(!record.foto){ drawPawIcon(ctx, W/2, photoY+photoSize/2, photoSize*0.45, '#FFFFFF'); }
+  ctx.textAlign = 'center'; ctx.fillStyle = '#151515';
+  ctx.font = '900 84px Lato, sans-serif';
+  ctx.fillText(record.pet || 'Mi mascota', W/2, photoY+photoSize+110);
+  ctx.font = '700 38px Lato, sans-serif'; ctx.fillStyle = '#6B7280';
+  const sub = record.breed ? `${record.species} · ${record.breed}` : (record.species || '');
+  ctx.fillText(sub, W/2, photoY+photoSize+170);
+  ctx.font = '900 36px Lato, sans-serif'; ctx.fillStyle = '#2FA8A8';
+  ctx.fillText('🐾  ' + planLabel(record.plan).toUpperCase(), W/2, photoY+photoSize+250);
+  ctx.font = '600 32px Lato, sans-serif'; ctx.fillStyle = '#1A1A1A';
+  ctx.fillText(record.comuna || '', W/2, photoY+photoSize+305);
+  drawPawIcon(ctx, W/2-150, H-150, 56, '#FFCE00');
+  ctx.textAlign = 'left'; ctx.font = '900 50px Lato, sans-serif'; ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('Mi Mascota Club', W/2-95, H-130);
+  ctx.textAlign = 'center'; ctx.font = '600 28px Lato, sans-serif'; ctx.fillStyle = '#B0B0B0';
+  ctx.fillText('Únete gratis · link en bio', W/2, H-70);
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+}
+async function compartirCarne(record){
+  if(!record){ toast('Primero busca o crea tu carnet.'); return; }
+  try{
+    const blob = await generateShareCardBlob(record);
+    const fileName = `carne-${(record.pet||'mascota').toString().trim().replace(/\s+/g,'-').toLowerCase()}.png`;
+    let compartido = false;
+    if(navigator.canShare && navigator.share){
+      try{
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if(navigator.canShare({ files:[file] })){
+          await navigator.share({ files:[file], title:'Mi Mascota Club', text:`¡${record.pet} ya es parte de Mi Mascota Club! 🐾` });
+          compartido = true;
+        }
+      }catch(shareErr){}
+    }
+    if(!compartido){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast('¡Imagen lista! Descárgala y súbela a tu historia de Instagram.');
+    }
+  }catch(err){ console.error(err); toast('No se pudo generar la imagen. Intenta de nuevo.'); }
+}
+
+/* ---------------- Mapa (Leaflet + OpenStreetMap, gratis, sin llave) ----------------
+   Como todavía no pedimos dirección exacta al registrar un negocio, ubicamos cada
+   uno en el centro aproximado de su comuna (con un pequeño desplazamiento aleatorio
+   para que no queden todos exactamente en el mismo punto). Cuando más adelante
+   pidamos dirección exacta, se puede afinar la precisión sin rehacer el mapa.
+------------------------------------------------------------------------------- */
+const COMUNA_COORDS = {
+  "Santiago":[-33.4489,-70.6693], "Providencia":[-33.4260,-70.6088], "Ñuñoa":[-33.4558,-70.5987],
+  "Las Condes":[-33.4089,-70.5693], "Vitacura":[-33.3789,-70.5678], "La Reina":[-33.4419,-70.5344],
+  "Macul":[-33.4881,-70.5978], "San Bernardo":[-33.5928,-70.7008], "Peñalolén":[-33.4831,-70.5364],
+  "La Florida":[-33.5228,-70.5928], "Maipú":[-33.5167,-70.7500], "Puente Alto":[-33.6119,-70.5756],
+  "Recoleta":[-33.4064,-70.6394], "Independencia":[-33.4189,-70.6644], "Quilicura":[-33.3600,-70.7300],
+  "Huechuraba":[-33.3667,-70.6333], "Estación Central":[-33.4597,-70.6797], "San Miguel":[-33.4964,-70.6503],
+  "La Cisterna":[-33.5322,-70.6656], "Lo Barnechea":[-33.3550,-70.5150], "Cerrillos":[-33.4989,-70.7089],
+  "Conchalí":[-33.3833,-70.6667], "Renca":[-33.4033,-70.7217], "Pudahuel":[-33.4419,-70.7581]
+};
+const SANTIAGO_CENTER = [-33.4489,-70.6693];
+let mapaLeaflet = null, mapaMarkers = [];
+
+function coordsParaComuna(comuna){
+  const base = COMUNA_COORDS[comuna] || SANTIAGO_CENTER;
+  const jitter = () => (Math.random()-0.5)*0.012;
+  return [base[0]+jitter(), base[1]+jitter()];
+}
+
+function abrirMapa(categoriaFiltro){
+  document.getElementById('mapModalTitle').textContent = categoriaFiltro
+    ? `Mapa · ${categoriaFiltro}` : 'Mapa de Mi Mascota Club';
+  document.getElementById('mapModalOverlay').classList.add('show');
+
+  setTimeout(() => {
+    if(!mapaLeaflet){
+      mapaLeaflet = L.map('mapContainer').setView(SANTIAGO_CENTER, 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+      }).addTo(mapaLeaflet);
+    } else {
+      mapaLeaflet.invalidateSize();
+    }
+
+    mapaMarkers.forEach(m => mapaLeaflet.removeLayer(m));
+    mapaMarkers = [];
+
+    const negociosAMostrar = combinedNegocios().filter(n => !categoriaFiltro || n.cat === categoriaFiltro);
+    negociosAMostrar.forEach(n => {
+      const [lat, lng] = coordsParaComuna(n.comuna);
+      const marker = L.marker([lat, lng]).addTo(mapaLeaflet);
+      marker.bindPopup(`
+        <b>${n.nombre}</b><br>${iconByCat[n.cat]||'🐾'} ${n.cat} · ${n.comuna}
+        ${n.beneficioDetalle ? `<br>🎁 ${n.beneficioTipo}: ${n.beneficioDetalle}` : ''}
+      `);
+      mapaMarkers.push(marker);
+    });
+
+    if(negociosAMostrar.length > 0){
+      const grupo = L.featureGroup(mapaMarkers);
+      mapaLeaflet.fitBounds(grupo.getBounds().pad(0.3));
+    }
+
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos => {
+        const tuUbicacion = [pos.coords.latitude, pos.coords.longitude];
+        L.circleMarker(tuUbicacion, { radius:9, fillColor:'#47C9C9', fillOpacity:0.9, color:'#fff', weight:3 })
+          .addTo(mapaLeaflet).bindPopup('📍 Tú estás aquí');
+        mapaLeaflet.setView(tuUbicacion, 13);
+      }, () => { /* si no da permiso, se queda centrado en Santiago, sin problema */ });
+    }
+  }, 50);
+}
+
+function cerrarMapa(){
+  document.getElementById('mapModalOverlay').classList.remove('show');
+}
+
+/* ---------------- Menús desplegables del nav ---------------- */
+function toggleDropdown(id){
+  const el = document.getElementById(id);
+  const dropdown = el.closest('.nav-dropdown');
+  const yaAbierto = dropdown.classList.contains('open');
+  document.querySelectorAll('.nav-dropdown.open').forEach(d => d.classList.remove('open'));
+  if(!yaAbierto) dropdown.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.nav-dropdown')){
+    document.querySelectorAll('.nav-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+
+function renderDropdowns(){
+  const ddMascota = document.getElementById('ddMascotaList');
+  const ddDueno = document.getElementById('ddDuenoList');
+  if(ddMascota){
+    ddMascota.innerHTML = CATS_MASCOTA.map(c => `<button class="dd-item" onclick="filtrarPorCategoria('${c.replace(/'/g,"\\'")}','mascota'); toggleDropdown('exploreDropdown');">${iconByCat[c]||'🐾'} ${c}</button>`).join('');
+  }
+  if(ddDueno){
+    ddDueno.innerHTML = CATS_DUENO.map(c => `<button class="dd-item" onclick="filtrarPorCategoria('${c.replace(/'/g,"\\'")}','dueno'); toggleDropdown('exploreDropdown');">${iconByCat[c]||'🎁'} ${c}</button>`).join('');
+  }
+
+  const benMascota = document.getElementById('ddBeneficiosMascota');
+  const benDueno = document.getElementById('ddBeneficiosDueno');
+  const ejemplosMascota = [{nombre:'Veterinaria Los Robles', b:'Consulta con descuento'}, {nombre:'Pelu Copito', b:'Baño y corte con precio socio'}];
+  const ejemplosDueno = [{nombre:'Barbería El Roble', b:'15% de descuento'}, {nombre:'Café Con Patas', b:'2x1 los martes'}];
+  const listaMascota = negociosReal.filter(n => n.tipo==='mascota' && n.beneficioDetalle).slice(0,3);
+  const listaDueno = negociosReal.filter(n => n.tipo==='dueno' && n.beneficioDetalle).slice(0,3);
+  const fuenteMascota = listaMascota.length ? listaMascota : ejemplosMascota.map(e=>({nombre:e.nombre, beneficioDetalle:e.b, beneficioTipo:'Beneficio'}));
+  const fuenteDueno = listaDueno.length ? listaDueno : ejemplosDueno.map(e=>({nombre:e.nombre, beneficioDetalle:e.b, beneficioTipo:'Beneficio'}));
+  // Cada fila es clicable: lleva directo al directorio (en su propia página) con el
+  // negocio que ofrece ese beneficio ya buscado, para que se pueda ver su ficha completa.
+  const benRow = n => `<button type="button" class="dd-item dd-benefit" onclick="filtrarPorNegocio('${n.nombre.replace(/'/g,"\\'")}'); toggleDropdown('beneficiosDropdown');"><span style="display:flex;flex-direction:column;align-items:flex-start;"><span class="pct">${n.beneficioDetalle}</span><span class="nm">${n.nombre}</span></span></button>`;
+  if(benMascota) benMascota.innerHTML = fuenteMascota.map(benRow).join('');
+  if(benDueno) benDueno.innerHTML = fuenteDueno.map(benRow).join('');
+}
+
+/* ---------------- Buscador animado del hero ---------------- */
+const HERO_SUGERENCIAS = [
+  "Necesito una veterinaria...", "¿Dónde baño a mi perro?", "Necesito comida...", "¿Dónde venden esto?",
+  "Quiero un hotel para mi perro...", "Quiero un paseador...", "Quiero comprar algo...",
+  "Quiero encontrar algo cerca...", "¿Hay algún descuento?", "Quiero guardar la información de mi mascota...",
+  "Quiero beneficios..."
+];
+let heroSugIndex = 0;
+function rotarSugerenciaHero(){
+  const input = document.getElementById('heroSearch');
+  if(!input || document.activeElement === input) { heroSugIndex = (heroSugIndex+1)%HERO_SUGERENCIAS.length; return; }
+  heroSugIndex = (heroSugIndex+1) % HERO_SUGERENCIAS.length;
+  input.style.opacity = '0';
+  setTimeout(() => { input.placeholder = HERO_SUGERENCIAS[heroSugIndex]; input.style.opacity = '1'; }, 200);
+}
+function irABuscar(){
+  const heroInput = document.getElementById('heroSearch');
+  const q = heroInput.value.trim();
+  irADirectorio({ q });
+  setTimeout(() => document.getElementById('dirSearch').focus(), 300);
+}
+
+/* ---------------- Carrusel circular de categorías (hero) ---------------- */
+const FAN_CARDS = [
+  {emoji:'🩺', label:'Veterinaria', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Veterinaria', tipo:'mascota'},
+  {emoji:'☕', label:'Café pet-friendly', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Café', tipo:'dueno'},
+  {emoji:'🏓', label:'Cancha de pádel', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Deporte', tipo:'dueno'},
+  {emoji:'✂️', label:'Peluquería', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Peluquería', tipo:'mascota'},
+  {emoji:'🦮', label:'Paseador', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Paseador', tipo:'mascota'},
+  {emoji:'🍽️', label:'Restaurante', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Restaurante', tipo:'dueno'},
+  {emoji:'🏨', label:'Hotel / guardería', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Hotel / Pensión', tipo:'mascota'},
+  {emoji:'🛍️', label:'Tienda', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Tienda', tipo:'mascota'},
+  {emoji:'🏋️', label:'Adiestramiento', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Adiestramiento', tipo:'mascota'},
+  {emoji:'💈', label:'Barbería', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Barbería', tipo:'dueno'},
+];
+function renderFanCarousel(){
+  const track = document.getElementById('fanTrack');
+  if(!track) return;
+  const html = FAN_CARDS.map(c => `<div class="fan-card" style="background:${c.bg};" onclick="filtrarPorCategoria('${c.cat.replace(/'/g,"\\'")}','${c.tipo}')"><div class="fan-emoji">${c.emoji}</div><div class="fan-label">${c.label}</div></div>`).join('');
+  track.innerHTML = html + html; // duplicado para el loop continuo
+}
+
+/* ---------------- Marquesina de negocios fundadores ---------------- */
+/* ---------------- Marquesina de negocios verificados ----------------
+   NOTA: por ahora muestra cualquier negocio registrado. Cuando se construya
+   el sistema de planes pagados para negocios (Presencia/Destacado/Premium),
+   este filtro debe cambiar a mostrar solo los que tengan verificado = true.
+------------------------------------------------------------------------- */
+function renderTrustMarquee(){
+  const track = document.getElementById('trustTrack');
+  if(!track) return;
+  const reales = negociosReal.slice(0,6).map(n => `<div class="trust-card real" onclick="filtrarPorNegocio('${n.nombre.replace(/'/g,"\\'")}')">✓ ${n.nombre}</div>`);
+  const faltan = Math.max(10 - reales.length, 4);
+  const placeholders = Array.from({length:faltan}, () => `<div class="trust-card" onclick="abrirElegirCamino()">➕ Tu negocio aquí</div>`);
+  const html = [...reales, ...placeholders].join('');
+  track.innerHTML = html + html;
+}
+
+/* ---------------- Formularios ---------------- */
+document.getElementById('bizForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('bizSubmitBtn');
+  const nombre = document.getElementById('bizName').value.trim();
+  const cat = document.getElementById('bizCat').value;
+  const comuna = document.getElementById('bizComuna').value.trim();
+  const bizEmailVal = document.getElementById('bizEmail').value.trim();
+  const bizTelefonoRaw = document.getElementById('bizTelefono').value.trim();
+  const bizTelefonoVal = bizTelefonoRaw ? telefonoCompleto(bizTelefonoRaw) : '';
+  const servicios = document.getElementById('bizServicios').value.trim();
+  const beneficioTipo = document.getElementById('bizBeneficioTipo').value;
+  const beneficioDetalle = document.getElementById('bizBeneficioDetalle').value.trim();
+  const direccion = document.getElementById('bizDireccion').value.trim();
+  const horario = document.getElementById('bizHorario').value.trim();
+  const redes = document.getElementById('bizRedes').value.trim();
+  const descripcion = document.getElementById('bizDescripcion').value.trim();
+  const logoFile = document.getElementById('bizLogo').files[0];
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Guardando...';
+  try{
+    const logo = await compressImage(logoFile, 300, 0.7);
+    const { data, error } = await supabase.rpc('registrar_negocio', {
+      p_nombre: nombre, p_cat: cat, p_tipo: bizTipoActual, p_comuna: comuna, p_email: bizEmailVal, p_telefono: bizTelefonoVal,
+      p_servicios: servicios, p_beneficio_tipo: beneficioTipo, p_beneficio_detalle: beneficioDetalle,
+      p_logo: logo, p_direccion: direccion, p_horario: horario, p_redes_sociales: redes, p_descripcion: descripcion,
+      p_es_especialista: bizEsEspecialista
+    });
+    if(error) throw error;
+    const { codigo, founder_number } = data[0];
+    const record = { nombre, cat, tipo: bizTipoActual, comuna, email: bizEmailVal, telefono: bizTelefonoVal, codigo, servicios,
+      beneficioTipo, beneficioDetalle, logo, direccion, horario, redesSociales: redes, descripcion,
+      meta: servicios || `${cat} en ${comuna}.`, founderNumber: founder_number, demo:false,
+      esEspecialista: bizEsEspecialista, destacado:false };
+    negociosReal.push(record);
+    updateCounts(); renderDirectory(); renderTrustMarquee();
+    const row = document.createElement('div');
+    row.className='waitlist-item';
+    row.innerHTML = `<span>${nombre} — ${cat}</span><span class="small">${comuna} · ${codigo}</span>`;
+    document.getElementById('bizList').prepend(row);
+    this.reset(); setBizTipo('mascota'); setBizEsEspecialista(false); resetValidacionesForm(this); wizardReset('biz'); resetRegionComuna('biz');
+    openModal(`
+      <div class="ficha">
+        ${logo ? `<img src="${logo}" alt="${nombre}" style="width:56px;height:56px;object-fit:cover;border-radius:14px;margin-bottom:14px;">` : `<div class="ficha-icon">${iconByCat[cat]||'🐾'}</div>`}
+        <h3>${nombre}</h3>
+        <div class="biz-cat">${cat} · ${comuna}</div>
+        <div class="row"><span>Estado</span><b style="color:var(--forest-2);">Guardado · gratis durante el piloto</b></div>
+        <div class="row"><span>Código de negocio</span><b>${codigo}</b></div>
+        ${bizEmailVal ? `<div class="row"><span>Correo</span><b>${bizEmailVal}</b></div>` : ''}
+        ${bizTelefonoVal ? `<div class="row"><span>Teléfono</span><b>${bizTelefonoVal}</b></div>` : ''}
+        ${servicios ? `<div class="row"><span>Especialidad</span><b>${servicios}</b></div>` : ''}
+        ${beneficioDetalle ? `<div class="row"><span>Beneficio</span><b>${beneficioTipo}: ${beneficioDetalle}</b></div>` : ''}
+      </div>
+      <div style="margin-top:16px;font-size:13px;">¡Listo! Guarda tu <b>código de negocio (${codigo})</b>: lo necesitas para validar visitas de socios en la sección "Validar visita".</div>
+    `);
+    enviarCorreoBienvenida({
+      to_email: bizEmailVal,
+      to_name: nombre,
+      tipo_registro: 'negocio',
+      codigo: codigo,
+      mensaje_extra: 'El mundo es mejor gracias a las personas que cuidan tan bien a sus clientes con mascota — y tú ahora eres parte de este club que lo demuestra todos los días.'
+    });
+  }catch(err){ console.error(err); toast('No se pudo guardar tu negocio. Intenta de nuevo.'); }
+  finally{ btn.disabled = false; btn.textContent = 'Quiero ser negocio fundador'; }
+});
+
+document.getElementById('ownerForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('ownerSubmitBtn');
+  const pet = document.getElementById('petName').value.trim();
+  const species = document.getElementById('petSpecies').value;
+  const breed = document.getElementById('petBreed').value.trim();
+  const comuna = document.getElementById('ownerComuna').value.trim();
+  const email = document.getElementById('ownerEmail').value.trim();
+  const edad = document.getElementById('petEdad').value.trim();
+  const peso = document.getElementById('petPeso').value.trim();
+  const tamano = document.getElementById('petTamano').value;
+  const repNombre = document.getElementById('ownerRepNombre').value.trim();
+  const repRut = document.getElementById('ownerRepRut').value.trim();
+  const repTelefonoRaw = document.getElementById('ownerRepTelefono').value.trim();
+  const repTelefono = repTelefonoRaw ? telefonoCompleto(repTelefonoRaw) : '';
+  const notasMedicas = document.getElementById('petNotas').value.trim();
+  const fotoFile = document.getElementById('petFoto').files[0];
+  const doc1File = document.getElementById('petDoc1').files[0];
+  const doc2File = document.getElementById('petDoc2').files[0];
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Guardando...';
+  try{
+    const foto = await compressImage(fotoFile, 360, 0.6);
+    const doc1 = await compressImage(doc1File, 700, 0.5);
+    const doc2 = await compressImage(doc2File, 700, 0.5);
+    const documentos = [doc1, doc2].filter(Boolean);
+    const { data, error } = await supabase.rpc('registrar_socio', {
+      p_pet: pet, p_species: species, p_breed: breed, p_comuna: comuna, p_email: email,
+      p_edad: edad, p_peso: peso, p_tamano: tamano,
+      p_representante_nombre: repNombre, p_representante_rut: repRut, p_representante_telefono: repTelefono,
+      p_foto: foto, p_documentos: documentos, p_notas_medicas: notasMedicas
+    });
+    if(error) throw error;
+    const { codigo, socio_number } = data[0];
+    sociosCount++;
+    const record = { pet, species, breed, comuna, email, codigo, socioNumber: socio_number, foto, plan: 'free' };
+    updateCounts();
+    document.getElementById('credId').textContent = codigo;
+    renderQR('credQR', codigo);
+    const row = document.createElement('div');
+    row.className='waitlist-item';
+    row.innerHTML = `<span>${pet}</span><span class="small">${comuna} · ${codigo}</span>`;
+    document.getElementById('ownerList').prepend(row);
+    this.reset(); updateCard(); resetValidacionesForm(this); wizardReset('owner'); resetRegionComuna('owner');
+    openModal(`
+      <div class="credencial" style="width:100%;transform:none;">
+        <div class="cred-badge">${planLabel('free')}</div>
+        <div class="cred-top"><div class="cred-brand">MI MASCOTA CLUB</div><div class="cred-id">${codigo}</div></div>
+        <div class="cred-name">${pet}</div>
+        <div class="cred-breed">${breed ? species+' · '+breed : species}</div>
+        <div id="modalQR" class="cred-qr"></div>
+        <div class="cred-row" style="margin-top:14px;"><div>Comuna<b>${comuna}</b></div><div>Estado<b style="color:var(--sage);">Activo</b></div></div>
+      </div>
+      <div style="margin-top:16px;font-size:13px;">¡El carnet de ${pet} quedó guardado! Muéstrale este código QR al negocio cuando lo visites para validar tu descuento de socio.</div>
+      <button type="button" id="modalShareBtn" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;">📤 Compartir en Instagram</button>
+      <div style="margin-top:8px;font-size:11.5px;color:#8a8a8a;text-align:center;">La imagen para compartir no incluye tu código ni tu QR — es segura de publicar.</div>
+    `);
+    renderQR('modalQR', codigo);
+    document.getElementById('modalShareBtn').addEventListener('click', () => compartirCarne(record));
+    enviarCorreoBienvenida({
+      to_email: email,
+      to_name: repNombre || pet,
+      tipo_registro: 'socio',
+      codigo: codigo,
+      mensaje_extra: 'El mundo es mejor gracias a las personas que aman a sus mascotas — y tú ahora eres parte de este club que lo demuestra todos los días.'
+    });
+  }catch(err){ console.error(err); toast('No se pudo guardar el carnet. Intenta de nuevo.'); }
+  finally{ btn.disabled = false; btn.textContent = 'Crear carnet y unirme gratis'; }
+});
+
+/* ---------------- Funciones reutilizables: tamaño sugerido y compresión de imágenes ---------------- */
+function sugerirTamano(){
+  const peso = Number(document.getElementById('petPeso').value);
+  const sel = document.getElementById('petTamano');
+  if(!peso || sel.value) return;
+  if(peso <= 10) sel.value = 'S'; else if(peso <= 25) sel.value = 'M';
+  else if(peso <= 40) sel.value = 'L'; else sel.value = 'XL';
+}
+
+function compressImage(file, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    if(!file){ resolve(null); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if(w > h){ if(w > maxDim){ h = Math.round(h * (maxDim / w)); w = maxDim; } }
+        else { if(h > maxDim){ w = Math.round(w * (maxDim / h)); h = maxDim; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------------- Validar visita (canje) ---------------- */
+document.getElementById('validarForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('validarSubmitBtn');
+  const bizCodigo = document.getElementById('valBizCode').value.trim().toUpperCase();
+  const socioCodigo = document.getElementById('valSocioCode').value.trim().toUpperCase();
+  const monto = Number(document.getElementById('valMonto').value);
+  const resultBox = document.getElementById('validarResult');
+  resultBox.classList.remove('show');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Validando...';
+  try{
+    const { data, error } = await supabase.rpc('registrar_canje', {
+      p_negocio_codigo: bizCodigo, p_socio_codigo: socioCodigo, p_monto: monto
+    });
+    if(error) throw error;
+    const r = data[0];
+    if(!r.ok){ toast(r.mensaje); return; }
+    canjesCount++;
+    let calCta = '';
+    if(r.negocio_plan === 'premium' && r.canje_id){
+      calCta = `<div style="margin-top:14px;"><button type="button" class="btn btn-sm btn-primary" onclick="abrirFormularioCalificar('${r.canje_id}','negocio','${bizCodigo}','${String(r.nombre_mostrar).replace(/'/g,"\\'")}')">⭐ Calificar a este socio ahora</button></div>`;
+    }
+    resultBox.innerHTML = `<div class="big">${formatCLP(monto)}</div>Compra validada de <b>${r.nombre_mostrar}</b> en <b>${r.negocio_nombre}</b>.<br>Ahorro de socio aplicado (ejemplo 10%): <b>${formatCLP(r.ahorro)}</b>${calCta}`;
+    resultBox.classList.add('show');
+    document.getElementById('valSocioCode').value = '';
+    document.getElementById('valMonto').value = '';
+    toast('¡Visita validada y registrada!');
+  }catch(err){ console.error(err); toast('No se pudo registrar la visita. Intenta de nuevo.'); }
+  finally{ btn.disabled = false; btn.textContent = 'Validar y registrar compra'; }
+});
+
+/* ---------------- Validación bidireccional (calificaciones mutuas, beneficio Premium) ----------------
+   Inspirada en el modelo Uber: al cerrarse una visita real (canjes), dueño y negocio pueden
+   calificarse mutuamente. La calificación queda oculta (visible=false en la BD) hasta que AMBAS
+   partes califican esa misma visita — recién ahí se revela. Solo disponible para socios con plan
+   'pro'/'premium' y negocios con plan 'premium' (ver supabase-fix-v9.sql para el gateo real, que
+   se aplica siempre en el servidor — el frontend solo evita mostrar UI que de todas formas el
+   backend rechazaría). Ver sistema-validacion-mi-mascota-club.md para el diseño completo. */
+const CRITERIOS_LABELS = {
+  socio: ['Puntualidad', 'Trato', 'Cumplimiento del servicio'],
+  negocio: ['Puntualidad del dueño', 'Comportamiento de la mascota', 'Pago a tiempo']
+};
+
+function starPickerHtml(inputId, value){
+  value = value || 0;
+  let btns = '';
+  for(let i=1;i<=5;i++){ btns += `<button type="button" class="${i<=value?'on':''}" data-i="${i}" onclick="setStarValue('${inputId}',${i})">★</button>`; }
+  return `<div class="star-picker" id="${inputId}_picker">${btns}</div><input type="hidden" id="${inputId}" value="${value}">`;
+}
+function setStarValue(inputId, i){
+  const input = document.getElementById(inputId);
+  if(input) input.value = i;
+  document.querySelectorAll(`#${inputId}_picker button`).forEach(b => b.classList.toggle('on', Number(b.dataset.i) <= i));
+}
+
+function abrirCalificaciones(){
+  openModal(`
+    <h3 style="margin-bottom:6px;">⭐ Calificaciones</h3>
+    <p class="dim" style="font-size:13px;margin-bottom:16px;">Al cierre de cada visita, dueño y negocio se califican mutuamente — como en Uber. Tu calificación queda oculta hasta que la otra parte también responda. Es un beneficio de los planes premium.</p>
+    <div class="field"><label for="calCodigo">Tu código (MMC00001 o NEG0001)</label><input id="calCodigo" placeholder="MMC00001" style="text-transform:uppercase;"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="buscarPendientesCalificar()">Ver mis visitas para calificar</button>
+    <div id="calResultado" style="margin-top:16px;"></div>
+  `);
+}
+
+async function buscarPendientesCalificar(){
+  const codigoInput = document.getElementById('calCodigo');
+  const codigo = codigoInput.value.trim().toUpperCase();
+  const box = document.getElementById('calResultado');
+  if(!codigo){ box.innerHTML = `<div class="rep-locked">Escribe tu código.</div>`; return; }
+  box.innerHTML = `<div class="dim" style="font-size:13px;">Buscando…</div>`;
+  try{
+    const { data, error } = await supabase.rpc('verificar_plan', { p_codigo: codigo });
+    if(error) throw error;
+    if(!data || !data.length){ box.innerHTML = `<div class="rep-locked">No encontramos ese código.</div>`; return; }
+    const v = data[0];
+    if(!v.premium){
+      box.innerHTML = `<div class="rep-locked">
+        Calificar visitas es un beneficio de los planes <b>${v.rol==='socio' ? 'Pro/Premium' : 'Premium'}</b>.
+        Hoy tu plan es <b>${planLabel ? (v.rol==='socio'?planLabel(v.plan):v.plan) : v.plan}</b>.<br><br>
+        <a href="#planes" onclick="closeModal(); mostrarSeccion('planes');" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver planes →</a>
+      </div>`;
+      return;
+    }
+    await renderPendientesCalificar(codigo, v.rol, box);
+  }catch(err){ console.error(err); box.innerHTML = `<div class="rep-locked">No se pudo consultar. Intenta de nuevo.</div>`; }
+}
+
+async function renderPendientesCalificar(codigo, rol, box){
+  box.innerHTML = `<div class="dim" style="font-size:13px;">Cargando visitas…</div>`;
+  try{
+    const { data, error } = await supabase.rpc('pendientes_por_validar', { p_codigo: codigo, p_rol: rol });
+    if(error) throw error;
+    if(!data || !data.length){
+      box.innerHTML = `<div class="rep-premium-pill">✓ Plan premium activo</div><div class="rep-empty" style="margin-top:10px;">No tienes visitas pendientes por calificar (ventana de 72h desde cada visita).</div>`;
+      return;
+    }
+    box.innerHTML = `<div class="rep-premium-pill">✓ Plan premium activo</div>` + data.map(p => `
+      <div class="cal-pending-row">
+        <div class="cp-head"><span>${p.contraparte}</span><span>${formatCLP(p.monto)}</span></div>
+        <div class="cp-meta">${new Date(p.fecha).toLocaleDateString('es-CL')} · quedan ${Math.max(0,Math.round(p.horas_restantes))}h para calificar</div>
+        <button class="btn btn-sm btn-outline" style="margin-top:10px;" onclick="abrirFormularioCalificar('${p.canje_id}','${rol}','${codigo}','${String(p.contraparte).replace(/'/g,"\\'")}')">Calificar</button>
+      </div>
+    `).join('');
+  }catch(err){ console.error(err); box.innerHTML = `<div class="rep-locked">No se pudieron cargar tus visitas.</div>`; }
+}
+
+function abrirFormularioCalificar(canjeId, rol, codigo, contraparte){
+  const labels = CRITERIOS_LABELS[rol] || CRITERIOS_LABELS.socio;
+  openModal(`
+    <h3 style="margin-bottom:4px;">Calificar a ${contraparte}</h3>
+    <p class="dim" style="font-size:12.5px;margin-bottom:14px;">Tu calificación queda oculta hasta que ${rol==='socio' ? 'el negocio' : 'el dueño'} también califique esta misma visita.</p>
+    <div class="field"><label>Calificación general</label>${starPickerHtml('calEstrellas', 5)}</div>
+    <div class="field"><label style="font-size:12px;">${labels[0]}</label>${starPickerHtml('calC1', 5)}</div>
+    <div class="field"><label style="font-size:12px;">${labels[1]}</label>${starPickerHtml('calC2', 5)}</div>
+    <div class="field"><label style="font-size:12px;">${labels[2]}</label>${starPickerHtml('calC3', 5)}</div>
+    <div class="field"><label>Comentario (opcional)</label><textarea id="calComentario" rows="3" placeholder="Cuéntanos cómo fue…"></textarea></div>
+    <button class="btn btn-primary" id="calEnviarBtn" style="width:100%;justify-content:center;" onclick="enviarCalificacion('${canjeId}','${rol}','${codigo}')">Enviar calificación</button>
+  `);
+}
+
+async function enviarCalificacion(canjeId, rol, codigo){
+  const btn = document.getElementById('calEnviarBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  try{
+    const estrellas = Number(document.getElementById('calEstrellas').value || 0);
+    if(!estrellas){ toast('Elige una calificación general de 1 a 5 estrellas.'); return; }
+    const c1 = Number(document.getElementById('calC1').value || 0) || null;
+    const c2 = Number(document.getElementById('calC2').value || 0) || null;
+    const c3 = Number(document.getElementById('calC3').value || 0) || null;
+    const comentario = document.getElementById('calComentario').value.trim();
+    const { data, error } = await supabase.rpc('enviar_validacion', {
+      p_canje_id: canjeId, p_rol: rol, p_codigo: codigo, p_estrellas: estrellas,
+      p_comentario: comentario, p_criterio1: c1, p_criterio2: c2, p_criterio3: c3
+    });
+    if(error) throw error;
+    const r = data[0];
+    if(!r.ok){ toast(r.mensaje); return; }
+    closeModal();
+    toast(r.mensaje);
+  }catch(err){ console.error(err); toast('No se pudo enviar la calificación. Intenta de nuevo.'); }
+  finally{ if(btn){ btn.disabled = false; btn.textContent = 'Enviar calificación'; } }
+}
+
+/* Reputación pública de un negocio, mostrada en su ficha (/negocio/slug) — el promedio y el total
+   son visibles para cualquiera; el detalle de comentarios individuales exige un código de socio
+   con plan Pro/Premium (gateado también en el servidor, ver detalle_validaciones_negocio). */
+async function cargarReputacionNegocio(n){
+  const box = document.getElementById('repSummaryBox');
+  if(!box || !n.codigo) return;
+  try{
+    const { data, error } = await supabase.rpc('resumen_reputacion_negocio', { p_negocio_codigo: n.codigo });
+    if(error) throw error;
+    const r = (data && data[0]) || {};
+    if(!r.total_visitas){ box.innerHTML = `<div class="rep-empty">Todavía no hay visitas validadas en este negocio.</div>`; return; }
+    if(!r.mostrar_promedio){
+      box.innerHTML = `<div class="rep-empty">${r.total_visitas} visita${r.total_visitas===1?'':'s'} validada${r.total_visitas===1?'':'s'} · aún no hay suficientes calificaciones para mostrar un promedio.</div>`;
+      return;
+    }
+    const llenas = Math.round(r.promedio);
+    box.innerHTML = `
+      <div class="rep-summary">
+        <span class="rep-stars">${'★'.repeat(llenas)}${'☆'.repeat(5-llenas)}</span>
+        <span class="rep-avg">${r.promedio}</span>
+        <span class="rep-count">${r.total_validado} calificación${r.total_validado===1?'':'es'} · ${r.total_visitas} visitas totales</span>
+      </div>
+      <div class="field-row" style="align-items:flex-end;gap:8px;">
+        <div class="field" style="flex:1;margin-bottom:0;"><label style="font-size:11px;">Tu código de socio Premium (para ver reseñas)</label><input id="repSocioCode" placeholder="MMC00001" style="text-transform:uppercase;"></div>
+        <button class="btn btn-sm btn-outline" type="button" onclick="verDetalleReputacionNegocio('${n.codigo}')">Ver reseñas</button>
+      </div>
+      <div id="repDetalleBox"></div>
+    `;
+  }catch(err){ console.error(err); box.innerHTML = ''; }
+}
+
+async function verDetalleReputacionNegocio(negocioCodigo){
+  const input = document.getElementById('repSocioCode');
+  const codigo = input ? input.value.trim().toUpperCase() : '';
+  const out = document.getElementById('repDetalleBox');
+  if(!out) return;
+  if(!codigo){ out.innerHTML = `<div class="rep-locked">Escribe tu código de socio para ver el detalle de reseñas (beneficio Pro/Premium).</div>`; return; }
+  out.innerHTML = `<div class="dim" style="font-size:12.5px;">Verificando…</div>`;
+  try{
+    const { data, error } = await supabase.rpc('detalle_validaciones_negocio', { p_negocio_codigo: negocioCodigo, p_codigo_consultante: codigo });
+    if(error) throw error;
+    if(!data || !data.length){
+      out.innerHTML = `<div class="rep-locked">Ver el detalle de reseñas es un beneficio de los planes Pro/Premium (o todavía no hay reseñas visibles).<br><a href="#planes" onclick="mostrarSeccion('planes');" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver planes →</a></div>`;
+      return;
+    }
+    out.innerHTML = data.map(c => `
+      <div class="rep-comment">
+        <div class="rc-head"><span class="rc-stars">${'★'.repeat(c.estrellas)}</span><span>${new Date(c.fecha).toLocaleDateString('es-CL')}</span></div>
+        ${c.comentario ? `<p>${c.comentario}</p>` : ''}
+      </div>
+    `).join('');
+  }catch(err){ console.error(err); out.innerHTML = `<div class="rep-locked">No se pudo cargar el detalle.</div>`; }
+}
+
+/* ---------------- Panel privado (Supabase Auth real) ---------------- */
+async function tryUnlock(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPass').value;
+  const err = document.getElementById('adminError');
+  const btn = document.getElementById('adminLoginBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Entrando...';
+  try{
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    document.getElementById('adminLockWrap').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    err.style.display='none';
+    await refreshAdmin();
+  }catch(e){
+    err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
+    err.style.display='block';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+async function refreshAdmin(){
+  try{
+    const [rNeg, rSoc, rCan] = await Promise.all([
+      supabase.from('negocios').select('*').order('created_at', {ascending:false}),
+      supabase.from('socios').select('*').order('created_at', {ascending:false}),
+      supabase.from('canjes').select('*').order('created_at', {ascending:false}),
+    ]);
+    if(rNeg.error) throw new Error('Negocios: ' + rNeg.error.message);
+    if(rSoc.error) throw new Error('Socios: ' + rSoc.error.message);
+    if(rCan.error) throw new Error('Canjes: ' + rCan.error.message);
+    const neg = rNeg.data || [], soc = rSoc.data || [], can = rCan.data || [];
+
+    document.getElementById('statBiz').textContent = neg.length;
+    document.getElementById('statOwners').textContent = soc.length;
+    const clientesUnicos = new Set(can.map(c=>c.socio_id)).size;
+    const gmvTotal = can.reduce((s,c)=>s+Number(c.monto||0),0);
+    document.getElementById('statClientes').textContent = clientesUnicos;
+    document.getElementById('statGMV').textContent = formatCLP(gmvTotal);
+
+    document.getElementById('adminBizTable').innerHTML = neg.map(n=>`
+      <div class="table-row"><span>${n.nombre}</span><span class="dim">${n.cat}</span><span class="dim">${n.comuna}</span><span class="dim">${n.contacto}</span></div>
+    `).join('') || `<div class="table-row"><span class="dim">Aún no hay negocios reales inscritos.</span></div>`;
+
+    document.getElementById('adminOwnerTable').innerHTML = soc.map(o=>`
+      <div class="table-row"><span>${o.pet} <small class="dim" style="font-weight:600;">· ${planLabel(o.plan)}</small></span><span class="dim">${o.species||''}</span><span class="dim">${o.comuna||''}</span><span class="dim">${o.email||''}</span></div>
+    `).join('') || `<div class="table-row"><span class="dim">Aún no hay dueños reales inscritos.</span></div>`;
+
+    document.getElementById('adminCanjesTable').innerHTML = can.map(c=>`
+      <div class="table-row"><span>${c.negocio_nombre}</span><span class="dim">${c.socio_nombre}</span><span class="dim">${formatCLP(c.monto)}</span><span class="dim">${new Date(c.created_at).toLocaleDateString('es-CL')}</span></div>
+    `).join('') || `<div class="table-row"><span class="dim">Todavía no hay visitas validadas.</span></div>`;
+
+    const porNegocio = {};
+    can.forEach(c=>{
+      if(!porNegocio[c.negocio_nombre]) porNegocio[c.negocio_nombre] = { visitas:0, monto:0 };
+      porNegocio[c.negocio_nombre].visitas++;
+      porNegocio[c.negocio_nombre].monto += Number(c.monto||0);
+    });
+    document.getElementById('adminRoiTable').innerHTML = Object.entries(porNegocio).sort((a,b)=>b[1].monto-a[1].monto).map(([nombre,d])=>`
+      <div class="table-row"><span>${nombre}</span><span class="dim">${d.visitas} visita${d.visitas===1?'':'s'}</span><span class="dim">${formatCLP(d.monto)}</span><span class="dim">${formatCLP(d.monto/d.visitas)} prom.</span></div>
+    `).join('') || `<div class="table-row"><span class="dim">Sin datos todavía — valida la primera visita para ver el ROI por negocio.</span></div>`;
+  }catch(e){
+    console.error(e);
+    toast('No se pudo cargar el panel: ' + (e.message || 'error desconocido'));
+  }
+}
+
+/* ---------------- Navegación interna segura ---------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+});
+
+loadAll().then(() => manejarRutaActual()); // reaplica filtros de la URL con datos reales ya cargados
+renderCatGrid();
+renderFanCarousel();
+document.getElementById('heroSearch').style.transition = 'opacity .2s ease';
+setInterval(rotarSugerenciaHero, 2600);
+setBizTipo('mascota');
+setDirTipo('');
+manejarRutaActual(); // si se entra directo a /directorio/... (o se refresca ahí), se muestra esa vista de inmediato
+
+// Campos con formato y validación estricta en vivo (RUT, teléfono CL, correo)
+initRutField('ownerRepRut', 'fieldOwnerRut', 'ownerRepRutMsg');
+initTelefonoField('ownerRepTelefono', 'fieldOwnerTelefono', 'ownerRepTelefonoMsg');
+initEmailField('ownerEmail', 'fieldOwnerEmail', 'ownerEmailMsg');
+initTelefonoField('bizTelefono', 'fieldBizTelefono', 'bizTelefonoMsg');
+initEmailField('bizEmail', 'fieldBizEmail', 'bizEmailMsg');
+wizardRender('owner');
+wizardRender('biz');
+
+// Selector Región → Comuna: se pobla al cargar la página, con la Región Metropolitana
+// preseleccionada (piloto en Santiago) en ambos formularios.
+poblarRegiones('ownerRegion');
+poblarRegiones('bizRegion');
+resetRegionComuna('owner');
+resetRegionComuna('biz');
+
+// Funciones que el HTML llama directo vía onclick / oninput — deben ser globales.
+window.setBizTipo = setBizTipo;
+window.setDirTipo = setDirTipo;
+window.poblarComunas = poblarComunas;
+window.filtrarPorCategoria = filtrarPorCategoria;
+window.filtrarPorNegocio = filtrarPorNegocio;
+window.abrirElegirCamino = abrirElegirCamino;
+window.mostrarFormulario = mostrarFormulario;
+window.mostrarSeccion = mostrarSeccion;
+window.tryUnlock = tryUnlock;
+window.updateCard = updateCard;
+window.sugerirTamano = sugerirTamano;
+window.closeModal = closeModal;
+window.wizardNext = wizardNext;
+window.wizardBack = wizardBack;
+window.abrirMapa = abrirMapa;
+window.cerrarMapa = cerrarMapa;
+window.toggleDropdown = toggleDropdown;
+window.irABuscar = irABuscar;
+window.refreshAdmin = refreshAdmin;
+window.irADirectorio = irADirectorio;
+window.irAEspecialistas = irAEspecialistas;
+window.irANegocio = irANegocio;
+window.volverAlInicio = volverAlInicio;
+window.setBizEsEspecialista = setBizEsEspecialista;
+window.irASlideBanner = irASlideBanner;
+window.abrirCalificaciones = abrirCalificaciones;
+window.buscarPendientesCalificar = buscarPendientesCalificar;
+window.abrirFormularioCalificar = abrirFormularioCalificar;
+window.enviarCalificacion = enviarCalificacion;
+window.setStarValue = setStarValue;
+window.verDetalleReputacionNegocio = verDetalleReputacionNegocio;
+
+})();
+
+</script>
+</body>
+</html>
