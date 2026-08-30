@@ -4,6 +4,39 @@ Este documento resume TODO lo construido hasta ahora, para que puedas pegarlo al
 conversación nueva (en otra cuenta de Claude, u otra IA como ChatGPT/Gemini) y que quien te ayude
 entienda el proyecto sin que tengas que reexplicar todo desde cero.
 
+## 0. Actualización 30 de agosto — Migración completa de infraestructura
+
+Se migró TODA la infraestructura del proyecto, dejando cero rastro de la anterior. Motivo: la cuenta
+de Netlify anterior se quedó sin minutos de build por el hábito de subir la carpeta completa a mano
+("drag & drop") en cada cambio, en vez de usar control de versiones.
+
+**Qué cambió:**
+- **Control de versiones**: el proyecto ya NO se sube a mano. Ahora vive en un repositorio de GitHub:
+  `https://github.com/mimascotaclub/mi-mascota-club` (rama `main`). Cada cambio se hace con
+  `git add .` → `git commit -m "..."` → `git push`, y Netlify redespliega solo, en segundos (deploy
+  incremental, gasta muchísimos menos minutos que el drag & drop).
+- **Netlify**: cuenta nueva (conectada por GitHub, no por email suelto). Sitio en
+  `https://mimascotaclub.netlify.app`. Auto-publish activado desde la rama `main`.
+- **Supabase**: proyecto nuevo desde cero (el anterior, `ybnibsruzkgtuycgecun`, quedó abandonado —
+  **ya no se usa, ignorar cualquier referencia vieja a esa URL**).
+  - Nuevo Project ID: `mzsqyjxqnomsbqzhygkx`
+  - Nueva URL: `https://mzsqyjxqnomsbqzhygkx.supabase.co`
+  - Nueva publishable key: `sb_publishable_KdIYZfFtnfO2e7VaMMfWAA_GBT79hZ1`
+  - Región: South America (São Paulo)
+  - Se re-ejecutaron en orden, en una base 100% limpia: `supabase-schema.sql` → `v3` → `v4` → `v5` →
+    `v6` → `v7` → `v8` → `v9` → `supabase-fix-permisos.sql`. Todo verificado con éxito paso a paso.
+  - **`supabase-fix-foto.sql` NO se ejecutó** — se detectó que recrea `actualizar_ficha` con la firma
+    vieja de 11 parámetros (incluye nombre/RUT/teléfono del representante), que choca con la versión
+    de 4-5 parámetros que dejó `v3` por motivos de privacidad. Si en el sitio migrado falla la opción
+    de "quitar foto" de la mascota, revisar cuál firma llama realmente `js/app.js` antes de correr
+    ese parche — puede que ya no aplique al diseño actual.
+  - Se recreó el usuario administrador en Authentication → Users con el mismo correo
+    (`holamimascotaclub@gmail.com`) y una contraseña nueva (el usuario la tiene guardada).
+- **Código actualizado**: `js/app.js` e `index-combinado.html` ya apuntan a las credenciales nuevas
+  de Supabase (URL y publishable key de arriba). Cambio subido a GitHub y ya en producción.
+- **Todos los datos del Supabase anterior se perdieron a propósito** (se decidió partir de cero en
+  vez de migrar datos existentes) — la base nueva está vacía, lista para registros reales.
+
 ## 1. Qué es el proyecto
 
 "Mi Mascota Club" es un club de beneficios para dueños de mascotas en Chile (piloto en Santiago).
@@ -16,10 +49,13 @@ mostrarle a los negocios el valor real de estar en el club.
 
 - **Frontend**: HTML + CSS + JavaScript vanilla (sin frameworks), un solo archivo `index.html` que
   referencia `css/styles.css` y `js/app.js`.
-- **Hosting**: Netlify (gratis), sitio publicado en `https://tranquil-torte-695e25.netlify.app/`
-  (puede cambiar si se vuelve a subir a un nuevo "drop" de Netlify).
-- **Base de datos**: Supabase (Postgres), proyecto ya creado. URL: `https://ybnibsruzkgtuycgecun.supabase.co`
-  Clave pública (publishable key, segura de exponer en el navegador): `sb_publishable_pBEeTEOopiaqqFKgH1nKLw_B4QRdepP`
+- **Hosting**: Netlify (gratis), conectado a GitHub — deploys automáticos con cada `git push` a
+  `main` (ya no se sube a mano). Sitio publicado en `https://mimascotaclub.netlify.app`.
+- **Control de versiones**: GitHub, repo `https://github.com/mimascotaclub/mi-mascota-club`, rama
+  `main`. Flujo: `git add .` → `git commit -m "..."` → `git push`.
+- **Base de datos**: Supabase (Postgres), proyecto recreado el 30 de agosto (ver sección 0).
+  URL: `https://mzsqyjxqnomsbqzhygkx.supabase.co`
+  Clave pública (publishable key, segura de exponer en el navegador): `sb_publishable_KdIYZfFtnfO2e7VaMMfWAA_GBT79hZ1`
 - **Seguridad**: Row Level Security (RLS) activado. Los datos sensibles de socios (RUT, teléfono,
   email) NUNCA se leen directo desde el navegador — solo mediante funciones controladas (RPC) o el
   panel de administrador con login real (Supabase Auth).
