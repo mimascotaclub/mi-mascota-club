@@ -37,6 +37,72 @@ de Netlify anterior se quedó sin minutos de build por el hábito de subir la ca
 - **Todos los datos del Supabase anterior se perdieron a propósito** (se decidió partir de cero en
   vez de migrar datos existentes) — la base nueva está vacía, lista para registros reales.
 
+## 0.1 Continuación (misma sesión, 30 de agosto) — Formulario paso a paso + verificación OTP
+
+Se construyó un formulario de registro nuevo, tipo "una pregunta por pantalla" (estilo Typeform),
+con la identidad visual del club (negro/amarillo/turquesa, Lato), **verificación real de correo por
+código (OTP)**, y ya probado de punta a punta con un registro real.
+
+**Archivo del formulario:** `formulario-registro-demo-v2.html` (vive suelto en la raíz del proyecto
+por ahora, en `https://mimascotaclub.netlify.app/formulario-registro-demo-v2.html` — **todavía NO
+reemplaza el formulario de registro dentro de `index.html`/`index-combinado.html`**, eso queda
+pendiente, ver sección "Próximos pasos" abajo).
+
+**Preguntas del flujo, en orden:** nombre completo → nombre de mascota → especie (tarjetas
+perro/gato/otro) → raza (buscador con lista que cambia según especie) → edad/peso/tamaño
+(desplegables con rangos fijos) → dirección (sin verificar, campo libre) → celular (sin verificar) →
+correo → **código OTP de 6 dígitos** → selección de plan (Free/Pro/Premium) → pantalla final con el
+código de socio real y resumen.
+
+**Sistema de verificación de correo (OTP) — arquitectura:**
+- Tabla nueva `codigos_verificacion` (email, codigo, usado, expira_en) — sin políticas RLS de
+  select/insert para "anon", solo accesible por la Service Role Key o por la función de abajo.
+- Función SQL `verificar_codigo_email(p_email, p_codigo)` — valida y marca como usado. Ejecutada
+  vía `supabase-fix-v10.sql`.
+- Netlify Function `netlify/functions/enviar-codigo.js` — genera el código de 6 dígitos, lo guarda en
+  Supabase con la Service Role Key (nunca expuesta al navegador), y dispara el correo vía la API
+  REST de EmailJS usando la Private Key (también oculta, solo en el servidor).
+- Variables de entorno agregadas en Netlify (Project configuration → Environment variables), **sin
+  marcar "Contains secret values"** porque esa opción requiere plan pago — quedaron visibles en el
+  panel de Netlify pero eso es aceptable para este proyecto (solo Jaime tiene acceso):
+  `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID_OTP`,
+  `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY`.
+- En EmailJS: se creó el template `template_73lwbzc` (categoría "One-Time Password") para el correo
+  con el código, y se activó **"Allow EmailJS API for non-browser applications"** en Account →
+  Security (sin esto, la Netlify Function no podía llamar a la API — daba error 500).
+- Protección anti-bot simple: un campo "honeypot" invisible (`#honeypot`) — si llega lleno, el
+  registro se descarta en silencio.
+
+**Registro real + correo de bienvenida (plan Free):**
+- Al confirmar plan Free, el formulario llama a `registrar_socio()` (RPC real de Supabase) con los
+  datos recolectados. Comuna y RUT del representante se envían vacíos (`''`) porque el formulario no
+  los pregunta — son nullable en la tabla, así que no rompe nada, pero es una limitación a mejorar.
+- Con el código de socio que devuelve `registrar_socio()`, se envía el correo de bienvenida usando el
+  template YA EXISTENTE `template_u9x5p1i` (el de siempre, con variables `to_name`, `codigo`,
+  `mensaje_extra`), esta vez sí vía el SDK de EmailJS en el navegador (con la Public Key, que es
+  segura de exponer).
+- **Probado end-to-end con éxito**: se generó el socio `MMC00001` real en la tabla `socios`, y llegó
+  el correo de bienvenida con el logo visible.
+- Planes Pro/Premium: el botón hoy solo muestra una alerta ("pendiente de integrar Mercado Pago") —
+  no hay checkout real todavía.
+
+**Detalle importante resuelto — visibilidad del sitio:** el proyecto de Netlify tenía activada
+"Visitor access" en modo Private, lo que bloqueaba el logo en los correos (Gmail/Apple Mail no
+podían cargar la imagen porque no están "logueados" en Netlify) y bloqueaba cualquier prueba en
+modo incógnito. Se cambió a **Public** en Project configuration → Visitor access → Edit visibility.
+
+**Próximos pasos (pendientes para siguiente sesión):**
+1. **Integrar `formulario-registro-demo-v2.html` dentro de `index.html`/`index-combinado.html` real**,
+   reemplazando el formulario de registro de socio actual — pendiente porque Claude no tenía ese
+   archivo cargado en esta sesión y prefirió no arriesgarse a romperlo sin verlo primero.
+2. **Construir el equivalente para registro de negocios/especialistas**: mismo patrón paso a paso,
+   con un selector inicial que diferencia "Negocio" vs "Especialista individual" (ya existe la
+   columna `es_especialista` en la tabla `negocios` desde el parche v8).
+3. **Conectar Mercado Pago (Preapproval API)** para que elegir Pro/Premium dispare un checkout real,
+   en vez de la alerta placeholder actual.
+4. Revisar `supabase-fix-foto.sql` (ver nota en sección 0) — sigue sin ejecutarse.
+5. Considerar agregar comuna y RUT del representante al formulario, ya que hoy quedan vacíos.
+
 ## 1. Qué es el proyecto
 
 "Mi Mascota Club" es un club de beneficios para dueños de mascotas en Chile (piloto en Santiago).
