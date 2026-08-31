@@ -232,6 +232,10 @@
 
 <input type="text" name="sitio_web" id="honeypot" style="position:absolute; left:-9999px;" tabindex="-1" autocomplete="off">
 
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init({ publicKey: "9eL8mW9_T5HjOEAYe" });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // Reemplaza por tu URL y publishable key reales (las mismas que usa app.js)
@@ -539,11 +543,56 @@ function renderPaso(index, direccion){
         btn.textContent = card.dataset.plan === 'free' ? 'Confirmar registro' : 'Ir a pagar';
       });
     });
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', async ()=>{
       if(respuestas.plan !== 'free'){
         alert('Aquí se conectará el checkout de Mercado Pago (pendiente de integrar).');
+        return;
       }
-      avanzar();
+      btn.textContent = 'Registrando...';
+      btn.classList.remove('activo');
+      try{
+        const { data, error } = await window.supabase.rpc('registrar_socio', {
+          p_pet: respuestas.mascota,
+          p_species: respuestas.especie,
+          p_breed: respuestas.raza,
+          p_comuna: '',
+          p_email: respuestas.correo,
+          p_edad: respuestas.edad,
+          p_peso: respuestas.peso,
+          p_tamano: respuestas.tamano,
+          p_representante_nombre: respuestas.nombre,
+          p_representante_rut: '',
+          p_representante_telefono: respuestas.celular,
+          p_foto: null,
+          p_documentos: null,
+          p_notas_medicas: null
+        });
+        if(error || !data || !data[0]){
+          alert('No se pudo registrar: ' + (error?.message || 'error desconocido'));
+          btn.textContent = 'Confirmar registro';
+          btn.classList.add('activo');
+          return;
+        }
+        respuestas.codigo_socio = data[0].codigo;
+
+        // Correo de bienvenida (público, seguro de enviar desde el navegador)
+        try{
+          await emailjs.send('service_ch7ncxl', 'template_u9x5p1i', {
+            to_email: respuestas.correo,
+            to_name: respuestas.nombre,
+            codigo: respuestas.codigo_socio,
+            mensaje_extra: '¡Bienvenido a la comunidad! Explora el directorio y empieza a disfrutar tus beneficios.'
+          });
+        } catch(emailErr){
+          console.warn('El registro se guardó, pero el correo de bienvenida falló:', emailErr);
+        }
+
+        avanzar();
+      } catch(e){
+        alert('Error de conexión al registrar: ' + e.message);
+        btn.textContent = 'Confirmar registro';
+        btn.classList.add('activo');
+      }
     });
   }
 
@@ -595,6 +644,7 @@ function mostrarFinal(){
       <h1 class="pregunta">¡Bienvenido al club, ${respuestas.nombre.split(' ')[0]}!</h1>
       <p style="color:rgba(255,255,255,0.6); font-size:15px;">Te enviamos el carnet de ${respuestas.mascota} a ${respuestas.correo}</p>
       <div class="resumen">
+        <div class="resumen-row"><span>Código de socio</span><b style="color:var(--amarillo);">${respuestas.codigo_socio || '—'}</b></div>
         <div class="resumen-row"><span>Dueño/a</span><b>${respuestas.nombre}</b></div>
         <div class="resumen-row"><span>Mascota</span><b>${respuestas.mascota}</b></div>
         <div class="resumen-row"><span>Especie / Raza</span><b>${respuestas.especie} · ${respuestas.raza}</b></div>
