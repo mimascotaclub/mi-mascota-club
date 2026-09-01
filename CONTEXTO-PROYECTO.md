@@ -103,6 +103,88 @@ modo incógnito. Se cambió a **Public** en Project configuration → Visitor ac
 4. Revisar `supabase-fix-foto.sql` (ver nota en sección 0) — sigue sin ejecutarse.
 5. Considerar agregar comuna y RUT del representante al formulario, ya que hoy quedan vacíos.
 
+## 0.2 Continuación (sesión noche 31 de agosto) — Pulido del formulario + checklist de prioridades
+
+**Archivo vigente del formulario:** `formulario-registro-demo-v3.html` (reemplaza a la v2, mismo lugar:
+raíz del proyecto, `https://mimascotaclub.netlify.app/formulario-registro-demo-v3.html`). Sigue sin
+estar integrado dentro de `index.html`/`index-combinado.html` real.
+
+**Cambios hechos en esta sesión (todos ya en producción):**
+- Se quitaron los campos "Dirección" y "Celular" del formulario (no había forma de validarlos sin
+  costo, así que se decidió no pedirlos en el registro inicial).
+- Se agregó un campo **RUT** con validación real en el navegador: formatea en vivo (`12.345.678-9`)
+  y valida el dígito verificador con el algoritmo módulo 11 chileno (funciones `validarRut()` y
+  `formatearRut()` en el JS del formulario). Sin esto, `registrar_socio()` recibía RUT vacío.
+- Las listas `RAZAS_PERRO` y `RAZAS_GATO` quedaron ordenadas alfabéticamente (antes estaban sin orden).
+- Se agregó feedback visual claro en el paso del RUT: texto turquesa "✓ RUT válido" cuando es
+  correcto, texto rojo cuando no, en vez de quedar ambiguo como antes.
+- Se agregó un botón "Ir al inicio" en la pantalla final de bienvenida, que lleva a
+  `https://mimascotaclub.netlify.app` — decisión tomada en vez de un auto-redirect, para no cortar
+  la sensación de logro justo al terminar el registro.
+- **Animación de la mascota tapándose los ojos** en el paso de ingresar el código OTP: un SVG simple
+  (perro amarillo con patitas) que, mediante clases CSS (`mascota-tapada`, `mascota-espiando`)
+  activadas por JS al detectar dígitos escritos en las casillas, tapa los ojos con las patitas al
+  empezar a escribir el código, "espía" cada ~2.2 segundos, y se destapa al verificar con éxito o al
+  borrar todo el código. Es la animación principal pedida por Jaime — patrón que vio hace años y
+  quería replicar para gamificar el paso de verificación.
+- Se ocultó el **badge "Powered by Netlify"** desde Netlify → Project configuration → busca "Powered
+  by Netlify badge" → Configure → desactivar. Confirmado: "The badge is not shown on this project."
+
+**Estado de la lista completa de ideas (lluvia de ideas de la tarde/noche del 31 de agosto):**
+
+✅ Completado hoy:
+1. Quitar dirección del formulario
+2. Quitar celular del formulario
+3. Agregar RUT con validación real
+4. Ordenar razas alfabéticamente
+5. Botón "Ir al inicio" en pantalla final
+6. Animación de mascota tapándose los ojos en el paso del código
+7. Quitar badge de Netlify
+
+⏳ Pendiente, priorizado (de más a menos urgente):
+1. **Mercado Pago**: botón de pago (Preapproval, pagos recurrentes) + función que genera el link de
+   pago + función webhook que recibe la confirmación y actualiza el plan del socio en Supabase de
+   `free` a `pro`/`premium`. Mercado Pago manda su propio correo de confirmación al cliente — NO hay
+   que duplicar eso con EmailJS.
+2. **Botón "Completa tu perfil"** en el correo de bienvenida (`template_u9x5p1i`) + página de perfil
+   donde se completan después: foto de la mascota, dirección, celular — filosofía de "progressive
+   profiling" (pedir lo mínimo al inicio, completar después ya con el usuario dentro). Incluye un
+   banner/aviso: "Completa tu información para disfrutar los beneficios."
+3. **Acceso privado a "Mi Mascota ID"**: reutilizar el mismo mecanismo OTP ya construido — la persona
+   pone su código MMC, se le manda un código nuevo a su correo registrado, lo ingresa, y ahí ve/edita
+   su perfil. No requiere contraseña ni sistema nuevo, es el mismo flujo de esta noche aplicado a una
+   segunda pantalla. Debe ser información privada, no una página pública.
+4. **Integrar `formulario-registro-demo-v3.html` dentro del `index.html`/`index-combinado.html`
+   real**, reemplazando el formulario de registro de socio actual — Claude no tiene ese archivo
+   cargado todavía, hay que subirlo en la próxima sesión antes de tocar esto.
+5. **Formulario de negocios/especialistas**: mismo patrón paso a paso, con selector inicial que
+   diferencia "Negocio" vs "Especialista individual" (usa la columna `es_especialista` ya existente
+   en la tabla `negocios`, del parche v8). Importante: NO es un formulario nuevo por cada plan — son
+   solo 2 formularios en total (socio y negocio/especialista), cada uno con una bifurcación al final
+   (Free/Presencia se registra directo, planes pagados van a Mercado Pago).
+6. Revisar `supabase-fix-foto.sql` (housekeeping, sigue sin resolverse desde la migración).
+7. (Opcional, sin urgencia) Login con Google en un clic vía Supabase Auth — técnicamente simple y
+   gratis (OAuth, se configura una vez en Google Cloud Console sin necesidad de tarjeta), pero no es
+   prioritario ahora.
+
+**Límites de servicios gratuitos a tener en cuenta (investigado hoy):**
+- **EmailJS free**: máximo 2 templates y 200 correos/mes. Ya se están usando los 2 templates
+  disponibles (`template_73lwbzc` para OTP, `template_u9x5p1i` para bienvenida) — para negocios o
+  cualquier mensaje nuevo, hay que **reutilizar estos mismos 2 templates** cambiando el contenido vía
+  variables (ej. `mensaje_extra`), no crear templates nuevos, salvo que se pague el plan Personal
+  ($9 USD/mes, sube a 6 templates y 2.000 correos/mes).
+- **Supabase free**: sin límite de cantidad de tablas/funciones, solo limita espacio total (500MB) —
+  no es una preocupación real a esta escala.
+- **Netlify free**: sin límite de cantidad de funciones distintas, solo de invocaciones mensuales
+  (125.000/mes) — tampoco es preocupación a esta escala.
+
+**Contexto de negocio (conversación aparte, no técnica):** Jaime preguntó por precio de venta del
+proyecto a una empresa y sobre si sus habilidades aplican a un perfil de Product Designer. Se le dio
+una calificación honesta del proyecto (6.5-7/10 en fase actual, MVP real y funcional, con el riesgo
+típico de "arranque en frío" de todo marketplace de doble cara). Se le recomendó enfocar el esfuerzo
+en conseguir 20-30 negocios reales en su comuna antes de pensar en vender a marcas grandes (ej.
+Purina) o replicar el modelo a otros nichos — ambas ideas son válidas a futuro, pero prematuras ahora.
+
 ## 1. Qué es el proyecto
 
 "Mi Mascota Club" es un club de beneficios para dueños de mascotas en Chile (piloto en Santiago).
