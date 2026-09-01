@@ -281,6 +281,8 @@ function validarRut(rutCompleto){
   const cuerpo = rutCompleto.slice(0,-1);
   let dv = rutCompleto.slice(-1).toUpperCase();
   if(!/^\d+$/.test(cuerpo)) return false;
+  if(/^(\d)\1*$/.test(cuerpo)) return false; // rechaza 000000, 111111, 22222222, etc.
+  if(cuerpo.length < 7) return false; // RUTs reales en Chile parten en 7 dígitos como mínimo
   let suma = 0, multiplo = 2;
   for(let i = cuerpo.length - 1; i >= 0; i--){
     suma += parseInt(cuerpo[i]) * multiplo;
