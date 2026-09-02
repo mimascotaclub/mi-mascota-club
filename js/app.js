@@ -328,6 +328,18 @@ function manejarRutaActual(){
 window.addEventListener('popstate', manejarRutaActual);
 
 /* ---------------- Flujo de entrada: elegir camino antes de mostrar el formulario ---------------- */
+function irAMiMascota(){
+  openModal(`
+    <div style="text-align:center;padding:6px 2px 4px;">
+      <h3 style="margin:0 0 6px;">🐾 Perfil de tu mascota</h3>
+      <p style="font-size:13.5px;color:#5a6259;margin:0 0 22px;">
+        Muy pronto vas a poder entrar aquí con un código para ver y completar el perfil de tu mascota (foto y datos finales).
+        Si todavía no te has registrado, partamos por ahí.
+      </p>
+      <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="mostrarFormulario('dueno')">🐾 Quiero registrar mi mascota</button>
+    </div>
+  `);
+}
 function abrirElegirCamino(){
   openModal(`
     <div style="text-align:center;padding:6px 2px 4px;">
