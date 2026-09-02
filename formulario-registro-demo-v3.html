@@ -720,7 +720,8 @@ function renderPaso(index, direccion){
     });
   }
 
-  btnVolver.classList.toggle('visible', index > 0);
+  btnVolver.classList.add('visible');
+  btnVolver.textContent = index > 0 ? '← Atrás' : '← Volver al inicio';
   progresoBar.style.width = ((index+1)/preguntas.length*100) + '%';
   progresoTexto.textContent = `${index+1} / ${preguntas.length}`;
 
@@ -740,7 +741,10 @@ function avanzar(){
 }
 
 function retroceder(){
-  if(pasoActual===0) return;
+  if(pasoActual===0){
+    window.location.href = 'index.html';
+    return;
+  }
   const actualDiv = stage.querySelector('.paso.activo');
   if(actualDiv) actualDiv.classList.add('saliendo');
   pasoActual--;
