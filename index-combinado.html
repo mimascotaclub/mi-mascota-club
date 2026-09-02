@@ -1391,6 +1391,11 @@ function abrirElegirCamino(){
   `);
 }
 function mostrarFormulario(tipo){
+  if(tipo === 'dueno'){
+    // El registro de mascota ahora usa el formulario animado v3 (con verificación OTP)
+    window.location.href = 'formulario-registro-demo-v3.html';
+    return;
+  }
   closeModal();
   // Si veníamos de la página del directorio, volvemos primero al inicio para
   // que el formulario aparezca en la página principal, como siempre.
