@@ -380,6 +380,27 @@ body.pagina-ficha #fichaNegocio{
 }
 body.pagina-ficha .announce-bar{ display:none; }
 
+/* ======================= Planes como página propia (/planes) =======================
+   Igual que el directorio y la ficha: #planes deja de ser una sección del home (antes
+   se llegaba con scroll) y por defecto queda oculta; solo se muestra a pantalla completa
+   cuando el body tiene la clase .pagina-planes. */
+#planes{ display:none; }
+body.pagina-planes .hero,
+body.pagina-planes #categorias,
+body.pagina-planes #como-funciona,
+body.pagina-planes #negocios,
+body.pagina-planes #validar,
+body.pagina-planes #panel,
+body.pagina-planes #directorio,
+body.pagina-planes #fichaNegocio{
+  display:none !important;
+}
+body.pagina-planes #planes{
+  display:block;
+  min-height:calc(100vh - 140px);
+}
+body.pagina-planes .announce-bar{ display:none; }
+
 /* ======================= Banner de página (5 slides, degradados) =======================
    Se usa arriba del directorio, de especialistas y de la ficha de cada negocio.
    Rota sola cada 5s (renderPageBanner en js/app.js); si solo hay 1 slide (ficha de un

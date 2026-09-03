@@ -223,6 +223,10 @@ const BANNER_BENEFICIOS = [
   { cat: 'Beneficios para ti como dueño' },
   { cat: 'Descuentos de negocios verificados' },
 ];
+const BANNER_PLANES = [
+  { cat: 'Planes para dueños de mascota' },
+  { cat: 'Planes para negocios y especialistas' },
+];
 let pageBannerTimers = {};
 function renderPageBanner(containerId, slides){
   const el = document.getElementById(containerId);
@@ -301,15 +305,33 @@ function irABeneficios(opts){
   history.pushState({ beneficios:true, ...opts }, '', path);
   mostrarPaginaDirectorio({ ...opts, beneficios:true });
 }
+/* Planes: página propia (/planes), separada del home — antes era una sección
+   más de la página principal (#planes) a la que se llegaba con scroll. No tiene
+   filtros como el directorio, así que no reutiliza mostrarPaginaDirectorio: solo
+   alterna la clase del body (igual que pagina-directorio/pagina-ficha) y pinta
+   su propio banner. */
+function mostrarPaginaPlanes(){
+  document.body.classList.remove('pagina-directorio');
+  document.body.classList.remove('pagina-ficha');
+  document.body.classList.add('pagina-planes');
+  renderPageBanner('planesBanner', BANNER_PLANES);
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+}
+function irAPlanes(){
+  history.pushState({ planes:true }, '', '/planes');
+  mostrarPaginaPlanes();
+}
 function volverAlInicio(){
   document.body.classList.remove('pagina-directorio');
   document.body.classList.remove('pagina-ficha');
+  document.body.classList.remove('pagina-planes');
   if(location.pathname !== '/') history.pushState({}, '', '/');
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 function mostrarPaginaDirectorio(opts){
   opts = opts || {};
   document.body.classList.remove('pagina-ficha');
+  document.body.classList.remove('pagina-planes');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
   modoDirectorioBeneficios = !!opts.beneficios;
@@ -342,11 +364,14 @@ function manejarRutaActual(){
   } else if(parts[0] === 'beneficios'){
     const found = parts[1] ? catBySlug(parts[1]) : null;
     mostrarPaginaDirectorio(found ? { cat: found.cat, tipo: found.tipo, beneficios:true } : { beneficios:true });
+  } else if(parts[0] === 'planes'){
+    mostrarPaginaPlanes();
   } else if(parts[0] === 'negocio' && parts[1]){
     mostrarPaginaFichaPorSlug(parts[1]);
   } else {
     document.body.classList.remove('pagina-directorio');
     document.body.classList.remove('pagina-ficha');
+    document.body.classList.remove('pagina-planes');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
@@ -383,9 +408,9 @@ function mostrarFormulario(tipo){
     return;
   }
   closeModal();
-  // Si veníamos de la página del directorio, volvemos primero al inicio para
-  // que el formulario aparezca en la página principal, como siempre.
-  if(document.body.classList.contains('pagina-directorio')) volverAlInicio();
+  // Si veníamos de una página propia (directorio o planes), volvemos primero al
+  // inicio para que el formulario aparezca en la página principal, como siempre.
+  if(document.body.classList.contains('pagina-directorio') || document.body.classList.contains('pagina-planes')) volverAlInicio();
   const section = document.getElementById('negocios');
   const panelNegocio = document.getElementById('panelNegocio');
   const panelDueno = document.getElementById('duenos');
@@ -564,7 +589,7 @@ function resetValidacionesForm(formEl){
   });
 }
 function mostrarSeccion(id){
-  if(document.body.classList.contains('pagina-directorio')) volverAlInicio();
+  if(document.body.classList.contains('pagina-directorio') || document.body.classList.contains('pagina-planes')) volverAlInicio();
   const el = document.getElementById(id);
   if(!el) return;
   el.style.display = '';
@@ -761,11 +786,13 @@ function mostrarPaginaFichaPorSlug(slug){
   const n = negocioPorSlug(slug);
   if(n){ mostrarPaginaFicha(n); return; }
   document.body.classList.remove('pagina-directorio');
+  document.body.classList.remove('pagina-planes');
   document.body.classList.add('pagina-ficha');
   document.getElementById('fichaContent').innerHTML = `<div class="empty-state">No encontramos esta ficha. <a href="/directorio" onclick="event.preventDefault(); irADirectorio({});" style="color:var(--brass);text-decoration:underline;">Volver al directorio →</a></div>`;
 }
 function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-directorio');
+  document.body.classList.remove('pagina-planes');
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
@@ -1327,7 +1354,7 @@ async function buscarPendientesCalificar(){
       box.innerHTML = `<div class="rep-locked">
         Calificar visitas es un beneficio de los planes <b>${v.rol==='socio' ? 'Pro/Premium' : 'Premium'}</b>.
         Hoy tu plan es <b>${planLabel ? (v.rol==='socio'?planLabel(v.plan):v.plan) : v.plan}</b>.<br><br>
-        <a href="#planes" onclick="closeModal(); mostrarSeccion('planes');" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver planes →</a>
+        <a href="/planes" onclick="closeModal(); event.preventDefault(); irAPlanes();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver planes →</a>
       </div>`;
       return;
     }
@@ -1433,7 +1460,7 @@ async function verDetalleReputacionNegocio(negocioCodigo){
     const { data, error } = await supabase.rpc('detalle_validaciones_negocio', { p_negocio_codigo: negocioCodigo, p_codigo_consultante: codigo });
     if(error) throw error;
     if(!data || !data.length){
-      out.innerHTML = `<div class="rep-locked">Ver el detalle de reseñas es un beneficio de los planes Pro/Premium (o todavía no hay reseñas visibles).<br><a href="#planes" onclick="mostrarSeccion('planes');" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver planes →</a></div>`;
+      out.innerHTML = `<div class="rep-locked">Ver el detalle de reseñas es un beneficio de los planes Pro/Premium (o todavía no hay reseñas visibles).<br><a href="/planes" onclick="event.preventDefault(); irAPlanes();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver planes →</a></div>`;
       return;
     }
     out.innerHTML = data.map(c => `
@@ -1573,6 +1600,7 @@ window.refreshAdmin = refreshAdmin;
 window.irADirectorio = irADirectorio;
 window.irAEspecialistas = irAEspecialistas;
 window.irABeneficios = irABeneficios;
+window.irAPlanes = irAPlanes;
 window.irAMiMascota = irAMiMascota;
 window.irANegocio = irANegocio;
 window.volverAlInicio = volverAlInicio;
