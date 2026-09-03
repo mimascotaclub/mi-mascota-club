@@ -339,6 +339,15 @@ footer{ padding:44px 0; border-top:2px solid var(--line); background:var(--paper
   .wizard-label{ font-size:9.5px; max-width:62px; }
 }
 
+/* ======================= Secciones del home ocultas por ahora =======================
+   "Explora por categoría" (grilla de 18 categorías) y la fila "★ Destacados" del
+   directorio (arriba del listado, en /directorio, /especialistas y /beneficios): el
+   negocio pidió sacarlas de la vista por ahora. El código queda intacto (igual que se
+   hizo con los links de Especialistas y Mi Mascota del menú) por si se retoman más
+   adelante — solo se ocultan con CSS. */
+#categorias{ display:none !important; }
+#featuredStripWrap{ display:none !important; }
+
 /* ======================= Directorio como página propia (/directorio/...) =======================
    El directorio deja de ser "una sección más" del home: por defecto queda OCULTO de la
    página principal, y solo se muestra —a pantalla completa, como si fuera otra página—

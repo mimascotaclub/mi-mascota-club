@@ -57,6 +57,10 @@ const iconByCat = {
 };
 const CATS_MASCOTA = ["Veterinaria","Peluquería","Paseador","Hotel / Pensión","Tienda","Alimentos","Salud","Accesorios","Adiestramiento","Fotografía"];
 const CATS_DUENO = ["Café","Restaurante","Hotel","Deporte","Barbería","Belleza","Tienda","Otro"];
+/* Todas las categorías del directorio (las mismas 18 de "Explora por categoría"),
+   en orden alfabético — se usan para llenar el filtro de categoría del directorio
+   completo, no solo las que ya tienen algún negocio cargado. */
+const ALL_DIR_CATS = [...new Set([...CATS_MASCOTA, ...CATS_DUENO])].sort((a,b)=>a.localeCompare(b,'es'));
 const DESCUENTO_EJEMPLO = 0.10;
 
 /* ---------------- Regiones y comunas de Chile (16 regiones, 346 comunas) ----------------
@@ -81,6 +85,9 @@ const CHILE_REGIONES = [
   { region: "Magallanes y la Antártica Chilena", comunas: ["Antártica","Cabo de Hornos","Laguna Blanca","Natales","Porvenir","Primavera","Punta Arenas","Río Verde","San Gregorio","Timaukel","Torres del Paine"] },
 ];
 const REGION_POR_DEFECTO = "Metropolitana de Santiago";
+/* Todas las comunas de Chile (las 346 de CHILE_REGIONES), sin duplicados y en orden
+   alfabético — se usan para llenar el filtro de comuna del directorio completo. */
+const ALL_COMUNAS_CHILE = [...new Set(CHILE_REGIONES.flatMap(r => r.comunas))].sort((a,b)=>a.localeCompare(b,'es'));
 
 /* Rellena un <select> de regiones. */
 function poblarRegiones(selectId){
@@ -648,14 +655,17 @@ function updateCounts(){
 /* ---------------- Directorio ---------------- */
 function combinedNegocios(){ return [...negociosReal, ...negociosSeed]; }
 
+/* Llena los <select> de categoría y comuna del directorio con las listas COMPLETAS
+   (ALL_DIR_CATS / ALL_COMUNAS_CHILE), no solo las que ya tienen algún negocio cargado —
+   así se puede filtrar por cualquier categoría o comuna del país aunque todavía no haya
+   negocios ahí. Se llama una sola vez al iniciar (las listas son fijas, no dependen de
+   los datos de Supabase), y mostrarPaginaDirectorio() confía en que ya están pobladas
+   antes de fijar dirCat.value / dirComuna.value según la URL. */
 function refreshFilterOptions(){
-  const all = combinedNegocios();
-  const cats = [...new Set(all.map(n=>n.cat))];
-  const comunas = [...new Set(all.map(n=>n.comuna))].sort();
   const catSelect = document.getElementById('dirCat'), comunaSelect = document.getElementById('dirComuna');
   const curCat = catSelect.value, curComuna = comunaSelect.value;
-  catSelect.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option ${c===curCat?'selected':''}>${c}</option>`).join('');
-  comunaSelect.innerHTML = '<option value="">Todas las comunas</option>' + comunas.map(c=>`<option ${c===curComuna?'selected':''}>${c}</option>`).join('');
+  catSelect.innerHTML = '<option value="">Todas las categorías</option>' + ALL_DIR_CATS.map(c=>`<option ${c===curCat?'selected':''}>${c}</option>`).join('');
+  comunaSelect.innerHTML = '<option value="">Todas las comunas</option>' + ALL_COMUNAS_CHILE.map(c=>`<option ${c===curComuna?'selected':''}>${c}</option>`).join('');
 }
 
 /* Íconos circulares de contacto para la tarjeta del directorio.
@@ -715,7 +725,6 @@ function bizCardInnerHTML(n, destacado){
       </div>`;
 }
 function renderDirectory(){
-  refreshFilterOptions();
   const qRaw = document.getElementById('dirSearch').value.trim().toLowerCase();
   const cat = document.getElementById('dirCat').value, comuna = document.getElementById('dirComuna').value;
   const grid = document.getElementById('dirGrid');
@@ -1558,8 +1567,17 @@ renderFanCarousel();
 document.getElementById('heroSearch').style.transition = 'opacity .2s ease';
 setInterval(rotarSugerenciaHero, 2600);
 setBizTipo('mascota');
+refreshFilterOptions(); // listas fijas (categorías/comunas) — se llenan una sola vez, antes de leer la URL
 setDirTipo('');
 manejarRutaActual(); // si se entra directo a /directorio/... (o se refresca ahí), se muestra esa vista de inmediato
+
+// Buscar y filtrar en el directorio en vivo: antes solo se refrescaba al tocar una de
+// las pestañas (Todos/Para tu mascota/Para ti como dueño); escribir en el buscador o
+// cambiar categoría/comuna no hacía nada hasta tocar una pestaña. Ahora cada uno
+// dispara renderDirectory() de inmediato.
+document.getElementById('dirSearch').addEventListener('input', renderDirectory);
+document.getElementById('dirCat').addEventListener('change', renderDirectory);
+document.getElementById('dirComuna').addEventListener('change', renderDirectory);
 
 // Campos con formato y validación estricta en vivo (RUT, teléfono CL, correo)
 initRutField('ownerRepRut', 'fieldOwnerRut', 'ownerRepRutMsg');
