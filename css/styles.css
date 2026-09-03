@@ -51,6 +51,10 @@ nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.92); back
 
 .btn-outline{ background:#fff; border-color:var(--ink); color:var(--ink); }
 .btn-brass{ background:var(--teal); color:#fff; box-shadow:0 3px 0 var(--teal-dark); }
+/* Botón "Quiero unirme al club" del nav: celeste por defecto (mismo tono que el
+   "para tu mascota" del hero), pasa a amarillo con texto negro en hover/focus/press. */
+.btn-nav-join{ background:var(--teal-dark); color:#fff; box-shadow:0 3px 0 #257e7e; }
+.btn-nav-join:hover, .btn-nav-join:focus-visible, .btn-nav-join:active{ background:var(--yellow); color:var(--black); box-shadow:0 3px 0 var(--yellow-dark); }
 .btn-navy{ background:var(--black); color:#fff; }
 .btn-sm{ padding:9px 15px; font-size:13px; }
 

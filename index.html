@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<div class="announce-bar" id="announceBar">🎉 <b>Nuevo en el club:</b> cada semana sumamos más negocios y beneficios.</div>
+<div class="announce-bar" id="announceBar">🎉 Cada semana sumamos nuevos negocios y beneficios.</div>
 
 <nav>
   <div class="navbar">
@@ -42,24 +42,12 @@
           </div>
         </div>
       </div>
-      <div class="nav-dropdown">
-        <button class="nav-dropdown-btn" onclick="toggleDropdown('beneficiosDropdown')">Beneficios <span class="caret">▾</span></button>
-        <div class="nav-dropdown-panel wide" id="beneficiosDropdown">
-          <div class="dd-col">
-            <div class="dd-col-title">🐶 Para tu mascota</div>
-            <div id="ddBeneficiosMascota"></div>
-          </div>
-          <div class="dd-col">
-            <div class="dd-col-title">👤 Para ti</div>
-            <div id="ddBeneficiosDueno"></div>
-          </div>
-        </div>
-      </div>
-      <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();">Especialistas</a>
-      <a href="#duenos" onclick="event.preventDefault(); irAMiMascota();">Mi Mascota</a>
+      <a href="/beneficios" onclick="event.preventDefault(); irABeneficios();">Beneficios</a>
+      <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();" style="display:none;" aria-hidden="true">Especialistas</a>
+      <a href="#duenos" onclick="event.preventDefault(); irAMiMascota();" style="display:none;" aria-hidden="true">Mi Mascota</a>
       <a href="#planes">Planes</a>
     </div>
-    <a href="#negocios" class="btn btn-primary btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
+    <a href="#negocios" class="btn btn-nav-join btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
   </div>
 </nav>
 

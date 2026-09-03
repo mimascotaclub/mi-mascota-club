@@ -121,6 +121,7 @@ let negociosReal = [];
 let sociosCount = 0;
 let canjesCount = 0;
 let modoDirectorioEspecialistas = false;
+let modoDirectorioBeneficios = false;
 let bizEsEspecialista = false;
 
 /* Alterna, en el paso 1 del formulario de negocio, si la ficha que se está creando es
@@ -217,6 +218,11 @@ const BANNER_ESPECIALISTAS = [
   { cat: 'Fisioterapia y rehabilitación' },
   { cat: 'Especialistas para ti como dueño' },
 ];
+const BANNER_BENEFICIOS = [
+  { cat: 'Beneficios para tu mascota' },
+  { cat: 'Beneficios para ti como dueño' },
+  { cat: 'Descuentos de negocios verificados' },
+];
 let pageBannerTimers = {};
 function renderPageBanner(containerId, slides){
   const el = document.getElementById(containerId);
@@ -281,6 +287,20 @@ function irAEspecialistas(opts){
   history.pushState({ especialistas:true, ...opts }, '', path);
   mostrarPaginaDirectorio({ ...opts, especialistas:true });
 }
+/* Igual que las anteriores, pero para /beneficios — filtra el directorio para
+   mostrar solo los negocios que tienen un beneficio de socio cargado
+   (beneficioDetalle), en vez de la vista previa de 3 ejemplos que mostraba
+   antes el menú desplegable "Beneficios" del nav. */
+function irABeneficios(opts){
+  opts = opts || {};
+  let path = '/beneficios';
+  if(opts.cat){
+    const found = DIR_CATS_INDEX.find(c => c.cat === opts.cat && (!opts.tipo || c.tipo === opts.tipo));
+    if(found) path += '/' + found.slug;
+  }
+  history.pushState({ beneficios:true, ...opts }, '', path);
+  mostrarPaginaDirectorio({ ...opts, beneficios:true });
+}
 function volverAlInicio(){
   document.body.classList.remove('pagina-directorio');
   document.body.classList.remove('pagina-ficha');
@@ -292,11 +312,12 @@ function mostrarPaginaDirectorio(opts){
   document.body.classList.remove('pagina-ficha');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
+  modoDirectorioBeneficios = !!opts.beneficios;
   const eyebrow = document.getElementById('dirEyebrow');
-  if(eyebrow) eyebrow.textContent = modoDirectorioEspecialistas ? 'Especialistas' : 'Directorio';
-  renderPageBanner('dirBanner', modoDirectorioEspecialistas ? BANNER_ESPECIALISTAS : BANNER_DIRECTORIO);
+  if(eyebrow) eyebrow.textContent = modoDirectorioBeneficios ? 'Beneficios' : (modoDirectorioEspecialistas ? 'Especialistas' : 'Directorio');
+  renderPageBanner('dirBanner', modoDirectorioBeneficios ? BANNER_BENEFICIOS : (modoDirectorioEspecialistas ? BANNER_ESPECIALISTAS : BANNER_DIRECTORIO));
   const featuredWrap = document.getElementById('featuredStripWrap');
-  if(modoDirectorioEspecialistas){
+  if(modoDirectorioEspecialistas || modoDirectorioBeneficios){
     if(featuredWrap) featuredWrap.style.display = 'none';
   } else {
     renderFeaturedStrip();
@@ -318,6 +339,9 @@ function manejarRutaActual(){
   } else if(parts[0] === 'especialistas'){
     const found = parts[1] ? catBySlug(parts[1]) : null;
     mostrarPaginaDirectorio(found ? { cat: found.cat, tipo: found.tipo, especialistas:true } : { especialistas:true });
+  } else if(parts[0] === 'beneficios'){
+    const found = parts[1] ? catBySlug(parts[1]) : null;
+    mostrarPaginaDirectorio(found ? { cat: found.cat, tipo: found.tipo, beneficios:true } : { beneficios:true });
   } else if(parts[0] === 'negocio' && parts[1]){
     mostrarPaginaFichaPorSlug(parts[1]);
   } else {
@@ -676,11 +700,14 @@ function renderDirectory(){
     const coincideBusqueda = !qRaw || (keywords.length ? keywords.some(k => texto.includes(k)) : texto.includes(qRaw));
     return coincideBusqueda && (!cat || n.cat===cat) && (!comuna || n.comuna===comuna) &&
       (!dirTipoFiltro || n.tipo===dirTipoFiltro) &&
-      (!modoDirectorioEspecialistas || n.esEspecialista===true);
+      (!modoDirectorioEspecialistas || n.esEspecialista===true) &&
+      (!modoDirectorioBeneficios || !!n.beneficioDetalle);
   });
   grid.innerHTML = '';
   if(filtered.length===0){
-    const msg = modoDirectorioEspecialistas
+    const msg = modoDirectorioBeneficios
+      ? 'Todavía no hay beneficios cargados con esos filtros.'
+      : modoDirectorioEspecialistas
       ? 'Todavía no hay especialistas registrados con esos filtros.'
       : 'No encontramos negocios con esos filtros todavía.';
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">${msg} Sé el primero en <a href="#negocios" onclick="event.preventDefault(); abrirElegirCamino();" style="color:var(--brass);text-decoration:underline;">sumar tu ficha</a>.</div>`;
@@ -991,20 +1018,9 @@ function renderDropdowns(){
   if(ddDueno){
     ddDueno.innerHTML = CATS_DUENO.map(c => `<button class="dd-item" onclick="filtrarPorCategoria('${c.replace(/'/g,"\\'")}','dueno'); toggleDropdown('exploreDropdown');">${iconByCat[c]||'🎁'} ${c}</button>`).join('');
   }
-
-  const benMascota = document.getElementById('ddBeneficiosMascota');
-  const benDueno = document.getElementById('ddBeneficiosDueno');
-  const ejemplosMascota = [{nombre:'Veterinaria Los Robles', b:'Consulta con descuento'}, {nombre:'Pelu Copito', b:'Baño y corte con precio socio'}];
-  const ejemplosDueno = [{nombre:'Barbería El Roble', b:'15% de descuento'}, {nombre:'Café Con Patas', b:'2x1 los martes'}];
-  const listaMascota = negociosReal.filter(n => n.tipo==='mascota' && n.beneficioDetalle).slice(0,3);
-  const listaDueno = negociosReal.filter(n => n.tipo==='dueno' && n.beneficioDetalle).slice(0,3);
-  const fuenteMascota = listaMascota.length ? listaMascota : ejemplosMascota.map(e=>({nombre:e.nombre, beneficioDetalle:e.b, beneficioTipo:'Beneficio'}));
-  const fuenteDueno = listaDueno.length ? listaDueno : ejemplosDueno.map(e=>({nombre:e.nombre, beneficioDetalle:e.b, beneficioTipo:'Beneficio'}));
-  // Cada fila es clicable: lleva directo al directorio (en su propia página) con el
-  // negocio que ofrece ese beneficio ya buscado, para que se pueda ver su ficha completa.
-  const benRow = n => `<button type="button" class="dd-item dd-benefit" onclick="filtrarPorNegocio('${n.nombre.replace(/'/g,"\\'")}'); toggleDropdown('beneficiosDropdown');"><span style="display:flex;flex-direction:column;align-items:flex-start;"><span class="pct">${n.beneficioDetalle}</span><span class="nm">${n.nombre}</span></span></button>`;
-  if(benMascota) benMascota.innerHTML = fuenteMascota.map(benRow).join('');
-  if(benDueno) benDueno.innerHTML = fuenteDueno.map(benRow).join('');
+  // El menú "Beneficios" del nav ya no es un desplegable con 3 ejemplos — ahora es
+  // un link directo a /beneficios (ver irABeneficios), que reutiliza la misma vista
+  // del directorio filtrada a negocios con beneficioDetalle cargado.
 }
 
 /* ---------------- Buscador animado del hero ---------------- */
@@ -1556,6 +1572,8 @@ window.irABuscar = irABuscar;
 window.refreshAdmin = refreshAdmin;
 window.irADirectorio = irADirectorio;
 window.irAEspecialistas = irAEspecialistas;
+window.irABeneficios = irABeneficios;
+window.irAMiMascota = irAMiMascota;
 window.irANegocio = irANegocio;
 window.volverAlInicio = volverAlInicio;
 window.setBizEsEspecialista = setBizEsEspecialista;
