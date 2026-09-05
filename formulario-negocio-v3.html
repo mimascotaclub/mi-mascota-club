@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscribe tu negocio · Mi Mascota Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/mmc-negocios.css">
+</head>
+<body class="mmc">
+
+<div class="form-shell">
+
+  <!-- ============ Barra superior ============ -->
+  <header class="form-top">
+    <div class="form-top__row">
+      <div class="form-top__brand">Mi Mascota Club · Negocios</div>
+      <div class="form-top__step"><span id="stepNow">1</span> / <span id="stepTotal">9</span></div>
+    </div>
+    <div class="progress"><div class="progress__bar" id="progressBar"></div></div>
+  </header>
+
+  <main class="form-main">
+  <div class="form-wrap">
+
+    <!-- ============ 0 · Intro ============ -->
+    <section class="step is-active" data-step="0">
+      <p class="eyebrow">Inscripción de negocios</p>
+      <h2>Suma tu negocio<br>a la red</h2>
+      <p class="lead">Miles de dueños de mascotas en Santiago buscan dónde comprar, comer y atenderse. Publicamos tu ficha con el beneficio que ofreces y te llevamos clientes que ya pagan una membresía.</p>
+      <div class="note">
+        <span class="note__ico">✱</span>
+        <div><strong>Un requisito:</strong> tu negocio tiene que entregar un beneficio real a los socios. Sin beneficio no aprobamos la ficha.</div>
+      </div>
+      <p class="lead" style="font-size:14px;margin-bottom:0">Toma unos 5 minutos. Ten a mano tu logo, una foto del local y el RUT de la empresa.</p>
+      <div class="nav">
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Empezar</button>
+      </div>
+    </section>
+
+    <!-- ============ 1 · Tipo y nombre ============ -->
+    <section class="step" data-step="1">
+      <p class="eyebrow">Paso 1 · Tu negocio</p>
+      <h2>¿Qué tipo de negocio tienes?</h2>
+      <p class="lead">Esto define cómo se clasifica tu ficha en el directorio y qué datos te vamos a pedir.</p>
+
+      <div class="field" id="f-tipo">
+        <label for="tipo_negocio">Tipo de negocio</label>
+        <select id="tipo_negocio" name="tipo_negocio"><option value="">Selecciona una opción</option></select>
+        <div class="field__hint" id="tipoHint">¿No encuentras el tuyo? Elige «Otro» y lo revisamos contigo.</div>
+        <div class="field__err">Selecciona el tipo de negocio.</div>
+      </div>
+
+      <div class="field" id="f-nombre">
+        <label for="nombre">Nombre del negocio</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: Patitas Felices" maxlength="60" autocomplete="organization">
+        <div class="field__hint">Tal como quieres que aparezca en la ficha.</div>
+        <div class="field__err">Escribe el nombre del negocio.</div>
+      </div>
+
+      <div class="field" id="f-descripcion">
+        <label for="descripcion">En una línea, ¿qué haces? <span style="color:var(--mmc-ink-3);font-weight:400">(opcional)</span></label>
+        <textarea id="descripcion" maxlength="160" placeholder="Ej: Petshop de barrio con alimento natural y accesorios."></textarea>
+        <div class="field__hint"><span id="descCount">0</span>/160</div>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 2 · Ubicación ============ -->
+    <section class="step" data-step="2">
+      <p class="eyebrow">Paso 2 · Ubicación</p>
+      <h2 id="ubiTitulo">¿Dónde te encuentran?</h2>
+      <p class="lead" id="ubiLead">La comuna es lo primero que filtran los socios, así que siempre es obligatoria.</p>
+
+      <div class="grid-2">
+        <div class="field" id="f-region">
+          <label for="region">Región</label>
+          <select id="region"></select>
+          <div class="field__err">Selecciona la región.</div>
+        </div>
+        <div class="field" id="f-comuna">
+          <label for="comuna">Comuna</label>
+          <select id="comuna"><option value="">Selecciona</option></select>
+          <div class="field__err">Selecciona la comuna.</div>
+        </div>
+      </div>
+
+      <!-- Solo si el tipo tiene local físico -->
+      <div id="bloqueLocal">
+        <div class="field" id="f-direccion">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" placeholder="Ej: Av. Providencia 1234, local 5" autocomplete="street-address">
+          <div class="field__err">Escribe la dirección del local.</div>
+        </div>
+        <div class="field" id="f-maps">
+          <label for="google_maps_url">Enlace de Google Maps</label>
+          <input type="url" id="google_maps_url" placeholder="https://maps.app.goo.gl/...">
+          <div class="field__hint">Busca tu negocio en Google Maps → Compartir → Copiar vínculo. Es el botón «Cómo llegar» de tu ficha.</div>
+          <div class="field__err">Pega un enlace válido de Google Maps.</div>
+        </div>
+      </div>
+
+      <!-- Solo si el servicio es a domicilio / sin local -->
+      <div id="bloqueCobertura" hidden>
+        <div class="field" id="f-cobertura">
+          <label class="field__label">¿En qué comunas atiendes?</label>
+          <div class="field__hint" style="margin:0 0 10px">Marca todas las que correspondan. Aparecerás en las búsquedas de cada una.</div>
+          <div id="coberturaLista" style="max-height:260px;overflow:auto;border:1px solid var(--mmc-line);border-radius:var(--mmc-r-md);padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px"></div>
+          <div class="field__err">Marca al menos una comuna.</div>
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 3 · Contacto público ============ -->
+    <section class="step" data-step="3">
+      <p class="eyebrow">Paso 3 · Contacto</p>
+      <h2>Cómo te contactan<br>los socios</h2>
+      <p class="lead">Todo lo de este paso se muestra en tu ficha. Deja en blanco lo que no uses.</p>
+
+      <div class="grid-2">
+        <div class="field" id="f-telefono_local">
+          <label for="telefono_local">Teléfono del local</label>
+          <div class="prefix"><span class="prefix__tag">+56</span><input type="tel" id="telefono_local" placeholder="2 2345 6789" inputmode="tel"></div>
+          <div class="field__err">Ingresa un teléfono válido.</div>
+        </div>
+        <div class="field" id="f-whatsapp">
+          <label for="whatsapp">WhatsApp</label>
+          <div class="prefix"><span class="prefix__tag">+56 9</span><input type="tel" id="whatsapp" placeholder="1234 5678" inputmode="numeric" maxlength="11"></div>
+          <div class="field__err">Ingresa 8 dígitos.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" id="f-instagram">
+          <label for="instagram">Instagram</label>
+          <div class="prefix"><span class="prefix__tag">@</span><input type="text" id="instagram" placeholder="tunegocio"></div>
+        </div>
+        <div class="field" id="f-tiktok">
+          <label for="tiktok">TikTok</label>
+          <div class="prefix"><span class="prefix__tag">@</span><input type="text" id="tiktok" placeholder="tunegocio"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" id="f-facebook">
+          <label for="facebook">Facebook</label>
+          <div class="prefix"><span class="prefix__tag">facebook.com/</span><input type="text" id="facebook" placeholder="tunegocio"></div>
+        </div>
+        <div class="field" id="f-sitio_web">
+          <label for="sitio_web">Sitio web <span style="color:var(--mmc-ink-3);font-weight:400">(opcional)</span></label>
+          <input type="url" id="sitio_web" placeholder="https://">
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 4 · Horario ============ -->
+    <section class="step" data-step="4">
+      <p class="eyebrow">Paso 4 · Horario</p>
+      <h2>¿Cuándo atiendes?</h2>
+      <p class="lead">Aparece sobre la foto de tu negocio, como en la ficha.</p>
+
+      <div class="field" id="f-horario_dias">
+        <label for="horario_dias">Días de atención</label>
+        <select id="horario_dias">
+          <option value="">Selecciona</option>
+          <option>Todos los días</option>
+          <option>Lunes a viernes</option>
+          <option>Lunes a sábado</option>
+          <option>Lunes a domingo</option>
+          <option>Martes a domingo</option>
+          <option>Solo fines de semana</option>
+          <option>Con hora agendada</option>
+        </select>
+        <div class="field__err">Selecciona los días.</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" id="f-hora_desde">
+          <label for="hora_desde">Desde</label>
+          <input type="time" id="hora_desde" value="09:00">
+          <div class="field__err">Indica la hora de apertura.</div>
+        </div>
+        <div class="field" id="f-hora_hasta">
+          <label for="hora_hasta">Hasta</label>
+          <input type="time" id="hora_hasta" value="19:00">
+          <div class="field__err">Indica la hora de cierre.</div>
+        </div>
+      </div>
+
+      <div class="note"><span class="note__ico">👁</span><div>Se verá así en tu ficha: <strong id="horarioPreview">Horario: 9:00 AM - 7:00 PM</strong></div></div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 5 · Beneficio (cascada 3 pasos) ============ -->
+    <section class="step" data-step="5">
+      <p class="eyebrow">Paso 5 · Beneficio</p>
+      <h2>El beneficio<br>para los socios</h2>
+      <p class="lead">Es lo único que no puede faltar. Se arma en tres selecciones y así queda escrito en tu ficha.</p>
+
+      <div class="cascade">
+        <div class="cascade__step is-open" id="cas1">
+          <div class="field" id="f-beneficio_valor">
+            <label for="beneficio_valor"><span class="cascade__num">1</span>¿Qué entregas?</label>
+            <select id="beneficio_valor"><option value="">Selecciona el beneficio</option></select>
+            <div class="field__err">Elige el beneficio.</div>
+          </div>
+        </div>
+
+        <div class="cascade__step" id="cas2">
+          <div class="field" id="f-beneficio_sobre">
+            <label for="beneficio_sobre"><span class="cascade__num">2</span>¿Sobre qué aplica?</label>
+            <select id="beneficio_sobre"><option value="">Selecciona</option></select>
+            <div class="field__err">Elige sobre qué aplica.</div>
+          </div>
+        </div>
+
+        <div class="cascade__step" id="cas3">
+          <div class="field" id="f-beneficio_cuando">
+            <label for="beneficio_cuando"><span class="cascade__num">3</span>¿Cuándo aplica?</label>
+            <select id="beneficio_cuando"><option value="">Selecciona</option></select>
+            <div class="field__err">Elige cuándo aplica.</div>
+          </div>
+        </div>
+
+        <div class="cascade__step" id="cas4">
+          <div class="grid-2">
+            <div class="field">
+              <label for="beneficio_monto_min">Monto mínimo de compra <span style="color:var(--mmc-ink-3);font-weight:400">(opcional)</span></label>
+              <div class="prefix"><span class="prefix__tag">$</span><input type="number" id="beneficio_monto_min" placeholder="30.000" min="0" step="1000" inputmode="numeric"></div>
+              <div class="field__hint">Déjalo vacío si no hay mínimo.</div>
+            </div>
+            <div class="field">
+              <label for="beneficio_detalle">Letra chica <span style="color:var(--mmc-ink-3);font-weight:400">(opcional)</span></label>
+              <input type="text" id="beneficio_detalle" maxlength="60" placeholder="Ej: no acumulable con otras promos">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:6px"><span class="note__ico">✓</span><div>Queda así: <strong id="benPreview">—</strong></div></div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 6 · Imágenes ============ -->
+    <section class="step" data-step="6">
+      <p class="eyebrow">Paso 6 · Imágenes</p>
+      <h2>Logo y foto<br>del negocio</h2>
+      <p class="lead">Las dos aparecen en tu ficha. La foto es lo primero que ve el socio, así que elige una buena.</p>
+
+      <div class="grid-2" style="gap:0 20px">
+        <div class="field" id="f-logo">
+          <label class="field__label">Logo</label>
+          <label class="drop drop--logo" id="dropLogo">
+            <input type="file" id="fileLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+            <div class="drop__body">
+              <div class="drop__ico">◻︎</div>
+              <div class="drop__t">Sube tu logo</div>
+              <div class="drop__s">PNG con fondo transparente · máx. 2 MB</div>
+            </div>
+          </label>
+          <div class="field__err">Falta el logo.</div>
+        </div>
+
+        <div class="field" id="f-foto">
+          <label class="field__label">Foto del negocio</label>
+          <label class="drop" id="dropFoto">
+            <input type="file" id="fileFoto" accept="image/png,image/jpeg,image/webp">
+            <div class="drop__body">
+              <div class="drop__ico">▣</div>
+              <div class="drop__t">Sube la foto</div>
+              <div class="drop__s">Horizontal, mín. 1200px · máx. 5 MB</div>
+            </div>
+          </label>
+          <div class="field__err">Falta la foto del negocio.</div>
+        </div>
+      </div>
+
+      <div class="note"><span class="note__ico">✱</span><div>Revisamos las imágenes antes de publicar. No aceptamos fotos con marcas de agua, capturas de pantalla ni imágenes de bancos genéricos.</div></div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 7 · Datos del responsable (privados) ============ -->
+    <section class="step" data-step="7">
+      <p class="eyebrow">Paso 7 · Datos de la empresa</p>
+      <h2>Datos del<br>responsable</h2>
+      <p class="lead">Nada de este paso se publica.</p>
+
+      <div class="note"><span class="note__ico">🔒</span><div><strong>Privado.</strong> Estos datos quedan solo en nuestra base para validar el negocio, emitir el convenio y contactarte. No aparecen en tu ficha ni se comparten con los socios.</div></div>
+
+      <div class="grid-2">
+        <div class="field" id="f-rut_comercial">
+          <label for="rut_comercial">RUT comercial (empresa)</label>
+          <input type="text" id="rut_comercial" placeholder="76.123.456-7" inputmode="text">
+          <div class="field__err">RUT inválido.</div>
+        </div>
+        <div class="field" id="f-razon_social">
+          <label for="razon_social">Razón social</label>
+          <input type="text" id="razon_social" placeholder="Comercial Patitas SpA">
+          <div class="field__err">Escribe la razón social.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" id="f-responsable_nombre">
+          <label for="responsable_nombre">Nombre del responsable</label>
+          <input type="text" id="responsable_nombre" placeholder="Nombre y apellido" autocomplete="name">
+          <div class="field__err">Escribe el nombre del responsable.</div>
+        </div>
+        <div class="field" id="f-responsable_rut">
+          <label for="responsable_rut">RUT del responsable</label>
+          <input type="text" id="responsable_rut" placeholder="12.345.678-9">
+          <div class="field__err">RUT inválido.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" id="f-responsable_email">
+          <label for="responsable_email">Correo del responsable</label>
+          <input type="email" id="responsable_email" placeholder="nombre@negocio.cl" autocomplete="email">
+          <div class="field__err">Ingresa un correo válido.</div>
+        </div>
+        <div class="field" id="f-responsable_telefono">
+          <label for="responsable_telefono">Teléfono del responsable</label>
+          <div class="prefix"><span class="prefix__tag">+56 9</span><input type="tel" id="responsable_telefono" placeholder="1234 5678" inputmode="numeric" maxlength="11"></div>
+          <div class="field__err">Ingresa 8 dígitos.</div>
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" data-next>Revisar mi ficha</button>
+      </div>
+    </section>
+
+    <!-- ============ 8 · Preview + envío ============ -->
+    <section class="step" data-step="8">
+      <p class="eyebrow">Último paso</p>
+      <h2>Así se verá<br>tu ficha</h2>
+      <p class="lead">Revisa que todo esté bien. Puedes volver atrás a corregir lo que quieras.</p>
+
+      <div class="preview-tabs">
+        <button class="preview-tab is-active" data-view="desktop">Desktop</button>
+        <button class="preview-tab" data-view="mobile">Mobile</button>
+      </div>
+
+      <div class="preview-frame">
+        <div class="preview-stage" id="previewStage" data-view="desktop">
+          <div class="ficha" id="fichaPreview"></div>
+        </div>
+      </div>
+
+      <p class="eyebrow" style="margin-top:34px">No se publica</p>
+      <dl class="summary" id="resumenPrivado"></dl>
+
+      <div class="field" id="f-terminos">
+        <label class="choice" style="align-items:flex-start">
+          <input type="checkbox" id="acepta_terminos">
+          <span class="choice__dot" style="border-radius:6px;margin-top:1px"></span>
+          <span class="choice__txt">Confirmo que la información es real y me comprometo a respetar el beneficio publicado con los socios de Mi Mascota Club.<small>Puedes cambiar o retirar el beneficio avisándonos con 15 días.</small></span>
+        </label>
+        <div class="field__err">Necesitamos tu confirmación para continuar.</div>
+      </div>
+
+      <div id="envioError" class="note" hidden style="border-color:var(--mmc-err);color:var(--mmc-err)"><span class="note__ico">!</span><div id="envioErrorTxt"></div></div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" id="btnEnviar">Enviar inscripción</button>
+      </div>
+    </section>
+
+    <!-- ============ 9 · Listo ============ -->
+    <section class="step" data-step="9">
+      <div class="done">
+        <div class="done__mark">✓</div>
+        <h2 style="font-size:clamp(28px,5vw,44px)">Recibimos<br>tu inscripción</h2>
+        <p class="lead" style="margin:16px auto 0;max-width:46ch">Revisamos cada ficha a mano antes de publicarla. Te escribimos a <strong id="mailConfirm"></strong> dentro de <strong>2 días hábiles</strong> con la aprobación o con lo que haya que ajustar.</p>
+        <div style="margin-top:36px">
+          <a class="btn btn--primary" href="/">Volver al inicio</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  </main>
+</div>
+
+<script src="js/comunas-chile.js"></script>
+<script src="js/catalogos-negocio.js"></script>
+<script src="js/ficha-negocio.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ============================================================
+   CONFIGURACIÓN — reemplazar por las credenciales del proyecto
+   ============================================================ */
+const MMC_CONFIG = {
+  SUPABASE_URL: 'https://mzsqyjxqnomsbqzhygkx.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_KdIYZfFtnfO2e7VaMMfWAA_GBT79hZ1',
+  BUCKET: 'negocios'
+};
+
+let sb = null;
+try {
+  if (window.supabase && MMC_CONFIG.SUPABASE_ANON_KEY) {
+    sb = window.supabase.createClient(MMC_CONFIG.SUPABASE_URL, MMC_CONFIG.SUPABASE_ANON_KEY);
+  }
+} catch (e) { console.warn('Supabase no inicializado:', e); }
+
+/* ============================================================
+   COMUNAS
+   Si el sitio ya carga su listado completo (346 comunas) en
+   window.COMUNAS_POR_REGION, se usa ese. Si no, este fallback RM.
+   ============================================================ */
+const COMUNAS = window.COMUNAS_POR_REGION || {};
+
+/* ============================================================
+   Estado
+   ============================================================ */
+const D = {
+  logoFile: null, fotoFile: null,
+  logoDataUrl: null, fotoDataUrl: null,
+  comunas_cobertura: []
+};
+let paso = 0;
+const PASOS = document.querySelectorAll('.step');
+const TOTAL = PASOS.length - 2; // no cuentan la intro ni la pantalla final
+document.getElementById('stepTotal').textContent = TOTAL;
+
+const REGION_DEFECTO = 'Metropolitana de Santiago';
+const $ = id => document.getElementById(id);
+const val = id => ($(id) ? $(id).value.trim() : '');
+
+/* ============================================================
+   Poblar selects desde los catálogos
+   ============================================================ */
+(function poblar() {
+  const selTipo = $('tipo_negocio');
+  TIPOS_NEGOCIO.forEach(g => {
+    const og = document.createElement('optgroup');
+    og.label = g.grupo;
+    g.items.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.id; o.textContent = t.nombre; o.dataset.local = t.local;
+      og.appendChild(o);
+    });
+    selTipo.appendChild(og);
+  });
+
+  const selReg = $('region');
+  Object.keys(COMUNAS).forEach(r => {
+    const o = document.createElement('option'); o.value = r; o.textContent = r; selReg.appendChild(o);
+  });
+  selReg.value = REGION_DEFECTO;
+  cargarComunas();
+
+  const map = [['beneficio_valor', BENEFICIO_VALOR], ['beneficio_sobre', BENEFICIO_SOBRE], ['beneficio_cuando', BENEFICIO_CUANDO]];
+  map.forEach(([id, cat]) => {
+    const s = $(id);
+    cat.forEach(o => {
+      const op = document.createElement('option'); op.value = o.id; op.textContent = o.etiqueta; s.appendChild(op);
+    });
+  });
+})();
+
+function cargarComunas() {
+  const region = $('region').value;
+  const lista = COMUNAS[region] || [];
+  const sel = $('comuna');
+  sel.innerHTML = '<option value="">Selecciona</option>';
+  lista.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+
+  const cont = $('coberturaLista');
+  cont.innerHTML = '';
+  lista.forEach(c => {
+    const l = document.createElement('label');
+    l.style.cssText = 'display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer;padding:4px 2px';
+    l.innerHTML = `<input type="checkbox" value="${c}" style="width:16px;height:16px;accent-color:var(--mmc-accent-2)"> ${c}`;
+    cont.appendChild(l);
+  });
+}
+$('region').addEventListener('change', cargarComunas);
+
+/* ============================================================
+   Campos condicionales según tipo de negocio
+   ============================================================ */
+$('tipo_negocio').addEventListener('change', () => {
+  const conLocal = tipoTieneLocal($('tipo_negocio').value);
+  $('bloqueLocal').hidden = !conLocal;
+  $('bloqueCobertura').hidden = conLocal;
+  $('ubiTitulo').textContent = conLocal ? '¿Dónde te encuentran?' : '¿Dónde atiendes?';
+  $('ubiLead').textContent = conLocal
+    ? 'La comuna es lo primero que filtran los socios, así que siempre es obligatoria.'
+    : 'Aunque no tengas local, necesitamos tu comuna base y las comunas donde atiendes.';
+});
+
+$('descripcion').addEventListener('input', e => { $('descCount').textContent = e.target.value.length; });
+
+/* ============================================================
+   Horario
+   ============================================================ */
+function hora12(hhmm) {
+  if (!hhmm) return '';
+  const [h, m] = hhmm.split(':').map(Number);
+  const suf = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${suf}`;
+}
+function horarioTexto() {
+  const a = val('hora_desde'), b = val('hora_hasta');
+  return a && b ? `${hora12(a)} - ${hora12(b)}` : '';
+}
+['hora_desde', 'hora_hasta'].forEach(id => $(id).addEventListener('input', () => {
+  $('horarioPreview').textContent = 'Horario: ' + (horarioTexto() || '—');
+}));
+
+/* ============================================================
+   Cascada de beneficio
+   ============================================================ */
+function actualizarCascada() {
+  const v = val('beneficio_valor'), s = val('beneficio_sobre'), c = val('beneficio_cuando');
+  $('cas1').classList.toggle('is-done', !!v);
+  $('cas2').classList.toggle('is-open', !!v);
+  $('cas2').classList.toggle('is-done', !!s);
+  $('cas3').classList.toggle('is-open', !!s);
+  $('cas3').classList.toggle('is-done', !!c);
+  $('cas4').classList.toggle('is-open', !!c);
+
+  const b = beneficioTexto({ valor: v, sobre: s, cuando: c, monto_minimo: val('beneficio_monto_min'), detalle: val('beneficio_detalle') });
+  $('benPreview').textContent = b && v
+    ? [b.principal, b.condicion, b.cuando].filter(Boolean).join(' · ')
+    : '—';
+}
+['beneficio_valor', 'beneficio_sobre', 'beneficio_cuando', 'beneficio_monto_min', 'beneficio_detalle']
+  .forEach(id => $(id).addEventListener('input', actualizarCascada));
+
+/* ============================================================
+   Subida de imágenes (preview local)
+   ============================================================ */
+function conectarDrop(dropId, inputId, key) {
+  const drop = $(dropId), input = $(inputId);
+  const max = key === 'logo' ? 2 : 5;
+
+  input.addEventListener('change', () => {
+    const f = input.files[0];
+    if (!f) return;
+    if (f.size > max * 1024 * 1024) { alert(`La imagen supera los ${max} MB.`); input.value = ''; return; }
+    const r = new FileReader();
+    r.onload = e => {
+      D[key + 'File'] = f;
+      D[key + 'DataUrl'] = e.target.result;
+      drop.classList.add('has-file');
+      let img = drop.querySelector('img.preview');
+      if (!img) { img = document.createElement('img'); img.className = 'preview'; drop.appendChild(img); }
+      img.src = e.target.result;
+      drop.querySelector('.drop__t').textContent = f.name.length > 26 ? f.name.slice(0, 24) + '…' : f.name;
+      drop.querySelector('.drop__s').textContent = 'Toca para cambiar';
+      drop.querySelector('.drop__ico').textContent = '✓';
+    };
+    r.readAsDataURL(f);
+  });
+
+  ['dragover', 'dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault();
+    drop.classList.toggle('is-over', ev === 'dragover');
+    if (ev === 'drop' && e.dataTransfer.files[0]) {
+      input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  }));
+}
+conectarDrop('dropLogo', 'fileLogo', 'logo');
+conectarDrop('dropFoto', 'fileFoto', 'foto');
+
+/* ============================================================
+   Validaciones
+   ============================================================ */
+function validarRut(rut) {
+  if (!rut) return false;
+  const limpio = rut.replace(/[.\-\s]/g, '').toUpperCase();
+  if (limpio.length < 8 || limpio.length > 9) return false;
+  const cuerpo = limpio.slice(0, -1), dv = limpio.slice(-1);
+  if (!/^\d+$/.test(cuerpo)) return false;
+  if (/^(\d)\1+$/.test(cuerpo)) return false;          // 11111111-1 y similares
+  let suma = 0, mul = 2;
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo[i], 10) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const resto = 11 - (suma % 11);
+  const esperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+  return dv === esperado;
+}
+function formatearRut(v) {
+  let s = v.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (s.length < 2) return s;
+  const dv = s.slice(-1);
+  let cuerpo = s.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return cuerpo + '-' + dv;
+}
+['rut_comercial', 'responsable_rut'].forEach(id => {
+  $(id).addEventListener('input', e => { e.target.value = formatearRut(e.target.value); });
+});
+
+const emailOk = v => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v);
+const soloDigitos = v => v.replace(/\D/g, '');
+
+function marcar(fieldId, ok, msg) {
+  const f = $(fieldId);
+  if (!f) return ok;
+  f.classList.toggle('has-error', !ok);
+  if (msg) { const e = f.querySelector('.field__err'); if (e) e.textContent = msg; }
+  return ok;
+}
+
+function validarPaso(n) {
+  let ok = true;
+  const fail = (fid, cond, msg) => { if (!marcar(fid, cond, msg)) ok = false; };
+
+  if (n === 1) {
+    fail('f-tipo', !!val('tipo_negocio'));
+    fail('f-nombre', val('nombre').length >= 2);
+  }
+
+  if (n === 2) {
+    const conLocal = tipoTieneLocal(val('tipo_negocio'));
+    fail('f-region', !!val('region'));
+    fail('f-comuna', !!val('comuna'));
+    if (conLocal) {
+      fail('f-direccion', val('direccion').length >= 5);
+      const m = val('google_maps_url');
+      fail('f-maps', /^https?:\/\/(www\.)?(google\.[a-z.]+\/maps|maps\.google\.|maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(m));
+    } else {
+      D.comunas_cobertura = [...$('coberturaLista').querySelectorAll('input:checked')].map(i => i.value);
+      fail('f-cobertura', D.comunas_cobertura.length > 0);
+    }
+  }
+
+  if (n === 3) {
+    const tl = soloDigitos(val('telefono_local'));
+    const wa = soloDigitos(val('whatsapp'));
+    fail('f-telefono_local', tl.length >= 8 && tl.length <= 11, 'Ingresa un teléfono válido.');
+    fail('f-whatsapp', wa.length === 8, 'Ingresa los 8 dígitos, sin el 9.');
+  }
+
+  if (n === 4) {
+    fail('f-horario_dias', !!val('horario_dias'));
+    fail('f-hora_desde', !!val('hora_desde'));
+    fail('f-hora_hasta', !!val('hora_hasta'));
+  }
+
+  if (n === 5) {
+    fail('f-beneficio_valor', !!val('beneficio_valor'));
+    fail('f-beneficio_sobre', !!val('beneficio_sobre'));
+    fail('f-beneficio_cuando', !!val('beneficio_cuando'));
+  }
+
+  if (n === 6) {
+    fail('f-logo', !!D.logoFile);
+    fail('f-foto', !!D.fotoFile);
+  }
+
+  if (n === 7) {
+    fail('f-rut_comercial', validarRut(val('rut_comercial')));
+    fail('f-razon_social', val('razon_social').length >= 3);
+    fail('f-responsable_nombre', val('responsable_nombre').length >= 3);
+    fail('f-responsable_rut', validarRut(val('responsable_rut')));
+    fail('f-responsable_email', emailOk(val('responsable_email')));
+    fail('f-responsable_telefono', soloDigitos(val('responsable_telefono')).length === 8, 'Ingresa los 8 dígitos, sin el 9.');
+  }
+
+  if (!ok) {
+    const primero = document.querySelector('.step.is-active .has-error');
+    if (primero) primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+/* ============================================================
+   Navegación
+   ============================================================ */
+function irA(n) {
+  PASOS.forEach(s => s.classList.toggle('is-active', +s.dataset.step === n));
+  paso = n;
+  $('stepNow').textContent = Math.min(n + 1, TOTAL);
+  $('progressBar').style.width = Math.round((n / TOTAL) * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 8) pintarPreview();
+}
+
+document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => {
+  if (validarPaso(paso)) irA(paso + 1);
+}));
+document.querySelectorAll('[data-prev]').forEach(b => b.addEventListener('click', () => irA(Math.max(0, paso - 1))));
+
+document.querySelectorAll('.preview-tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.preview-tab').forEach(x => x.classList.remove('is-active'));
+  t.classList.add('is-active');
+  $('previewStage').dataset.view = t.dataset.view;
+}));
+
+/* ============================================================
+   Armado del objeto negocio + preview
+   ============================================================ */
+function datosNegocio() {
+  const conLocal = tipoTieneLocal(val('tipo_negocio'));
+  const dir = directorioPara(val('tipo_negocio'));
+  const ben = beneficioTexto({
+    valor: val('beneficio_valor'), sobre: val('beneficio_sobre'), cuando: val('beneficio_cuando'),
+    monto_minimo: val('beneficio_monto_min'), detalle: val('beneficio_detalle')
+  }) || {};
+  return {
+    nombre: val('nombre'),
+    tipo_negocio: val('tipo_negocio'),
+    // Puente con el directorio que ya existe
+    dir_tipo: dir.tipo,
+    dir_cat: dir.cat,
+    es_especialista: dir.especialista,
+    tiene_local: conLocal,
+    descripcion: val('descripcion') || null,
+    region: val('region'),
+    comuna: val('comuna'),
+    comunas_cobertura: conLocal ? null : D.comunas_cobertura,
+    direccion: conLocal ? val('direccion') : null,
+    google_maps_url: conLocal ? val('google_maps_url') : null,
+    telefono_local: val('telefono_local') ? '+56 ' + val('telefono_local') : null,
+    whatsapp: val('whatsapp') ? '+569' + soloDigitos(val('whatsapp')) : null,
+    instagram: val('instagram') || null,
+    facebook: val('facebook') || null,
+    tiktok: val('tiktok') || null,
+    sitio_web: val('sitio_web') || null,
+    horario_texto: horarioTexto(),
+    horario_dias: val('horario_dias'),
+    beneficio_valor: val('beneficio_valor'),
+    beneficio_sobre: val('beneficio_sobre'),
+    beneficio_cuando: val('beneficio_cuando'),
+    beneficio_monto_min: val('beneficio_monto_min') ? parseInt(val('beneficio_monto_min'), 10) : null,
+    beneficio_detalle: val('beneficio_detalle') || null,
+    // Textos ya armados, para que la ficha y el directorio los muestren tal cual
+    beneficio_label: ben.principal || null,
+    beneficio_condicion: [ben.condicion, ben.cuando].filter(Boolean).join(' · ') || null,
+    razon_social: val('razon_social'),
+    rut_comercial: val('rut_comercial'),
+    responsable_nombre: val('responsable_nombre'),
+    responsable_rut: val('responsable_rut'),
+    responsable_email: val('responsable_email'),
+    responsable_telefono: '+569' + soloDigitos(val('responsable_telefono')),
+    acepta_terminos: $('acepta_terminos').checked,
+    estado: 'pendiente'
+  };
+}
+
+function pintarPreview() {
+  const d = datosNegocio();
+  renderFicha($('fichaPreview'), { ...d, logo_url: D.logoDataUrl, foto_url: D.fotoDataUrl }, { interactivo: false });
+
+  const privados = [
+    ['Razón social', d.razon_social],
+    ['RUT comercial', d.rut_comercial],
+    ['Responsable', d.responsable_nombre],
+    ['RUT responsable', d.responsable_rut],
+    ['Correo', d.responsable_email],
+    ['Teléfono responsable', d.responsable_telefono]
+  ];
+  $('resumenPrivado').innerHTML = privados.map(([k, v]) =>
+    `<div class="summary__row"><dt>${k}</dt><dd>${v || '—'}</dd></div>`).join('');
+}
+
+/* ============================================================
+   Envío
+   ============================================================ */
+async function subirImagen(file, carpeta) {
+  if (!sb || !file) return null;
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await sb.storage.from(MMC_CONFIG.BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
+  if (error) throw error;
+  return sb.storage.from(MMC_CONFIG.BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+$('btnEnviar').addEventListener('click', async () => {
+  if (!marcar('f-terminos', $('acepta_terminos').checked)) return;
+
+  const btn = $('btnEnviar');
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando…';
+  $('envioError').hidden = true;
+
+  try {
+    if (!sb) throw new Error('Falta configurar las credenciales de Supabase en MMC_CONFIG.');
+
+    const [logo_url, foto_url] = await Promise.all([
+      subirImagen(D.logoFile, 'logos'),
+      subirImagen(D.fotoFile, 'fotos')
+    ]);
+
+    const payload = { ...datosNegocio(), logo_url, foto_url };
+    const { error } = await sb.from('negocios_solicitudes').insert(payload);
+    if (error) throw error;
+
+    $('mailConfirm').textContent = payload.responsable_email;
+    irA(9);
+    $('progressBar').style.width = '100%';
+  } catch (err) {
+    console.error(err);
+    $('envioErrorTxt').textContent = (err && err.message) || 'No pudimos enviar tu inscripción. Intenta de nuevo en unos minutos.';
+    $('envioError').hidden = false;
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+  }
+});
+
+irA(0);
+</script>
+</body>
+</html>

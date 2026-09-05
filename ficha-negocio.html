@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha de negocio · Mi Mascota Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/mmc-negocios.css">
+<style>
+  .page { max-width: 1180px; margin: 0 auto; padding: clamp(28px,6vw,64px) clamp(18px,5vw,44px) 90px; }
+  .page h1.t { font-family: var(--mmc-font-display); font-weight:900; text-transform:uppercase; font-size:clamp(28px,5vw,44px); line-height:.96; letter-spacing:-.02em; margin:0 0 8px; }
+  .page p.s { color: var(--mmc-ink-2); margin:0 0 44px; font-size:16px; }
+  .demo { margin-bottom: 64px; }
+  .demo__label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--mmc-ink-3); margin-bottom:14px; }
+  .card { border:1px solid var(--mmc-line); border-radius: var(--mmc-r-xl); background:#fff; padding: clamp(20px,3.4vw,34px); box-shadow: var(--mmc-shadow-md); }
+  .card--mobile { max-width: 390px; }
+</style>
+</head>
+<body class="mmc">
+<div class="page">
+  <h1 class="t">Ficha de negocio</h1>
+  <p class="s">Mismo componente, dos layouts. Los colores salen de <code>:root</code> en <code>css/mmc-negocios.css</code>.</p>
+
+  <section class="demo">
+    <div class="demo__label">Desktop</div>
+    <div class="card"><div class="ficha" id="ficha-desktop"></div></div>
+  </section>
+
+  <section class="demo">
+    <div class="demo__label">Mobile</div>
+    <div class="card card--mobile"><div class="ficha" id="ficha-mobile"></div></div>
+  </section>
+
+  <section class="demo">
+    <div class="demo__label">Servicio sin local (paseador, etólogo)</div>
+    <div class="card"><div class="ficha" id="ficha-sinlocal"></div></div>
+  </section>
+</div>
+
+<script src="js/catalogos-negocio.js"></script>
+<script src="js/ficha-negocio.js"></script>
+<script>
+const demo = {
+  nombre: 'Patitas Felices',
+  tipo_negocio: 'petshop',
+  tiene_local: true,
+  comuna: 'Providencia',
+  direccion: 'Av. Providencia 1234',
+  google_maps_url: 'https://maps.google.com/?q=Av.+Providencia+1234',
+  telefono_local: '+56 2 2345 6789',
+  whatsapp: '+56 9 1234 5678',
+  instagram: '@patitasfelices',
+  facebook: 'patitasfelices',
+  tiktok: '@patitasfelices',
+  horario_texto: '8:00 AM - 6:00 PM',
+  beneficio_valor: 'desc_20',
+  beneficio_sobre: 'compras',
+  beneficio_cuando: 'dia_jueves',
+  beneficio_monto_min: 30000
+};
+
+const demoSinLocal = {
+  nombre: 'Camila Rojas · Etología',
+  tipo_negocio: 'etologo',
+  tiene_local: false,
+  comuna: 'Ñuñoa',
+  comunas_cobertura: ['Ñuñoa', 'Providencia', 'La Reina', 'Macul'],
+  whatsapp: '+56 9 8765 4321',
+  instagram: '@camilaetologia',
+  horario_texto: '10:00 AM - 7:00 PM',
+  beneficio_valor: 'desc_25',
+  beneficio_sobre: 'primera_compra',
+  beneficio_cuando: 'todo_el_mes'
+};
+
+renderFicha(document.getElementById('ficha-desktop'), demo);
+renderFicha(document.getElementById('ficha-mobile'), demo);
+renderFicha(document.getElementById('ficha-sinlocal'), demoSinLocal);
+</script>
+</body>
+</html>

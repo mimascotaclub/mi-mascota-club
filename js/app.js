@@ -55,7 +55,7 @@ const iconByCat = {
   "Salud":"💊","Accesorios":"🎾","Adiestramiento":"🏋️","Fotografía":"📷",
   "Barbería":"💈","Café":"☕","Restaurante":"🍽️","Belleza":"💅","Deporte":"🏓","Hotel":"🏨","Otro":"🎁"
 };
-const CATS_MASCOTA = ["Veterinaria","Peluquería","Paseador","Hotel / Pensión","Tienda","Alimentos","Salud","Accesorios","Adiestramiento","Fotografía"];
+const CATS_MASCOTA = ["Veterinaria","Peluquería","Paseador","Hotel / Pensión","Tienda","Alimentos","Salud","Accesorios","Adiestramiento","Fotografía","Servicios"];
 const CATS_DUENO = ["Café","Restaurante","Hotel","Deporte","Barbería","Belleza","Tienda","Otro"];
 /* Todas las categorías del directorio (las mismas 18 de "Explora por categoría"),
    en orden alfabético — se usan para llenar el filtro de categoría del directorio
@@ -409,6 +409,12 @@ function abrirElegirCamino(){
   `);
 }
 function mostrarFormulario(tipo){
+  if(tipo === 'negocio'){
+    // El registro de negocios ahora usa el formulario v3 (ficha, beneficio en 3 pasos
+    // y aprobación manual). El asistente antiguo del index queda como respaldo.
+    window.location.href = 'formulario-negocio-v3.html';
+    return;
+  }
   if(tipo === 'dueno'){
     // El registro de mascota ahora usa el formulario animado v3 (con verificación OTP)
     window.location.href = 'formulario-registro-demo-v3.html';
