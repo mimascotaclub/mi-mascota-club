@@ -1,0 +1,462 @@
+/* ============================================================
+   Mi Mascota Club — Ficha de negocio y tarjeta del directorio
+   ------------------------------------------------------------
+   Este archivo SÍ se carga dentro de index.html, así que todas
+   sus clases van con prefijo propio (mmc-ficha / mmcf / mmcard)
+   para no chocar con nada de css/styles.css.
+   ============================================================ */
+
+:root {
+  /* ---- MARCA Mi Mascota Club ---- */
+  --mmc-negro:        #151515;
+  --mmc-amarillo:     #FFCE00;
+  --mmc-turquesa:     #47C9C9;
+
+  --mmc-brand:        var(--mmc-negro);
+  --mmc-brand-ink:    #FFFFFF;
+  --mmc-accent:       var(--mmc-amarillo);
+  --mmc-accent-2:     var(--mmc-turquesa);
+
+  /* ---- Neutros ---- */
+  --mmc-ink:          #151515;
+  --mmc-ink-2:        #5C5C5C;
+  --mmc-ink-3:        #8E8E8E;
+  --mmc-bg:           #FFFFFF;
+  --mmc-surface:      #FFFFFF;
+  --mmc-surface-2:    #F3F3F3;
+  --mmc-surface-3:    #FAFAFA;
+  --mmc-line:         rgba(21,21,21,.10);
+  --mmc-line-strong:  rgba(21,21,21,.16);
+  --mmc-beneficio-bg: rgba(255,206,0,.20);
+
+  /* ---- Estado ---- */
+  --mmc-ok:           var(--mmc-turquesa);
+  --mmc-warn:         #C2410C;
+  --mmc-err:          #DC2626;
+
+  /* ---- Forma ---- */
+  --mmc-r-xs: 8px;
+  --mmc-r-sm: 12px;
+  --mmc-r-md: 18px;
+  --mmc-r-lg: 26px;
+  --mmc-r-xl: 34px;
+  --mmc-r-pill: 999px;
+
+  --mmc-shadow-sm: 0 1px 2px rgba(0,0,0,.04), 0 1px 1px rgba(0,0,0,.03);
+  --mmc-shadow-md: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+  --mmc-shadow-lg: 0 18px 50px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.05);
+
+  --mmc-font-display: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mmc-font-body:    'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --mmc-ease: cubic-bezier(.22,.61,.36,1);
+}
+
+/* ============================================================
+   FICHA DE NEGOCIO  (.mmc-ficha)
+   Mismo componente para /negocio/<slug>, el preview del
+   formulario y la cola de aprobación del panel.
+   ============================================================ */
+
+.mmc-ficha,
+.mmc-ficha *,
+.mmc-ficha *::before,
+.mmc-ficha *::after { box-sizing: border-box; }
+
+.mmc-ficha {
+  font-family: var(--mmc-font-body);
+  color: var(--mmc-ink);
+  container-type: inline-size;
+  display: block;
+}
+
+.mmcf__grid { --gap: 14px; display: grid; gap: var(--gap); }
+
+/* ---- Encabezado ---- */
+.mmcf__head { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+
+.mmcf__logo {
+  width: 76px; height: 76px;
+  border-radius: var(--mmc-r-md);
+  background: var(--mmc-surface);
+  border: 1px solid var(--mmc-line);
+  box-shadow: var(--mmc-shadow-sm);
+  overflow: hidden;
+  display: grid; place-items: center;
+  flex: none;
+}
+.mmcf__logo img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+.mmcf__logo span {
+  font-family: var(--mmc-font-display);
+  font-weight: 900; font-size: 13px; color: var(--mmc-ink-3);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+
+.mmcf__tipo {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid var(--mmc-line-strong);
+  border-radius: var(--mmc-r-pill);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--mmc-ink-2);
+  margin-bottom: 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+
+.mmcf__nombre {
+  font-family: var(--mmc-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(24px, 5.6cqw, 42px);
+  line-height: .98;
+  letter-spacing: -.015em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.mmcf__comuna {
+  margin: 6px 0 0;
+  font-size: 13px; color: var(--mmc-ink-2);
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ---- Barra de beneficio ---- */
+.mmcf__beneficio {
+  background: var(--mmc-beneficio-bg);
+  border-radius: var(--mmc-r-lg);
+  padding: 8px;
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;
+}
+
+.mmcf__ben-valor {
+  flex: 1 1 170px; min-width: 0;
+  background: var(--mmc-surface);
+  border-radius: var(--mmc-r-md);
+  padding: 14px 18px;
+  display: grid; place-items: center;
+  font-family: var(--mmc-font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(16px, 3.2cqw, 25px);
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  color: var(--mmc-ink);
+  text-align: center;
+  box-shadow: var(--mmc-shadow-sm);
+}
+
+.mmcf__ben-meta { flex: 1 1 160px; min-width: 0; display: grid; gap: 6px; align-content: center; }
+
+.mmcf__chip {
+  background: var(--mmc-surface);
+  border-radius: var(--mmc-r-sm);
+  padding: 7px 14px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  color: var(--mmc-ink-2);
+  text-align: center; line-height: 1.3;
+  overflow-wrap: anywhere;
+  box-shadow: var(--mmc-shadow-sm);
+}
+
+/* ---- Tarjeta de foto ---- */
+.mmcf__foto {
+  position: relative;
+  border-radius: var(--mmc-r-xl);
+  overflow: hidden;
+  background: var(--mmc-surface-2);
+  border: 1px solid var(--mmc-line);
+  aspect-ratio: 16 / 10;
+  display: grid; place-items: center;
+  min-height: 200px;
+}
+.mmcf__foto > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mmcf__foto-ph {
+  font-family: var(--mmc-font-display);
+  font-weight: 900; text-transform: uppercase;
+  color: var(--mmc-ink-3);
+  font-size: clamp(18px, 4cqw, 34px);
+  letter-spacing: .02em;
+}
+
+.mmcf__foto-bar {
+  position: absolute; left: 12px; right: 12px; bottom: 12px;
+  display: flex; gap: 8px; align-items: center;
+  justify-content: space-between; flex-wrap: wrap;
+}
+
+.mmcf__horario {
+  background: rgba(255,255,255,.92);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  border-radius: var(--mmc-r-pill);
+  padding: 9px 16px;
+  font-size: 12px; font-weight: 700; letter-spacing: .02em;
+  color: var(--mmc-ink); white-space: nowrap;
+  box-shadow: var(--mmc-shadow-sm);
+}
+
+.mmcf__redes { display: flex; gap: 6px; }
+
+.mmcf__red {
+  width: 38px; height: 38px;
+  border-radius: var(--mmc-r-sm);
+  background: rgba(255,255,255,.92);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  display: grid; place-items: center;
+  color: var(--mmc-ink); text-decoration: none;
+  box-shadow: var(--mmc-shadow-sm);
+  transition: transform .18s var(--mmc-ease), background .18s var(--mmc-ease);
+}
+.mmcf__red:hover { transform: translateY(-2px); background: #fff; }
+.mmcf__red svg { width: 17px; height: 17px; display: block; }
+
+/* ---- CTA ---- */
+.mmcf__cta {
+  appearance: none; border: 0; width: 100%;
+  background: var(--mmc-brand); color: var(--mmc-brand-ink);
+  border-radius: var(--mmc-r-pill);
+  padding: 20px 28px;
+  font-family: var(--mmc-font-display);
+  font-weight: 900; text-transform: uppercase;
+  font-size: clamp(15px, 2.8cqw, 21px);
+  letter-spacing: .01em;
+  cursor: pointer; text-align: center; text-decoration: none; display: block;
+  transition: transform .18s var(--mmc-ease), opacity .18s var(--mmc-ease);
+}
+.mmcf__cta:hover { transform: translateY(-1px); opacity: .92; }
+.mmcf__cta:active { transform: translateY(0) scale(.995); }
+
+/* ---- Dos columnas cuando hay ancho ---- */
+@container (min-width: 640px) {
+  .mmcf__grid {
+    grid-template-columns: minmax(290px, .8fr) 1.2fr;
+    grid-template-areas: "head foto" "benef foto" "cta foto";
+    align-content: start;
+    gap: 18px 34px;
+  }
+  .mmcf__head { grid-area: head; grid-template-columns: 1fr; gap: 0; align-items: start; }
+  .mmcf__head .mmcf__logo { margin-bottom: 18px; width: 88px; height: 88px; }
+  .mmcf__beneficio { grid-area: benef; align-self: start; }
+  .mmcf__cta { grid-area: cta; align-self: start; width: auto; justify-self: start; padding: 18px 44px; }
+  .mmcf__foto { grid-area: foto; aspect-ratio: auto; height: 100%; min-height: 340px; }
+}
+
+@container (max-width: 520px) {
+  .mmcf__ben-valor { flex: 1 1 100%; }
+  .mmcf__ben-meta  { flex: 1 1 100%; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  .mmcf__chip      { padding: 7px 10px; letter-spacing: .02em; }
+  .mmcf__foto-bar  { justify-content: center; row-gap: 8px; }
+}
+
+/* ============================================================
+   TARJETA DEL DIRECTORIO  (.mmcard)
+   Va DENTRO del .biz-card que ya existe, así la grilla y la
+   fila de destacados siguen funcionando igual que antes.
+   ============================================================ */
+
+.mmcard, .mmcard *, .mmcard *::before, .mmcard *::after { box-sizing: border-box; }
+
+.mmcard { font-family: var(--mmc-font-body); color: var(--mmc-ink); }
+
+.mmcard__foto {
+  position: relative;
+  height: 148px;
+  display: grid; place-items: center;
+  font-size: 42px;
+  overflow: hidden;
+  background: var(--mmc-surface-2);
+}
+.mmcard__foto > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mmcard__foto .founder-badge {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  background: rgba(255,255,255,.94); color: var(--mmc-negro);
+  padding: 4px 9px; border-radius: 7px;
+  font-family: var(--mmc-font-body);
+  font-size: 9.5px; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase;
+  line-height: 1.4; white-space: nowrap;
+}
+.mmcard__foto .founder-badge.badge-destacado { background: var(--mmc-amarillo); }
+.mmcard__foto > span { font-size: 42px; line-height: 1; }
+
+.mmcard__body { padding: 14px 16px 16px; display: grid; gap: 10px; }
+
+.mmcard__head { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+
+.mmcard__logo {
+  width: 44px; height: 44px; flex: none;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--mmc-line);
+  overflow: hidden;
+  display: grid; place-items: center;
+  font-size: 20px;
+}
+.mmcard__logo img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+
+.mmcard__nombre {
+  font-family: var(--mmc-font-display);
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1.15;
+  margin: 0 0 2px;
+  color: var(--mmc-ink);
+  overflow-wrap: anywhere;
+}
+.mmcard__cat {
+  font-size: 10.5px; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--mmc-ink-3);
+}
+
+.mmcard__ben {
+  background: var(--mmc-beneficio-bg);
+  border-radius: 14px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.mmcard__ben b {
+  display: block;
+  font-family: var(--mmc-font-display);
+  font-weight: 900; text-transform: uppercase;
+  font-size: 14px; line-height: 1.15;
+  letter-spacing: -.005em;
+}
+.mmcard__ben small {
+  display: block; margin-top: 3px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  color: var(--mmc-ink-2); line-height: 1.35;
+}
+
+.mmcard__meta { font-size: 12.5px; color: var(--mmc-ink-2); line-height: 1.45; margin: 0; }
+
+/* ============================================================
+   COLA DE APROBACIÓN  (.cola-*)
+   Vive dentro del panel privado. Pensada para usarse desde el
+   celular: una ficha completa y tres botones grandes debajo.
+   ============================================================ */
+
+.cola-count {
+  display: inline-grid; place-items: center;
+  min-width: 22px; height: 22px; padding: 0 7px;
+  border-radius: var(--mmc-r-pill);
+  background: var(--mmc-amarillo); color: var(--mmc-negro);
+  font-size: 11px; font-weight: 900;
+  margin-left: 8px;
+}
+.cola-count[data-cero="1"] { background: var(--mmc-surface-2); color: var(--mmc-ink-3); }
+
+.cola-lista { padding: 16px; display: grid; gap: 16px; }
+.cola-vacia { text-align: center; padding: 28px 16px; color: var(--mmc-ink-3); font-size: 14px; font-weight: 600; }
+
+.cola-item {
+  border: 1px solid var(--mmc-line);
+  border-radius: var(--mmc-r-xl);
+  padding: clamp(14px, 3vw, 22px);
+  background: #fff;
+  box-shadow: var(--mmc-shadow-sm);
+}
+.cola-item[data-ocupado="1"] { opacity: .55; pointer-events: none; }
+
+.cola-fecha { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--mmc-ink-3); margin-bottom: 12px; }
+
+/* Datos que no se publican */
+.cola-priv {
+  margin-top: 16px;
+  border: 1px solid var(--mmc-line);
+  border-radius: var(--mmc-r-md);
+  overflow: hidden;
+  font-size: 13px;
+}
+.cola-priv__t {
+  background: var(--mmc-surface-3);
+  padding: 9px 14px;
+  font-size: 10.5px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mmc-ink-3);
+  border-bottom: 1px solid var(--mmc-line);
+}
+.cola-priv__row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--mmc-line); }
+.cola-priv__row:last-child { border-bottom: 0; }
+.cola-priv__row span { color: var(--mmc-ink-3); }
+.cola-priv__row b { font-weight: 700; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .cola-priv__row { grid-template-columns: 1fr; gap: 1px; } }
+
+/* Tres botones */
+.cola-acciones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+@media (max-width: 560px) { .cola-acciones { grid-template-columns: 1fr; } }
+
+.cola-btn {
+  appearance: none; border: 1px solid var(--mmc-line-strong);
+  background: #fff; color: var(--mmc-ink);
+  border-radius: var(--mmc-r-pill);
+  padding: 15px 18px;
+  font-family: var(--mmc-font-body);
+  font-size: 14.5px; font-weight: 800;
+  cursor: pointer;
+  transition: transform .16s var(--mmc-ease), background .16s var(--mmc-ease), color .16s var(--mmc-ease);
+  min-height: 50px;
+}
+.cola-btn:hover { transform: translateY(-1px); }
+.cola-btn--ok   { background: var(--mmc-turquesa); border-color: var(--mmc-turquesa); color: #fff; }
+.cola-btn--edit { background: var(--mmc-amarillo); border-color: var(--mmc-amarillo); color: var(--mmc-negro); }
+.cola-btn--no   { color: var(--mmc-err); border-color: color-mix(in srgb, var(--mmc-err) 34%, transparent); }
+.cola-btn--no:hover { background: var(--mmc-err); border-color: var(--mmc-err); color: #fff; }
+
+/* Modo edición */
+.cola-edit { margin-top: 16px; display: grid; gap: 12px; }
+.cola-edit__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .cola-edit__grid { grid-template-columns: 1fr; } }
+.cola-campo { display: grid; gap: 5px; }
+.cola-campo label { font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--mmc-ink-3); }
+.cola-campo input, .cola-campo select {
+  width: 100%; font: inherit; font-size: 15px;
+  color: var(--mmc-ink); background: #fff;
+  border: 1px solid var(--mmc-line-strong);
+  border-radius: var(--mmc-r-sm);
+  padding: 11px 13px; outline: none;
+}
+.cola-campo input:focus, .cola-campo select:focus {
+  border-color: var(--mmc-turquesa);
+  box-shadow: 0 0 0 3px rgba(71,201,201,.28);
+}
+
+.cola-msg { margin-top: 12px; font-size: 13.5px; font-weight: 700; }
+.cola-msg--ok { color: var(--mmc-turquesa); }
+.cola-msg--err { color: var(--mmc-err); }
+
+
+/* ============================================================
+   Contenedor de la ficha en la página /negocio/<slug>
+   ============================================================ */
+.mmc-ficha-wrap {
+  background: #fff;
+  border: 1px solid var(--mmc-line);
+  border-radius: var(--mmc-r-xl);
+  padding: clamp(18px, 3vw, 34px);
+  box-shadow: var(--mmc-shadow-md);
+}
+.mmc-ficha-desc { font-size: 15px; line-height: 1.65; color: var(--mmc-ink-2); margin: 22px 0 0; }
+
+.mmc-datos {
+  margin-top: 20px;
+  background: #fff;
+  border: 1px solid var(--mmc-line);
+  border-radius: var(--mmc-r-xl);
+  padding: clamp(14px, 2.4vw, 22px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2px 26px;
+}
+.mmc-datos__row {
+  display: flex; justify-content: space-between; gap: 14px;
+  padding: 11px 4px;
+  border-bottom: 1px dashed var(--mmc-line);
+  font-size: 13.5px;
+}
+.mmc-datos__row span { color: var(--mmc-ink-3); }
+.mmc-datos__row b { font-weight: 800; text-align: right; overflow-wrap: anywhere; }

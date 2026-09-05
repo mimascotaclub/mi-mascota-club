@@ -1,9 +1,15 @@
 /* ============================================================
-   Mi Mascota Club — Renderizador de la ficha de negocio
-   Uso:  renderFicha(document.getElementById('ficha'), datos)
-   El mismo componente sirve para /negocio/<slug> y para el
-   preview en vivo dentro del formulario.
-   Requiere: catalogos-negocio.js
+   Mi Mascota Club — Ficha de negocio (componente compartido)
+   ------------------------------------------------------------
+   Se usa en tres lugares, siempre con el mismo aspecto:
+     1. La página /negocio/<slug>
+     2. El preview en vivo del formulario de inscripción
+     3. La cola "Fichas por aprobar" del panel privado
+
+   Uso:  renderFicha(elemento, datos)
+         cardNegocioHTML(datos)   -> tarjeta del directorio
+
+   Requiere: js/catalogos-negocio.js y css/mmc-ficha.css
    ============================================================ */
 
 const MMC_ICONOS = {
@@ -30,39 +36,52 @@ function _waLink(numero) {
 function _urlRed(valor, base) {
   if (!valor) return null;
   const v = String(valor).trim();
+  if (!v) return null;
   if (/^https?:\/\//i.test(v)) return v;
   return base + v.replace(/^@/, '');
 }
 
-/**
- * @param {HTMLElement} el  contenedor
- * @param {Object} d        datos del negocio
- * @param {Object} [opts]   { interactivo: true }  false = preview sin links
- */
-function renderFicha(el, d, opts) {
-  opts = opts || {};
-  const vivo = opts.interactivo !== false;
+/* Beneficio: si vienen los 3 campos estructurados los arma con el catálogo;
+   si no (negocios registrados con el formulario antiguo), usa los textos
+   que ya estén guardados en beneficio_tipo / beneficio_detalle. */
+function _beneficio(d) {
+  if (d.beneficio_valor && typeof beneficioTexto === 'function') {
+    const b = beneficioTexto({
+      valor: d.beneficio_valor, sobre: d.beneficio_sobre, cuando: d.beneficio_cuando,
+      monto_minimo: d.beneficio_monto_min, detalle: d.beneficio_detalle
+    });
+    if (b) return b;
+  }
+  if (d.beneficio_label || d.beneficio_tipo) {
+    return { principal: d.beneficio_label || d.beneficio_tipo, condicion: d.beneficio_condicion || d.beneficio_detalle || '', cuando: '' };
+  }
+  return null;
+}
 
-  const tipo = typeof tipoNegocioPorId === 'function' ? tipoNegocioPorId(d.tipo_negocio) : null;
-  const tipoLabel = d.tipo_label || (tipo ? tipo.nombre : '');
-
-  const ben = typeof beneficioTexto === 'function'
-    ? beneficioTexto({
-        valor: d.beneficio_valor,
-        sobre: d.beneficio_sobre,
-        cuando: d.beneficio_cuando,
-        monto_minimo: d.beneficio_monto_min,
-        detalle: d.beneficio_detalle
-      })
-    : null;
-
-  const redes = [
+function _redes(d, comoLinks) {
+  return [
     { k: 'instagram', href: _urlRed(d.instagram, 'https://instagram.com/'), label: 'Instagram' },
     { k: 'tiktok',    href: _urlRed(d.tiktok, 'https://tiktok.com/@'),      label: 'TikTok' },
     { k: 'facebook',  href: _urlRed(d.facebook, 'https://facebook.com/'),   label: 'Facebook' },
     { k: 'whatsapp',  href: _waLink(d.whatsapp),                            label: 'WhatsApp' },
     { k: 'mapa',      href: d.google_maps_url || null,                      label: 'Cómo llegar' }
   ].filter(r => r.href);
+}
+
+/**
+ * Dibuja la ficha completa dentro de un elemento.
+ * @param {HTMLElement} el
+ * @param {Object} d      datos del negocio
+ * @param {Object} [opts] { interactivo:false } deja los links inertes (preview/panel)
+ */
+function renderFicha(el, d, opts) {
+  opts = opts || {};
+  const vivo = opts.interactivo !== false;
+
+  const tipo = typeof tipoNegocioPorId === 'function' ? tipoNegocioPorId(d.tipo_negocio) : null;
+  const tipoLabel = d.tipo_label || (tipo ? tipo.nombre : (d.cat || ''));
+  const ben = _beneficio(d);
+  const redes = _redes(d);
 
   const logoHTML = d.logo_url
     ? `<img src="${_esc(d.logo_url)}" alt="Logo de ${_esc(d.nombre)}">`
@@ -70,10 +89,10 @@ function renderFicha(el, d, opts) {
 
   const fotoHTML = d.foto_url
     ? `<img src="${_esc(d.foto_url)}" alt="${_esc(d.nombre)}">`
-    : `<div class="ficha__foto__ph">Foto negocio</div>`;
+    : `<div class="mmcf__foto-ph">Foto negocio</div>`;
 
   const horario = d.horario_texto
-    ? `<div class="ficha__horario">Horario: ${_esc(d.horario_texto)}</div>`
+    ? `<div class="mmcf__horario">Horario: ${_esc(d.horario_texto)}</div>`
     : '<div></div>';
 
   const ubicacion = d.tiene_local === false
@@ -83,41 +102,160 @@ function renderFicha(el, d, opts) {
     : [d.direccion, d.comuna].filter(Boolean).map(_esc).join(', ');
 
   el.innerHTML = `
-   <div class="ficha__grid">
-    <div class="ficha__head">
-      <div class="ficha__logo">${logoHTML}</div>
-      <div class="ficha__ident">
-        ${tipoLabel ? `<span class="ficha__tipo">${_esc(tipoLabel)}</span>` : ''}
-        <h1 class="ficha__nombre">${_esc(d.nombre || 'Nombre negocio')}</h1>
-        ${ubicacion ? `<p class="ficha__comuna">${MMC_ICONOS.pin} ${ubicacion}</p>` : ''}
+   <div class="mmcf__grid">
+    <div class="mmcf__head">
+      <div class="mmcf__logo">${logoHTML}</div>
+      <div class="mmcf__ident">
+        ${tipoLabel ? `<span class="mmcf__tipo">${_esc(tipoLabel)}</span>` : ''}
+        <h1 class="mmcf__nombre">${_esc(d.nombre || 'Nombre negocio')}</h1>
+        ${ubicacion ? `<p class="mmcf__comuna">${MMC_ICONOS.pin} ${ubicacion}</p>` : ''}
       </div>
     </div>
 
-    <div class="ficha__beneficio">
-      <div class="beneficio__valor">${_esc(ben && ben.principal ? ben.principal : 'Beneficio')}</div>
-      <div class="beneficio__meta">
-        ${ben && ben.cuando ? `<div class="beneficio__chip">${_esc(ben.cuando)}</div>` : ''}
-        ${ben && ben.condicion ? `<div class="beneficio__chip">${_esc(ben.condicion)}</div>` : ''}
+    ${ben && ben.principal ? `
+    <div class="mmcf__beneficio">
+      <div class="mmcf__ben-valor">${_esc(ben.principal)}</div>
+      <div class="mmcf__ben-meta">
+        ${ben.cuando ? `<div class="mmcf__chip">${_esc(ben.cuando)}</div>` : ''}
+        ${ben.condicion ? `<div class="mmcf__chip">${_esc(ben.condicion)}</div>` : ''}
       </div>
-    </div>
+    </div>` : ''}
 
-    <div class="ficha__foto">
+    <div class="mmcf__foto">
       ${fotoHTML}
-      <div class="ficha__foto__bar">
+      <div class="mmcf__foto-bar">
         ${horario}
-        <div class="ficha__redes">
+        <div class="mmcf__redes">
           ${redes.map(r => `
-            <a class="ficha__red" ${vivo ? `href="${_esc(r.href)}" target="_blank" rel="noopener"` : 'href="#" onclick="return false"'}
+            <a class="mmcf__red" ${vivo ? `href="${_esc(r.href)}" target="_blank" rel="noopener"` : 'href="#" onclick="return false"'}
                aria-label="${_esc(r.label)}" title="${_esc(r.label)}">${MMC_ICONOS[r.k]}</a>`).join('')}
         </div>
       </div>
     </div>
 
-    <button class="ficha__cta" type="button">Obtener beneficio</button>
+    ${ben && ben.principal ? `<button class="mmcf__cta" type="button">Obtener beneficio</button>` : ''}
    </div>
   `;
-
   return el;
 }
 
-if (typeof module !== 'undefined') module.exports = { renderFicha, MMC_ICONOS };
+/**
+ * Tarjeta del directorio: la misma ficha en versión compacta.
+ * Devuelve solo el contenido interior — va dentro del .biz-card que ya existe.
+ * @param {Object} d      datos del negocio
+ * @param {String} badge  etiqueta de la esquina (Fundador #002, Ejemplo, ★ Destacado)
+ * @param {String} extra  HTML opcional al final (los íconos de contacto de siempre)
+ */
+function cardNegocioHTML(d, badge, extra) {
+  const ben = _beneficio(d);
+  const tipo = typeof tipoNegocioPorId === 'function' ? tipoNegocioPorId(d.tipo_negocio) : null;
+  const catLabel = d.cat || (tipo ? tipo.nombre : '');
+
+  const fondo = d.foto_url
+    ? ''
+    : (d.tipo === 'dueno'
+        ? 'background:linear-gradient(135deg,#FFE699,#FFCE00);'
+        : 'background:linear-gradient(135deg,#B9EDED,#47C9C9);');
+
+  const foto = d.foto_url
+    ? `<img src="${_esc(d.foto_url)}" alt="${_esc(d.nombre)}">`
+    : `<span>${d.emoji || '🐾'}</span>`;
+
+  const logo = d.logo_url
+    ? `<img src="${_esc(d.logo_url)}" alt="">`
+    : `<span>${d.emoji || '🐾'}</span>`;
+
+  return `
+    <div class="mmcard">
+      <div class="mmcard__foto" style="${fondo}">
+        ${badge ? `<span class="founder-badge${/destacado/i.test(badge) ? ' badge-destacado' : ''}">${_esc(badge)}</span>` : ''}
+        ${foto}
+      </div>
+      <div class="mmcard__body">
+        <div class="mmcard__head">
+          <div class="mmcard__logo">${logo}</div>
+          <div>
+            <h3 class="mmcard__nombre">${_esc(d.nombre)}</h3>
+            <div class="mmcard__cat">${_esc(catLabel)} · ${_esc(d.comuna || '')}</div>
+          </div>
+        </div>
+        ${ben ? `
+        <div class="mmcard__ben">
+          <b>${_esc(ben.principal)}</b>
+          ${(ben.condicion || ben.cuando) ? `<small>${_esc([ben.condicion, ben.cuando].filter(Boolean).join(' · '))}</small>` : ''}
+        </div>` : ''}
+        ${d.meta ? `<p class="mmcard__meta">${_esc(d.meta)}</p>` : ''}
+        ${extra || ''}
+      </div>
+    </div>`;
+}
+
+/* Adaptador: pasa un negocio tal como lo arma js/app.js al formato de la ficha. */
+function fichaDesdeNegocio(n) {
+  return {
+    nombre: n.nombre,
+    cat: n.cat,
+    tipo: n.tipo,
+    tipo_negocio: n.tipoNegocio || null,
+    tiene_local: n.tieneLocal !== false,
+    comuna: n.comuna,
+    comunas_cobertura: n.comunasCobertura || null,
+    direccion: n.direccion,
+    google_maps_url: n.googleMapsUrl || (n.direccion ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${n.direccion}, ${n.comuna}`) : null),
+    whatsapp: n.whatsapp,
+    instagram: n.instagram || n.redesSociales,
+    facebook: n.facebook,
+    tiktok: n.tiktok,
+    horario_texto: n.horario,
+    logo_url: n.logo,
+    foto_url: n.foto,
+    /* En la tabla `negocios` el beneficio ya viene escrito en dos líneas
+       (beneficio_tipo / beneficio_detalle), armadas al aprobar la ficha.
+       No se recalcula desde los campos estructurados para no repetir el texto. */
+    beneficio_label: n.beneficioTipo,
+    beneficio_condicion: n.beneficioDetalle,
+    meta: n.meta,
+    emoji: n.emoji
+  };
+}
+
+/* Adaptador: una solicitud pendiente (tabla negocios_solicitudes) a la ficha. */
+function fichaDesdeSolicitud(s) {
+  return {
+    nombre: s.nombre,
+    cat: s.dir_cat,
+    tipo: s.dir_tipo,
+    tipo_negocio: s.tipo_negocio,
+    tiene_local: s.tiene_local,
+    comuna: s.comuna,
+    comunas_cobertura: s.comunas_cobertura,
+    direccion: s.direccion,
+    google_maps_url: s.google_maps_url,
+    whatsapp: s.whatsapp,
+    instagram: s.instagram,
+    facebook: s.facebook,
+    tiktok: s.tiktok,
+    horario_texto: s.horario_texto,
+    logo_url: s.logo_url,
+    foto_url: s.foto_url,
+    beneficio_valor: s.beneficio_valor,
+    beneficio_sobre: s.beneficio_sobre,
+    beneficio_cuando: s.beneficio_cuando,
+    beneficio_monto_min: s.beneficio_monto_min,
+    beneficio_detalle: s.beneficio_detalle,
+    beneficio_label: s.beneficio_label,
+    beneficio_condicion: s.beneficio_condicion
+  };
+}
+
+if (typeof window !== 'undefined') {
+  window.renderFicha = renderFicha;
+  window.cardNegocioHTML = cardNegocioHTML;
+  window.fichaDesdeNegocio = fichaDesdeNegocio;
+  window.fichaDesdeSolicitud = fichaDesdeSolicitud;
+  window.MMC_ICONOS = MMC_ICONOS;
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { renderFicha, cardNegocioHTML, fichaDesdeNegocio, fichaDesdeSolicitud, MMC_ICONOS };
+}

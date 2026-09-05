@@ -632,7 +632,15 @@ async function loadAll(){
       beneficioTipo: n.beneficio_tipo, beneficioDetalle: n.beneficio_detalle,
       logo: n.logo, direccion: n.direccion, horario: n.horario, redesSociales: n.redes_sociales,
       descripcion: n.descripcion, verificado: n.verificado, createdAt: n.created_at, demo:false,
-      esEspecialista: !!n.es_especialista, destacado: !!n.destacado
+      esEspecialista: !!n.es_especialista, destacado: !!n.destacado,
+      /* Columnas nuevas del flujo de inscripción v3 (parche v11) */
+      foto: n.foto, googleMapsUrl: n.google_maps_url, whatsapp: n.whatsapp,
+      instagram: n.instagram, facebook: n.facebook, tiktok: n.tiktok, sitioWeb: n.sitio_web,
+      horarioDias: n.horario_dias, tieneLocal: n.tiene_local !== false,
+      comunasCobertura: n.comunas_cobertura, tipoNegocio: n.tipo_negocio,
+      beneficioValor: n.beneficio_valor, beneficioSobre: n.beneficio_sobre,
+      beneficioCuando: n.beneficio_cuando, beneficioMontoMin: n.beneficio_monto_min,
+      email: n.email, telefono: n.telefono
     }));
   }catch(e){ console.error(e); negociosReal = []; }
   try{
@@ -715,20 +723,10 @@ function palabrasClaveBusqueda(q){
    duplicar el markup. destacado=true agrega la etiqueta ★ Destacado en vez del badge
    normal (Ejemplo / Verificado / Fundador #). */
 function bizCardInnerHTML(n, destacado){
-  const headerBg = n.tipo === 'dueno' ? 'linear-gradient(135deg, #FFE699, var(--yellow))' : 'linear-gradient(135deg, #B9EDED, var(--teal))';
   const badge = destacado ? '★ Destacado' : (n.demo ? 'Ejemplo' : (n.verificado ? '✓ Verificado' : 'Fundador #'+String(n.founderNumber||'').padStart(3,'0')));
-  return `
-      <div class="biz-photo" style="background:${n.logo ? '#fff' : headerBg};">
-        <span class="founder-badge${destacado?' badge-destacado':''}">${badge}</span>
-        ${n.logo ? `<img src="${n.logo}" alt="${n.nombre}" style="width:70px;height:70px;object-fit:cover;border-radius:14px;">` : (iconByCat[n.cat]||'🐾')}
-      </div>
-      <div class="biz-body">
-        <h3>${n.nombre}</h3>
-        <div class="biz-cat"><span class="${n.tipo==='dueno'?'tag-dueno':''}">${n.cat}</span> · ${n.comuna}</div>
-        <div class="biz-meta">${n.meta||'Negocio fundador del club.'}</div>
-        ${n.beneficioDetalle ? `<div class="biz-meta" style="color:var(--teal-dark);font-weight:700;margin-top:4px;">🎁 ${n.beneficioTipo}: ${n.beneficioDetalle}</div>` : ''}
-        ${bizContactIcons(n)}
-      </div>`;
+  const datos = fichaDesdeNegocio(n);
+  datos.emoji = iconByCat[n.cat] || '🐾';
+  return cardNegocioHTML(datos, badge, bizContactIcons(n));
 }
 function renderDirectory(){
   const qRaw = document.getElementById('dirSearch').value.trim().toLowerCase();
@@ -811,31 +809,35 @@ function mostrarPaginaFicha(n){
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
+  const cajaFicha = document.getElementById('fichaMMC');
+  if(cajaFicha){
+    const datos = fichaDesdeNegocio(n);
+    datos.tipo_label = n.esEspecialista ? `${n.cat} · Especialista` : n.cat;
+    renderFicha(cajaFicha, datos);
+  }
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   if(!n.demo && n.codigo) cargarReputacionNegocio(n);
 }
 function renderFichaContenido(n){
+  const dato = (label, valor) => valor ? `<div class="mmc-datos__row"><span>${label}</span><b>${valor}</b></div>` : '';
   return `
-    <div class="ficha-page">
-      <div class="ficha-page-main">
-        ${n.logo ? `<img src="${n.logo}" alt="${n.nombre}" class="ficha-page-logo">` : `<div class="ficha-page-icon">${iconByCat[n.cat]||'🐾'}</div>`}
-        <h1>${n.nombre} ${n.verificado ? '<span style="color:var(--teal-dark);font-size:15px;">✓ Verificado</span>' : (n.esEspecialista ? '<span style="color:var(--teal-dark);font-size:15px;">🧑‍⚕️ Especialista</span>' : '')}</h1>
-        <div class="biz-cat">${n.cat} · ${n.comuna}</div>
-        ${n.descripcion ? `<p style="font-size:14.5px;color:#3a3a3a;line-height:1.6;margin:16px 0;">${n.descripcion}</p>` : ''}
-        ${n.beneficioDetalle ? `<div class="biz-meta" style="color:var(--teal-dark);font-weight:700;font-size:14.5px;margin:8px 0 4px;">🎁 Beneficio de socio — ${n.beneficioTipo}: ${n.beneficioDetalle}</div>` : ''}
-        ${!n.demo && n.codigo ? `<div id="repSummaryBox" class="rep-empty">Cargando reputación…</div>` : ''}
-        ${bizContactIcons(n)}
-      </div>
-      <div class="ficha-page-side">
-        <div class="row"><span>Estado</span><b style="color:var(--forest-2);">${n.demo ? 'Ejemplo de directorio' : 'Activo · gratis (piloto)'}</b></div>
-        <div class="row"><span>Tipo de beneficio</span><b>${n.tipo==='dueno' ? 'Para el dueño' : 'Para la mascota'}</b></div>
-        ${n.servicios ? `<div class="row"><span>Especialidad</span><b>${n.servicios}</b></div>` : ''}
-        ${n.direccion ? `<div class="row"><span>Dirección</span><b>${n.direccion}</b></div>` : ''}
-        ${n.horario ? `<div class="row"><span>Horario</span><b>${n.horario}</b></div>` : ''}
-        ${n.redesSociales ? `<div class="row"><span>Redes / contacto</span><b>${n.redesSociales}</b></div>` : ''}
-        ${!n.demo ? `<div class="row"><span>N° fundador</span><b>#${String(n.founderNumber||'').padStart(3,'0')}</b></div>` : ''}
-        ${!n.demo ? `<div class="row"><span>Código</span><b>${n.codigo||'—'}</b></div>` : ''}
-      </div>
+    <div class="mmc-ficha-wrap">
+      <div class="mmc-ficha" id="fichaMMC"></div>
+      ${n.descripcion ? `<p class="mmc-ficha-desc">${n.descripcion}</p>` : ''}
+      ${!n.demo && n.codigo ? `<div id="repSummaryBox" class="rep-empty" style="margin-top:18px;">Cargando reputación…</div>` : ''}
+    </div>
+    <div class="mmc-datos">
+      ${dato('Estado', n.demo ? 'Ejemplo de directorio' : 'Activo · gratis (piloto)')}
+      ${dato('Beneficio para', n.tipo === 'dueno' ? 'El dueño' : 'La mascota')}
+      ${n.verificado ? dato('Verificado', '✓ Sí') : ''}
+      ${n.esEspecialista ? dato('Ficha', 'Especialista') : ''}
+      ${dato('Especialidad', n.servicios)}
+      ${dato('Dirección', n.direccion)}
+      ${dato('Días', n.horarioDias)}
+      ${dato('Horario', n.horario)}
+      ${dato('Teléfono', n.telefono)}
+      ${!n.demo ? dato('N° fundador', '#' + String(n.founderNumber||'').padStart(3,'0')) : ''}
+      ${!n.demo ? dato('Código', n.codigo || '—') : ''}
     </div>
     <div style="margin-top:18px;font-size:12.5px;color:#5a6259;">← <a href="/directorio" onclick="event.preventDefault(); irADirectorio({});" style="color:var(--brass);text-decoration:underline;">Volver al directorio</a></div>
   `;
@@ -1501,6 +1503,7 @@ async function tryUnlock(){
     document.getElementById('adminPanel').style.display='block';
     err.style.display='none';
     await refreshAdmin();
+    cargarColaFichas();
   }catch(e){
     err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
     err.style.display='block';
@@ -1608,6 +1611,202 @@ window.poblarComunas = poblarComunas;
 window.filtrarPorCategoria = filtrarPorCategoria;
 window.filtrarPorNegocio = filtrarPorNegocio;
 window.abrirElegirCamino = abrirElegirCamino;
+/* ============================================================
+   COLA DE APROBACIÓN DE FICHAS DE NEGOCIO
+   ------------------------------------------------------------
+   Vive dentro del panel privado (sección "Fichas por aprobar").
+   Todo pasa por funciones RPC con SECURITY DEFINER que verifican
+   que el usuario logueado esté en la tabla `admins`, así que la
+   anon key por sí sola no puede ver ni aprobar nada.
+   ============================================================ */
+
+let colaFichasCache = [];
+
+function colaEsc(v){
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function cargarColaFichas(){
+  const cont = document.getElementById('colaFichas');
+  const cnt = document.getElementById('colaCount');
+  if(!cont) return;
+  cont.innerHTML = '<div class="cola-vacia">Cargando…</div>';
+  try{
+    const { data, error } = await supabase.rpc('admin_fichas_pendientes');
+    if(error) throw error;
+    colaFichasCache = data || [];
+    if(cnt){ cnt.textContent = colaFichasCache.length; cnt.dataset.cero = colaFichasCache.length ? '0' : '1'; }
+    if(!colaFichasCache.length){
+      cont.innerHTML = '<div class="cola-vacia">No hay fichas esperando revisión. 🎉</div>';
+      return;
+    }
+    cont.innerHTML = '';
+    colaFichasCache.forEach(sol => cont.appendChild(colaItemEl(sol)));
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<div class="cola-vacia">No pudimos cargar la cola. Vuelve a entrar al panel e inténtalo otra vez.</div>';
+    if(cnt){ cnt.textContent = '0'; cnt.dataset.cero = '1'; }
+  }
+}
+
+function colaItemEl(sol){
+  const el = document.createElement('div');
+  el.className = 'cola-item';
+  el.id = 'cola-' + sol.id;
+  const fecha = new Date(sol.creado_en).toLocaleString('es-CL', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  el.innerHTML = `
+    <div class="cola-fecha">Recibida el ${colaEsc(fecha)}</div>
+    <div class="mmc-ficha" id="colaficha-${sol.id}"></div>
+    <div class="cola-priv">
+      <div class="cola-priv__t">No se publica — solo para ti</div>
+      <div class="cola-priv__row"><span>Razón social</span><b>${colaEsc(sol.razon_social) || '—'}</b></div>
+      <div class="cola-priv__row"><span>RUT comercial</span><b>${colaEsc(sol.rut_comercial)}</b></div>
+      <div class="cola-priv__row"><span>Responsable</span><b>${colaEsc(sol.responsable_nombre)} · ${colaEsc(sol.responsable_rut)}</b></div>
+      <div class="cola-priv__row"><span>Correo</span><b><a href="mailto:${colaEsc(sol.responsable_email)}">${colaEsc(sol.responsable_email)}</a></b></div>
+      <div class="cola-priv__row"><span>Teléfono</span><b>${colaEsc(sol.responsable_telefono)}</b></div>
+      <div class="cola-priv__row"><span>Categoría en el directorio</span><b>${colaEsc(sol.dir_cat)} · ${sol.dir_tipo === 'dueno' ? 'Para el dueño' : 'Para la mascota'}${sol.es_especialista ? ' · Especialista' : ''}</b></div>
+    </div>
+    <div id="colaedit-${sol.id}"></div>
+    <div class="cola-acciones">
+      <button class="cola-btn cola-btn--ok" onclick="aprobarFicha('${sol.id}')">✓ Aprobar</button>
+      <button class="cola-btn cola-btn--edit" onclick="editarFicha('${sol.id}')">✎ Modificar</button>
+      <button class="cola-btn cola-btn--no" onclick="rechazarFicha('${sol.id}')">✕ Rechazar</button>
+    </div>
+    <div class="cola-msg" id="colamsg-${sol.id}"></div>`;
+  setTimeout(() => {
+    const caja = document.getElementById('colaficha-' + sol.id);
+    if(caja) renderFicha(caja, fichaDesdeSolicitud(sol), { interactivo:false });
+  }, 0);
+  return el;
+}
+
+function colaMsg(id, texto, ok){
+  const el = document.getElementById('colamsg-' + id);
+  if(el){ el.textContent = texto; el.className = 'cola-msg ' + (ok ? 'cola-msg--ok' : 'cola-msg--err'); }
+}
+function colaBloquear(id, on){
+  const el = document.getElementById('cola-' + id);
+  if(el) el.dataset.ocupado = on ? '1' : '0';
+}
+
+async function aprobarFicha(id){
+  const sol = colaFichasCache.find(x => x.id === id);
+  if(!confirm(`¿Publicar la ficha de "${sol ? sol.nombre : 'este negocio'}"?\n\nVa a aparecer en el directorio de inmediato.`)) return;
+  colaBloquear(id, true);
+  colaMsg(id, 'Publicando…', true);
+  try{
+    const { data, error } = await supabase.rpc('aprobar_solicitud_negocio', { p_id: id });
+    if(error) throw error;
+    colaMsg(id, `Publicada como ${data}. Ya está en el directorio.`, true);
+    setTimeout(() => { cargarColaFichas(); loadData(); }, 900);
+  }catch(e){
+    console.error(e);
+    colaBloquear(id, false);
+    colaMsg(id, 'No se pudo aprobar: ' + (e.message || 'error desconocido'), false);
+  }
+}
+
+async function rechazarFicha(id){
+  const motivo = prompt('¿Por qué la rechazas? (el negocio va a ver este mensaje)');
+  if(motivo === null) return;
+  if(!motivo.trim()){ alert('Escribe un motivo para poder avisarle al negocio.'); return; }
+  colaBloquear(id, true);
+  colaMsg(id, 'Guardando…', true);
+  try{
+    const { error } = await supabase.rpc('rechazar_solicitud_negocio', { p_id: id, p_motivo: motivo.trim() });
+    if(error) throw error;
+    colaMsg(id, 'Ficha rechazada.', true);
+    setTimeout(cargarColaFichas, 800);
+  }catch(e){
+    console.error(e);
+    colaBloquear(id, false);
+    colaMsg(id, 'No se pudo rechazar: ' + (e.message || 'error desconocido'), false);
+  }
+}
+
+/* "Modificar": abre los campos editables de esa misma ficha.
+   Al guardar, la ficha de arriba se vuelve a dibujar con los cambios,
+   y recién ahí decides si la apruebas. */
+function editarFicha(id){
+  const sol = colaFichasCache.find(x => x.id === id);
+  const caja = document.getElementById('colaedit-' + id);
+  if(!sol || !caja) return;
+  if(caja.innerHTML){ caja.innerHTML = ''; return; }   // segundo clic: cerrar
+
+  const campo = (name, label, valor, tipo) =>
+    `<div class="cola-campo"><label for="ed-${name}-${id}">${label}</label>
+       <input id="ed-${name}-${id}" type="${tipo||'text'}" value="${colaEsc(valor||'')}"></div>`;
+
+  const cats = (typeof ALL_DIR_CATS !== 'undefined' ? ALL_DIR_CATS : [])
+    .map(c => `<option ${c === sol.dir_cat ? 'selected' : ''}>${colaEsc(c)}</option>`).join('');
+
+  caja.innerHTML = `
+    <div class="cola-edit">
+      <div class="cola-edit__grid">
+        ${campo('nombre', 'Nombre del negocio', sol.nombre)}
+        <div class="cola-campo"><label for="ed-cat-${id}">Categoría del directorio</label>
+          <select id="ed-cat-${id}">${cats}</select></div>
+        <div class="cola-campo"><label for="ed-tipo-${id}">Aparece en</label>
+          <select id="ed-tipo-${id}">
+            <option value="mascota" ${sol.dir_tipo==='mascota'?'selected':''}>Beneficios para la mascota</option>
+            <option value="dueno" ${sol.dir_tipo==='dueno'?'selected':''}>Beneficios para el dueño</option>
+          </select></div>
+        <div class="cola-campo"><label for="ed-esp-${id}">¿Es especialista?</label>
+          <select id="ed-esp-${id}">
+            <option value="false" ${!sol.es_especialista?'selected':''}>No, es un local o marca</option>
+            <option value="true" ${sol.es_especialista?'selected':''}>Sí, es una persona</option>
+          </select></div>
+        ${campo('beneficio', 'Beneficio (línea grande)', sol.beneficio_label)}
+        ${campo('condicion', 'Condición (línea chica)', sol.beneficio_condicion)}
+        ${campo('comuna', 'Comuna', sol.comuna)}
+        ${campo('direccion', 'Dirección', sol.direccion)}
+        ${campo('horario', 'Horario', sol.horario_texto)}
+        ${campo('dias', 'Días de atención', sol.horario_dias)}
+        ${campo('telefono', 'Teléfono del local', sol.telefono_local)}
+        ${campo('whatsapp', 'WhatsApp', sol.whatsapp)}
+        ${campo('instagram', 'Instagram', sol.instagram)}
+        ${campo('facebook', 'Facebook', sol.facebook)}
+        ${campo('tiktok', 'TikTok', sol.tiktok)}
+        ${campo('maps', 'Enlace de Google Maps', sol.google_maps_url, 'url')}
+        ${campo('descripcion', 'Descripción corta', sol.descripcion)}
+      </div>
+      <button class="cola-btn cola-btn--ok" style="width:100%;" onclick="guardarEdicionFicha('${id}')">Guardar cambios</button>
+    </div>`;
+}
+
+async function guardarEdicionFicha(id){
+  const v = name => { const el = document.getElementById(`ed-${name}-${id}`); return el ? el.value.trim() : null; };
+  colaMsg(id, 'Guardando…', true);
+  try{
+    const { error } = await supabase.rpc('admin_editar_ficha', {
+      p_id: id,
+      p_nombre: v('nombre'),
+      p_dir_cat: v('cat'),
+      p_dir_tipo: v('tipo'),
+      p_es_especialista: v('esp') === 'true',
+      p_comuna: v('comuna'),
+      p_direccion: v('direccion'),
+      p_google_maps_url: v('maps'),
+      p_telefono_local: v('telefono'),
+      p_whatsapp: v('whatsapp'),
+      p_instagram: v('instagram'),
+      p_facebook: v('facebook'),
+      p_tiktok: v('tiktok'),
+      p_horario_texto: v('horario'),
+      p_horario_dias: v('dias'),
+      p_descripcion: v('descripcion'),
+      p_beneficio_label: v('beneficio'),
+      p_beneficio_condicion: v('condicion')
+    });
+    if(error) throw error;
+    colaMsg(id, 'Cambios guardados. Revisa la ficha y apruébala si está lista.', true);
+    await cargarColaFichas();
+  }catch(e){
+    console.error(e);
+    colaMsg(id, 'No se pudo guardar: ' + (e.message || 'error desconocido'), false);
+  }
+}
+
 window.mostrarFormulario = mostrarFormulario;
 window.mostrarSeccion = mostrarSeccion;
 window.tryUnlock = tryUnlock;
@@ -1621,6 +1820,11 @@ window.cerrarMapa = cerrarMapa;
 window.toggleDropdown = toggleDropdown;
 window.irABuscar = irABuscar;
 window.refreshAdmin = refreshAdmin;
+window.cargarColaFichas = cargarColaFichas;
+window.aprobarFicha = aprobarFicha;
+window.rechazarFicha = rechazarFicha;
+window.editarFicha = editarFicha;
+window.guardarEdicionFicha = guardarEdicionFicha;
 window.irADirectorio = irADirectorio;
 window.irAEspecialistas = irAEspecialistas;
 window.irABeneficios = irABeneficios;
