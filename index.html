@@ -452,11 +452,60 @@
         <div class="field-row three">
           <div class="field"><label for="valBizCode">Tu código de negocio</label><input id="valBizCode" required placeholder="NEG0001" style="text-transform:uppercase;"></div>
           <div class="field"><label for="valSocioCode">Código del socio</label><input id="valSocioCode" required placeholder="MMC00001" style="text-transform:uppercase;"></div>
-          <div class="field"><label for="valMonto">Monto compra (CLP)</label><input id="valMonto" type="number" min="1" required placeholder="15000"></div>
+          <div class="field"><label for="valMonto">Monto compra (CLP) <span style="font-weight:600;color:#8a8a8a;">— opcional</span></label><input id="valMonto" type="number" min="1" placeholder="15000"></div>
         </div>
-        <button type="submit" id="validarSubmitBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Validar y registrar compra</button>
+        <div style="font-size:12px;color:#7a8377;margin:-4px 0 14px;line-height:1.45;">Si el beneficio no tiene un monto claro (2x1, un servicio gratis), deja el monto vacío: la visita se registra igual.</div>
+        <button type="submit" id="validarSubmitBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Validar y registrar visita</button>
       </form>
       <div class="validar-result" id="validarResult"></div>
+      <div style="margin-top:16px;font-size:12.5px;text-align:center;">
+        <a href="/mi-negocio" onclick="event.preventDefault(); irAMiNegocio();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver las visitas de mi negocio →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PANEL DEL NEGOCIO (/mi-negocio)
+     El negocio entra con su código NEG#### y el correo con el que
+     se registró, y ve sus propias visitas validadas. El código solo
+     no basta a propósito: son correlativos y se podrían adivinar.
+     ============================================================ -->
+<section id="panelNegocio" class="band">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:22px;">
+      <span class="eyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Para negocios</span>
+      <h2>Las visitas de tu negocio</h2>
+      <p>Cada vez que validas el carnet de un socio queda registrada la visita. Aquí las ves todas.</p>
+    </div>
+
+    <div class="panel full" style="max-width:520px;" id="negLoginBox">
+      <form id="negLoginForm">
+        <div class="field-row">
+          <div class="field"><label for="negCodigo">Tu código de negocio</label><input id="negCodigo" required placeholder="NEG0001" style="text-transform:uppercase;"></div>
+          <div class="field"><label for="negEmail">Correo con el que te registraste</label><input id="negEmail" type="email" required placeholder="hola@tunegocio.cl"></div>
+        </div>
+        <button type="submit" id="negLoginBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Entrar</button>
+        <div id="negLoginError" style="color:var(--rust);font-size:12.5px;margin-top:10px;display:none;"></div>
+        <div style="margin-top:12px;font-size:12px;color:#7a8377;line-height:1.45;">
+          Te pedimos el correo además del código porque los códigos son correlativos: sin esto, cualquiera podría escribir NEG0002 y ver los clientes de otro negocio.
+        </div>
+      </form>
+    </div>
+
+    <div id="negPanelBox" style="display:none;">
+      <div class="neg-cab">
+        <div>
+          <h3 id="negNombre" style="margin:0;font-size:22px;"></h3>
+          <div id="negSub" class="neg-sub"></div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="salirPanelNegocio()">Salir</button>
+      </div>
+
+      <div class="neg-kpis" id="negKpis"></div>
+
+      <h4 class="neg-t">Visitas registradas</h4>
+      <div id="negTabla"></div>
     </div>
   </div>
 </section>

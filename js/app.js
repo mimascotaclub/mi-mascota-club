@@ -375,10 +375,17 @@ function manejarRutaActual(){
     mostrarPaginaPlanes();
   } else if(parts[0] === 'negocio' && parts[1]){
     mostrarPaginaFichaPorSlug(parts[1]);
+  } else if(parts[0] === 'mi-negocio'){
+    mostrarPaginaNegocio();
+  } else if(parts[0] === 'validar'){
+    /* Es la URL que trae el QR del carnet del socio. Llega el negocio, con el
+       celular, después de escanear. */
+    abrirValidarConSocio(parts[1] ? decodeURIComponent(parts[1]).toUpperCase() : '');
   } else {
     document.body.classList.remove('pagina-directorio');
     document.body.classList.remove('pagina-ficha');
     document.body.classList.remove('pagina-planes');
+    document.body.classList.remove('pagina-negocio');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
@@ -1017,7 +1024,7 @@ async function confirmarBeneficio(){
           ${n.beneficioDetalle ? '<br><span style="font-size:12px;">' + colaEsc(n.beneficioDetalle) + '</span>' : ''}
         </div>
       </div>`;
-    renderQR('benQR', codigo);
+    renderQR('benQR', urlCarnet(codigo));
   }catch(e){
     console.error(e);
     error('No pudimos verificar el código. Inténtalo de nuevo.');
@@ -1075,14 +1082,26 @@ function updateCard(){
   document.getElementById('credBreed').textContent = breed ? `${species} · ${breed}` : (name ? species : 'Escribe su nombre para previsualizar →');
   document.getElementById('credComuna').textContent = comuna || 'Santiago';
 }
+/* El QR del carnet lleva una URL, no el código pelado.
+   Antes el QR contenía solo "MMC00001": al escanearlo con la cámara del
+   teléfono aparecía ese texto y no pasaba nada más. Ahora contiene
+   https://…/validar/MMC00001, así que el negocio lo escanea con la cámara
+   que ya trae su celular (sin apps ni lectores raros), le abre la página de
+   validar con el código del socio ya puesto, y solo tiene que escribir el
+   monto. Ese registro es el que deja la huella del movimiento en `canjes`. */
+function urlCarnet(codigo){
+  return location.origin + '/validar/' + encodeURIComponent(codigo);
+}
+
 function renderQR(elId, text){
   const el = document.getElementById(elId);
   if(!el) return;
+  const respaldo = String(text).split('/').pop();   // si falla la librería, al menos el código
   el.innerHTML = '';
   try{
     if(typeof QRCode !== 'undefined'){ new QRCode(el, { text, width:120, height:120, correctLevel: QRCode.CorrectLevel.M }); }
-    else { el.innerHTML = `<div style="font-family:var(--font-mono);font-size:11px;text-align:center;">${text}</div>`; }
-  }catch(e){ el.innerHTML = `<div style="font-family:var(--font-mono);font-size:11px;text-align:center;">${text}</div>`; }
+    else { el.innerHTML = `<div style="font-family:var(--font-mono);font-size:11px;text-align:center;">${respaldo}</div>`; }
+  }catch(e){ el.innerHTML = `<div style="font-family:var(--font-mono);font-size:11px;text-align:center;">${respaldo}</div>`; }
 }
 
 /* ---------------- Compartir carnet en Instagram (SIN código ni QR) ---------------- */
@@ -1450,7 +1469,7 @@ document.getElementById('ownerForm').addEventListener('submit', async function(e
     const record = { pet, species, breed, comuna, email, codigo, socioNumber: socio_number, foto, plan: 'free' };
     updateCounts();
     document.getElementById('credId').textContent = codigo;
-    renderQR('credQR', codigo);
+    renderQR('credQR', urlCarnet(codigo));
     const row = document.createElement('div');
     row.className='waitlist-item';
     row.innerHTML = `<span>${pet}</span><span class="small">${comuna} · ${codigo}</span>`;
@@ -1469,7 +1488,7 @@ document.getElementById('ownerForm').addEventListener('submit', async function(e
       <button type="button" id="modalShareBtn" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;">📤 Compartir en Instagram</button>
       <div style="margin-top:8px;font-size:11.5px;color:#8a8a8a;text-align:center;">La imagen para compartir no incluye tu código ni tu QR — es segura de publicar.</div>
     `);
-    renderQR('modalQR', codigo);
+    renderQR('modalQR', urlCarnet(codigo));
     document.getElementById('modalShareBtn').addEventListener('click', () => compartirCarne(record));
     enviarCorreoBienvenida({
       to_email: email,
@@ -1514,13 +1533,39 @@ function compressImage(file, maxDim, quality){
   });
 }
 
-/* ---------------- Validar visita (canje) ---------------- */
+/* ---------------- Validar visita (canje) ----------------
+   El negocio escanea el QR del socio con la cámara de su celular y aterriza
+   aquí con el código del socio ya puesto. Su propio código de negocio queda
+   guardado en ese teléfono, así que a partir de la segunda vez lo único que
+   escribe es el monto. */
+const LS_NEGOCIO = 'mmc_codigo_negocio';
+
+function abrirValidarConSocio(socioCodigo){
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes');
+  const seccion = document.getElementById('validar');
+  if(!seccion) return;
+  seccion.style.display = '';
+  const inputSocio = document.getElementById('valSocioCode');
+  const inputBiz = document.getElementById('valBizCode');
+  if(socioCodigo && inputSocio) inputSocio.value = socioCodigo;
+  let guardado = '';
+  try{ guardado = localStorage.getItem(LS_NEGOCIO) || ''; }catch(e){}
+  if(guardado && inputBiz) inputBiz.value = guardado;
+  setTimeout(() => {
+    seccion.scrollIntoView({ behavior:'smooth' });
+    const foco = guardado ? document.getElementById('valMonto') : inputBiz;
+    if(foco) foco.focus();
+  }, 120);
+}
+
+
 document.getElementById('validarForm').addEventListener('submit', async function(e){
   e.preventDefault();
   const btn = document.getElementById('validarSubmitBtn');
   const bizCodigo = document.getElementById('valBizCode').value.trim().toUpperCase();
   const socioCodigo = document.getElementById('valSocioCode').value.trim().toUpperCase();
-  const monto = Number(document.getElementById('valMonto').value);
+  const montoRaw = document.getElementById('valMonto').value.trim();
+  const monto = montoRaw === '' ? null : Number(montoRaw);
   const resultBox = document.getElementById('validarResult');
   resultBox.classList.remove('show');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Validando...';
@@ -1532,18 +1577,154 @@ document.getElementById('validarForm').addEventListener('submit', async function
     const r = data[0];
     if(!r.ok){ toast(r.mensaje); return; }
     canjesCount++;
+    try{ localStorage.setItem(LS_NEGOCIO, bizCodigo); }catch(e){ /* modo incógnito */ }
     let calCta = '';
     if(r.negocio_plan === 'premium' && r.canje_id){
       calCta = `<div style="margin-top:14px;"><button type="button" class="btn btn-sm btn-primary" onclick="abrirFormularioCalificar('${r.canje_id}','negocio','${bizCodigo}','${String(r.nombre_mostrar).replace(/'/g,"\\'")}')">⭐ Calificar a este socio ahora</button></div>`;
     }
-    resultBox.innerHTML = `<div class="big">${formatCLP(monto)}</div>Compra validada de <b>${r.nombre_mostrar}</b> en <b>${r.negocio_nombre}</b>.<br>Ahorro de socio aplicado (ejemplo 10%): <b>${formatCLP(r.ahorro)}</b>${calCta}`;
+    resultBox.innerHTML = (monto != null
+        ? `<div class="big">${formatCLP(monto)}</div>Compra validada de <b>${r.nombre_mostrar}</b> en <b>${r.negocio_nombre}</b>.<br>Ahorro de socio aplicado (ejemplo 10%): <b>${formatCLP(r.ahorro)}</b>`
+        : `<div class="big">✓</div>Visita de <b>${r.nombre_mostrar}</b> registrada en <b>${r.negocio_nombre}</b>.<br><span style="font-size:12.5px;color:#7a8377;">Sin monto anotado — la visita queda igual en el historial.</span>`)
+      + calCta
+      + `<div style="margin-top:14px;font-size:12.5px;"><a href="/mi-negocio" onclick="event.preventDefault(); irAMiNegocio();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver todas mis visitas →</a></div>`;
     resultBox.classList.add('show');
     document.getElementById('valSocioCode').value = '';
     document.getElementById('valMonto').value = '';
     toast('¡Visita validada y registrada!');
   }catch(err){ console.error(err); toast('No se pudo registrar la visita. Intenta de nuevo.'); }
-  finally{ btn.disabled = false; btn.textContent = 'Validar y registrar compra'; }
+  finally{ btn.disabled = false; btn.textContent = 'Validar y registrar visita'; }
 });
+
+/* ============================================================
+   PANEL DEL NEGOCIO  (/mi-negocio)
+   ------------------------------------------------------------
+   Cada visita validada queda en la tabla `canjes`. Esto es esa
+   misma información, pero mostrada al negocio: cuántas visitas
+   le trajo el club, cuántos socios distintos, cuánto sumaron las
+   compras y quién repitió.
+
+   El acceso pide código + correo de registro (ver
+   supabase-panel-negocio-v14.sql). El par queda guardado en ese
+   navegador para no escribirlo cada vez.
+   ============================================================ */
+const LS_NEG_SESION = 'mmc_sesion_negocio';
+
+function sesionNegocio(){
+  try{ return JSON.parse(localStorage.getItem(LS_NEG_SESION) || 'null'); }catch(e){ return null; }
+}
+function guardarSesionNegocio(codigo, email){
+  try{ localStorage.setItem(LS_NEG_SESION, JSON.stringify({ codigo, email })); }catch(e){}
+}
+function salirPanelNegocio(){
+  try{ localStorage.removeItem(LS_NEG_SESION); }catch(e){}
+  document.getElementById('negPanelBox').style.display = 'none';
+  document.getElementById('negLoginBox').style.display = '';
+  document.getElementById('negCodigo').value = '';
+  document.getElementById('negEmail').value = '';
+}
+
+function irAMiNegocio(){
+  history.pushState({ miNegocio:true }, '', '/mi-negocio');
+  mostrarPaginaNegocio();
+}
+
+function mostrarPaginaNegocio(){
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes');
+  document.body.classList.add('pagina-negocio');
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+  const s = sesionNegocio();
+  if(s && s.codigo && s.email) cargarPanelNegocio(s.codigo, s.email);
+  else salirPanelNegocio();
+}
+
+async function cargarPanelNegocio(codigo, email){
+  const errBox = document.getElementById('negLoginError');
+  const btn = document.getElementById('negLoginBtn');
+  if(errBox) errBox.style.display = 'none';
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Entrando...'; }
+  try{
+    const { data, error } = await supabase.rpc('negocio_acceso', { p_codigo: codigo, p_email: email });
+    if(error) throw error;
+    const acc = data && data[0];
+    if(!acc || !acc.ok){
+      salirPanelNegocio();
+      if(errBox){
+        errBox.textContent = 'No encontramos un negocio con ese código y ese correo. Revisa que sea el mismo correo con el que te inscribiste.';
+        errBox.style.display = 'block';
+      }
+      document.getElementById('negCodigo').value = codigo;
+      document.getElementById('negEmail').value = email;
+      return;
+    }
+    guardarSesionNegocio(codigo.toUpperCase(), email);
+    document.getElementById('negLoginBox').style.display = 'none';
+    document.getElementById('negPanelBox').style.display = '';
+    document.getElementById('negNombre').textContent = acc.nombre;
+    const desde = acc.desde ? new Date(acc.desde).toLocaleDateString('es-CL', { month:'long', year:'numeric' }) : '';
+    document.getElementById('negSub').textContent =
+      [codigo.toUpperCase(),
+       acc.founder_number ? 'Fundador #' + String(acc.founder_number).padStart(3,'0') : '',
+       desde ? 'en el club desde ' + desde : ''].filter(Boolean).join(' · ');
+
+    const { data: filas, error: err2 } = await supabase.rpc('historial_negocio', { p_codigo: codigo, p_email: email });
+    if(err2) throw err2;
+    renderPanelNegocio(filas || []);
+  }catch(e){
+    console.error(e);
+    if(errBox){ errBox.textContent = 'No pudimos cargar tus visitas. Inténtalo de nuevo en un momento.'; errBox.style.display = 'block'; }
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
+  }
+}
+
+function renderPanelNegocio(filas){
+  const ahora = new Date();
+  const esteMes = filas.filter(f => {
+    const d = new Date(f.fecha);
+    return d.getMonth() === ahora.getMonth() && d.getFullYear() === ahora.getFullYear();
+  });
+  const socios = new Set(filas.map(f => f.socio_codigo));
+  const conMonto = filas.filter(f => f.monto != null);
+  const totalVentas = conMonto.reduce((a,f) => a + Number(f.monto || 0), 0);
+  const repiten = [...socios].filter(c => filas.filter(f => f.socio_codigo === c).length > 1).length;
+
+  const kpi = (n, label, hint) =>
+    `<div class="neg-kpi"><div class="neg-kpi__n">${n}</div><div class="neg-kpi__l">${label}</div>${hint ? `<div class="neg-kpi__h">${hint}</div>` : ''}</div>`;
+
+  document.getElementById('negKpis').innerHTML =
+    kpi(filas.length, 'Visitas del club', esteMes.length + ' este mes') +
+    kpi(socios.size, 'Socios distintos', repiten ? repiten + ' han vuelto' : 'ninguno ha repetido aún') +
+    kpi(conMonto.length ? formatCLP(totalVentas) : '—', 'Compras registradas',
+        conMonto.length ? 'en ' + conMonto.length + ' de ' + filas.length + ' visitas' : 'nadie ha anotado monto') +
+    kpi(conMonto.length ? formatCLP(Math.round(totalVentas / conMonto.length)) : '—', 'Compra promedio',
+        conMonto.length ? '' : 'aparece al anotar montos');
+
+  const tabla = document.getElementById('negTabla');
+  if(!filas.length){
+    tabla.innerHTML = `<div class="neg-vacio">
+      Todavía no has validado ninguna visita.<br>
+      Cuando un socio te muestre el QR de su carnet, escanéalo con la cámara de tu celular
+      y quedará registrada aquí.
+    </div>`;
+    return;
+  }
+  tabla.innerHTML = `<div class="neg-tabla"><table>
+    <thead><tr><th>Fecha</th><th>Socio</th><th>Código</th><th class="num">Compra</th></tr></thead>
+    <tbody>${filas.map(f => {
+      const d = new Date(f.fecha);
+      const fecha = d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' }) + ' · ' +
+                    d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
+      const quien = colaEsc(f.socio_nombre || '') +
+        (f.socio_mascota && f.socio_mascota !== f.socio_nombre ? ` <span class="dim">· ${colaEsc(f.socio_mascota)}</span>` : '');
+      return `<tr>
+        <td>${fecha}</td>
+        <td>${quien}</td>
+        <td class="dim" style="font-family:var(--font-mono);font-size:12px;">${colaEsc(f.socio_codigo || '')}</td>
+        <td class="num">${f.monto != null ? formatCLP(Number(f.monto)) : '<span class="dim">—</span>'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
 
 /* ---------------- Validación bidireccional (calificaciones mutuas, beneficio Premium) ----------------
    Inspirada en el modelo Uber: al cerrarse una visita real (canjes), dueño y negocio pueden
@@ -1811,6 +1992,13 @@ document.getElementById('dirSearch').addEventListener('input', renderDirectory);
 document.getElementById('dirCat').addEventListener('change', renderDirectory);
 document.getElementById('dirComuna').addEventListener('change', renderDirectory);
 document.getElementById('dirOrden').addEventListener('change', renderDirectory);
+document.getElementById('negLoginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  cargarPanelNegocio(
+    document.getElementById('negCodigo').value.trim().toUpperCase(),
+    document.getElementById('negEmail').value.trim()
+  );
+});
 // Cerrar el panel de filtros del celular con la tecla Esc
 document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarFiltrosDir(); });
 
@@ -1834,6 +2022,9 @@ resetRegionComuna('biz');
 window.setBizTipo = setBizTipo;
 window.setDirTipo = setDirTipo;
 window.abrirBeneficio = abrirBeneficio;
+window.abrirValidarConSocio = abrirValidarConSocio;
+window.irAMiNegocio = irAMiNegocio;
+window.salirPanelNegocio = salirPanelNegocio;
 window.confirmarBeneficio = confirmarBeneficio;
 window.setDirCat = setDirCat;
 window.setDirComuna = setDirComuna;

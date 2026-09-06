@@ -628,3 +628,56 @@ body.pagina-planes .announce-bar{ display:none; }
 .dir-grid{ grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); }
 /* El atributo hidden debe ganarle al display de estas dos reglas */
 .dir-filtros-btn__n[hidden], .dir-chips[hidden], .dir-vermas[hidden]{ display:none; }
+
+/* El banner de cada página va pegado al menú: la sección traía los 64px de
+   padding de arriba y eso dejaba una franja de color vacía entre el menú y
+   el banner que no aportaba nada. */
+body.pagina-directorio #directorio,
+body.pagina-ficha #fichaNegocio,
+body.pagina-planes #planes{ padding-top:0; }
+
+/* ======================================================================
+   PANEL DEL NEGOCIO (/mi-negocio)
+   ====================================================================== */
+#panelNegocio{ display:none; }
+body.pagina-negocio .hero,
+body.pagina-negocio #categorias,
+body.pagina-negocio #como-funciona,
+body.pagina-negocio #directorio,
+body.pagina-negocio #fichaNegocio,
+body.pagina-negocio #negocios,
+body.pagina-negocio #validar,
+body.pagina-negocio #planes,
+body.pagina-negocio #panel{ display:none !important; }
+body.pagina-negocio #panelNegocio{ display:block; min-height:calc(100vh - 140px); }
+body.pagina-negocio .announce-bar{ display:none; }
+
+.neg-cab{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+.neg-sub{ font-size:13px; color:var(--gray); margin-top:4px; font-weight:600; }
+
+.neg-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:34px; }
+.neg-kpi{ background:#fff; border:2px solid var(--line); border-radius:18px; padding:16px 18px; }
+.neg-kpi__n{ font-family:var(--font-display); font-weight:900; font-size:30px; line-height:1.05; }
+.neg-kpi__l{ font-size:11.5px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; color:var(--gray); margin-top:6px; }
+.neg-kpi__h{ font-size:11.5px; color:var(--gray); margin-top:4px; font-weight:600; }
+
+.neg-t{ font-family:var(--font-display); font-size:15px; font-weight:900; margin:0 0 12px; }
+.neg-tabla{ background:#fff; border:2px solid var(--line); border-radius:18px; overflow-x:auto; }
+.neg-tabla table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:480px; }
+.neg-tabla th{
+  text-align:left; padding:12px 16px; font-size:11px; font-weight:800;
+  letter-spacing:0.05em; text-transform:uppercase; color:var(--gray);
+  border-bottom:1px solid var(--line); white-space:nowrap;
+}
+.neg-tabla td{ padding:13px 16px; border-bottom:1px solid var(--line); }
+.neg-tabla tr:last-child td{ border-bottom:0; }
+.neg-tabla td.num{ text-align:right; font-family:var(--font-mono); white-space:nowrap; }
+.neg-tabla th.num{ text-align:right; }
+.neg-tabla .dim{ color:#9aa0a6; }
+.neg-vacio{ background:#fff; border:2px dashed var(--line); border-radius:18px; padding:38px 24px; text-align:center; color:var(--gray); font-size:14px; line-height:1.6; }
+
+@media (max-width:880px){
+  .neg-kpis{ grid-template-columns:repeat(2,1fr); gap:10px; }
+  .neg-kpi{ padding:13px 14px; }
+  .neg-kpi__n{ font-size:24px; }
+}
