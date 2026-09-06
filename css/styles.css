@@ -175,9 +175,26 @@ section{ padding:64px 0; }
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
 footer{ padding:44px 0; border-top:2px solid var(--line); background:var(--paper-tint-yellow); }
-.foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; }
-.foot-row .logo{ font-size:16px; }
-.foot-note{ font-size:12.5px; color:#6b7280; font-weight:600; }
+.foot-row{ display:flex; justify-content:space-between; align-items:center; gap:20px; }
+.foot-row .logo{ font-size:16px; flex:none; }
+
+/* Enlaces del pie: siempre en una sola línea, sin que se parta ninguno. */
+.foot-links{
+  display:flex; align-items:center; gap:26px;
+  font-size:12.5px; font-weight:700;
+  white-space:nowrap;
+}
+.foot-links a{
+  color:var(--ink); text-decoration:none;
+  border-bottom:1px solid rgba(26,26,26,0.22); padding-bottom:2px;
+}
+@media (hover:hover) and (pointer:fine){
+  .foot-links a:hover{ border-bottom-color:var(--ink); }
+}
+@media (max-width:560px){
+  .foot-row{ flex-direction:column; align-items:flex-start; gap:18px; }
+  .foot-links{ gap:18px; font-size:12px; }
+}
 
 @media (max-width: 880px){
   .hero-grid{ grid-template-columns:1fr; }
@@ -344,9 +361,11 @@ footer{ padding:44px 0; border-top:2px solid var(--line); background:var(--paper
    directorio (arriba del listado, en /directorio, /especialistas y /beneficios): el
    negocio pidió sacarlas de la vista por ahora. El código queda intacto (igual que se
    hizo con los links de Especialistas y Mi Mascota del menú) por si se retoman más
-   adelante — solo se ocultan con CSS. */
+   adelante — solo se ocultan con CSS.
+   6 de septiembre 2026: se suma "Cómo funciona" (los 3 pasos 01/02/03). */
 #categorias{ display:none !important; }
 #featuredStripWrap{ display:none !important; }
+#como-funciona{ display:none !important; }
 
 /* ======================= Directorio como página propia (/directorio/...) =======================
    El directorio deja de ser "una sección más" del home: por defecto queda OCULTO de la
