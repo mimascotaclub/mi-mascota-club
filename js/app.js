@@ -1358,6 +1358,55 @@ function renderFanCarousel(){
    este filtro debe cambiar a mostrar solo los que tengan verificado = true.
 ------------------------------------------------------------------------- */
 
+
+/* ============================================================
+   TITULAR DE LA PORTADA QUE SE ESCRIBE SOLO
+   ------------------------------------------------------------
+   Alterna las dos promesas del club en un mismo titular: escribe
+   "para tu mascota", la borra, escribe "para ti como dueño de
+   mascota", y vuelve a empezar. Así los dos mensajes caben en una
+   sola línea sin tener que elegir uno.
+
+   Para cambiar las frases o los tiempos, todo está aquí abajo.
+   ============================================================ */
+const HERO_FRASES = ['para tu mascota', 'para ti como dueño de mascota'];
+const HERO_TIEMPOS = {
+  escribir: 65,    // ms por letra al escribir
+  borrar:   32,    // ms por letra al borrar (más rápido, se siente natural)
+  leer:     2200,  // pausa con la frase completa en pantalla
+  entre:    420    // pausa en blanco antes de escribir la siguiente
+};
+
+function animarTitularHero(){
+  const el = document.getElementById('heroRota');
+  if(!el) return;
+
+  /* Si la persona configuró su sistema para reducir animaciones, se queda
+     la primera frase fija y no se anima nada. */
+  const sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(sinMovimiento){ el.textContent = HERO_FRASES[0]; return; }
+
+  let iFrase = 0, iLetra = 0, borrando = false;
+
+  function paso(){
+    const frase = HERO_FRASES[iFrase];
+    iLetra = borrando ? iLetra - 1 : iLetra + 1;
+    el.textContent = frase.slice(0, iLetra);
+
+    if(!borrando && iLetra === frase.length){
+      borrando = true;
+      setTimeout(paso, HERO_TIEMPOS.leer);
+    } else if(borrando && iLetra === 0){
+      borrando = false;
+      iFrase = (iFrase + 1) % HERO_FRASES.length;
+      setTimeout(paso, HERO_TIEMPOS.entre);
+    } else {
+      setTimeout(paso, borrando ? HERO_TIEMPOS.borrar : HERO_TIEMPOS.escribir);
+    }
+  }
+  paso();
+}
+
 /* ============================================================
    PIE DE PÁGINA
    ------------------------------------------------------------
@@ -2049,6 +2098,7 @@ setBizTipo('mascota');
 refreshFilterOptions(); // listas fijas (categorías/comunas) — se llenan una sola vez, antes de leer la URL
 setDirTipo('');
 renderRedesFooter();
+animarTitularHero();
 manejarRutaActual(); // si se entra directo a /directorio/... (o se refresca ahí), se muestra esa vista de inmediato
 
 // Buscar y filtrar en el directorio en vivo: antes solo se refrescaba al tocar una de

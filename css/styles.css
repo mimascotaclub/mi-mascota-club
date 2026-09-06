@@ -64,6 +64,26 @@ nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.92); back
 .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-body); font-weight:800; font-size:12.5px; letter-spacing:0.04em; text-transform:uppercase; color:var(--black); background:#fff; padding:7px 14px; border-radius:999px; margin-bottom:20px; border:2px solid var(--ink); }
 .hero h1{ font-size:52px; line-height:1.06; font-weight:900; margin:0 0 18px; letter-spacing:-0.01em; }
 .hero h1 em{ font-style:normal; color:var(--teal-dark); }
+
+/* ---- Titular que se escribe y se borra solo ----
+   .hero-rota__fantasma es la frase más larga, invisible: reserva el espacio.
+   .hero-rota__vivo va encima, en posición absoluta, y es la que cambia. Así el
+   bloque nunca cambia de tamaño y nada salta en la página. */
+.hero-rota{ position:relative; display:block; }
+.hero-rota__fantasma{ visibility:hidden; }
+.hero-rota__vivo{ position:absolute; left:0; right:0; top:0; }
+.hero-caret{
+  display:inline-block; width:3px; height:0.82em;
+  margin-left:5px; vertical-align:-0.08em;
+  background:var(--teal-dark); border-radius:2px;
+  animation:heroCaret 1s steps(1) infinite;
+}
+@keyframes heroCaret{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+/* Si la persona pidió menos movimiento en su sistema, no parpadea nada. */
+@media (prefers-reduced-motion: reduce){
+  .hero-caret{ animation:none; opacity:0; }
+}
 .hero p.lead{ font-size:18px; line-height:1.55; color:#3a3a3a; max-width:480px; margin:0 0 28px; font-weight:500; }
 .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px; }
 .hero-note{ font-size:13.5px; color:#4a4a4a; display:flex; align-items:center; gap:8px; font-weight:600; }

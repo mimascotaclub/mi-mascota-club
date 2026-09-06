@@ -54,8 +54,16 @@
 
 <header class="hero">
   <div class="wrap" style="text-align:center;max-width:760px;">
-    <h1 style="font-size:44px;">Encuentra todo lo que necesitas <em>para tu mascota</em></h1>
-    <p class="lead" style="margin:0 auto 26px;">Negocios, productos, servicios y beneficios.</p>
+    <!-- El trozo que cambia solo se escribe y se borra en bucle (ver js/app.js).
+         El span "fantasma" lleva la frase más larga y es invisible: su única
+         función es reservar el alto y el ancho, para que el buscador de abajo
+         no salte cada vez que el texto cambia de largo. -->
+    <h1 style="font-size:44px;">Encuentra todo lo que necesitas
+      <em class="hero-rota">
+        <span class="hero-rota__fantasma" aria-hidden="true">para ti como dueño de mascota</span>
+        <span class="hero-rota__vivo"><span id="heroRota"></span><span class="hero-caret" aria-hidden="true"></span></span>
+      </em>
+    </h1>
     <div class="hero-search-wrap">
       <input id="heroSearch" class="hero-search" type="text" placeholder="Necesito una veterinaria..." onkeydown="if(event.key==='Enter'){event.preventDefault(); irABuscar();}">
       <button class="btn btn-primary hero-search-btn" onclick="irABuscar()">Explorar</button>
