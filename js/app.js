@@ -332,6 +332,7 @@ function volverAlInicio(){
   document.body.classList.remove('pagina-directorio');
   document.body.classList.remove('pagina-ficha');
   document.body.classList.remove('pagina-planes');
+  document.body.classList.remove('pagina-negocio');
   if(location.pathname !== '/') history.pushState({}, '', '/');
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -1356,6 +1357,44 @@ function renderFanCarousel(){
    el sistema de planes pagados para negocios (Presencia/Destacado/Premium),
    este filtro debe cambiar a mostrar solo los que tengan verificado = true.
 ------------------------------------------------------------------------- */
+
+/* ============================================================
+   PIE DE PÁGINA
+   ------------------------------------------------------------
+   REDES SOCIALES: cambia las tres direcciones de abajo por las
+   reales y listo. Si una queda vacía (''), ese ícono no aparece.
+   ============================================================ */
+const REDES_MMC = {
+  instagram: '',   // ej: 'https://instagram.com/mimascotaclub'
+  tiktok:    '',   // ej: 'https://tiktok.com/@mimascotaclub'
+  youtube:   ''    // ej: 'https://youtube.com/@mimascotaclub'
+};
+
+const ICONOS_REDES = {
+  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5.4"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  tiktok:    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.29a4.29 4.29 0 0 1-3.24-1.47Z"/></svg>',
+  youtube:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7a3 3 0 0 0-2.1-2.1C18.9 4.8 12 4.8 12 4.8s-6.9 0-8.5.4a3 3 0 0 0-2.1 2.1C1 8.8 1 12 1 12s0 3.2.4 4.7a3 3 0 0 0 2.1 2.1c1.6.4 8.5.4 8.5.4s6.9 0 8.5-.4a3 3 0 0 0 2.1-2.1C23 15.2 23 12 23 12ZM9.8 15.3V8.7l5.7 3.3-5.7 3.3Z"/></svg>'
+};
+
+function renderRedesFooter(){
+  const cajas = document.querySelectorAll('#footRedes');
+  if(!cajas.length) return;
+  const nombres = { instagram:'Instagram', tiktok:'TikTok', youtube:'YouTube' };
+  const html = Object.keys(REDES_MMC)
+    .filter(k => REDES_MMC[k])
+    .map(k => `<a class="foot-red" href="${REDES_MMC[k]}" target="_blank" rel="noopener"
+                  aria-label="${nombres[k]}" title="${nombres[k]}">${ICONOS_REDES[k]}</a>`)
+    .join('');
+  cajas.forEach(c => { c.innerHTML = html; });
+}
+
+/* Enlaces del pie que todavía no tienen página propia. En vez de llevar a
+   un 404, avisan. Cuando la página exista, se cambia el onclick del enlace
+   en el HTML por la ruta real. */
+function proximamente(nombre){
+  toast(`"${nombre}" todavía no está publicada.`);
+}
+
 /* ---------------- Cinta de logos de la portada ----------------
    Son espacios PAGADOS y se administran a mano en js/logos-partners.js,
    no salen de la tabla `negocios`. Todos los archivos vienen ya compuestos
@@ -2009,6 +2048,7 @@ setInterval(rotarSugerenciaHero, 2600);
 setBizTipo('mascota');
 refreshFilterOptions(); // listas fijas (categorías/comunas) — se llenan una sola vez, antes de leer la URL
 setDirTipo('');
+renderRedesFooter();
 manejarRutaActual(); // si se entra directo a /directorio/... (o se refresca ahí), se muestra esa vista de inmediato
 
 // Buscar y filtrar en el directorio en vivo: antes solo se refrescaba al tocar una de
@@ -2048,6 +2088,7 @@ resetRegionComuna('biz');
 // Funciones que el HTML llama directo vía onclick / oninput — deben ser globales.
 window.setBizTipo = setBizTipo;
 window.setDirTipo = setDirTipo;
+window.proximamente = proximamente;
 window.abrirBeneficio = abrirBeneficio;
 window.abrirValidarConSocio = abrirValidarConSocio;
 window.irAMiNegocio = irAMiNegocio;

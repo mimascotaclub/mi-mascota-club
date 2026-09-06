@@ -31,7 +31,7 @@
     <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
     <div class="navlinks">
       <div class="nav-dropdown">
-        <button class="nav-dropdown-btn" onclick="toggleDropdown('exploreDropdown')">Explorar <span class="caret">▾</span></button>
+        <button class="nav-dropdown-btn" onclick="toggleDropdown('exploreDropdown')">Categorías <span class="caret">▾</span></button>
         <div class="nav-dropdown-panel wide" id="exploreDropdown">
           <div class="dd-col">
             <div class="dd-col-title">🐾 Para mi mascota</div>
@@ -67,11 +67,17 @@
     <div class="fan-track" id="fanTrack"></div>
   </div>
 
-  <div class="wrap" style="text-align:center;margin-top:36px;">
-    <p style="font-size:12px;color:#8a8a8a;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">✓ Negocios verificados</p>
-  </div>
-  <div class="trust-marquee">
-    <div class="trust-track" id="trustTrack"></div>
+  <!-- Cinta de logos oculta mientras Jaime define qué va en la portada
+       (6 de septiembre 2026). El código y js/logos-partners.js quedan
+       intactos: se recupera quitando el display:none de .trust-zona
+       en css/styles.css. -->
+  <div class="trust-zona">
+    <div class="wrap" style="text-align:center;margin-top:36px;">
+      <p style="font-size:12px;color:#8a8a8a;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">✓ Negocios verificados</p>
+    </div>
+    <div class="trust-marquee">
+      <div class="trust-track" id="trustTrack"></div>
+    </div>
   </div>
 </header>
 
@@ -682,12 +688,64 @@
   </div>
 </section>
 
+<!-- ============================================================
+     PIE DE PÁGINA
+     Los enlaces que todavía no tienen página propia (Acerca de
+     nosotros, Servicios, Por qué escogernos y los tres legales)
+     llaman a proximamente(): muestran un aviso en vez de llevar a
+     un 404. Cuando exista la página, se cambia el onclick por la
+     ruta real y listo.
+     ============================================================ -->
 <footer>
-  <div class="wrap foot-row">
-    <div class="logo"><img src="assets/logo.svg" alt="Mi Mascota Club" style="height:28px;"></div>
-    <div class="foot-links">
-      <a href="#validar" onclick="event.preventDefault(); mostrarSeccion('validar');">Validar una visita</a>
-      <a href="#panel" onclick="event.preventDefault(); mostrarSeccion('panel');">Panel privado</a>
+  <div class="wrap foot-grid">
+
+    <div class="foot-marca">
+      <img src="assets/logo-blanco.svg" alt="Mi Mascota Club" class="foot-logo">
+      <p class="foot-lema">
+        Amamos a las mascotas, por eso decidimos crear el mejor club de mascotas,
+        con beneficios para nuestras mascotas y para los dueños.
+      </p>
+    </div>
+
+    <div class="foot-col">
+      <h4 class="foot-t">Club</h4>
+      <a href="/" onclick="event.preventDefault(); volverAlInicio();">Home</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Acerca de nosotros');">Acerca de nosotros</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Servicios');">Servicios</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Por qué escogernos');">Por qué escogernos</a>
+
+      <h4 class="foot-t foot-t--2">Legal</h4>
+      <a href="#" onclick="event.preventDefault(); proximamente('Términos de uso');">Términos de uso</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Política de privacidad');">Política de privacidad</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Términos y condiciones');">Términos y condiciones</a>
+    </div>
+
+    <div class="foot-col">
+      <h4 class="foot-t">Beneficios</h4>
+      <a href="/directorio" onclick="event.preventDefault(); irADirectorio({ tipo:'mascota' });">Para tu mascota</a>
+      <a href="/directorio" onclick="event.preventDefault(); irADirectorio({ tipo:'dueno' });">Para ti como dueño de mascota</a>
+    </div>
+
+    <div class="foot-col">
+      <h4 class="foot-t">Contacto</h4>
+      <a class="foot-dato" href="tel:+56950591447">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z"/></svg>
+        +56 9 5059 1447
+      </a>
+      <span class="foot-dato">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5c0 5.4-8 11.5-8 11.5s-8-6.1-8-11.5a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10.3" r="2.9"/></svg>
+        Santiago Centro
+      </span>
+      <div class="foot-redes" id="footRedes"></div>
+    </div>
+  </div>
+
+  <div class="wrap foot-bajo">
+    <div class="foot-copy">© 2026 Mi Mascota Club. Todos los derechos reservados.</div>
+    <div class="foot-legal">
+      <a href="#" onclick="event.preventDefault(); proximamente('Términos de uso');">Términos de uso</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Políticas de Privacidad');">Políticas de Privacidad</a>
+      <a href="#" onclick="event.preventDefault(); proximamente('Términos y condiciones');">Términos y condiciones</a>
     </div>
   </div>
 </footer>
