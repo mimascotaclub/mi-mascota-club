@@ -114,18 +114,76 @@
     <div class="section-head" style="margin-bottom:22px;margin-top:30px;">
       <span class="eyebrow" id="dirEyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Directorio</span>
     </div>
-    <div class="dir-controls">
-      <button class="btn btn-sm btn-primary" id="tabTodos" onclick="setDirTipo('')">Todos</button>
-      <button class="btn btn-sm btn-outline" id="tabMascota" onclick="setDirTipo('mascota')">Para tu mascota</button>
-      <button class="btn btn-sm btn-outline" id="tabDueno" onclick="setDirTipo('dueno')">Para ti como dueño</button>
+
+    <!-- Barra superior: buscar + abrir filtros (móvil) + ordenar -->
+    <div class="dir-topbar">
+      <input id="dirSearch" type="text" placeholder="Buscar negocio, servicio o comuna...">
+      <button type="button" class="dir-filtros-btn" id="dirFiltrosBtn" onclick="abrirFiltrosDir()">
+        <span class="dir-filtros-btn__ic">☰</span> Filtrar
+        <span class="dir-filtros-btn__n" id="dirFiltrosN" hidden>0</span>
+      </button>
+      <label class="dir-orden">
+        <span>Ordenar por</span>
+        <select id="dirOrden">
+          <option value="recomendados">Recomendados</option>
+          <option value="descuento">Mayor descuento</option>
+          <option value="nuevos">Más nuevos</option>
+          <option value="az">Nombre (A-Z)</option>
+        </select>
+      </label>
     </div>
-    <div class="dir-controls">
-      <input id="dirSearch" type="text" placeholder="Buscar negocio o especialista...">
+
+    <!-- Los <select> originales siguen existiendo (ocultos): son la fuente de
+         verdad de los filtros y el router de URLs los sigue usando igual.
+         La columna de la izquierda solo escribe en ellos. -->
+    <div class="dir-legacy-selects">
       <select id="dirCat"><option value="">Todas las categorías</option></select>
       <select id="dirComuna"><option value="">Todas las comunas</option></select>
     </div>
-    <div class="dir-status" id="dirStatus"><span class="spinner"></span>Cargando directorio...</div>
-    <div class="dir-grid" id="dirGrid"></div>
+
+    <div class="dir-layout">
+      <div class="dir-side-backdrop" id="dirSideBackdrop" onclick="cerrarFiltrosDir()"></div>
+
+      <aside class="dir-side" id="dirSide" aria-label="Filtros del directorio">
+        <div class="dir-side__bar">
+          <b>Filtros</b>
+          <button type="button" class="dir-side__x" onclick="cerrarFiltrosDir()" aria-label="Cerrar filtros">✕</button>
+        </div>
+
+        <div class="dir-chips" id="dirChips"></div>
+
+        <div class="dir-facet">
+          <h4 class="dir-facet__t">¿Para quién?</h4>
+          <div class="dir-facet__list" id="dirTipoList">
+            <button type="button" class="dir-opt" id="tabTodos"   onclick="setDirTipo('')">Todos</button>
+            <button type="button" class="dir-opt" id="tabMascota" onclick="setDirTipo('mascota')">Para tu mascota</button>
+            <button type="button" class="dir-opt" id="tabDueno"   onclick="setDirTipo('dueno')">Para ti como dueño</button>
+          </div>
+        </div>
+
+        <div class="dir-facet">
+          <h4 class="dir-facet__t">Categoría</h4>
+          <div class="dir-facet__list" id="dirCatList"></div>
+          <button type="button" class="dir-vermas" id="dirCatVerMas" onclick="toggleVerTodas('cat')"></button>
+        </div>
+
+        <div class="dir-facet">
+          <h4 class="dir-facet__t">Comuna</h4>
+          <div class="dir-facet__list" id="dirComunaList"></div>
+          <button type="button" class="dir-vermas" id="dirComunaVerMas" onclick="toggleVerTodas('comuna')"></button>
+        </div>
+
+        <div class="dir-side__pie">
+          <button type="button" class="dir-side__aplicar" onclick="cerrarFiltrosDir()" id="dirAplicarBtn">Ver resultados</button>
+        </div>
+      </aside>
+
+      <div class="dir-main">
+        <div class="dir-status" id="dirStatus"><span class="spinner"></span>Cargando directorio...</div>
+        <div class="dir-count" id="dirCount"></div>
+        <div class="dir-grid" id="dirGrid"></div>
+      </div>
+    </div>
   </div>
 </section>
 

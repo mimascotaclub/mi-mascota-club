@@ -478,3 +478,153 @@ body.pagina-planes .announce-bar{ display:none; }
 @media (max-width:880px){
   .ficha-page{ grid-template-columns:1fr; }
 }
+
+/* ======================================================================
+   DIRECTORIO — barra superior + columna de filtros (septiembre 2026)
+   ----------------------------------------------------------------------
+   Antes los filtros eran dos <select> perdidos arriba de la grilla, así que
+   para encontrar algo había que abrir un desplegable y adivinar qué había
+   dentro. Ahora hay una columna a la izquierda con las categorías y comunas
+   visibles y con su número de resultados al lado, como en cualquier tienda
+   online. En el celular esa misma columna se convierte en un panel que se
+   abre con el botón "Filtrar".
+   ====================================================================== */
+
+.dir-legacy-selects{ display:none; }   /* los <select> siguen ahí, solo que ocultos */
+
+.dir-topbar{
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;
+}
+.dir-topbar input{
+  flex:1; min-width:220px; padding:13px 16px; border-radius:14px;
+  border:2px solid var(--line); background:#fff;
+  font-size:16px; font-family:var(--font-body); font-weight:600;
+}
+.dir-topbar input:focus{ outline:none; border-color:var(--teal); }
+
+.dir-orden{ display:flex; align-items:center; gap:8px; margin-left:auto; }
+.dir-orden > span{ font-size:12.5px; font-weight:700; color:var(--gray); white-space:nowrap; }
+.dir-orden select{
+  padding:11px 12px; border-radius:12px; border:2px solid var(--line); background:#fff;
+  font-size:14px; font-family:var(--font-body); font-weight:700; cursor:pointer;
+}
+
+.dir-filtros-btn{
+  display:none; align-items:center; gap:8px;
+  padding:13px 16px; border-radius:14px; border:2px solid var(--black);
+  background:#fff; color:var(--black); cursor:pointer;
+  font-family:var(--font-body); font-weight:800; font-size:14.5px;
+}
+.dir-filtros-btn__n{
+  display:inline-grid; place-items:center; min-width:20px; height:20px; padding:0 6px;
+  border-radius:99px; background:var(--yellow); color:var(--black); font-size:11.5px; font-weight:900;
+}
+
+/* ---------------- Layout de dos columnas ---------------- */
+.dir-layout{ display:grid; grid-template-columns:248px 1fr; gap:28px; align-items:start; }
+.dir-main{ min-width:0; }
+.dir-count{ font-size:13px; font-weight:700; color:var(--gray); margin-bottom:14px; }
+
+.dir-side{
+  position:sticky; top:88px;
+  background:#fff; border:2px solid var(--line); border-radius:20px;
+  padding:6px 16px 16px; max-height:calc(100vh - 110px); overflow-y:auto;
+}
+.dir-side__bar{ display:none; }
+.dir-side__pie{ display:none; }
+
+.dir-chips{ display:flex; flex-wrap:wrap; gap:6px; padding:12px 0 4px; }
+.dir-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:99px; border:1.5px solid var(--black);
+  background:var(--black); color:#fff; cursor:pointer;
+  font-family:var(--font-body); font-size:12px; font-weight:700; line-height:1.2;
+}
+.dir-chip span{ opacity:.7; font-size:11px; }
+.dir-chip--limpiar{ background:#fff; color:var(--gray); border-color:var(--line); font-weight:600; }
+
+.dir-facet{ padding:14px 0; border-bottom:1px solid var(--line); }
+.dir-facet:last-of-type{ border-bottom:0; }
+.dir-facet__t{
+  margin:0 0 8px; font-family:var(--font-display); font-weight:900;
+  font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--gray);
+}
+.dir-facet__list{ display:flex; flex-direction:column; gap:1px; }
+.dir-facet__vacia{ font-size:12.5px; color:var(--gray); margin:0; }
+
+.dir-opt{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%;
+  padding:7px 9px; border:0; border-radius:9px; background:transparent; cursor:pointer;
+  text-align:left; font-family:var(--font-body); font-size:14px; font-weight:600; color:var(--ink);
+  line-height:1.25;
+}
+.dir-opt__lbl{ overflow:hidden; text-overflow:ellipsis; }
+.dir-opt__n{ font-size:11.5px; font-weight:700; color:var(--gray); flex:none; }
+.dir-opt.is-on{ background:var(--black); color:#fff; font-weight:800; }
+.dir-opt.is-on .dir-opt__n{ color:rgba(255,255,255,.7); }
+.dir-opt.is-vacia{ color:#B4B4B4; }
+.dir-vermas{
+  margin-top:6px; padding:4px 9px; border:0; background:transparent; cursor:pointer;
+  font-family:var(--font-body); font-size:12.5px; font-weight:800; color:var(--teal-dark);
+  text-decoration:underline; text-underline-offset:3px;
+}
+@media (hover:hover) and (pointer:fine){
+  .dir-opt:hover{ background:rgba(21,21,21,0.06); }
+  .dir-opt.is-on:hover{ background:var(--black); }
+}
+
+.dir-side-backdrop{ display:none; }
+
+/* ---------------- Celular: la columna se vuelve un panel ---------------- */
+@media (max-width:880px){
+  .dir-layout{ grid-template-columns:1fr; gap:0; }
+  .dir-orden{ margin-left:0; }
+  .dir-orden > span{ display:none; }
+  .dir-orden select{ flex:1; }
+  .dir-filtros-btn{ display:inline-flex; }
+
+  .dir-side{
+    position:fixed; inset:0 0 0 auto; z-index:120;
+    width:min(88vw, 360px); max-height:none; height:100%;
+    border:0; border-radius:0; padding:0 18px 96px;
+    transform:translateX(102%); transition:transform .22s ease;
+    overflow-y:auto;
+  }
+  body.filtros-abiertos .dir-side{ transform:translateX(0); }
+  body.filtros-abiertos{ overflow:hidden; }
+
+  .dir-side__bar{
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:2; background:#fff;
+    padding:16px 0 12px; border-bottom:1px solid var(--line); margin-bottom:4px;
+    font-family:var(--font-display); font-size:17px; font-weight:900;
+  }
+  .dir-side__x{
+    border:0; background:transparent; font-size:20px; line-height:1;
+    cursor:pointer; padding:4px 6px; color:var(--ink);
+  }
+  .dir-side__pie{
+    display:block; position:fixed; bottom:0; right:0; z-index:3;
+    width:min(88vw, 360px); padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+    background:#fff; border-top:1px solid var(--line);
+  }
+  .dir-side__aplicar{
+    width:100%; padding:15px; border:0; border-radius:14px;
+    background:var(--black); color:#fff; cursor:pointer;
+    font-family:var(--font-display); font-size:15px; font-weight:900;
+  }
+  .dir-side-backdrop{
+    display:block; position:fixed; inset:0; z-index:119;
+    background:rgba(21,21,21,.45); opacity:0; pointer-events:none; transition:opacity .22s ease;
+  }
+  body.filtros-abiertos .dir-side-backdrop{ opacity:1; pointer-events:auto; }
+  .dir-opt{ padding:11px 9px; font-size:15px; }   /* más alto para el dedo */
+}
+
+/* La tarjeta del directorio ahora termina en un botón: que la caja ocupe todo
+   el alto de su fila para que los botones queden alineados entre tarjetas. */
+.dir-grid .biz-card{ display:flex; }
+.dir-grid .biz-card > .mmcard{ flex:1; }
+.dir-grid{ grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); }
+/* El atributo hidden debe ganarle al display de estas dos reglas */
+.dir-filtros-btn__n[hidden], .dir-chips[hidden], .dir-vermas[hidden]{ display:none; }

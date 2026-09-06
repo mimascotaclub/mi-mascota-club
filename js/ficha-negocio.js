@@ -133,7 +133,7 @@ function renderFicha(el, d, opts) {
       </div>
     </div>
 
-    ${ben && ben.principal ? `<button class="mmcf__cta" type="button">Obtener beneficio</button>` : ''}
+    ${ben && ben.principal ? `<button class="mmcf__cta" type="button" ${vivo ? 'onclick="window.abrirBeneficio && abrirBeneficio()"' : 'disabled'}>Obtener beneficio</button>` : ''}
    </div>
   `;
   return el;
@@ -150,6 +150,7 @@ function cardNegocioHTML(d, badge, extra) {
   const ben = _beneficio(d);
   const tipo = typeof tipoNegocioPorId === 'function' ? tipoNegocioPorId(d.tipo_negocio) : null;
   const catLabel = d.cat || (tipo ? tipo.nombre : '');
+  const redes = _redes(d);
 
   const fondo = d.foto_url
     ? ''
@@ -165,28 +166,53 @@ function cardNegocioHTML(d, badge, extra) {
     ? `<img src="${_esc(d.logo_url)}" alt="">`
     : `<span>${d.emoji || '🐾'}</span>`;
 
+  /* Barra sobre la foto: horario a la izquierda, redes a la derecha — igual
+     que en la ficha grande. Si el negocio es de los antiguos y no tiene los
+     campos de redes separados, se cae de vuelta a los íconos que arma app.js
+     desde el campo "contacto" (parámetro extra). */
+  const redesHTML = redes.length
+    ? `<div class="mmcard__redes">${redes.map(r => `
+        <a class="mmcard__red" href="${_esc(r.href)}" target="_blank" rel="noopener"
+           aria-label="${_esc(r.label)}" title="${_esc(r.label)}"
+           onclick="event.stopPropagation()">${MMC_ICONOS[r.k]}</a>`).join('')}</div>`
+    : (extra || '');
+
+  const horarioHTML = d.horario_texto
+    ? `<span class="mmcard__horario">${_esc(d.horario_texto)}</span>`
+    : '<span></span>';
+
   return `
     <div class="mmcard">
+      <div class="mmcard__head">
+        <div class="mmcard__logo">${logo}</div>
+        <div class="mmcard__ident">
+          ${catLabel ? `<span class="mmcard__tipo">${_esc(catLabel)}</span>` : ''}
+          <h3 class="mmcard__nombre">${_esc(d.nombre)}</h3>
+          ${d.comuna ? `<div class="mmcard__comuna">${MMC_ICONOS.pin} ${_esc(d.comuna)}</div>` : ''}
+        </div>
+      </div>
+
+      ${ben ? `
+      <div class="mmcard__ben">
+        <b>${_esc(ben.principal)}</b>
+        ${(ben.cuando || ben.condicion) ? `<div class="mmcard__ben-meta">
+          ${ben.cuando ? `<span class="mmcard__chip">${_esc(ben.cuando)}</span>` : ''}
+          ${ben.condicion ? `<span class="mmcard__chip">${_esc(ben.condicion)}</span>` : ''}
+        </div>` : ''}
+      </div>` : ''}
+
       <div class="mmcard__foto" style="${fondo}">
         ${badge ? `<span class="founder-badge${/destacado/i.test(badge) ? ' badge-destacado' : ''}">${_esc(badge)}</span>` : ''}
         ${foto}
-      </div>
-      <div class="mmcard__body">
-        <div class="mmcard__head">
-          <div class="mmcard__logo">${logo}</div>
-          <div>
-            <h3 class="mmcard__nombre">${_esc(d.nombre)}</h3>
-            <div class="mmcard__cat">${_esc(catLabel)} · ${_esc(d.comuna || '')}</div>
-          </div>
+        <div class="mmcard__foto-bar">
+          ${horarioHTML}
+          ${redesHTML}
         </div>
-        ${ben ? `
-        <div class="mmcard__ben">
-          <b>${_esc(ben.principal)}</b>
-          ${(ben.condicion || ben.cuando) ? `<small>${_esc([ben.condicion, ben.cuando].filter(Boolean).join(' · '))}</small>` : ''}
-        </div>` : ''}
-        ${d.meta ? `<p class="mmcard__meta">${_esc(d.meta)}</p>` : ''}
-        ${extra || ''}
       </div>
+
+      ${d.meta ? `<p class="mmcard__meta">${_esc(d.meta)}</p>` : ''}
+
+      <span class="mmcard__cta">${ben ? 'Ver beneficio' : 'Ver ficha'}</span>
     </div>`;
 }
 

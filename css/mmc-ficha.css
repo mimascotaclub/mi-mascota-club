@@ -259,19 +259,113 @@
 
 .mmcard, .mmcard *, .mmcard *::before, .mmcard *::after { box-sizing: border-box; }
 
-.mmcard { font-family: var(--mmc-font-body); color: var(--mmc-ink); }
+/* La tarjeta sigue el mismo orden que la ficha grande que diseñó Jaime:
+   logo + nombre arriba, la franja del beneficio, la foto con el horario y
+   las redes encima, y el botón al final. Antes la foto iba primero y el
+   beneficio quedaba enterrado, que es justo lo que la gente viene a mirar. */
+.mmcard {
+  font-family: var(--mmc-font-body);
+  color: var(--mmc-ink);
+  display: flex; flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 14px 14px 16px;
+}
+/* El botón siempre abajo, así todas las tarjetas de una fila terminan
+   parejas aunque el nombre ocupe una o dos líneas. */
+.mmcard__cta { margin-top: auto; }
+.mmcard__head, .mmcard__ben, .mmcard__foto, .mmcard__meta { flex: none; }
 
+/* ---- Cabecera: logo + tipo + nombre + comuna ---- */
+.mmcard__head { display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: center; }
+.mmcard__ident { min-width: 0; }
+
+.mmcard__logo {
+  width: 48px; height: 48px; flex: none;
+  border-radius: 13px;
+  background: #fff;
+  border: 1.5px solid var(--mmc-line-strong);
+  overflow: hidden;
+  display: grid; place-items: center;
+  font-size: 21px;
+}
+.mmcard__logo img { width: 100%; height: 100%; object-fit: contain; padding: 5px; }
+
+.mmcard__tipo {
+  display: inline-block;
+  border: 1.5px solid var(--mmc-line-strong);
+  border-radius: 99px;
+  padding: 2px 9px;
+  margin-bottom: 4px;
+  font-size: 9.5px; font-weight: 800;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--mmc-ink-2);
+  line-height: 1.5;
+  max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mmcard__nombre {
+  font-family: var(--mmc-font-display);
+  font-weight: 900;
+  font-size: 17px;
+  line-height: 1.12;
+  margin: 0;
+  color: var(--mmc-ink);
+  overflow-wrap: anywhere;
+}
+.mmcard__comuna {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 3px;
+  font-size: 11.5px; font-weight: 700;
+  color: var(--mmc-ink-3);
+}
+.mmcard__comuna svg { width: 12px; height: 12px; flex: none; }
+
+/* ---- Franja del beneficio ---- */
+.mmcard__ben {
+  background: var(--mmc-surface-2);
+  border-radius: 14px;
+  padding: 11px 12px;
+  display: grid; gap: 7px;
+}
+.mmcard__ben b {
+  display: block;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+  font-family: var(--mmc-font-display);
+  font-weight: 900; text-transform: uppercase;
+  font-size: 15px; line-height: 1.12;
+  letter-spacing: -.01em;
+}
+.mmcard__ben-meta { display: grid; gap: 5px; }
+.mmcard__chip {
+  display: block;
+  background: #fff;
+  border-radius: 8px;
+  padding: 5px 9px;
+  text-align: center;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: .04em; text-transform: uppercase;
+  color: var(--mmc-ink-2);
+  line-height: 1.35;
+}
+
+/* ---- Foto con la barra encima ---- */
 .mmcard__foto {
   position: relative;
-  height: 148px;
+  height: 158px;
+  border-radius: 16px;
+  border: 1.5px solid var(--mmc-line);
   display: grid; place-items: center;
-  font-size: 42px;
   overflow: hidden;
   background: var(--mmc-surface-2);
 }
 .mmcard__foto > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mmcard__foto > span { font-size: 44px; line-height: 1; }
 .mmcard__foto .founder-badge {
-  position: absolute; top: 10px; right: 10px; z-index: 2;
+  position: absolute; top: 9px; right: 9px; z-index: 2;
   background: rgba(255,255,255,.94); color: var(--mmc-negro);
   padding: 4px 9px; border-radius: 7px;
   font-family: var(--mmc-font-body);
@@ -280,59 +374,61 @@
   line-height: 1.4; white-space: nowrap;
 }
 .mmcard__foto .founder-badge.badge-destacado { background: var(--mmc-amarillo); }
-.mmcard__foto > span { font-size: 42px; line-height: 1; }
 
-.mmcard__body { padding: 14px 16px 16px; display: grid; gap: 10px; }
-
-.mmcard__head { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
-
-.mmcard__logo {
-  width: 44px; height: 44px; flex: none;
-  border-radius: 12px;
+.mmcard__foto-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 9px 10px;
+  background: linear-gradient(to top, rgba(255,255,255,.96), rgba(255,255,255,.72) 62%, rgba(255,255,255,0));
+}
+.mmcard__horario {
   background: #fff;
-  border: 1px solid var(--mmc-line);
-  overflow: hidden;
-  display: grid; place-items: center;
-  font-size: 20px;
-}
-.mmcard__logo img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
-
-.mmcard__nombre {
-  font-family: var(--mmc-font-display);
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.15;
-  margin: 0 0 2px;
-  color: var(--mmc-ink);
-  overflow-wrap: anywhere;
-}
-.mmcard__cat {
-  font-size: 10.5px; font-weight: 800;
-  letter-spacing: .05em; text-transform: uppercase;
-  color: var(--mmc-ink-3);
-}
-
-.mmcard__ben {
-  background: var(--mmc-beneficio-bg);
-  border-radius: 14px;
-  padding: 10px 12px;
-  text-align: center;
-}
-.mmcard__ben b {
-  display: block;
-  font-family: var(--mmc-font-display);
-  font-weight: 900; text-transform: uppercase;
-  font-size: 14px; line-height: 1.15;
-  letter-spacing: -.005em;
-}
-.mmcard__ben small {
-  display: block; margin-top: 3px;
-  font-size: 10.5px; font-weight: 700;
+  border: 1.5px solid var(--mmc-line-strong);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 10px; font-weight: 800;
   letter-spacing: .03em; text-transform: uppercase;
-  color: var(--mmc-ink-2); line-height: 1.35;
+  color: var(--mmc-ink);
+  line-height: 1.4;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 58%;
 }
+.mmcard__redes { display: flex; gap: 5px; margin-left: auto; }
+.mmcard__red {
+  width: 27px; height: 27px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: #fff;
+  border: 1.5px solid var(--mmc-line-strong);
+  color: var(--mmc-ink);
+  text-decoration: none;
+}
+.mmcard__red svg { width: 14px; height: 14px; }
+/* Fila de íconos de los negocios antiguos (la que arma app.js) */
+.mmcard__foto-bar .biz-icons-row { display: flex; gap: 5px; margin-left: auto; }
 
 .mmcard__meta { font-size: 12.5px; color: var(--mmc-ink-2); line-height: 1.45; margin: 0; }
+
+/* ---- Botón. Es un <span>: la tarjeta entera ya es el enlace a la ficha,
+        así que no debe haber un botón dentro de otro clic. ---- */
+.mmcard__cta {
+  display: block;
+  margin-top: 2px;
+  padding: 13px 14px;
+  border-radius: 99px;
+  background: var(--mmc-negro);
+  color: #fff;
+  text-align: center;
+  font-family: var(--mmc-font-display);
+  font-weight: 900; text-transform: uppercase;
+  font-size: 13.5px; letter-spacing: .02em;
+  line-height: 1.2;
+}
+.biz-card:hover .mmcard__cta { background: var(--mmc-amarillo); color: var(--mmc-negro); }
+
+/* En la fila de Destacados las tarjetas son más angostas */
+.featured-strip .mmcard__foto { height: 132px; }
+.featured-strip .mmcard__nombre { font-size: 15.5px; }
 
 /* ============================================================
    COLA DE APROBACIÓN  (.cola-*)
@@ -460,3 +556,10 @@
 }
 .mmc-datos__row span { color: var(--mmc-ink-3); }
 .mmc-datos__row b { font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+
+/* Sobrescrituras de especificidad: css/styles.css define .biz-card h3 y
+   .biz-card p con sus propios tamaños, y como .biz-card envuelve a .mmcard
+   ganaba por especificidad. Esto deja mandar al diseño de la tarjeta. */
+.biz-card .mmcard__nombre { font-size: 17px; margin: 0; font-family: var(--mmc-font-display); }
+.biz-card .mmcard__meta   { font-size: 12.5px; color: var(--mmc-ink-2); margin: 0; }
+.featured-strip .biz-card .mmcard__nombre { font-size: 15.5px; }

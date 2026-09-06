@@ -157,9 +157,9 @@ function setBizTipo(tipo){
 }
 function setDirTipo(tipo){
   dirTipoFiltro = tipo;
-  document.getElementById('tabTodos').className = 'btn btn-sm ' + (tipo==='' ? 'btn-primary' : 'btn-outline');
-  document.getElementById('tabMascota').className = 'btn btn-sm ' + (tipo==='mascota' ? 'btn-primary' : 'btn-outline');
-  document.getElementById('tabDueno').className = 'btn btn-sm ' + (tipo==='dueno' ? 'btn-primary' : 'btn-outline');
+  document.getElementById('tabTodos').className   = 'dir-opt' + (tipo===''        ? ' is-on' : '');
+  document.getElementById('tabMascota').className = 'dir-opt' + (tipo==='mascota' ? ' is-on' : '');
+  document.getElementById('tabDueno').className   = 'dir-opt' + (tipo==='dueno'   ? ' is-on' : '');
   renderDirectory();
 }
 function renderCatGrid(){
@@ -728,19 +728,163 @@ function bizCardInnerHTML(n, destacado){
   datos.emoji = iconByCat[n.cat] || '🐾';
   return cardNegocioHTML(datos, badge, bizContactIcons(n));
 }
-function renderDirectory(){
-  const qRaw = document.getElementById('dirSearch').value.trim().toLowerCase();
-  const cat = document.getElementById('dirCat').value, comuna = document.getElementById('dirComuna').value;
-  const grid = document.getElementById('dirGrid');
-  const keywords = qRaw ? palabrasClaveBusqueda(qRaw) : [];
-  const filtered = combinedNegocios().filter(n => {
+/* ---------------- Filtros del directorio (columna izquierda) ----------------
+   El directorio pasó de "3 botones + 2 menús desplegables" a una columna de
+   filtros a la izquierda, como MercadoLibre: se ve de una sola mirada qué
+   categorías y comunas existen y cuántos negocios hay en cada una, sin tener
+   que abrir un desplegable y adivinar.
+
+   Los <select id="dirCat"> y <select id="dirComuna"> siguen existiendo (ocultos
+   en el HTML) y siguen siendo la fuente de verdad: el router de URLs
+   (/directorio/veterinaria) y refreshFilterOptions() los usan igual que antes.
+   La columna de filtros solo les escribe el valor y vuelve a dibujar. */
+
+let dirVerTodasCat = false, dirVerTodasComuna = false;
+const DIR_FACET_TOPE = 8;   // cuántas opciones se muestran antes de "Ver todas"
+
+function dirFiltrosActuales(){
+  return {
+    q: (document.getElementById('dirSearch').value || '').trim().toLowerCase(),
+    cat: document.getElementById('dirCat').value,
+    comuna: document.getElementById('dirComuna').value,
+    tipo: dirTipoFiltro
+  };
+}
+
+/* Filtra la lista completa. `omitir` deja fuera un filtro a propósito: se usa
+   para contar cuántos resultados tendría cada opción de una faceta si se
+   eligiera (igual que los números entre paréntesis de MercadoLibre). */
+function dirFiltrar(f, omitir){
+  const keywords = f.q ? palabrasClaveBusqueda(f.q) : [];
+  return combinedNegocios().filter(n => {
     const texto = `${n.nombre} ${n.cat} ${n.comuna} ${n.meta||''} ${n.servicios||''} ${n.descripcion||''}`.toLowerCase();
-    const coincideBusqueda = !qRaw || (keywords.length ? keywords.some(k => texto.includes(k)) : texto.includes(qRaw));
-    return coincideBusqueda && (!cat || n.cat===cat) && (!comuna || n.comuna===comuna) &&
-      (!dirTipoFiltro || n.tipo===dirTipoFiltro) &&
-      (!modoDirectorioEspecialistas || n.esEspecialista===true) &&
-      (!modoDirectorioBeneficios || !!n.beneficioDetalle);
+    const coincideBusqueda = !f.q || (keywords.length ? keywords.some(k => texto.includes(k)) : texto.includes(f.q));
+    return coincideBusqueda
+      && (omitir==='cat'    || !f.cat    || n.cat === f.cat)
+      && (omitir==='comuna' || !f.comuna || n.comuna === f.comuna)
+      && (omitir==='tipo'   || !f.tipo   || n.tipo === f.tipo)
+      && (!modoDirectorioEspecialistas || n.esEspecialista === true)
+      && (!modoDirectorioBeneficios || !!n.beneficioDetalle);
   });
+}
+
+/* Porcentaje del beneficio, para poder ordenar por "mayor descuento".
+   Lee el texto tal como quedó guardado ("30% de descuento en...") porque es
+   lo único que tienen en común las fichas viejas y las nuevas. */
+function dirDescuentoPct(n){
+  const txt = `${n.beneficioTipo||''} ${n.beneficioDetalle||''} ${n.meta||''}`;
+  const m = txt.match(/(\d{1,3})\s*%/);
+  return m ? parseInt(m[1], 10) : -1;
+}
+
+function dirOrdenar(lista, orden){
+  const arr = lista.slice();
+  const nuevoPrimero = (a,b) => (b.founderNumber||0) - (a.founderNumber||0);
+  if(orden === 'az')        arr.sort((a,b) => a.nombre.localeCompare(b.nombre,'es'));
+  else if(orden === 'descuento') arr.sort((a,b) => dirDescuentoPct(b) - dirDescuentoPct(a) || nuevoPrimero(a,b));
+  else if(orden === 'nuevos')    arr.sort((a,b) => (a.demo?1:0)-(b.demo?1:0) || nuevoPrimero(a,b));
+  else /* recomendados */        arr.sort((a,b) =>
+      (b.destacado?1:0)-(a.destacado?1:0) ||
+      (a.demo?1:0)-(b.demo?1:0) ||
+      (a.founderNumber||999) - (b.founderNumber||999));
+  return arr;
+}
+
+/* Escribe el valor en el <select> oculto y vuelve a dibujar todo.
+   Volver a hacer clic en la opción ya elegida la quita (toggle). */
+function setDirCat(cat){
+  const s = document.getElementById('dirCat');
+  s.value = (s.value === cat) ? '' : cat;
+  renderDirectory();
+}
+function setDirComuna(comuna){
+  const s = document.getElementById('dirComuna');
+  s.value = (s.value === comuna) ? '' : comuna;
+  renderDirectory();
+}
+function limpiarFiltrosDir(){
+  document.getElementById('dirSearch').value = '';
+  document.getElementById('dirCat').value = '';
+  document.getElementById('dirComuna').value = '';
+  setDirTipo('');           // setDirTipo ya llama a renderDirectory()
+}
+function toggleVerTodas(cual){
+  if(cual === 'cat') dirVerTodasCat = !dirVerTodasCat;
+  else dirVerTodasComuna = !dirVerTodasComuna;
+  renderDirectory();
+}
+function abrirFiltrosDir(){ document.body.classList.add('filtros-abiertos'); }
+function cerrarFiltrosDir(){ document.body.classList.remove('filtros-abiertos'); }
+
+/* Dibuja una faceta (categoría o comuna) con su contador.
+   Solo aparecen las opciones que hoy tienen al menos un negocio — con 3 o 300
+   negocios cargados, una lista de 18 categorías vacías no ayuda a nadie.
+   "Ver todas" muestra el resto (útil para filtrar por algo que todavía no
+   existe y caer en el mensaje de "sé el primero en sumar tu ficha"). */
+function dirRenderFaceta(contenedorId, verMasId, opciones, seleccionada, verTodas, onClickFn){
+  const cont = document.getElementById(contenedorId);
+  const btnMas = document.getElementById(verMasId);
+  if(!cont) return;
+  const conResultados = opciones.filter(o => o.n > 0 || o.valor === seleccionada);
+  const lista = verTodas ? opciones : conResultados.slice(0, DIR_FACET_TOPE);
+  cont.innerHTML = lista.map(o => `
+    <button type="button" class="dir-opt${o.valor === seleccionada ? ' is-on' : ''}${o.n === 0 ? ' is-vacia' : ''}"
+            onclick="${onClickFn}('${String(o.valor).replace(/'/g,"\\'")}')">
+      <span class="dir-opt__lbl">${o.valor}</span>
+      <span class="dir-opt__n">${o.n}</span>
+    </button>`).join('') || '<p class="dir-facet__vacia">Sin resultados con los filtros de arriba.</p>';
+  if(btnMas){
+    const hayMas = opciones.length > conResultados.slice(0, DIR_FACET_TOPE).length;
+    btnMas.hidden = !hayMas;
+    btnMas.textContent = verTodas ? 'Ver menos' : `Ver todas (${opciones.length})`;
+  }
+}
+
+function renderDirectory(){
+  const f = dirFiltrosActuales();
+  const grid = document.getElementById('dirGrid');
+  const filtered = dirFiltrar(f);
+
+  /* ---- Columna de filtros: contadores por categoría y por comuna ---- */
+  const baseCat = dirFiltrar(f, 'cat');
+  const baseComuna = dirFiltrar(f, 'comuna');
+  const cuenta = (lista, campo, valor) => lista.filter(n => n[campo] === valor).length;
+
+  dirRenderFaceta('dirCatList', 'dirCatVerMas',
+    ALL_DIR_CATS.map(c => ({ valor:c, n: cuenta(baseCat,'cat',c) })),
+    f.cat, dirVerTodasCat, 'setDirCat');
+
+  /* De las 346 comunas del país solo se listan las que hoy tienen negocios,
+     ordenadas por cantidad; el resto queda detrás de "Ver todas". */
+  const comunasOpts = ALL_COMUNAS_CHILE
+    .map(c => ({ valor:c, n: cuenta(baseComuna,'comuna',c) }))
+    .sort((a,b) => b.n - a.n || a.valor.localeCompare(b.valor,'es'));
+  dirRenderFaceta('dirComunaList', 'dirComunaVerMas', comunasOpts, f.comuna, dirVerTodasComuna, 'setDirComuna');
+
+  /* ---- Chips de lo que está aplicado ---- */
+  const chips = [];
+  if(f.tipo)   chips.push({ txt: f.tipo === 'mascota' ? 'Para tu mascota' : 'Para ti como dueño', fn: "setDirTipo('')" });
+  if(f.cat)    chips.push({ txt: f.cat,    fn: "setDirCat('" + f.cat.replace(/'/g,"\\'") + "')" });
+  if(f.comuna) chips.push({ txt: f.comuna, fn: "setDirComuna('" + f.comuna.replace(/'/g,"\\'") + "')" });
+  if(f.q)      chips.push({ txt: '“' + f.q + '”', fn: "document.getElementById('dirSearch').value=''; renderDirectory();" });
+  const chipsBox = document.getElementById('dirChips');
+  if(chipsBox){
+    chipsBox.innerHTML = chips.length
+      ? chips.map(c => `<button type="button" class="dir-chip" onclick="${c.fn}">${c.txt} <span>✕</span></button>`).join('')
+        + '<button type="button" class="dir-chip dir-chip--limpiar" onclick="limpiarFiltrosDir()">Limpiar todo</button>'
+      : '';
+    chipsBox.hidden = !chips.length;
+  }
+  const nBadge = document.getElementById('dirFiltrosN');
+  if(nBadge){ nBadge.textContent = chips.length; nBadge.hidden = !chips.length; }
+
+  /* ---- Contador de resultados y botón del panel móvil ---- */
+  const cuentaBox = document.getElementById('dirCount');
+  if(cuentaBox) cuentaBox.textContent = `${filtered.length} ${filtered.length === 1 ? 'resultado' : 'resultados'}`;
+  const aplicar = document.getElementById('dirAplicarBtn');
+  if(aplicar) aplicar.textContent = `Ver ${filtered.length} ${filtered.length === 1 ? 'resultado' : 'resultados'}`;
+
+  /* ---- Grilla ---- */
   grid.innerHTML = '';
   if(filtered.length===0){
     const msg = modoDirectorioBeneficios
@@ -751,7 +895,8 @@ function renderDirectory(){
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">${msg} Sé el primero en <a href="#negocios" onclick="event.preventDefault(); abrirElegirCamino();" style="color:var(--brass);text-decoration:underline;">sumar tu ficha</a>.</div>`;
     return;
   }
-  filtered.forEach(n=>{
+  const ordenSel = document.getElementById('dirOrden');
+  dirOrdenar(filtered, ordenSel ? ordenSel.value : 'recomendados').forEach(n=>{
     const el = document.createElement('div');
     el.className='biz-card';
     el.innerHTML = bizCardInnerHTML(n, false);
@@ -803,7 +948,84 @@ function mostrarPaginaFichaPorSlug(slug){
   document.body.classList.add('pagina-ficha');
   document.getElementById('fichaContent').innerHTML = `<div class="empty-state">No encontramos esta ficha. <a href="/directorio" onclick="event.preventDefault(); irADirectorio({});" style="color:var(--brass);text-decoration:underline;">Volver al directorio →</a></div>`;
 }
+/* ---------------- "Obtener beneficio" (solo socios) ----------------
+   La tarjeta del directorio lleva SIEMPRE a la ficha: ahí está la dirección,
+   el horario y la letra chica, que es lo que hay que leer antes de ir. El
+   canje vive en la ficha, y ahí sí se pide ser socio: sin código no hay QR
+   que mostrar en el local. El código queda guardado en este navegador para
+   no tener que escribirlo cada vez. */
+let negocioActual = null;
+const LS_SOCIO = 'mmc_codigo_socio';
+
+function codigoSocioGuardado(){
+  try{ return localStorage.getItem(LS_SOCIO) || ''; }catch(e){ return ''; }
+}
+function guardarCodigoSocio(codigo){
+  try{ localStorage.setItem(LS_SOCIO, codigo); }catch(e){ /* modo incógnito */ }
+}
+
+function abrirBeneficio(){
+  const n = negocioActual;
+  if(!n) return;
+  const guardado = codigoSocioGuardado();
+  openModal(`
+    <div style="font-family:var(--font-display);font-weight:900;font-size:20px;line-height:1.15;">Obtener el beneficio</div>
+    <div style="font-size:13.5px;color:#5C5C5C;margin-top:6px;line-height:1.5;">
+      En <b>${colaEsc(n.nombre)}</b>${n.beneficioTipo ? ' · ' + colaEsc(n.beneficioTipo) : ''}
+    </div>
+    <div id="benPaso" style="margin-top:18px;">
+      <label style="display:block;font-size:12.5px;font-weight:800;margin-bottom:6px;">Tu código de socio</label>
+      <input id="benCodigo" type="text" value="${colaEsc(guardado)}" placeholder="MMC00001"
+             style="width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--line);font-family:var(--font-mono);font-size:15px;text-transform:uppercase;">
+      <div id="benMsg" style="font-size:12.5px;color:var(--rust);margin-top:8px;display:none;"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" onclick="confirmarBeneficio()">Mostrar mi carnet</button>
+      <div style="margin-top:14px;font-size:12.5px;color:#6B7280;text-align:center;line-height:1.5;">
+        ¿Todavía no eres socio?
+        <a href="formulario-registro-demo-v3.html" style="color:var(--brass);text-decoration:underline;font-weight:800;">Regístrate gratis →</a>
+      </div>
+    </div>
+  `);
+  const input = document.getElementById('benCodigo');
+  if(input){
+    input.focus();
+    input.addEventListener('keydown', e => { if(e.key === 'Enter') confirmarBeneficio(); });
+  }
+}
+
+async function confirmarBeneficio(){
+  const n = negocioActual;
+  const input = document.getElementById('benCodigo');
+  const msg = document.getElementById('benMsg');
+  const codigo = (input.value || '').trim().toUpperCase();
+  const error = txt => { msg.textContent = txt; msg.style.display = 'block'; };
+  if(!codigo){ error('Escribe tu código de socio.'); return; }
+  msg.style.display = 'none';
+  try{
+    const { data, error: err } = await supabase.rpc('verificar_plan', { p_codigo: codigo });
+    if(err) throw err;
+    if(!data || !data.length || data[0].rol !== 'socio'){
+      error('No encontramos ese código de socio. Revísalo o regístrate gratis.');
+      return;
+    }
+    guardarCodigoSocio(codigo);
+    document.getElementById('benPaso').innerHTML = `
+      <div style="text-align:center;">
+        <div id="benQR" class="cred-qr" style="margin:0 auto;"></div>
+        <div style="font-family:var(--font-mono);font-size:15px;font-weight:600;margin-top:10px;">${colaEsc(codigo)}</div>
+        <div style="font-size:13.5px;color:#5C5C5C;margin-top:12px;line-height:1.5;">
+          Muéstrale este código en <b>${colaEsc(n.nombre)}</b> para aplicar tu beneficio.
+          ${n.beneficioDetalle ? '<br><span style="font-size:12px;">' + colaEsc(n.beneficioDetalle) + '</span>' : ''}
+        </div>
+      </div>`;
+    renderQR('benQR', codigo);
+  }catch(e){
+    console.error(e);
+    error('No pudimos verificar el código. Inténtalo de nuevo.');
+  }
+}
+
 function mostrarPaginaFicha(n){
+  negocioActual = n;
   document.body.classList.remove('pagina-directorio');
   document.body.classList.remove('pagina-planes');
   document.body.classList.add('pagina-ficha');
@@ -1223,6 +1445,7 @@ document.getElementById('ownerForm').addEventListener('submit', async function(e
     });
     if(error) throw error;
     const { codigo, socio_number } = data[0];
+    guardarCodigoSocio(codigo);
     sociosCount++;
     const record = { pet, species, breed, comuna, email, codigo, socioNumber: socio_number, foto, plan: 'free' };
     updateCounts();
@@ -1587,6 +1810,9 @@ manejarRutaActual(); // si se entra directo a /directorio/... (o se refresca ah�
 document.getElementById('dirSearch').addEventListener('input', renderDirectory);
 document.getElementById('dirCat').addEventListener('change', renderDirectory);
 document.getElementById('dirComuna').addEventListener('change', renderDirectory);
+document.getElementById('dirOrden').addEventListener('change', renderDirectory);
+// Cerrar el panel de filtros del celular con la tecla Esc
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarFiltrosDir(); });
 
 // Campos con formato y validación estricta en vivo (RUT, teléfono CL, correo)
 initRutField('ownerRepRut', 'fieldOwnerRut', 'ownerRepRutMsg');
@@ -1607,6 +1833,15 @@ resetRegionComuna('biz');
 // Funciones que el HTML llama directo vía onclick / oninput — deben ser globales.
 window.setBizTipo = setBizTipo;
 window.setDirTipo = setDirTipo;
+window.abrirBeneficio = abrirBeneficio;
+window.confirmarBeneficio = confirmarBeneficio;
+window.setDirCat = setDirCat;
+window.setDirComuna = setDirComuna;
+window.limpiarFiltrosDir = limpiarFiltrosDir;
+window.toggleVerTodas = toggleVerTodas;
+window.abrirFiltrosDir = abrirFiltrosDir;
+window.cerrarFiltrosDir = cerrarFiltrosDir;
+window.renderDirectory = renderDirectory;
 window.poblarComunas = poblarComunas;
 window.filtrarPorCategoria = filtrarPorCategoria;
 window.filtrarPorNegocio = filtrarPorNegocio;
