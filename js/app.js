@@ -1381,10 +1381,26 @@ function animarTitularHero(){
   const el = document.getElementById('heroRota');
   if(!el) return;
 
-  /* Si la persona configuró su sistema para reducir animaciones, se queda
-     la primera frase fija y no se anima nada. */
+  /* Si la persona configuró su sistema para reducir animaciones (en macOS:
+     Ajustes → Accesibilidad → Pantalla → Reducir movimiento), igual se ven
+     las dos frases, pero cambiando con un fundido suave en vez de escribirse
+     letra por letra. Antes esto dejaba la frase fija, y quien tuviera esa
+     opción activada nunca veía el segundo mensaje. */
   const sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(sinMovimiento){ el.textContent = HERO_FRASES[0]; return; }
+  if(sinMovimiento){
+    const caja = el.parentElement;
+    let i = 0;
+    el.textContent = HERO_FRASES[0];
+    setInterval(() => {
+      caja.style.opacity = '0';
+      setTimeout(() => {
+        i = (i + 1) % HERO_FRASES.length;
+        el.textContent = HERO_FRASES[i];
+        caja.style.opacity = '1';
+      }, 320);
+    }, HERO_TIEMPOS.leer + 1400);
+    return;
+  }
 
   let iFrase = 0, iLetra = 0, borrando = false;
 
