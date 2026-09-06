@@ -1,0 +1,6 @@
+# Archivos que macOS crea solo y no son parte del sitio
+.DS_Store
+
+# Carpeta donde la app de Claude deja los archivos que te envía en el chat.
+# Son copias (capturas, respaldos), no forman parte del sitio que se publica.
+Claude outputs/
