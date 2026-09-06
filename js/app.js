@@ -1356,14 +1356,41 @@ function renderFanCarousel(){
    el sistema de planes pagados para negocios (Presencia/Destacado/Premium),
    este filtro debe cambiar a mostrar solo los que tengan verificado = true.
 ------------------------------------------------------------------------- */
+/* ---------------- Cinta de logos de la portada ----------------
+   Son espacios PAGADOS y se administran a mano en js/logos-partners.js,
+   no salen de la tabla `negocios`. Todos los archivos vienen ya compuestos
+   en un lienzo de 300x120 px, así que en pantalla todos ocupan exactamente
+   lo mismo (150x60) y la cinta se ve pareja aunque un logo sea horizontal
+   y el otro cuadrado.
+
+   Mientras haya menos logos que espacios, el resto se rellena con
+   "Tu negocio aquí". Si algún día hay más de 15, se muestran todos: la
+   cinta gira en bucle y ninguno se queda fuera. */
 function renderTrustMarquee(){
   const track = document.getElementById('trustTrack');
   if(!track) return;
-  const reales = negociosReal.slice(0,6).map(n => `<div class="trust-card real" onclick="filtrarPorNegocio('${n.nombre.replace(/'/g,"\\'")}')">✓ ${n.nombre}</div>`);
-  const faltan = Math.max(10 - reales.length, 4);
+
+  const lista = (typeof LOGOS_PARTNERS !== 'undefined' ? LOGOS_PARTNERS : []).filter(l => l && l.archivo);
+  const espacios = (typeof LOGOS_PARTNERS_ESPACIOS !== 'undefined' ? LOGOS_PARTNERS_ESPACIOS : 15);
+
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const tarjetas = lista.map(l => {
+    const accion = l.url
+      ? `onclick="window.open('${esc(l.url)}','_blank','noopener')"`
+      : `onclick="filtrarPorNegocio('${String(l.nombre||'').replace(/'/g,"\\'")}')"`;
+    /* Si el archivo no carga (nombre mal escrito, archivo que falta), la
+       tarjeta cae de vuelta al nombre en texto en vez de mostrar la imagen rota. */
+    return `<div class="trust-card partner" title="${esc(l.nombre)}" ${accion}>
+      <img class="partner-logo" src="${esc(l.archivo)}" alt="${esc(l.nombre)}" loading="lazy"
+           onerror="var c=this.closest('.trust-card'); c.classList.remove('partner'); c.textContent=this.alt;">
+    </div>`;
+  });
+
+  const faltan = Math.max(espacios - tarjetas.length, 0);
   const placeholders = Array.from({length:faltan}, () => `<div class="trust-card" onclick="abrirElegirCamino()">➕ Tu negocio aquí</div>`);
-  const html = [...reales, ...placeholders].join('');
-  track.innerHTML = html + html;
+  const html = [...tarjetas, ...placeholders].join('');
+  track.innerHTML = html + html;   // duplicado para que el bucle no tenga costura
 }
 
 /* ---------------- Formularios ---------------- */

@@ -309,6 +309,30 @@ footer{ padding:44px 0; border-top:2px solid var(--line); background:var(--paper
 .trust-card:hover{ transform:translateY(-2px); }
 .trust-card.real{ border-style:solid; border-color:var(--teal); color:var(--ink); }
 
+/* ---- Tarjetas de logo (espacios pagados) ----
+   Todos los archivos llegan compuestos en un lienzo de 300x120 px, así que
+   todas las tarjetas miden exactamente lo mismo y el logo se dibuja siempre
+   dentro del mismo rectángulo. Da igual que uno sea horizontal y otro
+   cuadrado: el lienzo es el que empareja. */
+.trust-card.partner{
+  padding:14px 20px;
+  width:190px; height:88px;
+  border-style:solid; border-color:var(--line);
+  justify-content:center;
+}
+.partner-logo{
+  width:150px; height:60px;
+  object-fit:contain; object-position:center;
+  display:block;
+}
+@media (hover:hover) and (pointer:fine){
+  .trust-card.partner:hover{ border-color:var(--teal); }
+}
+@media (max-width:880px){
+  .trust-card.partner{ padding:12px 16px; width:154px; height:74px; }
+  .partner-logo{ width:122px; height:49px; }
+}
+
 @media (max-width: 880px){
   .navlinks{ display:none; }
   .nav-dropdown-panel.wide{ width:88vw; }

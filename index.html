@@ -685,11 +685,9 @@
 <footer>
   <div class="wrap foot-row">
     <div class="logo"><img src="assets/logo.svg" alt="Mi Mascota Club" style="height:28px;"></div>
-    <div class="foot-note">MVP conectado a base de datos, con validación de visitas por QR. Precios de ejemplo, a validar.</div>
-    <div class="foot-links" style="display:flex;gap:18px;font-size:12.5px;font-weight:700;">
-      <a href="#validar" onclick="event.preventDefault(); mostrarSeccion('validar');" style="color:var(--ink);">Validar una visita</a>
-      <a href="#" onclick="event.preventDefault(); abrirCalificaciones();" style="color:var(--ink);">⭐ Calificar (Premium)</a>
-      <a href="#panel" onclick="event.preventDefault(); mostrarSeccion('panel');" style="color:var(--ink);">Panel privado</a>
+    <div class="foot-links">
+      <a href="#validar" onclick="event.preventDefault(); mostrarSeccion('validar');">Validar una visita</a>
+      <a href="#panel" onclick="event.preventDefault(); mostrarSeccion('panel');">Panel privado</a>
     </div>
   </div>
 </footer>
@@ -707,6 +705,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="js/logos-partners.js"></script>
 <script src="js/catalogos-negocio.js"></script>
 <script src="js/ficha-negocio.js"></script>
 <script src="js/app.js"></script>
