@@ -454,26 +454,76 @@
   </div>
 </section>
 
+<!-- ============================================================
+     VALIDAR UNA VISITA  (/validar/MMC00001)
+     Es donde aterriza el negocio despues de escanear el QR del
+     carnet con la camara de su celular. Tres pasos:
+       1. Que negocio eres (solo la primera vez en ese telefono)
+       2. La ficha del socio y TU beneficio, antes de confirmar
+       3. El comprobante con folio
+     El correo se pide recien al confirmar, no antes: asi nadie
+     queda bloqueado y ninguna visita se pierde.
+     ============================================================ -->
 <section id="validar" class="band" style="display:none;">
   <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Para negocios</span>
+    <div class="section-head" style="margin-bottom:20px;">
+      <span class="eyebrow">Para negocios</span>
       <h2>Validar una visita</h2>
-      <p>Con tu código de negocio (te lo entregamos al registrarte) y el código QR del carnet del socio, registra la compra y su descuento en segundos.</p>
+      <p id="valSubtitulo">Escanea el carnet del socio y confirma la visita. Queda registrada para los dos.</p>
     </div>
-    <div class="panel full" style="max-width:520px;">
-      <form id="validarForm">
-        <div class="field-row three">
-          <div class="field"><label for="valBizCode">Tu código de negocio</label><input id="valBizCode" required placeholder="NEG0001" style="text-transform:uppercase;"></div>
-          <div class="field"><label for="valSocioCode">Código del socio</label><input id="valSocioCode" required placeholder="MMC00001" style="text-transform:uppercase;"></div>
-          <div class="field"><label for="valMonto">Monto compra (CLP) <span style="font-weight:600;color:#8a8a8a;">— opcional</span></label><input id="valMonto" type="number" min="1" placeholder="15000"></div>
+
+    <!-- ---------- Paso 1: quien eres (solo la primera vez) ---------- -->
+    <div class="panel full val-panel" id="valPaso1" style="display:none;">
+      <form id="valNegocioForm">
+        <div class="field">
+          <label for="valBizCode">Tu código de negocio</label>
+          <input id="valBizCode" required placeholder="NEG0001" style="text-transform:uppercase;" autocomplete="off">
         </div>
-        <div style="font-size:12px;color:#7a8377;margin:-4px 0 14px;line-height:1.45;">Si el beneficio no tiene un monto claro (2x1, un servicio gratis), deja el monto vacío: la visita se registra igual.</div>
-        <button type="submit" id="validarSubmitBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Validar y registrar visita</button>
+        <div class="field">
+          <label for="valSocioCode">Código del socio</label>
+          <input id="valSocioCode" required placeholder="MMC00001" style="text-transform:uppercase;" autocomplete="off">
+        </div>
+        <button type="submit" id="valBuscarBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Ver el carnet</button>
+        <div id="valPaso1Error" class="soc-error" style="display:none;"></div>
+        <p class="soc-nota">Tu código de negocio queda guardado en este teléfono. La próxima vez basta con escanear el QR del socio.</p>
       </form>
-      <div class="validar-result" id="validarResult"></div>
-      <div style="margin-top:16px;font-size:12.5px;text-align:center;">
-        <a href="/mi-negocio" onclick="event.preventDefault(); irAMiNegocio();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver las visitas de mi negocio →</a>
+    </div>
+
+    <!-- ---------- Paso 2: la ficha del socio y el beneficio ---------- -->
+    <div class="val-panel" id="valPaso2" style="display:none;">
+      <div class="val-ficha" id="valFicha"></div>
+
+      <div class="panel full" style="margin-top:16px;">
+        <div class="field">
+          <label for="valMonto">Monto de la compra <span class="soc-opt">— opcional</span></label>
+          <input id="valMonto" type="number" min="1" inputmode="numeric" placeholder="15000">
+          <p class="soc-nota">Si el beneficio no tiene un monto claro (2x1, un servicio gratis), déjalo vacío: la visita se registra igual.</p>
+        </div>
+
+        <!-- Identificación: aparece sola si este teléfono todavía no está identificado -->
+        <div id="valIdentifica" style="display:none;">
+          <div class="val-identifica">
+            <div class="val-identifica__t">Una sola vez: confirma que eres el negocio</div>
+            <div class="field" style="margin-bottom:10px;">
+              <label for="valBizEmail">Correo con el que inscribiste tu negocio</label>
+              <input id="valBizEmail" type="email" placeholder="hola@tunegocio.cl" autocomplete="email">
+            </div>
+            <p class="soc-nota" style="margin:0;">Sin esto cualquiera podría escribir tu código y registrar visitas falsas. Después de esta vez este teléfono queda identificado.</p>
+          </div>
+        </div>
+
+        <button type="button" id="valConfirmarBtn" class="btn btn-primary btn-grande" style="width:100%;justify-content:center;">Confirmar visita</button>
+        <div id="valPaso2Error" class="soc-error" style="display:none;"></div>
+        <button type="button" class="soc-link" style="display:block;margin:14px auto 0;" onclick="validarReiniciar()">← Es otro socio</button>
+      </div>
+    </div>
+
+    <!-- ---------- Paso 3: comprobante ---------- -->
+    <div class="val-panel" id="valPaso3" style="display:none;">
+      <div class="val-ok" id="valComprobante"></div>
+      <button type="button" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:16px;" onclick="validarReiniciar()">Registrar otra visita</button>
+      <div style="margin-top:14px;font-size:12.5px;text-align:center;">
+        <a href="/mi-negocio" onclick="event.preventDefault(); irAMiNegocio();" style="color:var(--teal-dark);text-decoration:underline;font-weight:800;">Ver todas mis visitas →</a>
       </div>
     </div>
   </div>

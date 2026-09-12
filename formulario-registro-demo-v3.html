@@ -6,6 +6,8 @@
 <title>Mi Mascota Club — Registro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- Librería para dibujar el QR del carnet -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --amarillo:#FFCE00;
@@ -179,6 +181,46 @@
     border-bottom:1px solid rgba(255,255,255,0.06); color:rgba(255,255,255,0.8); }
   .resumen-row:last-child{ border-bottom:none; }
   .resumen-row b{ color:var(--blanco); }
+
+  /* ---------- Carnet final con QR ----------
+     Es lo único que el socio se lleva del registro: si no ve un carnet
+     con un QR, no tiene nada que mostrar en el mesón del negocio. */
+  .carnet{
+    width:100%; max-width:320px; margin:22px auto 0;
+    background:#1E1E1E; border:1px solid rgba(255,255,255,0.14);
+    border-radius:22px; padding:24px 22px 20px; position:relative;
+    box-shadow:0 24px 50px -18px rgba(0,0,0,0.6);
+  }
+  .carnet::before{
+    content:""; position:absolute; inset:9px;
+    border:1.5px dashed rgba(255,255,255,0.16); border-radius:16px; pointer-events:none;
+  }
+  .carnet-badge{
+    position:absolute; top:-11px; right:20px; background:var(--amarillo); color:var(--negro);
+    font-size:10.5px; font-weight:900; padding:5px 11px; border-radius:8px;
+  }
+  .carnet-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+  .carnet-marca{ font-size:11px; font-weight:900; letter-spacing:0.04em; color:var(--blanco); }
+  .carnet-id{ font-family:monospace; font-size:11px; color:var(--amarillo); font-weight:700; }
+  .carnet-nombre{ font-size:25px; font-weight:900; color:var(--blanco); line-height:1.1; }
+  .carnet-raza{ font-size:12.5px; color:rgba(255,255,255,0.6); font-weight:700; margin-top:3px; text-transform:capitalize; }
+  .carnet-qr{ background:#fff; border-radius:12px; padding:10px; margin-top:16px; display:flex; justify-content:center; }
+  .carnet-qr img, .carnet-qr canvas{ display:block; }
+  .carnet-pie{
+    display:flex; justify-content:space-between; font-family:monospace; font-size:10px;
+    color:rgba(255,255,255,0.5); border-top:1px solid rgba(255,255,255,0.14);
+    padding-top:11px; margin-top:14px; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .carnet-pie b{ display:block; color:var(--blanco); font-size:12px; margin-top:3px; letter-spacing:0; text-transform:none; }
+  .carnet-ayuda{
+    max-width:340px; margin:16px auto 0; font-size:13px; line-height:1.55;
+    color:rgba(255,255,255,0.6);
+  }
+  .btn-secundario{
+    display:inline-block; margin-top:12px; padding:13px 26px; border-radius:999px;
+    border:2px solid rgba(255,255,255,0.25); color:var(--blanco); text-decoration:none;
+    font-weight:800; font-size:14px;
+  }
 
   /* ---------- Casillas de código (estilo GitHub) ---------- */
   .codigo-boxes{ display:flex; gap:10px; margin-top:8px; }
@@ -705,7 +747,9 @@ function renderPaso(index, direccion){
             to_email: respuestas.correo,
             to_name: respuestas.nombre,
             codigo: respuestas.codigo_socio,
-            mensaje_extra: '¡Bienvenido a la comunidad! Explora el directorio y empieza a disfrutar tus beneficios.'
+            mascota: respuestas.mascota,
+            carnet_url: location.origin + '/mi-mascota',
+            mensaje_extra: '¡Bienvenido a la comunidad! Tu carnet con el código QR está siempre disponible en Mi Mascota ID — ábrelo en tu teléfono y muéstralo en el negocio.'
           });
         } catch(emailErr){
           console.warn('El registro se guardó, pero el correo de bienvenida falló:', emailErr);
@@ -764,28 +808,66 @@ function mostrarFinal(){
   progresoBar.style.width = '100%';
   progresoTexto.style.opacity = 0;
   btnVolver.classList.remove('visible');
+
+  const codigo = respuestas.codigo_socio || '';
+  const raza = [respuestas.especie, respuestas.raza].filter(Boolean).join(' · ');
+
   const div = document.createElement('div');
   div.className = 'paso';
   div.innerHTML = `
     <div class="paso-inner" style="text-align:center;">
       <div class="final-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#151515" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h1 class="pregunta">¡Bienvenido al club, ${respuestas.nombre.split(' ')[0]}!</h1>
-      <p style="color:rgba(255,255,255,0.6); font-size:15px;">Te enviamos el carnet de ${respuestas.mascota} a ${respuestas.correo}</p>
-      <div class="resumen">
-        <div class="resumen-row"><span>Código de socio</span><b style="color:var(--amarillo);">${respuestas.codigo_socio || '—'}</b></div>
-        <div class="resumen-row"><span>Dueño/a</span><b>${respuestas.nombre}</b></div>
-        <div class="resumen-row"><span>Mascota</span><b>${respuestas.mascota}</b></div>
-        <div class="resumen-row"><span>Especie / Raza</span><b>${respuestas.especie} · ${respuestas.raza}</b></div>
-        <div class="resumen-row"><span>Edad / Peso / Tamaño</span><b>${respuestas.edad} · ${respuestas.peso} · ${respuestas.tamano}</b></div>
-        <div class="resumen-row"><span>RUT</span><b>${respuestas.rut}</b></div>
-        <div class="resumen-row"><span>Plan</span><b>${(respuestas.plan||'free').toUpperCase()}</b></div>
+      <p style="color:rgba(255,255,255,0.6); font-size:15px;">Este es el carnet de ${respuestas.mascota}. También te lo enviamos a ${respuestas.correo}.</p>
+
+      <div class="carnet">
+        <div class="carnet-badge">MIEMBRO FREE</div>
+        <div class="carnet-top">
+          <div class="carnet-marca">MI MASCOTA CLUB</div>
+          <div class="carnet-id">${codigo || '—'}</div>
+        </div>
+        <div class="carnet-nombre">${respuestas.mascota}</div>
+        <div class="carnet-raza">${raza}</div>
+        <div class="carnet-qr" id="carnetQR"></div>
+        <div class="carnet-pie">
+          <div>Socio<b>${codigo || '—'}</b></div>
+          <div style="text-align:right;">Estado<b style="color:#5FD39B;">Activo</b></div>
+        </div>
       </div>
-      <a href="https://mimascotaclub.netlify.app" class="btn-ir-inicio">Ir al inicio</a>
+
+      <p class="carnet-ayuda">
+        <b style="color:#fff;">Cómo se usa:</b> en el negocio muestras este QR, ellos lo escanean con
+        la cámara de su celular y confirman tu visita. Ahí mismo te aplican el beneficio y a los dos
+        les queda el registro.
+      </p>
+
+      <a href="/mi-mascota" class="btn-ir-inicio">Ver mi carnet cuando quiera</a>
+      <div><a href="https://mimascotaclub.netlify.app" class="btn-secundario">Explorar los beneficios</a></div>
     </div>
   `;
   stage.appendChild(div);
   requestAnimationFrame(()=> div.classList.add('activo'));
+
+  // El QR lleva la URL de validación, no el código pelado: así el negocio lo
+  // escanea con la cámara que ya trae su teléfono y aterriza en la pantalla
+  // correcta, sin apps ni lectores raros.
+  if(codigo){
+    const caja = document.getElementById('carnetQR');
+    try{
+      if(typeof QRCode !== 'undefined'){
+        new QRCode(caja, {
+          text: location.origin + '/validar/' + encodeURIComponent(codigo),
+          width:132, height:132, correctLevel: QRCode.CorrectLevel.M
+        });
+      }else{
+        caja.innerHTML = '<div style="font-family:monospace;font-size:13px;color:#151515;font-weight:700;">' + codigo + '</div>';
+      }
+    }catch(e){
+      caja.innerHTML = '<div style="font-family:monospace;font-size:13px;color:#151515;font-weight:700;">' + codigo + '</div>';
+    }
+  }
 }
+
 
 // arranque
 renderPaso(0, 1);

@@ -322,6 +322,7 @@ function mostrarPaginaPlanes(){
   document.body.classList.remove('pagina-ficha');
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
+  document.body.classList.remove('pagina-validar');
   document.body.classList.add('pagina-planes');
   renderPageBanner('planesBanner', BANNER_PLANES);
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
@@ -336,6 +337,9 @@ function volverAlInicio(){
   document.body.classList.remove('pagina-planes');
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
+  document.body.classList.remove('pagina-validar');
+  const secValidar = document.getElementById('validar');
+  if(secValidar) secValidar.style.display = 'none';
   if(location.pathname !== '/') history.pushState({}, '', '/');
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -345,6 +349,7 @@ function mostrarPaginaDirectorio(opts){
   document.body.classList.remove('pagina-planes');
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
+  document.body.classList.remove('pagina-validar');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
   modoDirectorioBeneficios = !!opts.beneficios;
@@ -395,6 +400,7 @@ function manejarRutaActual(){
     document.body.classList.remove('pagina-planes');
     document.body.classList.remove('pagina-negocio');
     document.body.classList.remove('pagina-socio');
+    document.body.classList.remove('pagina-validar');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
@@ -1040,6 +1046,7 @@ function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-planes');
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
+  document.body.classList.remove('pagina-validar');
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
@@ -1668,67 +1675,272 @@ function compressImage(file, maxDim, quality){
   });
 }
 
-/* ---------------- Validar visita (canje) ----------------
-   El negocio escanea el QR del socio con la cámara de su celular y aterriza
-   aquí con el código del socio ya puesto. Su propio código de negocio queda
-   guardado en ese teléfono, así que a partir de la segunda vez lo único que
-   escribe es el monto. */
-const LS_NEGOCIO = 'mmc_codigo_negocio';
+/* ============================================================
+   VALIDAR UNA VISITA  (/validar/MMC00001)
+   ------------------------------------------------------------
+   Es el momento en que el beneficio de verdad ocurre, así que es
+   la pantalla que más importa que esté bien.
+
+   El negocio escanea el QR del carnet con la cámara de su celular
+   y aterriza aquí con el código del socio ya puesto. Antes de
+   apretar nada ve QUIÉN llegó, si está vigente, CUÁL es su propio
+   beneficio y si ese socio ya vino antes — porque el que atiende
+   casi nunca es el dueño y no tiene por qué acordarse.
+
+   El correo del negocio se pide recién al confirmar, y solo la
+   primera vez en ese teléfono. Así nadie queda bloqueado y ninguna
+   visita se pierde, pero cada canje queda amarrado a un negocio
+   que probó su correo: sin eso cualquiera podría escribir NEG0001
+   y registrar visitas falsas, o un socio autovalidarse.
+
+   Ver supabase-canje-trazable-v16.sql.
+   ============================================================ */
+const LS_NEGOCIO = 'mmc_codigo_negocio';     // solo el código (compatibilidad)
+const LS_NEG_SES = 'mmc_sesion_negocio';     // { codigo, email } — la sesión real
+
+let valSocio = '';       // MMC00001
+let valNegocio = '';     // NEG0001
+let valPrevio = null;    // lo que devolvió canje_previo()
+
+function valSesion(){
+  try{ return JSON.parse(localStorage.getItem(LS_NEG_SES) || 'null'); }catch(e){ return null; }
+}
+/* El correo guardado solo sirve si es del MISMO negocio que se está validando:
+   si en ese teléfono se cambió de código, hay que volver a identificarse. */
+function valEmailGuardado(codigo){
+  const s = valSesion();
+  return (s && s.email && String(s.codigo).toUpperCase() === String(codigo).toUpperCase()) ? s.email : '';
+}
+function valCodigoGuardado(){
+  const s = valSesion();
+  if(s && s.codigo) return String(s.codigo).toUpperCase();
+  try{ return (localStorage.getItem(LS_NEGOCIO) || '').toUpperCase(); }catch(e){ return ''; }
+}
+
+function valMostrarPaso(n){
+  ['valPaso1','valPaso2','valPaso3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = (i + 1 === n) ? '' : 'none';
+  });
+  const err1 = document.getElementById('valPaso1Error');
+  const err2 = document.getElementById('valPaso2Error');
+  if(err1) err1.style.display = 'none';
+  if(err2) err2.style.display = 'none';
+}
+
+function valError(id, texto){
+  const box = document.getElementById(id);
+  if(!box) return;
+  if(!texto){ box.style.display = 'none'; return; }
+  box.textContent = texto;
+  box.style.display = 'block';
+}
 
 function abrirValidarConSocio(socioCodigo){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes');
+  /* Página propia, como /mi-negocio: el cajero tiene un cliente esperando y no
+     puede aterrizar en la portada con el formulario escondido bajo el fold. */
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio');
+  document.body.classList.add('pagina-validar');
   const seccion = document.getElementById('validar');
   if(!seccion) return;
   seccion.style.display = '';
-  const inputSocio = document.getElementById('valSocioCode');
+
+  valSocio = (socioCodigo || '').toUpperCase();
+  valNegocio = valCodigoGuardado();
+
   const inputBiz = document.getElementById('valBizCode');
-  if(socioCodigo && inputSocio) inputSocio.value = socioCodigo;
-  let guardado = '';
-  try{ guardado = localStorage.getItem(LS_NEGOCIO) || ''; }catch(e){}
-  if(guardado && inputBiz) inputBiz.value = guardado;
-  setTimeout(() => {
-    seccion.scrollIntoView({ behavior:'smooth' });
-    const foco = guardado ? document.getElementById('valMonto') : inputBiz;
-    if(foco) foco.focus();
-  }, 120);
+  const inputSocio = document.getElementById('valSocioCode');
+  if(inputBiz) inputBiz.value = valNegocio;
+  if(inputSocio) inputSocio.value = valSocio;
+
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+
+  /* Si ya sabemos los dos códigos (el del socio vino en el QR y el del negocio
+     está guardado en este teléfono), saltamos derecho a la ficha. */
+  if(valSocio && valNegocio) cargarPrevioCanje();
+  else {
+    valMostrarPaso(1);
+    setTimeout(() => { const foco = valNegocio ? inputSocio : inputBiz; if(foco) foco.focus(); }, 200);
+  }
 }
 
+function validarReiniciar(){
+  valSocio = '';
+  valPrevio = null;
+  const inputSocio = document.getElementById('valSocioCode');
+  const inputMonto = document.getElementById('valMonto');
+  if(inputSocio) inputSocio.value = '';
+  if(inputMonto) inputMonto.value = '';
+  const inputBiz = document.getElementById('valBizCode');
+  if(inputBiz) inputBiz.value = valNegocio || valCodigoGuardado();
+  valMostrarPaso(1);
+  if(inputSocio) inputSocio.focus();
+}
 
-document.getElementById('validarForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const btn = document.getElementById('validarSubmitBtn');
-  const bizCodigo = document.getElementById('valBizCode').value.trim().toUpperCase();
-  const socioCodigo = document.getElementById('valSocioCode').value.trim().toUpperCase();
-  const montoRaw = document.getElementById('valMonto').value.trim();
-  const monto = montoRaw === '' ? null : Number(montoRaw);
-  const resultBox = document.getElementById('validarResult');
-  resultBox.classList.remove('show');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Validando...';
+/* ---------------- Paso 2: la ficha, antes de confirmar ---------------- */
+async function cargarPrevioCanje(){
+  const btn = document.getElementById('valBuscarBtn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Buscando...'; }
   try{
-    const { data, error } = await supabase.rpc('registrar_canje', {
-      p_negocio_codigo: bizCodigo, p_socio_codigo: socioCodigo, p_monto: monto
+    const { data, error } = await supabase.rpc('canje_previo', {
+      p_negocio_codigo: valNegocio, p_socio_codigo: valSocio
     });
     if(error) throw error;
-    const r = data[0];
-    if(!r.ok){ toast(r.mensaje); return; }
-    canjesCount++;
-    try{ localStorage.setItem(LS_NEGOCIO, bizCodigo); }catch(e){ /* modo incógnito */ }
-    let calCta = '';
-    if(r.negocio_plan === 'premium' && r.canje_id){
-      calCta = `<div style="margin-top:14px;"><button type="button" class="btn btn-sm btn-primary" onclick="abrirFormularioCalificar('${r.canje_id}','negocio','${bizCodigo}','${String(r.nombre_mostrar).replace(/'/g,"\\'")}')">⭐ Calificar a este socio ahora</button></div>`;
+    const p = data && data[0];
+    if(!p || !p.ok){
+      valMostrarPaso(1);
+      valError('valPaso1Error', (p && p.mensaje) || 'No pudimos encontrar esos códigos.');
+      return;
     }
-    resultBox.innerHTML = (monto != null
-        ? `<div class="big">${formatCLP(monto)}</div>Compra validada de <b>${r.nombre_mostrar}</b> en <b>${r.negocio_nombre}</b>.<br>Ahorro de socio aplicado (ejemplo 10%): <b>${formatCLP(r.ahorro)}</b>`
-        : `<div class="big">✓</div>Visita de <b>${r.nombre_mostrar}</b> registrada en <b>${r.negocio_nombre}</b>.<br><span style="font-size:12.5px;color:#7a8377;">Sin monto anotado — la visita queda igual en el historial.</span>`)
-      + calCta
-      + `<div style="margin-top:14px;font-size:12.5px;"><a href="/mi-negocio" onclick="event.preventDefault(); irAMiNegocio();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver todas mis visitas →</a></div>`;
-    resultBox.classList.add('show');
-    document.getElementById('valSocioCode').value = '';
-    document.getElementById('valMonto').value = '';
-    toast('¡Visita validada y registrada!');
-  }catch(err){ console.error(err); toast('No se pudo registrar la visita. Intenta de nuevo.'); }
-  finally{ btn.disabled = false; btn.textContent = 'Validar y registrar visita'; }
+    valPrevio = p;
+    try{ localStorage.setItem(LS_NEGOCIO, valNegocio); }catch(e){}
+    renderFichaValidar(p);
+    valMostrarPaso(2);
+  }catch(e){
+    console.error(e);
+    valMostrarPaso(1);
+    valError('valPaso1Error', 'No pudimos conectarnos. Revisa la señal e intenta de nuevo.');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Ver el carnet'; }
+  }
+}
+
+function renderFichaValidar(p){
+  const desde = p.socio_desde
+    ? new Date(p.socio_desde).toLocaleDateString('es-CL', { month:'long', year:'numeric' })
+    : '';
+
+  let visitas;
+  if(!p.visitas_previas){
+    visitas = '<span class="val-nuevo">✦ Primera visita de este socio</span>';
+  }else{
+    const ult = p.ultima_visita
+      ? new Date(p.ultima_visita).toLocaleDateString('es-CL', { day:'2-digit', month:'short' })
+      : '';
+    visitas = `Ya vino ${p.visitas_previas} ${p.visitas_previas === 1 ? 'vez' : 'veces'}` +
+              (ult ? ` · la última el ${ult}` : '');
+  }
+
+  /* El beneficio es lo único que el cajero realmente necesita leer, así que va
+     grande y solo. Si el negocio no cargó beneficio, se dice explícitamente en
+     vez de mostrar un espacio vacío que se lee como un error. */
+  const ben = p.beneficio_texto
+    ? `<div class="val-ben__t">${colaEsc(p.beneficio_texto)}</div>` +
+      (p.beneficio_monto_min
+        ? `<div class="val-ben__min">Solo en compras sobre ${formatCLP(p.beneficio_monto_min)}</div>`
+        : '')
+    : `<div class="val-ben__t val-ben__t--vacio">Tu negocio todavía no tiene un beneficio cargado</div>
+       <div class="val-ben__min">Puedes registrar la visita igual, pero conviene cargarlo.</div>`;
+
+  document.getElementById('valFicha').innerHTML = `
+    <div class="val-ficha__cab">
+      <div>
+        <div class="val-ficha__pet">${colaEsc(p.socio_pet)}</div>
+        <div class="val-ficha__sub">${colaEsc([p.socio_species, p.socio_breed].filter(Boolean).join(' · '))}</div>
+      </div>
+      <div class="val-chip val-chip--ok">✓ Socio activo</div>
+    </div>
+    <div class="val-ficha__meta">
+      <span class="mono">${colaEsc(p.socio_codigo)}</span>
+      <span>${colaEsc(planLabel(p.socio_plan))}</span>
+      ${desde ? `<span>En el club desde ${desde}</span>` : ''}
+    </div>
+    <div class="val-ben">
+      <div class="val-ben__l">Lo que le tienes que dar</div>
+      ${ben}
+    </div>
+    <div class="val-visitas">${visitas}</div>`;
+
+  /* La identificación solo aparece si este teléfono todavía no la hizo. */
+  const cajaId = document.getElementById('valIdentifica');
+  if(cajaId) cajaId.style.display = valEmailGuardado(valNegocio) ? 'none' : '';
+
+  const btnConf = document.getElementById('valConfirmarBtn');
+  if(btnConf) btnConf.textContent = 'Confirmar visita de ' + p.socio_pet;
+}
+
+/* ---------------- Confirmar ---------------- */
+async function confirmarVisita(){
+  const btn = document.getElementById('valConfirmarBtn');
+  const montoRaw = (document.getElementById('valMonto').value || '').trim();
+  const monto = montoRaw === '' ? null : Number(montoRaw);
+
+  let email = valEmailGuardado(valNegocio);
+  if(!email){
+    email = (document.getElementById('valBizEmail').value || '').trim().toLowerCase();
+    if(!validarEmail(email)){
+      valError('valPaso2Error', 'Necesitamos el correo con el que inscribiste tu negocio.');
+      document.getElementById('valBizEmail').focus();
+      return;
+    }
+  }
+
+  valError('valPaso2Error', '');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Registrando...';
+  try{
+    const { data, error } = await supabase.rpc('registrar_canje_v2', {
+      p_negocio_codigo: valNegocio,
+      p_negocio_email: email,
+      p_socio_codigo: valSocio,
+      p_monto: monto
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){
+      valError('valPaso2Error', (r && r.mensaje) || 'No se pudo registrar la visita.');
+      return;
+    }
+
+    /* Recién ahora guardamos la sesión: el servidor confirmó que ese código y
+       ese correo son del mismo negocio. */
+    try{ localStorage.setItem(LS_NEG_SES, JSON.stringify({ codigo: valNegocio, email })); }catch(e){}
+    canjesCount++;
+    updateCounts();
+    renderComprobante(r);
+    valMostrarPaso(3);
+  }catch(e){
+    console.error(e);
+    valError('valPaso2Error', 'No pudimos registrar la visita. Revisa la señal e intenta de nuevo.');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Confirmar visita' + (valPrevio ? ' de ' + valPrevio.socio_pet : '');
+  }
+}
+
+function renderComprobante(r){
+  const linea = (r.monto != null)
+    ? `Compra de ${formatCLP(r.monto)}` + (r.ahorro != null ? ` · ahorró ${formatCLP(r.ahorro)}` : '')
+    : 'Sin monto anotado';
+
+  const calCta = (r.negocio_plan === 'premium' && r.canje_id)
+    ? `<div style="margin-top:16px;"><button type="button" class="btn btn-sm btn-outline" onclick="abrirFormularioCalificar('${r.canje_id}','negocio','${valNegocio}','${String(r.nombre_mostrar).replace(/'/g,"\\'")}')">⭐ Calificar a este socio</button></div>`
+    : '';
+
+  document.getElementById('valComprobante').innerHTML = `
+    <div class="val-ok__check">✓</div>
+    <div class="val-ok__t">Visita registrada</div>
+    <div class="val-ok__folio">${colaEsc(r.folio || '')}</div>
+    <div class="val-ok__sub">
+      <b>${colaEsc(r.socio_mascota || r.nombre_mostrar)}</b> en <b>${colaEsc(r.negocio_nombre)}</b>
+    </div>
+    ${r.beneficio_texto ? `<div class="val-ok__ben">${colaEsc(r.beneficio_texto)}</div>` : ''}
+    <div class="val-ok__monto">${linea}</div>
+    ${calCta}
+    <p class="val-ok__nota">
+      Muéstrale esta pantalla al socio. Este mismo folio le aparece a él en su Mi Mascota ID
+      y a ti en el panel de tu negocio.
+    </p>`;
+}
+
+document.getElementById('valNegocioForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  valNegocio = (document.getElementById('valBizCode').value || '').trim().toUpperCase();
+  valSocio = (document.getElementById('valSocioCode').value || '').trim().toUpperCase();
+  if(!valNegocio || !valSocio){ valError('valPaso1Error', 'Faltan los dos códigos.'); return; }
+  cargarPrevioCanje();
 });
+
+document.getElementById('valConfirmarBtn').addEventListener('click', confirmarVisita);
 
 /* ============================================================
    PANEL DEL NEGOCIO  (/mi-negocio)
@@ -1764,7 +1976,7 @@ function irAMiNegocio(){
 }
 
 function mostrarPaginaNegocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar');
   document.body.classList.add('pagina-negocio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const s = sesionNegocio();
@@ -1844,17 +2056,19 @@ function renderPanelNegocio(filas){
     return;
   }
   tabla.innerHTML = `<div class="neg-tabla"><table>
-    <thead><tr><th>Fecha</th><th>Socio</th><th>Código</th><th class="num">Compra</th></tr></thead>
+    <thead><tr><th>Folio</th><th>Fecha</th><th>Socio</th><th>Beneficio aplicado</th><th class="num">Compra</th></tr></thead>
     <tbody>${filas.map(f => {
       const d = new Date(f.fecha);
       const fecha = d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' }) + ' · ' +
                     d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
       const quien = colaEsc(f.socio_nombre || '') +
-        (f.socio_mascota && f.socio_mascota !== f.socio_nombre ? ` <span class="dim">· ${colaEsc(f.socio_mascota)}</span>` : '');
+        (f.socio_mascota && f.socio_mascota !== f.socio_nombre ? ` <span class="dim">· ${colaEsc(f.socio_mascota)}</span>` : '') +
+        `<div class="dim" style="font-family:var(--font-mono);font-size:11.5px;">${colaEsc(f.socio_codigo || '')}</div>`;
       return `<tr>
+        <td class="folio">${f.folio ? colaEsc(f.folio) : '<span class="dim">—</span>'}</td>
         <td>${fecha}</td>
         <td>${quien}</td>
-        <td class="dim" style="font-family:var(--font-mono);font-size:12px;">${colaEsc(f.socio_codigo || '')}</td>
+        <td class="dim" style="font-size:12.5px;">${f.beneficio_texto ? colaEsc(f.beneficio_texto) : '—'}</td>
         <td class="num">${f.monto != null ? formatCLP(Number(f.monto)) : '<span class="dim">—</span>'}</td>
       </tr>`;
     }).join('')}</tbody>
@@ -2161,6 +2375,7 @@ window.setDirTipo = setDirTipo;
 window.proximamente = proximamente;
 window.abrirBeneficio = abrirBeneficio;
 window.abrirValidarConSocio = abrirValidarConSocio;
+window.validarReiniciar = validarReiniciar;
 window.irAMiNegocio = irAMiNegocio;
 window.salirPanelNegocio = salirPanelNegocio;
 window.confirmarBeneficio = confirmarBeneficio;
@@ -2469,7 +2684,7 @@ async function salirPanelSocio(){
 }
 
 function mostrarPaginaSocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar');
   document.body.classList.add('pagina-socio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const token = sesionSocio();
@@ -2858,15 +3073,17 @@ function renderHistorialSocio(filas){
       <div class="neg-kpi"><div class="neg-kpi__n">${conMonto.length ? formatCLP(ahorroTotal) : '—'}</div><div class="neg-kpi__l">Ahorro acumulado</div><div class="neg-kpi__h">${conMonto.length ? 'en ' + conMonto.length + ' de ' + filas.length + ' visitas' : 'aparece cuando el negocio anota el monto'}</div></div>
     </div>
     <div class="neg-tabla"><table>
-      <thead><tr><th>Fecha</th><th>Negocio</th><th>Mascota</th><th class="num">Ahorro</th></tr></thead>
+      <thead><tr><th>Folio</th><th>Fecha</th><th>Negocio</th><th>Beneficio</th><th class="num">Ahorro</th></tr></thead>
       <tbody>${filas.map(f => {
         const d = new Date(f.fecha);
         const fecha = d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' }) + ' · ' +
                       d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
         return `<tr>
+          <td class="folio">${f.folio ? colaEsc(f.folio) : '<span class="dim">—</span>'}</td>
           <td>${fecha}</td>
-          <td class="soc-hist-neg">${colaEsc(f.negocio_nombre || '')}</td>
-          <td class="dim">${colaEsc(f.socio_mascota || '')}</td>
+          <td class="soc-hist-neg">${colaEsc(f.negocio_nombre || '')}
+            <div class="dim" style="font-weight:600;font-size:11.5px;">${colaEsc(f.socio_mascota || '')}</div></td>
+          <td class="dim" style="font-size:12.5px;">${f.beneficio_texto ? colaEsc(f.beneficio_texto) : '—'}</td>
           <td class="num">${f.ahorro != null ? formatCLP(Number(f.ahorro)) : '<span class="dim">—</span>'}</td>
         </tr>`;
       }).join('')}</tbody>

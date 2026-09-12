@@ -917,3 +917,100 @@ foto, conviene mover esto al bucket de Storage.
 4. Contenido y tips para dueños, para dar valor desde ya mientras hay pocos negocios.
 5. Moderación de las fotos que suben los dueños (hoy no hay ninguna revisión).
 6. Login con Google (prioridad baja — el acceso por correo ya cubre el caso).
+
+## 19. El canje trazable — cómo funciona un beneficio de verdad (12 de septiembre 2026)
+
+Hasta esta sesión el QR del carnet era simbólico. No porque estuviera mal programado, sino
+porque **el formulario de registro v3 nunca mostraba un carnet**: el socio se inscribía, veía
+su código en texto, y se iba sin nada que mostrar en el mesón. El QR existía solo en el flujo
+viejo del `index.html`, que ya nadie usa.
+
+### 19.1 El flujo completo, tal como quedó
+
+1. **El socio se inscribe** en `formulario-registro-demo-v3.html` y la pantalla final le muestra
+   su carnet con el QR dibujado ahí mismo. El QR lleva `…/validar/MMC00006`, no el código pelado:
+   así el negocio lo escanea con la cámara que ya trae su celular, sin apps ni lectores raros.
+   Botón directo a `/mi-mascota` para recuperarlo cuando quiera, y el correo de bienvenida lleva
+   el mismo link.
+2. **En el local** el socio muestra el QR (o dicta su código si no tiene batería).
+3. **El negocio escanea** y aterriza en `/validar/MMC00006`, que ahora es **una página propia**
+   —no la portada con el formulario escondido abajo— y le muestra, antes de apretar nada:
+   nombre de la mascota, especie y raza, "✓ Socio activo", desde cuándo está en el club, **su
+   propio beneficio escrito grande**, el monto mínimo si lo hay, y si ese socio ya vino antes.
+   Esto último importa porque el que atiende casi nunca es el dueño y no tiene por qué acordarse
+   de qué se ofreció hace tres meses.
+4. **Aplica el descuento en su caja** (eso es humano, fuera del sistema) y aprieta *Confirmar
+   visita*, con el monto opcional.
+5. **Queda el comprobante** con un folio corto tipo `C-7K4M`: el negocio lo ve en pantalla y se
+   lo muestra al socio, y el mismo folio aparece después en el panel de los dos.
+
+### 19.2 La decisión de fondo: quién confirma
+
+Se evaluaron dos modelos. **El socio escanea un afiche del local** es cero fricción para el
+negocio, pero cualquiera con una foto del afiche canjea desde su casa y el negocio no confirma
+nada — los números dejarían de servir como argumento de venta ante los negocios, que es justo
+para lo que se necesitan.
+
+Se eligió que **confirme el negocio**: es el que regala el descuento, así que no tiene ningún
+incentivo para inventar visitas, y por eso su confirmación es la que hace que el registro valga
+como prueba.
+
+Para que eso sea real hay que saber que el negocio es el negocio. Pero exigir login *antes* de
+validar dejaría a alguien bloqueado en el mesón con un cliente esperando. La solución:
+**el correo se pide recién al confirmar, y solo la primera vez en ese teléfono**. La visita que
+estaba pendiente se registra en ese mismo momento — nunca hay un estado donde se valide y no
+quede guardado. Después ese teléfono queda identificado y son dos toques.
+
+### 19.3 `supabase-canje-trazable-v16.sql` — YA EJECUTADO
+
+Aplicado y probado contra la base real el 12 de septiembre. El archivo queda como
+documentación; **no hay que volver a correrlo**.
+
+- `canjes` gana `folio` (único) y `beneficio_texto`. El beneficio se **congela dentro del
+  canje**: si mañana el negocio cambia de "15%" a "2x1", los canjes viejos siguen diciendo qué
+  se dio.
+- `canje_previo(negocio, socio)` — la ficha que ve el cajero. A propósito no devuelve foto,
+  correo, teléfono ni nombre del dueño: solo responde ¿es socio vigente?, ¿qué le doy?, ¿ya
+  vino antes? Así, aunque alguien adivine dos códigos, no saca nada personal de nadie.
+- `registrar_canje_v2(negocio, correo_negocio, socio, monto)` — exige el par código + correo.
+- `negocio_descuento_pct()` — **el ahorro dejó de ser un 10% fijo inventado**. Sale del
+  beneficio real (`desc_30`, o el primer NN% del texto). Si no hay porcentaje devuelve NULL:
+  mejor no decir nada que mostrarle al socio un ahorro que no es cierto.
+- `registrar_canje` (v1) queda revocada para anon: no pedía correo, así que permitía visitas
+  falsas.
+- `historial_negocio` y `socio_historial` devuelven ahora folio y beneficio.
+
+### 19.4 Frontend
+
+- `formulario-registro-demo-v3.html`: carnet con QR en la pantalla final (librería qrcodejs
+  agregada al head), y el correo de bienvenida ahora manda también `mascota` y `carnet_url`.
+- `index.html`: la sección `#validar` se rehízo en tres pasos (códigos → ficha → comprobante).
+- `css/styles.css`: bloque `.val-*` y la clase `body.pagina-validar`, que convierte la
+  validación en página propia.
+- `js/app.js`: bloque "VALIDAR UNA VISITA" reescrito completo. La sesión del negocio
+  (`mmc_sesion_negocio`) solo se guarda **después** de que el servidor confirmó el par
+  código+correo, y solo vale si el código guardado es el mismo que se está validando.
+
+### 19.5 Pendiente en Supabase (manual)
+
+`NEG0002` y `NEG0003` no tienen correo cargado en la tabla `negocios`. Sin correo no pueden
+validar visitas ni entrar a su panel:
+
+```sql
+update negocios set email = 'correo@delnegocio.cl' where codigo = 'NEG0002';
+```
+
+### 19.6 Pendiente en EmailJS (manual)
+
+La plantilla `template_u9x5p1i` ahora recibe dos variables nuevas: `{{mascota}}` y
+`{{carnet_url}}`. Conviene agregar en el correo un botón grande a `{{carnet_url}}` que diga
+"Ver el carnet de {{mascota}}", porque el carnet tiene que estar en el teléfono, no en el mail.
+
+### 19.7 Lo que sigue abierto
+
+1. **Aviso a Jaime en cada canje** — quedó decidido hacer correo automático + sección en el
+   panel privado con todos los canjes, pero no se construyó todavía. Es lo siguiente.
+2. Afiche imprimible con el QR para el mesón del negocio.
+3. Mercado Pago Preapproval + webhook.
+4. Migrar el formulario de negocios al estilo v3 (OTP + mascota animada).
+5. Moderación de las fotos que suben los dueños.
