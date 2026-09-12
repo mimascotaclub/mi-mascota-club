@@ -45,7 +45,7 @@
       </div>
       <a href="/beneficios" onclick="event.preventDefault(); irABeneficios();">Beneficios</a>
       <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();" style="display:none;" aria-hidden="true">Especialistas</a>
-      <a href="#duenos" onclick="event.preventDefault(); irAMiMascota();" style="display:none;" aria-hidden="true">Mi Mascota</a>
+      <a href="/mi-mascota" onclick="event.preventDefault(); irAMiMascota();">Mi Mascota ID</a>
       <a href="/planes" onclick="event.preventDefault(); irAPlanes();">Planes</a>
     </div>
     <a href="#negocios" class="btn btn-nav-join btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
@@ -476,6 +476,143 @@
         <a href="/mi-negocio" onclick="event.preventDefault(); irAMiNegocio();" style="color:var(--brass);text-decoration:underline;font-weight:800;">Ver las visitas de mi negocio →</a>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MI MASCOTA ID — PANEL DEL DUEÑO (/mi-mascota)
+     El dueño entra solo con su correo: le llega un código de 6
+     dígitos al mail y con eso abre sesión. No necesita acordarse
+     de su MMC00003. Un mismo correo puede tener varias mascotas
+     inscritas, así que la sesión es del correo y el panel las
+     muestra todas. Ver supabase-mi-mascota-id-v15.sql.
+     ============================================================ -->
+<section id="panelSocio" class="band">
+  <div class="wrap">
+
+    <!-- ---------- Paso 1 y 2: acceso por correo ---------- -->
+    <div id="socLoginBox">
+      <div class="section-head" style="margin-bottom:22px;">
+        <span class="eyebrow">Mi Mascota ID</span>
+        <h2>El perfil de tu mascota</h2>
+        <p>Entra con el correo que usaste al inscribirla. Te enviamos un código de 6 dígitos — no hay contraseñas que recordar.</p>
+      </div>
+
+      <div class="panel full" style="max-width:460px;">
+        <!-- Paso 1: correo -->
+        <form id="socEmailForm" class="soc-paso">
+          <div class="field">
+            <label for="socEmail">Tu correo</label>
+            <input id="socEmail" type="email" required placeholder="tucorreo@gmail.com" autocomplete="email">
+          </div>
+          <button type="submit" id="socEmailBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Enviarme el código</button>
+        </form>
+
+        <!-- Paso 2: código -->
+        <form id="socCodigoForm" class="soc-paso" style="display:none;">
+          <p class="soc-enviado">Te enviamos un código de 6 dígitos a <b id="socEmailEco"></b>. Llega en menos de un minuto — si no lo ves, revisa el spam.</p>
+          <div class="field">
+            <label for="socCodigo">Código de 6 dígitos</label>
+            <input id="socCodigo" inputmode="numeric" maxlength="6" required placeholder="123456" class="soc-otp" autocomplete="one-time-code">
+          </div>
+          <button type="submit" id="socCodigoBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Entrar</button>
+          <div class="soc-reenvio">
+            <button type="button" class="soc-link" onclick="socioVolverAlCorreo()">← Usar otro correo</button>
+            <button type="button" class="soc-link" id="socReenviarBtn" onclick="socioReenviarCodigo()">Reenviar código</button>
+          </div>
+        </form>
+
+        <div id="socLoginError" class="soc-error" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- ---------- Panel ---------- -->
+    <div id="socPanelBox" style="display:none;">
+      <div class="neg-cab">
+        <div>
+          <h3 id="socHola" style="margin:0;font-size:22px;">Hola 👋</h3>
+          <div id="socSub" class="neg-sub"></div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="salirPanelSocio()">Salir</button>
+      </div>
+
+      <!-- Si el correo tiene más de una mascota, aparecen aquí para cambiar entre ellas -->
+      <div id="socTabs" class="soc-tabs" style="display:none;"></div>
+
+      <!-- Barra "Completa tu perfil" -->
+      <div id="socCompletitud" class="soc-comp"></div>
+
+      <div class="soc-grid">
+        <!-- Columna izquierda: carnet -->
+        <div class="soc-col-carnet">
+          <div id="socCarnet"></div>
+          <button type="button" id="socShareBtn" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">📤 Compartir en Instagram</button>
+          <p class="soc-nota">La imagen para compartir no incluye tu código ni tu QR — es segura de publicar.</p>
+        </div>
+
+        <!-- Columna derecha: datos editables -->
+        <div class="soc-col-datos">
+          <div class="panel full">
+            <h4 class="neg-t">Foto de tu mascota</h4>
+            <div class="soc-foto-row">
+              <div class="soc-foto-prev" id="socFotoPrev"><span>🐾</span></div>
+              <div class="soc-foto-acciones">
+                <input type="file" id="socFotoInput" accept="image/*" style="display:none;">
+                <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('socFotoInput').click()">Elegir foto</button>
+                <button type="button" class="btn btn-sm btn-outline" id="socQuitarFoto" style="display:none;" onclick="socioQuitarFoto()">Quitar</button>
+                <p class="soc-nota" style="margin-top:8px;">Se achica sola antes de subirse. Sale en tu carnet y en la imagen para compartir.</p>
+              </div>
+            </div>
+
+            <h4 class="neg-t" style="margin-top:28px;">Datos de tu mascota</h4>
+            <form id="socDatosForm">
+              <div class="field-row">
+                <div class="field"><label for="socPet">Nombre</label><input id="socPet" required></div>
+                <div class="field"><label for="socSpecies">Especie</label>
+                  <select id="socSpecies"><option value="perro">Perro</option><option value="gato">Gato</option><option value="otro">Otro</option></select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="socBreed">Raza</label><input id="socBreed" placeholder="Mestizo, Labrador..."></div>
+                <div class="field"><label for="socEdad">Edad</label>
+                  <select id="socEdad"><option value="">—</option><option>Menos de 1 año</option><option>1 a 3 años</option><option>4 a 7 años</option><option>8 a 10 años</option><option>Más de 10 años</option></select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="socPeso">Peso</label>
+                  <select id="socPeso"><option value="">—</option><option>Menos de 5 kg</option><option>5 a 10 kg</option><option>11 a 20 kg</option><option>21 a 40 kg</option><option>Más de 40 kg</option></select>
+                </div>
+                <div class="field"><label for="socTamano">Tamaño</label>
+                  <select id="socTamano"><option value="">—</option><option>Pequeño</option><option>Mediano</option><option>Grande</option><option>Gigante</option></select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="socRegion">Región</label><select id="socRegion" onchange="poblarComunas('socRegion','socComuna')"></select></div>
+                <div class="field"><label for="socComuna">Comuna</label><select id="socComuna"></select></div>
+              </div>
+              <div class="field">
+                <label for="socNotas">Notas médicas <span class="soc-opt">(opcional, privado)</span></label>
+                <textarea id="socNotas" rows="3" placeholder="Alergias, tratamientos, cosas que un veterinario debería saber..."></textarea>
+              </div>
+
+              <h4 class="neg-t" style="margin-top:22px;">Tus datos</h4>
+              <div class="field-row">
+                <div class="field"><label for="socRepNombre">Tu nombre</label><input id="socRepNombre"></div>
+                <div class="field"><label for="socRepTel">Tu teléfono</label><input id="socRepTel" placeholder="9 1234 5678"></div>
+              </div>
+
+              <button type="submit" id="socGuardarBtn" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;">Guardar cambios</button>
+              <div id="socGuardarMsg" class="soc-msg" style="display:none;"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de canjes -->
+      <h4 class="neg-t" style="margin-top:38px;">Tus visitas y beneficios usados</h4>
+      <div id="socHistorial"></div>
+    </div>
+
   </div>
 </section>
 

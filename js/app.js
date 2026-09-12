@@ -320,6 +320,8 @@ function irABeneficios(opts){
 function mostrarPaginaPlanes(){
   document.body.classList.remove('pagina-directorio');
   document.body.classList.remove('pagina-ficha');
+  document.body.classList.remove('pagina-negocio');
+  document.body.classList.remove('pagina-socio');
   document.body.classList.add('pagina-planes');
   renderPageBanner('planesBanner', BANNER_PLANES);
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
@@ -333,6 +335,7 @@ function volverAlInicio(){
   document.body.classList.remove('pagina-ficha');
   document.body.classList.remove('pagina-planes');
   document.body.classList.remove('pagina-negocio');
+  document.body.classList.remove('pagina-socio');
   if(location.pathname !== '/') history.pushState({}, '', '/');
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -340,6 +343,8 @@ function mostrarPaginaDirectorio(opts){
   opts = opts || {};
   document.body.classList.remove('pagina-ficha');
   document.body.classList.remove('pagina-planes');
+  document.body.classList.remove('pagina-negocio');
+  document.body.classList.remove('pagina-socio');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
   modoDirectorioBeneficios = !!opts.beneficios;
@@ -378,6 +383,8 @@ function manejarRutaActual(){
     mostrarPaginaFichaPorSlug(parts[1]);
   } else if(parts[0] === 'mi-negocio'){
     mostrarPaginaNegocio();
+  } else if(parts[0] === 'mi-mascota'){
+    mostrarPaginaSocio();
   } else if(parts[0] === 'validar'){
     /* Es la URL que trae el QR del carnet del socio. Llega el negocio, con el
        celular, después de escanear. */
@@ -387,22 +394,17 @@ function manejarRutaActual(){
     document.body.classList.remove('pagina-ficha');
     document.body.classList.remove('pagina-planes');
     document.body.classList.remove('pagina-negocio');
+    document.body.classList.remove('pagina-socio');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
 
 /* ---------------- Flujo de entrada: elegir camino antes de mostrar el formulario ---------------- */
+/* Mi Mascota ID: hasta el 12 de septiembre esto abría un modal de "próximamente".
+   Ahora lleva a la página real (/mi-mascota) — ver el bloque MI MASCOTA ID al final. */
 function irAMiMascota(){
-  openModal(`
-    <div style="text-align:center;padding:6px 2px 4px;">
-      <h3 style="margin:0 0 6px;">🐾 Perfil de tu mascota</h3>
-      <p style="font-size:13.5px;color:#5a6259;margin:0 0 22px;">
-        Muy pronto vas a poder entrar aquí con un código para ver y completar el perfil de tu mascota (foto y datos finales).
-        Si todavía no te has registrado, partamos por ahí.
-      </p>
-      <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="mostrarFormulario('dueno')">🐾 Quiero registrar mi mascota</button>
-    </div>
-  `);
+  history.pushState({ miMascota:true }, '', '/mi-mascota');
+  mostrarPaginaSocio();
 }
 function abrirElegirCamino(){
   openModal(`
@@ -1036,6 +1038,8 @@ function mostrarPaginaFicha(n){
   negocioActual = n;
   document.body.classList.remove('pagina-directorio');
   document.body.classList.remove('pagina-planes');
+  document.body.classList.remove('pagina-negocio');
+  document.body.classList.remove('pagina-socio');
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
@@ -1760,7 +1764,7 @@ function irAMiNegocio(){
 }
 
 function mostrarPaginaNegocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio');
   document.body.classList.add('pagina-negocio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const s = sesionNegocio();
@@ -2400,5 +2404,541 @@ window.abrirFormularioCalificar = abrirFormularioCalificar;
 window.enviarCalificacion = enviarCalificacion;
 window.setStarValue = setStarValue;
 window.verDetalleReputacionNegocio = verDetalleReputacionNegocio;
+
+
+/* ============================================================
+   MI MASCOTA ID — PANEL DEL DUEÑO  (/mi-mascota)
+   ------------------------------------------------------------
+   El dueño entra SOLO con su correo: le llega un código de 6
+   dígitos (la misma función de Netlify enviar-codigo.js que ya
+   usa el registro) y con eso el servidor abre una sesión y
+   devuelve un token. Ese token es lo único que queda guardado en
+   su teléfono y es lo único que piden las funciones del servidor:
+   nunca se confía en un correo o un código que venga escrito
+   desde el navegador.
+
+   Por qué no pedimos el código MMC00003: es correlativo, se puede
+   adivinar, y además hay correos con más de una mascota inscrita.
+   La sesión es del CORREO, así que entra una vez y ve todas.
+
+   Requiere supabase-mi-mascota-id-v15.sql.
+   ============================================================ */
+const LS_SOC_SESION = 'mmc_sesion_socio';
+
+let socMascotas = [];        // todas las mascotas de ese correo
+let socActual = null;        // la que se está viendo
+let socFotoPendiente = null; // foto recién elegida, antes de guardar
+
+function sesionSocio(){
+  try{ return localStorage.getItem(LS_SOC_SESION) || ''; }catch(e){ return ''; }
+}
+function guardarSesionSocio(token){
+  try{ localStorage.setItem(LS_SOC_SESION, token); }catch(e){ /* modo incógnito */ }
+}
+
+function socError(texto){
+  const box = document.getElementById('socLoginError');
+  if(!box) return;
+  if(!texto){ box.style.display = 'none'; box.textContent = ''; return; }
+  box.textContent = texto;
+  box.style.display = 'block';
+}
+
+function socMostrarPaso(cual){
+  const e = document.getElementById('socEmailForm');
+  const c = document.getElementById('socCodigoForm');
+  if(e) e.style.display = cual === 'email' ? '' : 'none';
+  if(c) c.style.display = cual === 'codigo' ? '' : 'none';
+}
+
+async function salirPanelSocio(){
+  const token = sesionSocio();
+  if(token){
+    try{ await supabase.rpc('socio_logout', { p_token: token }); }catch(e){ /* da igual: igual se borra local */ }
+  }
+  try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
+  socMascotas = []; socActual = null; socFotoPendiente = null;
+  const panel = document.getElementById('socPanelBox');
+  const login = document.getElementById('socLoginBox');
+  if(panel) panel.style.display = 'none';
+  if(login) login.style.display = '';
+  socMostrarPaso('email');
+  socError('');
+  const inputCod = document.getElementById('socCodigo');
+  if(inputCod) inputCod.value = '';
+}
+
+function mostrarPaginaSocio(){
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio');
+  document.body.classList.add('pagina-socio');
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+  const token = sesionSocio();
+  if(token) cargarPanelSocio();
+  else {
+    document.getElementById('socPanelBox').style.display = 'none';
+    document.getElementById('socLoginBox').style.display = '';
+    socMostrarPaso('email');
+  }
+}
+
+/* ---------------- Paso 1: pedir el código ---------------- */
+async function socioPedirCodigo(email, btn, textoBtn){
+  socError('');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...'; }
+  try{
+    /* Primero preguntamos si ese correo tiene mascotas inscritas. Así no le
+       mandamos un correo a alguien que no está en el club y le podemos ofrecer
+       registrarse en vez de dejarlo esperando un código que no le va a servir. */
+    const { data, error } = await supabase.rpc('socio_existe', { p_email: email });
+    if(error) throw error;
+    const info = data && data[0];
+    if(!info || !info.existe){
+      socError('No encontramos mascotas inscritas con ese correo. ¿Todavía no te registras?');
+      const box = document.getElementById('socLoginError');
+      if(box){
+        box.innerHTML += ' <a href="#" onclick="event.preventDefault(); mostrarFormulario(\'dueno\');" style="color:var(--teal-dark);font-weight:800;">Inscribir mi mascota gratis →</a>';
+      }
+      return false;
+    }
+
+    const res = await fetch('/.netlify/functions/enviar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const r = await res.json().catch(() => ({}));
+    if(!res.ok || !r.ok){
+      socError(r.mensaje || 'No pudimos enviar el código. Inténtalo de nuevo en un momento.');
+      return false;
+    }
+
+    document.getElementById('socEmailEco').textContent = email;
+    socMostrarPaso('codigo');
+    const inputCod = document.getElementById('socCodigo');
+    if(inputCod){ inputCod.value = ''; inputCod.focus(); }
+    return true;
+  }catch(e){
+    console.error(e);
+    socError('No pudimos enviar el código. Inténtalo de nuevo en un momento.');
+    return false;
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = textoBtn; }
+  }
+}
+
+function socioVolverAlCorreo(){
+  socMostrarPaso('email');
+  socError('');
+}
+
+async function socioReenviarCodigo(){
+  const email = (document.getElementById('socEmail').value || '').trim().toLowerCase();
+  if(!email) { socioVolverAlCorreo(); return; }
+  const btn = document.getElementById('socReenviarBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  await socioPedirCodigo(email, null, '');
+  if(btn){
+    btn.textContent = 'Código reenviado';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Reenviar código'; }, 20000);
+  }
+}
+
+/* ---------------- Paso 2: validar el código y abrir sesión ---------------- */
+async function socioEntrar(email, codigo){
+  const btn = document.getElementById('socCodigoBtn');
+  socError('');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Entrando...'; }
+  try{
+    const { data, error } = await supabase.rpc('socio_login', { p_email: email, p_codigo: codigo });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){
+      socError((r && r.mensaje) || 'No pudimos validar el código.');
+      return;
+    }
+    guardarSesionSocio(r.token);
+    await cargarPanelSocio();
+  }catch(e){
+    console.error(e);
+    socError('No pudimos validar el código. Inténtalo de nuevo.');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
+  }
+}
+
+/* ---------------- Cargar el panel ---------------- */
+async function cargarPanelSocio(){
+  const token = sesionSocio();
+  if(!token){ salirPanelSocio(); return; }
+  try{
+    const { data, error } = await supabase.rpc('socio_perfil', { p_token: token });
+    if(error) throw error;
+    socMascotas = data || [];
+    if(!socMascotas.length){
+      /* El token venció o alguien borró la mascota: se vuelve al acceso. */
+      try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
+      document.getElementById('socPanelBox').style.display = 'none';
+      document.getElementById('socLoginBox').style.display = '';
+      socMostrarPaso('email');
+      socError('Tu sesión venció. Entra de nuevo con tu correo.');
+      return;
+    }
+
+    document.getElementById('socLoginBox').style.display = 'none';
+    document.getElementById('socPanelBox').style.display = '';
+
+    const primero = socMascotas[0];
+    const nombreDueno = (primero.representante_nombre || '').split(' ')[0];
+    document.getElementById('socHola').textContent = nombreDueno ? ('Hola, ' + nombreDueno + ' 👋') : 'Hola 👋';
+    document.getElementById('socSub').textContent =
+      [primero.email,
+       socMascotas.length === 1 ? '1 mascota inscrita' : socMascotas.length + ' mascotas inscritas'
+      ].filter(Boolean).join(' · ');
+
+    renderTabsSocio();
+    socioSeleccionar((socActual && socMascotas.some(m => m.codigo === socActual.codigo)) ? socActual.codigo : primero.codigo);
+    cargarHistorialSocio();
+  }catch(e){
+    console.error(e);
+    toast('No pudimos cargar tu perfil. Inténtalo de nuevo en un momento.');
+  }
+}
+
+function renderTabsSocio(){
+  const cont = document.getElementById('socTabs');
+  if(!cont) return;
+  if(socMascotas.length < 2){ cont.style.display = 'none'; cont.innerHTML = ''; return; }
+  cont.style.display = '';
+  cont.innerHTML = socMascotas.map(m => `
+    <button type="button" class="soc-tab" data-cod="${colaEsc(m.codigo)}" onclick="socioSeleccionar('${colaEsc(m.codigo)}')">
+      <span class="soc-tab__av">${m.foto ? `<img src="${m.foto}" alt="">` : (m.species === 'gato' ? '🐱' : '🐶')}</span>
+      ${colaEsc(m.pet)}
+    </button>`).join('');
+}
+
+function socioSeleccionar(codigo){
+  const m = socMascotas.find(x => x.codigo === codigo);
+  if(!m) return;
+  socActual = m;
+  socFotoPendiente = null;
+
+  document.querySelectorAll('#socTabs .soc-tab').forEach(b => {
+    b.classList.toggle('on', b.dataset.cod === codigo);
+  });
+
+  renderCarnetSocio(m);
+  renderCompletitudSocio(m);
+  llenarFormSocio(m);
+  renderFotoPrev(m.foto);
+}
+
+/* ---------------- Carnet ---------------- */
+function renderCarnetSocio(m){
+  const cont = document.getElementById('socCarnet');
+  if(!cont) return;
+  const avatar = m.foto
+    ? `<img src="${m.foto}" alt="${colaEsc(m.pet)}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<img src="assets/favicon.svg" alt="">`;
+  cont.innerHTML = `
+    <div class="credencial">
+      <div class="cred-badge">${planLabel(m.plan)}</div>
+      <div class="cred-top">
+        <div class="cred-brand"><img src="assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
+        <div class="cred-id">${colaEsc(m.codigo)}</div>
+      </div>
+      <div class="cred-photo" style="overflow:hidden;">${avatar}</div>
+      <div class="cred-name">${colaEsc(m.pet)}</div>
+      <div class="cred-breed">${colaEsc(m.breed ? m.species + ' · ' + m.breed : (m.species || ''))}</div>
+      <div id="socCarnetQR" class="cred-qr"></div>
+      <div class="cred-row" style="margin-top:14px;">
+        <div>Comuna<b>${colaEsc(m.comuna || '—')}</b></div>
+        <div>Estado<b style="color:var(--sage);">Activo</b></div>
+      </div>
+    </div>`;
+  renderQR('socCarnetQR', urlCarnet(m.codigo));
+}
+
+/* ---------------- Barra "Completa tu perfil" ---------------- */
+function renderCompletitudSocio(m){
+  const cont = document.getElementById('socCompletitud');
+  if(!cont) return;
+  const pct = Number(m.completitud || 0);
+
+  /* Las mismas 9 casillas que cuenta socio_perfil() en la base, para que el
+     porcentaje y la lista de "te falta" nunca se contradigan. */
+  const faltan = [];
+  if(!m.foto)                    faltan.push('subir una foto');
+  if(!m.breed)                   faltan.push('la raza');
+  if(!m.edad)                    faltan.push('la edad');
+  if(!m.peso)                    faltan.push('el peso');
+  if(!m.tamano)                  faltan.push('el tamaño');
+  if(!m.comuna)                  faltan.push('la comuna');
+  if(!m.notas_medicas)           faltan.push('las notas médicas');
+  if(!m.representante_nombre)    faltan.push('tu nombre');
+  if(!m.representante_telefono)  faltan.push('tu teléfono');
+
+  cont.innerHTML = `
+    <div class="soc-comp__top">
+      <span class="soc-comp__t">${pct >= 100 ? '✅ Perfil completo' : 'Completa el perfil de ' + colaEsc(m.pet)}</span>
+      <span class="soc-comp__pct">${pct}%</span>
+    </div>
+    <div class="soc-comp__bar"><div class="soc-comp__fill${pct >= 100 ? ' lleno' : ''}" style="width:${pct}%;"></div></div>
+    ${faltan.length
+      ? `<div class="soc-comp__falta">Te falta ${faltan.slice(0,3).join(', ')}${faltan.length > 3 ? ' y ' + (faltan.length - 3) + ' cosa' + (faltan.length - 3 > 1 ? 's' : '') + ' más' : ''}.</div>`
+      : `<div class="soc-comp__falta">No te falta nada. Gracias — mientras mejor esté el perfil, mejores beneficios podemos buscarte.</div>`}
+  `;
+}
+
+/* ---------------- Formulario de datos ---------------- */
+function llenarFormSocio(m){
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val == null ? '' : val; };
+  set('socPet', m.pet);
+  set('socSpecies', m.species || 'perro');
+  set('socBreed', m.breed);
+  set('socEdad', m.edad);
+  set('socPeso', m.peso);
+  set('socTamano', m.tamano);
+  set('socNotas', m.notas_medicas);
+  set('socRepNombre', m.representante_nombre);
+  set('socRepTel', m.representante_telefono);
+
+  /* La comuna vive en un par región→comuna: hay que encontrar primero la
+     región que la contiene para poder poblar y seleccionar la comuna. */
+  const regionSel = document.getElementById('socRegion');
+  const comunaSel = document.getElementById('socComuna');
+  if(regionSel && comunaSel){
+    const reg = (typeof CHILE_REGIONES !== 'undefined')
+      ? CHILE_REGIONES.find(r => r.comunas.includes(m.comuna))
+      : null;
+    regionSel.value = reg ? reg.region : REGION_POR_DEFECTO;
+    poblarComunas('socRegion', 'socComuna');
+    if(m.comuna) comunaSel.value = m.comuna;
+  }
+
+  const msg = document.getElementById('socGuardarMsg');
+  if(msg){ msg.style.display = 'none'; msg.textContent = ''; }
+}
+
+function renderFotoPrev(foto){
+  const prev = document.getElementById('socFotoPrev');
+  const btnQuitar = document.getElementById('socQuitarFoto');
+  if(prev) prev.innerHTML = foto ? `<img src="${foto}" alt="">` : '<span>🐾</span>';
+  if(btnQuitar) btnQuitar.style.display = foto ? '' : 'none';
+}
+
+function socMsgGuardar(texto, ok){
+  const msg = document.getElementById('socGuardarMsg');
+  if(!msg) return;
+  msg.textContent = texto;
+  msg.className = 'soc-msg ' + (ok ? 'ok' : 'mal');
+  msg.style.display = 'block';
+  if(ok) setTimeout(() => { msg.style.display = 'none'; }, 4000);
+}
+
+async function socioGuardarCambios(){
+  if(!socActual) return;
+  const btn = document.getElementById('socGuardarBtn');
+  const token = sesionSocio();
+  const v = id => (document.getElementById(id).value || '').trim();
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Guardando...';
+  try{
+    const params = {
+      p_token: token,
+      p_codigo: socActual.codigo,
+      p_pet: v('socPet'),
+      p_species: v('socSpecies'),
+      p_breed: v('socBreed'),
+      p_comuna: v('socComuna'),
+      p_edad: v('socEdad'),
+      p_peso: v('socPeso'),
+      p_tamano: v('socTamano'),
+      p_notas_medicas: v('socNotas'),
+      p_tocar_notas: true,     // las notas médicas sí se pueden dejar vacías a propósito
+      p_representante_nombre: v('socRepNombre'),
+      p_representante_telefono: v('socRepTel')
+    };
+    if(socFotoPendiente) params.p_foto = socFotoPendiente;
+
+    const { data, error } = await supabase.rpc('socio_actualizar', params);
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ socMsgGuardar((r && r.mensaje) || 'No se pudo guardar.', false); return; }
+
+    socFotoPendiente = null;
+    socMsgGuardar('Guardado ✓', true);
+    await cargarPanelSocio();
+  }catch(e){
+    console.error(e);
+    socMsgGuardar('No se pudo guardar. Inténtalo de nuevo.', false);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Guardar cambios';
+  }
+}
+
+/* La foto se guarda apenas se elige, sin esperar al botón: es el cambio que más
+   se nota en el carnet y es molesto elegir la foto y que no pase nada. */
+async function socioSubirFoto(file){
+  if(!file || !socActual) return;
+  const token = sesionSocio();
+  try{
+    const dataUrl = await compressImage(file, 640, 0.72);
+    if(!dataUrl) return;
+    renderFotoPrev(dataUrl);
+    const { data, error } = await supabase.rpc('socio_actualizar', {
+      p_token: token, p_codigo: socActual.codigo, p_foto: dataUrl
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){
+      socMsgGuardar((r && r.mensaje) || 'No se pudo subir la foto.', false);
+      renderFotoPrev(socActual.foto);
+      return;
+    }
+    toast('Foto actualizada 🐾');
+    await cargarPanelSocio();
+  }catch(e){
+    console.error(e);
+    socMsgGuardar('No se pudo subir la foto. Prueba con otra imagen.', false);
+    renderFotoPrev(socActual.foto);
+  }
+}
+
+async function socioQuitarFoto(){
+  if(!socActual) return;
+  const token = sesionSocio();
+  try{
+    const { data, error } = await supabase.rpc('socio_actualizar', {
+      p_token: token, p_codigo: socActual.codigo, p_quitar_foto: true
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ socMsgGuardar((r && r.mensaje) || 'No se pudo quitar la foto.', false); return; }
+    socFotoPendiente = null;
+    await cargarPanelSocio();
+  }catch(e){
+    console.error(e);
+    socMsgGuardar('No se pudo quitar la foto.', false);
+  }
+}
+
+/* ---------------- Historial de canjes del dueño ---------------- */
+async function cargarHistorialSocio(){
+  const cont = document.getElementById('socHistorial');
+  if(!cont) return;
+  cont.innerHTML = '<div class="neg-vacio">Cargando…</div>';
+  try{
+    const { data, error } = await supabase.rpc('socio_historial', { p_token: sesionSocio() });
+    if(error) throw error;
+    renderHistorialSocio(data || []);
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<div class="neg-vacio">No pudimos cargar tus visitas.</div>';
+  }
+}
+
+function renderHistorialSocio(filas){
+  const cont = document.getElementById('socHistorial');
+  if(!cont) return;
+  if(!filas.length){
+    cont.innerHTML = `<div class="neg-vacio">
+      Todavía no has usado ningún beneficio.<br>
+      Muéstrale el QR de tu carnet al negocio cuando lo visites y la visita queda registrada aquí.
+      <div style="margin-top:16px;"><a href="/beneficios" onclick="event.preventDefault(); irABeneficios();" class="btn btn-sm btn-primary">Ver beneficios disponibles</a></div>
+    </div>`;
+    return;
+  }
+  const conMonto = filas.filter(f => f.ahorro != null);
+  const ahorroTotal = conMonto.reduce((a,f) => a + Number(f.ahorro || 0), 0);
+
+  cont.innerHTML = `
+    <div class="neg-kpis">
+      <div class="neg-kpi"><div class="neg-kpi__n">${filas.length}</div><div class="neg-kpi__l">Visitas</div></div>
+      <div class="neg-kpi"><div class="neg-kpi__n">${new Set(filas.map(f => f.negocio_codigo)).size}</div><div class="neg-kpi__l">Negocios visitados</div></div>
+      <div class="neg-kpi"><div class="neg-kpi__n">${conMonto.length ? formatCLP(ahorroTotal) : '—'}</div><div class="neg-kpi__l">Ahorro acumulado</div><div class="neg-kpi__h">${conMonto.length ? 'en ' + conMonto.length + ' de ' + filas.length + ' visitas' : 'aparece cuando el negocio anota el monto'}</div></div>
+    </div>
+    <div class="neg-tabla"><table>
+      <thead><tr><th>Fecha</th><th>Negocio</th><th>Mascota</th><th class="num">Ahorro</th></tr></thead>
+      <tbody>${filas.map(f => {
+        const d = new Date(f.fecha);
+        const fecha = d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' }) + ' · ' +
+                      d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
+        return `<tr>
+          <td>${fecha}</td>
+          <td class="soc-hist-neg">${colaEsc(f.negocio_nombre || '')}</td>
+          <td class="dim">${colaEsc(f.socio_mascota || '')}</td>
+          <td class="num">${f.ahorro != null ? formatCLP(Number(f.ahorro)) : '<span class="dim">—</span>'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+/* ---------------- Conexiones con el HTML ---------------- */
+(function initPanelSocio(){
+  const formEmail = document.getElementById('socEmailForm');
+  if(formEmail){
+    formEmail.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = (document.getElementById('socEmail').value || '').trim().toLowerCase();
+      if(!validarEmail(email)){ socError('Revisa el correo, parece que tiene un error de tipeo.'); return; }
+      await socioPedirCodigo(email, document.getElementById('socEmailBtn'), 'Enviarme el código');
+    });
+  }
+
+  const formCodigo = document.getElementById('socCodigoForm');
+  if(formCodigo){
+    formCodigo.addEventListener('submit', function(e){
+      e.preventDefault();
+      const email = (document.getElementById('socEmail').value || '').trim().toLowerCase();
+      const codigo = (document.getElementById('socCodigo').value || '').trim();
+      if(codigo.length !== 6){ socError('El código son 6 dígitos.'); return; }
+      socioEntrar(email, codigo);
+    });
+  }
+
+  const inputCod = document.getElementById('socCodigo');
+  if(inputCod){
+    inputCod.addEventListener('input', function(){
+      this.value = this.value.replace(/\D/g, '').slice(0,6);
+      if(this.value.length === 6) document.getElementById('socCodigoForm').requestSubmit();
+    });
+  }
+
+  const formDatos = document.getElementById('socDatosForm');
+  if(formDatos){
+    formDatos.addEventListener('submit', function(e){ e.preventDefault(); socioGuardarCambios(); });
+  }
+
+  const fotoInput = document.getElementById('socFotoInput');
+  if(fotoInput){
+    fotoInput.addEventListener('change', function(){
+      const f = this.files && this.files[0];
+      this.value = '';               // permite volver a elegir la misma foto
+      socioSubirFoto(f);
+    });
+  }
+
+  const shareBtn = document.getElementById('socShareBtn');
+  if(shareBtn){
+    shareBtn.addEventListener('click', function(){
+      if(!socActual){ toast('Primero elige una mascota.'); return; }
+      compartirCarne({
+        pet: socActual.pet, species: socActual.species, breed: socActual.breed,
+        comuna: socActual.comuna, codigo: socActual.codigo, foto: socActual.foto,
+        plan: socActual.plan
+      });
+    });
+  }
+
+  poblarRegiones('socRegion');
+})();
+
+window.mostrarPaginaSocio = mostrarPaginaSocio;
+window.salirPanelSocio = salirPanelSocio;
+window.socioSeleccionar = socioSeleccionar;
+window.socioVolverAlCorreo = socioVolverAlCorreo;
+window.socioReenviarCodigo = socioReenviarCodigo;
+window.socioQuitarFoto = socioQuitarFoto;
+
 
 })();

@@ -808,3 +808,83 @@ body.pagina-negocio .announce-bar{ display:none; }
   .neg-kpi{ padding:13px 14px; }
   .neg-kpi__n{ font-size:24px; }
 }
+
+/* ======================================================================
+   MI MASCOTA ID — PANEL DEL DUEÑO (/mi-mascota)
+   Mismo patrón que el panel del negocio: la sección vive oculta en el
+   HTML y solo aparece cuando el body lleva la clase .pagina-socio.
+   ====================================================================== */
+#panelSocio{ display:none; }
+body.pagina-socio .hero,
+body.pagina-socio #categorias,
+body.pagina-socio #como-funciona,
+body.pagina-socio #directorio,
+body.pagina-socio #fichaNegocio,
+body.pagina-socio #negocios,
+body.pagina-socio #validar,
+body.pagina-socio #planes,
+body.pagina-socio #panelNegocio,
+body.pagina-socio #panel{ display:none !important; }
+body.pagina-socio #panelSocio{ display:block; min-height:calc(100vh - 140px); }
+body.pagina-socio .announce-bar{ display:none; }
+
+/* ---- Acceso ---- */
+.soc-enviado{ font-size:13px; color:var(--gray); line-height:1.5; margin:0 0 16px; }
+.soc-otp{ font-family:var(--font-mono); font-size:22px; letter-spacing:0.35em; text-align:center; }
+.soc-reenvio{ display:flex; justify-content:space-between; gap:12px; margin-top:14px; }
+.soc-link{ background:none; border:0; padding:0; font:inherit; font-size:12.5px; font-weight:700; color:var(--teal-dark); cursor:pointer; text-decoration:underline; }
+.soc-link:disabled{ color:var(--gray); cursor:default; text-decoration:none; }
+.soc-error{ color:var(--rust); font-size:12.5px; margin-top:12px; line-height:1.5; }
+.soc-msg{ font-size:12.5px; margin-top:10px; font-weight:700; }
+.soc-msg.ok{ color:var(--sage); }
+.soc-msg.mal{ color:var(--rust); }
+.soc-nota{ font-size:11.5px; color:var(--gray); line-height:1.45; margin:8px 0 0; }
+.soc-opt{ font-weight:600; color:var(--gray); font-size:11.5px; }
+
+/* ---- Selector de mascotas (cuando un correo tiene varias) ---- */
+.soc-tabs{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
+.soc-tab{
+  display:flex; align-items:center; gap:9px; background:#fff; border:2px solid var(--line);
+  border-radius:999px; padding:7px 16px 7px 8px; font-weight:800; font-size:13.5px;
+  cursor:pointer; transition:border-color .15s, background .15s;
+}
+.soc-tab:hover{ border-color:var(--teal); }
+.soc-tab.on{ border-color:var(--ink); background:var(--paper-tint-yellow); }
+.soc-tab__av{
+  width:28px; height:28px; border-radius:50%; background:var(--teal); flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center; font-size:14px; overflow:hidden;
+}
+.soc-tab__av img{ width:100%; height:100%; object-fit:cover; }
+
+/* ---- Barra de completitud ---- */
+.soc-comp{ background:#fff; border:2px solid var(--line); border-radius:18px; padding:16px 20px; margin-bottom:26px; }
+.soc-comp__top{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:10px; }
+.soc-comp__t{ font-weight:800; font-size:14px; }
+.soc-comp__pct{ font-family:var(--font-mono); font-weight:700; font-size:13px; color:var(--gray); }
+.soc-comp__bar{ height:9px; border-radius:999px; background:rgba(26,26,26,0.08); overflow:hidden; }
+.soc-comp__fill{ height:100%; border-radius:999px; background:var(--teal); transition:width .5s ease; }
+.soc-comp__fill.lleno{ background:var(--sage); }
+.soc-comp__falta{ font-size:12.5px; color:var(--gray); margin-top:9px; line-height:1.5; }
+
+/* ---- Grilla carnet + datos ---- */
+.soc-grid{ display:grid; grid-template-columns:340px 1fr; gap:30px; align-items:start; }
+.soc-col-carnet{ position:sticky; top:90px; }
+.soc-col-carnet .credencial{ transform:none; max-width:none; }
+
+.soc-foto-row{ display:flex; gap:18px; align-items:flex-start; }
+.soc-foto-prev{
+  width:96px; height:96px; flex:0 0 auto; border-radius:20px; overflow:hidden;
+  background:var(--paper-tint-teal); border:2px dashed var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:34px;
+}
+.soc-foto-prev img{ width:100%; height:100%; object-fit:cover; }
+.soc-foto-acciones{ flex:1 1 auto; min-width:0; display:flex; flex-wrap:wrap; gap:8px; }
+.soc-foto-acciones .soc-nota{ flex:1 0 100%; }
+
+/* ---- Historial ---- */
+.soc-hist-neg{ font-weight:800; }
+
+@media (max-width:900px){
+  .soc-grid{ grid-template-columns:1fr; gap:24px; }
+  .soc-col-carnet{ position:static; max-width:340px; margin:0 auto; }
+}

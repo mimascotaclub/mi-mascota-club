@@ -827,3 +827,93 @@ Copia y pega este mensaje al empezar:
 > qué quieres hacer]."
 
 Y adjunta el ZIP completo del proyecto (todo el código + este documento + los `.sql`).
+
+## 18. Mi Mascota ID — panel privado del dueño (12 de septiembre 2026)
+
+Es el pendiente #2 y #3 de la lista, resueltos juntos: el perfil privado del dueño y el
+"completa tu perfil". Hasta ahora el link "Mi Mascota" del nav abría un modal de
+"próximamente"; ahora lleva a una página real, `/mi-mascota`.
+
+### 18.1 El agujero de seguridad que se cerró de paso
+
+Existían cuatro funciones que pedían **solo el código** para leer o escribir una ficha:
+`buscar_ficha_por_codigo`, `actualizar_ficha`, `buscar_ficha_negocio` y
+`actualizar_ficha_negocio`. Como los códigos son correlativos (MMC00001, MMC00002…),
+cualquiera podía probar códigos al azar y leer — o **sobrescribir** — la foto, la comuna y
+las notas médicas de otro socio. Es el mismo agujero que el parche v14 ya había cerrado del
+lado del panel del negocio (código + correo). Ninguna pantalla del sitio las usaba, así que
+`supabase-mi-mascota-id-v15.sql` les revoca el permiso al rol anónimo sin romper nada.
+Las funciones quedan en la base por si algún día se ocupan desde el servidor.
+
+### 18.2 Cómo entra el dueño
+
+**Solo con su correo.** Escribe el correo → el sitio llama a la misma función de Netlify
+`enviar-codigo.js` que ya usa el registro → le llega un código de 6 dígitos → con eso el
+servidor abre una sesión y devuelve un **token uuid**. Ese token es lo único que queda
+guardado en su teléfono (`localStorage`, clave `mmc_sesion_socio`) y es lo único que piden
+las funciones del servidor: nunca se confía en un correo o un código escrito desde el
+navegador. La sesión dura 30 días.
+
+Dos razones para no pedirle el código MMC00003: es correlativo y se adivina, y además
+**un mismo correo puede tener varias mascotas inscritas** (en la base ya hay uno con tres).
+La sesión es del CORREO, así que entra una vez y ve todas sus mascotas con un selector
+arriba.
+
+Antes de mandar el correo, el sitio pregunta con `socio_existe()` si ese correo tiene
+mascotas inscritas. Si no, en vez de dejarlo esperando un código que no le va a servir, le
+ofrece el link para inscribirse gratis.
+
+### 18.3 `supabase-mi-mascota-id-v15.sql` — YA EJECUTADO
+
+Se aplicó el 12 de septiembre de 2026 y se probó de punta a punta contra la base real
+(login, perfil, guardado, historial, código reusado, mascota ajena, token falso). El
+archivo queda en el repo como documentación; **no hay que volver a correrlo**.
+
+- Tabla `sesiones_socio` (token uuid, email, expira_en 30 días). RLS encendido y **sin
+  políticas**: desde el navegador la tabla es invisible; solo la tocan las funciones
+  `security definer`.
+- `socio_email_de_token(token)` — helper interno, revocado para anon.
+- `socio_existe(email)` → existe + cuántas mascotas.
+- `socio_login(email, codigo)` → valida el OTP, lo consume, crea la sesión, devuelve el token.
+- `socio_perfil(token)` → una fila por mascota, incluye `completitud` (porcentaje de perfil
+  lleno sobre 9 casillas: foto, raza, edad, peso, tamaño, comuna, notas médicas, nombre y
+  teléfono del dueño). El porcentaje lo calcula la base, no el frontend, para que nunca se
+  contradigan.
+- `socio_actualizar(token, codigo, …)` → solo deja tocar mascotas que pertenecen al correo
+  de la sesión. Los campos que llegan NULL no se tocan (así se puede guardar solo la foto).
+  Tope de ~700 KB por foto.
+- `socio_historial(token)` → los canjes de todas sus mascotas juntas.
+- `socio_logout(token)` → borra el token del servidor, no solo del teléfono.
+
+### 18.4 Frontend
+
+- `index.html`: sección nueva `#panelSocio` (acceso en dos pasos + panel), y el link
+  "Mi Mascota ID" del nav dejó de estar oculto.
+- `css/styles.css`: bloque nuevo al final. Mismo patrón que el panel del negocio: la
+  sección vive oculta y aparece cuando el `body` lleva la clase `.pagina-socio`.
+- `js/app.js`: bloque nuevo "MI MASCOTA ID" al final del IIFE. `irAMiMascota()` ya no abre
+  el modal de próximamente. `manejarRutaActual()` entiende `/mi-mascota`. De paso, todas
+  las funciones que cambian de página ahora limpian también `pagina-negocio` y
+  `pagina-socio` (antes `mostrarPaginaDirectorio` y `mostrarPaginaPlanes` se olvidaban de
+  `pagina-negocio`).
+- `_redirects`: regla nueva `/mi-mascota → /index.html 200`.
+
+Qué muestra el panel: selector de mascotas (solo si hay más de una), barra de "completa tu
+perfil" con lo que falta escrito en palabras, el carnet con QR y el botón de compartir en
+Instagram, la foto de la mascota (se guarda apenas se elige, sin esperar al botón), el
+formulario de datos, y el historial de visitas con ahorro acumulado.
+
+La foto va como data URL comprimida a 640 px / calidad 0.72 en la columna `socios.foto`,
+igual que el resto del sitio — no en Storage. Ventaja: el canvas que genera la imagen para
+Instagram la puede dibujar sin problemas de CORS. Si algún día hay miles de socios con
+foto, conviene mover esto al bucket de Storage.
+
+### 18.5 Pendientes que siguen abiertos
+
+1. Mercado Pago Preapproval + webhook (cobro recurrente).
+2. Trazabilidad completa del canje: falta la notificación a Jaime cuando se valida una
+   visita. El lado negocio (v14) y el lado dueño (v15) ya están.
+3. Migrar el formulario de negocios al estilo v3 (OTP + mascota animada).
+4. Contenido y tips para dueños, para dar valor desde ya mientras hay pocos negocios.
+5. Moderación de las fotos que suben los dueños (hoy no hay ninguna revisión).
+6. Login con Google (prioridad baja — el acceso por correo ya cubre el caso).
