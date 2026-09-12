@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/mmc-ficha.css">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/mmc-ficha.css">
 
 <!-- Librería para generar los códigos QR del carnet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -28,7 +28,7 @@
 
 <nav>
   <div class="navbar">
-    <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
+    <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="/assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
     <div class="navlinks">
       <div class="nav-dropdown">
         <button class="nav-dropdown-btn" onclick="toggleDropdown('exploreDropdown')">Categorías <span class="caret">▾</span></button>
@@ -330,10 +330,10 @@
         <div class="credencial" style="transform:rotate(1deg);">
           <div class="cred-badge">Miembro Free</div>
           <div class="cred-top">
-            <div class="cred-brand"><img src="assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
+            <div class="cred-brand"><img src="/assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
             <div class="cred-id" id="credId">MMC00000</div>
           </div>
-          <div class="cred-photo" id="credPhoto"><img src="assets/favicon.svg" alt=""></div>
+          <div class="cred-photo" id="credPhoto"><img src="/assets/favicon.svg" alt=""></div>
           <div class="cred-name" id="credName">Tu mascota</div>
           <div class="cred-breed" id="credBreed">Escribe su nombre para previsualizar →</div>
           <div class="cred-row"><div>Comuna<b id="credComuna">Santiago</b></div><div>Estado<b style="color:var(--sage);">Activo</b></div></div>
@@ -895,7 +895,7 @@
   <div class="wrap foot-grid">
 
     <div class="foot-marca">
-      <img src="assets/logo-blanco.svg" alt="Mi Mascota Club" class="foot-logo">
+      <img src="/assets/logo-blanco.svg" alt="Mi Mascota Club" class="foot-logo">
       <p class="foot-lema">
         Amamos a las mascotas, por eso decidimos crear el mejor club de mascotas,
         con beneficios para nuestras mascotas y para los dueños.
@@ -958,9 +958,9 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="js/logos-partners.js"></script>
-<script src="js/catalogos-negocio.js"></script>
-<script src="js/ficha-negocio.js"></script>
-<script src="js/app.js"></script>
+<script src="/js/logos-partners.js"></script>
+<script src="/js/catalogos-negocio.js"></script>
+<script src="/js/ficha-negocio.js"></script>
+<script src="/js/app.js"></script>
 </body>
 </html>

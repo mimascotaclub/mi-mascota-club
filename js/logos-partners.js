@@ -26,8 +26,8 @@
    ============================================================ */
 
 const LOGOS_PARTNERS = [
-  // { nombre: 'Veterinaria Los Robles', archivo: 'assets/logos/los-robles.svg', url: 'https://losrobles.cl' },
-  // { nombre: 'Café Con Patas',         archivo: 'assets/logos/con-patas.svg' },
+  // { nombre: 'Veterinaria Los Robles', archivo: '/assets/logos/los-robles.svg', url: 'https://losrobles.cl' },
+  // { nombre: 'Café Con Patas',         archivo: '/assets/logos/con-patas.svg' },
 ];
 
 /* Cuántos espacios muestra la cinta. Mientras haya menos logos que

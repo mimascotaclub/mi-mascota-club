@@ -428,12 +428,12 @@ function mostrarFormulario(tipo){
   if(tipo === 'negocio'){
     // El registro de negocios ahora usa el formulario v3 (ficha, beneficio en 3 pasos
     // y aprobación manual). El asistente antiguo del index queda como respaldo.
-    window.location.href = 'formulario-negocio-v3.html';
+    window.location.href = '/formulario-negocio-v3.html';
     return;
   }
   if(tipo === 'dueno'){
     // El registro de mascota ahora usa el formulario animado v3 (con verificación OTP)
-    window.location.href = 'formulario-registro-demo-v3.html';
+    window.location.href = '/formulario-registro-demo-v3.html';
     return;
   }
   closeModal();
@@ -2853,12 +2853,12 @@ function renderCarnetSocio(m){
   if(!cont) return;
   const avatar = m.foto
     ? `<img src="${m.foto}" alt="${colaEsc(m.pet)}" style="width:100%;height:100%;object-fit:cover;">`
-    : `<img src="assets/favicon.svg" alt="">`;
+    : `<img src="/assets/favicon.svg" alt="">`;
   cont.innerHTML = `
     <div class="credencial">
       <div class="cred-badge">${planLabel(m.plan)}</div>
       <div class="cred-top">
-        <div class="cred-brand"><img src="assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
+        <div class="cred-brand"><img src="/assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
         <div class="cred-id">${colaEsc(m.codigo)}</div>
       </div>
       <div class="cred-photo" style="overflow:hidden;">${avatar}</div>
