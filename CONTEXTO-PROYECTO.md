@@ -1346,3 +1346,52 @@ Dos problemas, uno señalado por Supabase y otro no:
 Ahora: máximo 5 MB, y solo PNG y JPG. Se descartó el SVG porque puede llevar código adentro. Los
 dos selectores de archivo del formulario se alinearon a PNG/JPG y avisan con palabras claras antes
 de intentar subir.
+
+---
+
+## 27. El menú de teléfono (13 de septiembre, 2026)
+
+### 27.1 El problema
+
+En `css/styles.css`, dentro de `@media (max-width: 880px)`, había en dos lugares distintos la
+regla `.navlinks{ display:none; }` — y nada que la reemplazara. Es decir: en el teléfono, la
+barra superior mostraba **solo el logo**. Ni Beneficios, ni Categorías, ni Mi Mascota ID.
+
+Esto no era un detalle estético. La mayoría de la gente va a llegar al sitio desde el celular, y
+un socio que ya está registrado **no tenía forma de entrar a su carnet** salvo guardando el enlace
+que le llegó por correo. Si borraba el correo, perdía la puerta de entrada.
+
+### 27.2 La solución
+
+Un botón de tres líneas (el "hamburguesa") que aparece solo bajo 880px, y un panel que baja desde
+la barra superior con las opciones:
+
+- **Mi Mascota ID** — destacado arriba, en una tarjeta con borde amarillo y el subtítulo "Tu
+  carnet, tus datos y tus beneficios usados". Es la opción más importante del menú, así que se ve
+  distinta a las demás.
+- Beneficios
+- Para tu mascota
+- Para ti como dueño
+- Sugerencias
+- **Quiero unirme al club** — botón amarillo al final.
+
+Mi Mascota ID resuelve solo el caso del que ya está registrado y el del que no: la misma pantalla
+pide el correo, manda el código de 6 dígitos y, si no existe cuenta con ese correo, ofrece crearla.
+No hacen falta dos entradas distintas en el menú.
+
+### 27.3 Detalles de comportamiento
+
+El panel se cierra solo cuando: se elige una opción, se toca fuera de él, se aprieta Escape, o la
+pantalla pasa de 880px (por ejemplo al girar el teléfono). Mientras está abierto, el fondo no hace
+scroll (`body.menu-abierto{ overflow:hidden }`). El botón anima a una X cuando está abierto y lleva
+`aria-expanded` / `aria-controls` para los lectores de pantalla.
+
+### 27.4 Archivos tocados
+
+- `index.html` — el botón `#navBurger` y el panel `#menuMovil` dentro del `<nav>`.
+- `css/styles.css` — bloque "MENÚ DE TELÉFONO" al final.
+- `js/app.js` — `alternarMenuMovil()`, `abrirMenuMovil()`, `cerrarMenuMovil()` y los tres oyentes
+  (clic fuera, Escape, resize).
+
+Probado con Playwright a 390px y a 1200px: en teléfono el botón aparece y el panel navega bien; en
+escritorio el botón está oculto y la barra de siempre sigue igual. Cero errores en consola.

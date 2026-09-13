@@ -50,6 +50,35 @@
            La ruta /planes sigue funcionando: los avisos de plan Premium enlazan ahí. -->
     </div>
     <a href="#negocios" class="btn btn-nav-join btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
+
+    <!-- Botón del menú de teléfono. Bajo 880px .navlinks se oculta, así que sin
+         esto el sitio no tenía forma de llegar a Mi Mascota ID, Beneficios ni
+         al directorio desde un celular — que es de donde llega casi todo el
+         mundo. Solo se ve en pantallas chicas. -->
+    <button type="button" class="nav-burger" id="navBurger"
+            aria-label="Abrir menú" aria-expanded="false" aria-controls="menuMovil"
+            onclick="alternarMenuMovil()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Menú de teléfono -->
+  <div class="menu-movil" id="menuMovil" hidden>
+    <a class="menu-movil__destacado" href="/mi-mascota" onclick="event.preventDefault(); cerrarMenuMovil(); irAMiMascota();">
+      <span class="menu-movil__ic">🐾</span>
+      <span>
+        <b>Mi Mascota ID</b>
+        <small>Tu carnet, tus datos y tus beneficios usados</small>
+      </span>
+    </a>
+
+    <a href="/beneficios" onclick="event.preventDefault(); cerrarMenuMovil(); irABeneficios();">Beneficios</a>
+    <a href="/directorio" onclick="event.preventDefault(); cerrarMenuMovil(); irADirectorio({ tipo:'mascota' });">Para tu mascota</a>
+    <a href="/directorio" onclick="event.preventDefault(); cerrarMenuMovil(); irADirectorio({ tipo:'dueno' });">Para ti como dueño</a>
+    <a href="/sugerencias" onclick="event.preventDefault(); cerrarMenuMovil(); irASugerencias();">Sugerencias</a>
+
+    <button type="button" class="btn btn-primary menu-movil__cta"
+            onclick="cerrarMenuMovil(); abrirElegirCamino();">Quiero unirme al club</button>
   </div>
 </nav>
 

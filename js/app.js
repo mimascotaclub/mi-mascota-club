@@ -2491,6 +2491,51 @@ async function tryUnlock(){
   }
 }
 
+/* ---------------- Menú de teléfono ----------------
+   Bajo 880px la barra de enlaces se oculta y antes no había nada en su lugar:
+   desde un celular no se podía llegar a Mi Mascota ID, a Beneficios ni al
+   directorio. Este menú es esa puerta. */
+function alternarMenuMovil(){
+  const panel = document.getElementById('menuMovil');
+  const boton = document.getElementById('navBurger');
+  if(!panel || !boton) return;
+  const abierto = !panel.hasAttribute('hidden');
+  if(abierto) cerrarMenuMovil(); else abrirMenuMovil();
+}
+function abrirMenuMovil(){
+  const panel = document.getElementById('menuMovil');
+  const boton = document.getElementById('navBurger');
+  if(!panel || !boton) return;
+  panel.removeAttribute('hidden');
+  boton.setAttribute('aria-expanded', 'true');
+  boton.setAttribute('aria-label', 'Cerrar menú');
+  document.body.classList.add('menu-abierto');
+}
+function cerrarMenuMovil(){
+  const panel = document.getElementById('menuMovil');
+  const boton = document.getElementById('navBurger');
+  if(!panel || !boton) return;
+  panel.setAttribute('hidden', '');
+  boton.setAttribute('aria-expanded', 'false');
+  boton.setAttribute('aria-label', 'Abrir menú');
+  document.body.classList.remove('menu-abierto');
+}
+
+/* Se cierra solo al tocar fuera, con Escape, y si la pantalla crece hasta
+   donde el menú de escritorio vuelve a aparecer. */
+document.addEventListener('click', function(e){
+  const panel = document.getElementById('menuMovil');
+  if(!panel || panel.hasAttribute('hidden')) return;
+  if(e.target.closest('#menuMovil') || e.target.closest('#navBurger')) return;
+  cerrarMenuMovil();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') cerrarMenuMovil();
+});
+window.addEventListener('resize', function(){
+  if(window.innerWidth > 880) cerrarMenuMovil();
+});
+
 /* ---------------- Sugerencias (/sugerencias) ----------------
    Se guardan en la base, no se mandan por correo. Un formulario público que
    dispara correos es un blanco fácil para bots, y quemarían la cuota mensual
@@ -3027,6 +3072,8 @@ window.irAMiPanel = irAMiPanel;
 window.irATerminos = irATerminos;
 window.irAPrivacidad = irAPrivacidad;
 window.irASugerencias = irASugerencias;
+window.alternarMenuMovil = alternarMenuMovil;
+window.cerrarMenuMovil = cerrarMenuMovil;
 window.mostrarPaginaSugerencias = mostrarPaginaSugerencias;
 window.sugReiniciar = sugReiniciar;
 window.mostrarPaginaAdmin = mostrarPaginaAdmin;
