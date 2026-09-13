@@ -242,6 +242,21 @@ footer{
 }
 .foot-dato svg{ width:15px; height:15px; flex:none; opacity:0.75; }
 
+/* Categorías del footer que todavía no tienen negocios cargados: se muestran
+   apagadas y con la etiqueta "Próximamente", en vez de ser un enlace que
+   lleva a un listado vacío. */
+.foot-pronto{
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+  color:rgba(255,255,255,0.48);
+  font-size:13.5px; font-weight:600; line-height:1.35;
+}
+.foot-pronto em{
+  font-style:normal;
+  font-size:9.5px; font-weight:900; letter-spacing:0.07em; text-transform:uppercase;
+  padding:2px 7px; border-radius:999px;
+  color:#1A1A1A; background:var(--yellow);
+}
+
 .foot-redes{ display:flex; gap:10px; margin-top:9px; }
 .foot-red{
   width:38px; height:38px;

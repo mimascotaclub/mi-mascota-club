@@ -39,17 +39,16 @@ async function enviarCorreoBienvenida(params){
   }
 }
 
-const negociosSeed = [
-  {nombre:"Veterinaria Los Robles", cat:"Veterinaria", tipo:"mascota", comuna:"Ñuñoa", meta:"Consultas, vacunas y urgencias.", demo:true, destacado:true},
-  {nombre:"Pelu Copito", cat:"Peluquería", tipo:"mascota", comuna:"Providencia", meta:"Baño y corte a domicilio.", demo:true, destacado:true},
-  {nombre:"Paseos Rex", cat:"Paseador", tipo:"mascota", comuna:"La Reina", meta:"Paseos grupales y GPS en vivo.", demo:true},
-  {nombre:"Hotel Huellitas", cat:"Hotel / Pensión", tipo:"mascota", comuna:"Vitacura", meta:"Estadías cortas y largas, cámaras 24/7.", demo:true, destacado:true},
-  {nombre:"Barbería El Roble", cat:"Barbería", tipo:"dueno", comuna:"Ñuñoa", meta:"15% de descuento para socios del club.", demo:true},
-  {nombre:"Pádel Club Vitacura", cat:"Deporte", tipo:"dueno", comuna:"Vitacura", meta:"Hora de cancha con precio socio.", demo:true},
-  {nombre:"Café Con Patas", cat:"Café", tipo:"dueno", comuna:"Providencia", meta:"Café pet-friendly, 2x1 los martes para socios.", demo:true},
-  {nombre:"Valentina Ríos — Etóloga", cat:"Salud", tipo:"mascota", comuna:"Providencia", meta:"Consultas de conducta canina y felina, a domicilio u online.", demo:true, esEspecialista:true},
-  {nombre:"Camila Soto — Nutrición Animal", cat:"Salud", tipo:"mascota", comuna:"Ñuñoa", meta:"Planes de alimentación personalizados para tu mascota.", demo:true, esEspecialista:true},
-];
+/* Negocios de ejemplo del directorio.
+   Vaciado el 13 de septiembre de 2026, antes de abrir el club a socios reales.
+   Eran nueve negocios inventados (Veterinaria Los Robles, Café Con Patas,
+   Pelu Copito y compañía) que estaban ahí para que el directorio no se viera
+   vacío mientras se construía el sitio. Con socios reales entrando, un negocio
+   inventado deja de ser un ejemplo y pasa a ser información falsa: alguien
+   podría ir a buscarlo. La lista queda declarada y vacía —no borrada— porque
+   el resto del código la usa (combinedNegocios, el orden del directorio, la
+   insignia "Ejemplo"), y así vuelve a servir si algún día se necesita. */
+const negociosSeed = [];
 const iconByCat = {
   "Veterinaria":"🩺","Peluquería":"✂️","Paseador":"🦮","Hotel / Pensión":"🏠","Tienda":"🛍️","Alimentos":"🍖",
   "Salud":"💊","Accesorios":"🎾","Adiestramiento":"🏋️","Fotografía":"📷",

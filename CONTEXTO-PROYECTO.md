@@ -1429,3 +1429,57 @@ Técnicamente el bloque (`#benAviso`) vive en el mismo `<section id="directorio"
 —porque `/beneficios` reutiliza esa vista— y `mostrarPaginaDirectorio()` le pone o le saca el
 atributo `hidden` según `modoDirectorioBeneficios`. En `/directorio` y en `/especialistas` no
 aparece. Probado también entrando directo a la URL, no solo navegando desde el home.
+
+---
+
+## 28. Limpieza antes de abrir a socios reales (13 de septiembre, 2026)
+
+### 28.1 El teléfono personal salió del footer
+
+El footer seguía mostrando **+56 9 5059 1447**, un número personal, en la columna de Contacto.
+Ahora el único canal de contacto del sitio es **holamimascotaclub@gmail.com**, con ícono de sobre
+y enlace `mailto:`. La línea de ubicación quedó como **"Santiago, Chile"** en vez de "Santiago
+Centro": dice dónde opera el club sin apuntar a un lugar concreto.
+
+De paso, el formulario de registro de socios usaba "Ej: Jaime Florian" como texto de ejemplo en el
+campo de nombre. Cambiado a "Ej: María González". Era el nombre real del fundador puesto delante de
+cada persona que se registra.
+
+### 28.2 "Próximamente" en las categorías del footer
+
+"Para tu mascota" y "Para ti como dueño de mascota" eran enlaces a un directorio filtrado que hoy
+está vacío. Un enlace que lleva a cero resultados hace que el club se vea muerto. Ahora son texto
+apagado con una etiqueta amarilla **PRÓXIMAMENTE** (`.foot-pronto`), sin enlace.
+
+Cuando haya negocios cargados hay que devolverles el `<a>` con `irADirectorio({tipo:'mascota'})` y
+`irADirectorio({tipo:'dueno'})`. Queda anotado en pendientes.
+
+### 28.3 Los nueve negocios inventados
+
+En `js/app.js` vivía `negociosSeed`, una lista de nueve negocios que yo inventé al principio del
+proyecto para que el directorio no se viera vacío mientras se construía el sitio:
+
+- Veterinaria Los Robles, Pelu Copito, Paseos Rex, Hotel Huellitas (mascota)
+- Barbería El Roble, Pádel Club Vitacura, Café Con Patas (dueño)
+- Valentina Ríos — Etóloga, Camila Soto — Nutrición Animal (especialistas)
+
+Llevaban la insignia "Ejemplo" en la tarjeta, pero eso es letra chica: en la práctica se veían
+igual que un negocio real, con comuna, categoría y descripción. Con socios reales entrando, un
+negocio inventado deja de ser un ejemplo de diseño y pasa a ser información falsa — alguien podría
+salir a buscar "Café Con Patas" en Providencia.
+
+La lista quedó **declarada y vacía** (`const negociosSeed = [];`), no borrada, porque otras partes
+del código la usan: `combinedNegocios()`, el orden del directorio (los ejemplos iban siempre al
+final) y la insignia "Ejemplo".
+
+Efecto inmediato: el directorio y la página de beneficios muestran "0 resultados", y la franja de
+Destacados de la portada se oculta sola (`renderFeaturedStrip` ya lo hacía cuando no hay
+destacados). Eso es lo correcto — el aviso de la sección 27.5 es justamente lo que llena ese hueco
+con una explicación en vez de con negocios que no existen.
+
+La tabla `negocios` en Supabase ya estaba en cero desde el borrado del 13 de septiembre; estos
+nueve nunca estuvieron en la base de datos, estaban escritos a mano en el JavaScript. Por eso no
+aparecían al revisar Supabase.
+
+La cinta de logos pagados (`js/logos-partners.js`) ya estaba vacía — los dos ejemplos que tiene
+están comentados. No hubo que tocarla.
