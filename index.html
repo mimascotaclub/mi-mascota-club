@@ -842,6 +842,9 @@
       </div>
     </div>
     <div id="adminPanel" style="display:none;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="salirAdmin()">Cerrar sesión</button>
+      </div>
 
       <!-- ===== Fichas de negocio por aprobar ===== -->
       <div class="admin-table" id="colaWrap">
@@ -858,15 +861,17 @@
         <div class="stat-card"><div class="n" id="statOwners">0</div><div class="l">Mascotas / dueños</div></div>
         <div class="stat-card"><div class="n" id="statClientes">0</div><div class="l">Clientes que compraron</div></div>
         <div class="stat-card"><div class="n" id="statGMV">$0</div><div class="l">Ventas generadas (GMV)</div></div>
+        <div class="stat-card"><div class="n" id="statCanjes">0</div><div class="l">Visitas validadas</div></div>
+        <div class="stat-card"><div class="n" id="statAhorro">$0</div><div class="l">Ahorro entregado a socios</div></div>
       </div>
       <div class="admin-table">
         <h4>Resumen por negocio (ROI) <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
         <div class="table-row head"><span>Negocio</span><span>Visitas</span><span>Monto total</span><span>Ticket prom.</span></div>
         <div id="adminRoiTable"></div>
       </div>
-      <div class="admin-table">
-        <h4>Últimas visitas validadas</h4>
-        <div class="table-row head"><span>Negocio</span><span>Mascota</span><span>Monto</span><span>Fecha</span></div>
+      <div class="admin-table admin-table--canjes">
+        <h4>Últimas visitas validadas <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
+        <div class="table-row head"><span>Folio</span><span>Fecha</span><span>Negocio</span><span>Socio</span><span>Beneficio</span><span>Compra</span><span>Ahorro</span></div>
         <div id="adminCanjesTable"></div>
       </div>
       <div class="admin-table">

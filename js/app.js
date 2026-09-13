@@ -323,6 +323,7 @@ function mostrarPaginaPlanes(){
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
+  document.body.classList.remove('pagina-admin');
   document.body.classList.add('pagina-planes');
   renderPageBanner('planesBanner', BANNER_PLANES);
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
@@ -338,6 +339,7 @@ function volverAlInicio(){
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
+  document.body.classList.remove('pagina-admin');
   const secValidar = document.getElementById('validar');
   if(secValidar) secValidar.style.display = 'none';
   if(location.pathname !== '/') history.pushState({}, '', '/');
@@ -350,6 +352,7 @@ function mostrarPaginaDirectorio(opts){
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
+  document.body.classList.remove('pagina-admin');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
   modoDirectorioBeneficios = !!opts.beneficios;
@@ -390,6 +393,8 @@ function manejarRutaActual(){
     mostrarPaginaNegocio();
   } else if(parts[0] === 'mi-mascota'){
     mostrarPaginaSocio();
+  } else if(parts[0] === 'mi-panel'){
+    mostrarPaginaAdmin();
   } else if(parts[0] === 'validar'){
     /* Es la URL que trae el QR del carnet del socio. Llega el negocio, con el
        celular, después de escanear. */
@@ -401,6 +406,7 @@ function manejarRutaActual(){
     document.body.classList.remove('pagina-negocio');
     document.body.classList.remove('pagina-socio');
     document.body.classList.remove('pagina-validar');
+    document.body.classList.remove('pagina-admin');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
@@ -1047,6 +1053,7 @@ function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-negocio');
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
+  document.body.classList.remove('pagina-admin');
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
@@ -1739,7 +1746,7 @@ function valError(id, texto){
 function abrirValidarConSocio(socioCodigo){
   /* Página propia, como /mi-negocio: el cajero tiene un cliente esperando y no
      puede aterrizar en la portada con el formulario escondido bajo el fold. */
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-admin');
   document.body.classList.add('pagina-validar');
   const seccion = document.getElementById('validar');
   if(!seccion) return;
@@ -1976,7 +1983,7 @@ function irAMiNegocio(){
 }
 
 function mostrarPaginaNegocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar','pagina-admin');
   document.body.classList.add('pagina-negocio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const s = sesionNegocio();
@@ -2265,6 +2272,43 @@ async function tryUnlock(){
   }
 }
 
+/* El panel privado vive en /mi-panel. Antes existía pero no había ningún link ni
+   ruta que llevara ahí — se llegaba solo escribiendo mostrarSeccion('panel') en
+   la consola. No lleva link visible en el sitio a propósito: la dirección se
+   guarda en favoritos y el login de Supabase Auth es el que protege de verdad. */
+function irAMiPanel(){
+  history.pushState({ miPanel:true }, '', '/mi-panel');
+  mostrarPaginaAdmin();
+}
+
+function mostrarPaginaAdmin(){
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar');
+  document.body.classList.add('pagina-admin');
+  const sec = document.getElementById('panel');
+  if(sec) sec.style.display = '';
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+
+  /* Si la sesión de Supabase sigue viva de una visita anterior, entra directo. */
+  supabase.auth.getSession().then(({ data }) => {
+    if(data && data.session){
+      const lock = document.getElementById('adminLockWrap');
+      const panel = document.getElementById('adminPanel');
+      if(lock) lock.style.display = 'none';
+      if(panel) panel.style.display = 'block';
+      refreshAdmin();
+      cargarColaFichas();
+    }
+  }).catch(() => {});
+}
+
+async function salirAdmin(){
+  try{ await supabase.auth.signOut(); }catch(e){}
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('adminLockWrap').style.display = '';
+  document.getElementById('adminEmail').value = '';
+  document.getElementById('adminPass').value = '';
+}
+
 async function refreshAdmin(){
   try{
     const [rNeg, rSoc, rCan] = await Promise.all([
@@ -2283,6 +2327,9 @@ async function refreshAdmin(){
     const gmvTotal = can.reduce((s,c)=>s+Number(c.monto||0),0);
     document.getElementById('statClientes').textContent = clientesUnicos;
     document.getElementById('statGMV').textContent = formatCLP(gmvTotal);
+    document.getElementById('statCanjes').textContent = can.length;
+    document.getElementById('statAhorro').textContent =
+      formatCLP(can.reduce((t,c)=>t+Number(c.ahorro||0),0));
 
     document.getElementById('adminBizTable').innerHTML = neg.map(n=>`
       <div class="table-row"><span>${n.nombre}</span><span class="dim">${n.cat}</span><span class="dim">${n.comuna}</span><span class="dim">${n.contacto}</span></div>
@@ -2292,9 +2339,20 @@ async function refreshAdmin(){
       <div class="table-row"><span>${o.pet} <small class="dim" style="font-weight:600;">· ${planLabel(o.plan)}</small></span><span class="dim">${o.species||''}</span><span class="dim">${o.comuna||''}</span><span class="dim">${o.email||''}</span></div>
     `).join('') || `<div class="table-row"><span class="dim">Aún no hay dueños reales inscritos.</span></div>`;
 
-    document.getElementById('adminCanjesTable').innerHTML = can.map(c=>`
-      <div class="table-row"><span>${c.negocio_nombre}</span><span class="dim">${c.socio_nombre}</span><span class="dim">${formatCLP(c.monto)}</span><span class="dim">${new Date(c.created_at).toLocaleDateString('es-CL')}</span></div>
-    `).join('') || `<div class="table-row"><span class="dim">Todavía no hay visitas validadas.</span></div>`;
+    document.getElementById('adminCanjesTable').innerHTML = can.map(c=>{
+      const d = new Date(c.created_at);
+      const cuando = d.toLocaleDateString('es-CL',{day:'2-digit',month:'short'}) + ' ' +
+                     d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
+      return `<div class="table-row">
+        <span class="mono">${c.folio ? colaEsc(c.folio) : '—'}</span>
+        <span class="dim">${cuando}</span>
+        <span>${colaEsc(c.negocio_nombre || '')}</span>
+        <span class="dim">${colaEsc(c.socio_mascota || c.socio_nombre || '')}<br><small class="mono">${colaEsc(c.socio_codigo || '')}</small></span>
+        <span class="dim">${c.beneficio_texto ? colaEsc(c.beneficio_texto) : '—'}</span>
+        <span class="dim">${c.monto != null ? formatCLP(Number(c.monto)) : '—'}</span>
+        <span class="dim">${c.ahorro != null ? formatCLP(Number(c.ahorro)) : '—'}</span>
+      </div>`;
+    }).join('') || `<div class="table-row"><span class="dim">Todavía no hay visitas validadas.</span></div>`;
 
     const porNegocio = {};
     can.forEach(c=>{
@@ -2588,6 +2646,9 @@ async function guardarEdicionFicha(id){
 
 window.mostrarFormulario = mostrarFormulario;
 window.mostrarSeccion = mostrarSeccion;
+window.irAMiPanel = irAMiPanel;
+window.mostrarPaginaAdmin = mostrarPaginaAdmin;
+window.salirAdmin = salirAdmin;
 window.tryUnlock = tryUnlock;
 window.updateCard = updateCard;
 window.sugerirTamano = sugerirTamano;
@@ -2684,7 +2745,7 @@ async function salirPanelSocio(){
 }
 
 function mostrarPaginaSocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar','pagina-admin');
   document.body.classList.add('pagina-socio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const token = sesionSocio();

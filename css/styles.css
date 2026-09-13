@@ -958,3 +958,27 @@ body.pagina-validar #panelSocio,
 body.pagina-validar #panel{ display:none !important; }
 body.pagina-validar #validar{ display:block !important; min-height:calc(100vh - 200px); }
 body.pagina-validar .announce-bar{ display:none; }
+
+/* ======================================================================
+   PANEL PRIVADO DEL CLUB (/admin)
+   No lleva link visible en el sitio: la dirección se guarda en favoritos
+   y quien protege de verdad es el login de Supabase Auth.
+   ====================================================================== */
+body.pagina-admin .hero,
+body.pagina-admin #categorias,
+body.pagina-admin #como-funciona,
+body.pagina-admin #directorio,
+body.pagina-admin #fichaNegocio,
+body.pagina-admin #negocios,
+body.pagina-admin #validar,
+body.pagina-admin #planes,
+body.pagina-admin #panelNegocio,
+body.pagina-admin #panelSocio{ display:none !important; }
+body.pagina-admin #panel{ display:block !important; min-height:calc(100vh - 140px); }
+body.pagina-admin .announce-bar{ display:none; }
+
+/* La tabla de canjes tiene 7 columnas y no cabe en un teléfono:
+   se deja desplazable en vez de apretarla hasta que no se lea. */
+.admin-table--canjes{ overflow-x:auto; }
+.admin-table--canjes .table-row{ min-width:860px; grid-template-columns:0.7fr 0.9fr 1.2fr 1.2fr 1.6fr 0.9fr 0.9fr; }
+.admin-table--canjes .table-row .mono{ font-family:var(--font-mono); font-size:12px; }
