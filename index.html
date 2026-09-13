@@ -551,6 +551,70 @@
 </section>
 
 <!-- ============================================================
+     SUGERENCIAS (/sugerencias)
+     Se guardan en la base y se leen desde /mi-panel. A propósito no
+     disparan un correo: un formulario público que envía correos es
+     un blanco fácil para bots, y quemarían la cuota mensual que
+     sostiene el registro de socios.
+     ============================================================ -->
+<section id="paginaSugerencias" class="band">
+  <div class="wrap wrap-legal">
+    <div class="section-head" style="margin-bottom:26px;">
+      <span class="eyebrow">Construyámoslo juntos</span>
+      <h2>¿Cómo lo hacemos mejor?</h2>
+      <p>Estamos creando Mi Mascota Club para mejorarle la vida a las mascotas y a quienes las
+      cuidan. Si se te ocurre algo, si algo no funciona o si echas de menos un negocio en el
+      directorio, cuéntanos. Leemos todo.</p>
+    </div>
+
+    <div class="panel full" style="max-width:560px;" id="sugCaja">
+      <form id="sugForm">
+        <div class="field">
+          <label for="sugTexto">Tu idea o comentario</label>
+          <textarea id="sugTexto" rows="6" required maxlength="3000"
+            placeholder="Me gustaría que... / Sería útil si... / Encontré un problema en..."></textarea>
+          <p class="soc-nota" id="sugContador" style="margin-top:6px;">0 caracteres</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="sugNombre">Tu nombre <span class="soc-opt">(opcional)</span></label>
+            <input id="sugNombre" maxlength="120" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="sugEmail">Tu correo <span class="soc-opt">(opcional)</span></label>
+            <input id="sugEmail" type="email" maxlength="160" placeholder="por si queremos responderte" autocomplete="email">
+          </div>
+        </div>
+
+        <!-- Trampa para bots: invisible para una persona, irresistible para un robot -->
+        <input type="text" id="sugTrampa" name="website" tabindex="-1" autocomplete="off"
+          style="position:absolute;left:-9999px;" aria-hidden="true">
+
+        <button type="submit" id="sugBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Enviar sugerencia</button>
+        <div id="sugMsg" class="soc-msg" style="display:none;"></div>
+        <p class="soc-nota">Puedes dejarlo anónimo: el nombre y el correo son opcionales. Si nos
+        dejas el correo es solo para responderte, nada más.</p>
+      </form>
+    </div>
+
+    <div id="sugGracias" class="val-ok" style="display:none;max-width:560px;margin:0 auto;">
+      <div class="val-ok__check">✓</div>
+      <div class="val-ok__t">¡Gracias!</div>
+      <p class="val-ok__nota" style="font-size:14px;">
+        Tu sugerencia ya está con nosotros. Leemos todas — el club se está armando y las ideas de
+        la gente que lo usa son la mejor guía que tenemos.
+      </p>
+      <button type="button" class="btn btn-sm btn-outline" style="margin-top:16px;" onclick="sugReiniciar()">Enviar otra</button>
+    </div>
+
+    <p class="soc-nota" style="max-width:560px;margin:20px auto 0;text-align:center;">
+      ¿Prefieres escribirnos directo? <a href="mailto:holamimascotaclub@gmail.com" style="color:var(--teal-dark);font-weight:700;">holamimascotaclub@gmail.com</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
      PÁGINAS LEGALES (/terminos y /privacidad)
      Escritas sobre lo que el sitio REALMENTE hace: los datos que
      pide, dónde se guardan y cómo se borran. Son un borrador para
@@ -1085,6 +1149,14 @@
         <button type="button" class="btn btn-sm btn-outline" onclick="salirAdmin()">Cerrar sesión</button>
       </div>
 
+      <!-- ===== Buzón de sugerencias ===== -->
+      <div class="admin-table" id="sugWrap">
+        <h4>Sugerencias <span id="sugCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarSugerencias()">↻ Actualizar</button>
+        </h4>
+        <div id="sugLista"><div class="cola-vacia">Cargando…</div></div>
+      </div>
+
       <!-- ===== Fichas de negocio por aprobar ===== -->
       <div class="admin-table" id="colaWrap">
         <h4>Fichas por aprobar <span id="colaCount" class="cola-count">0</span>
@@ -1152,6 +1224,7 @@
       <a href="#" onclick="event.preventDefault(); proximamente('Acerca de nosotros');">Acerca de nosotros</a>
       <a href="#" onclick="event.preventDefault(); proximamente('Servicios');">Servicios</a>
       <a href="#" onclick="event.preventDefault(); proximamente('Por qué escogernos');">Por qué escogernos</a>
+      <a href="/sugerencias" onclick="event.preventDefault(); irASugerencias();">Sugerencias</a>
 
       <h4 class="foot-t foot-t--2">Legal</h4>
       <a href="/terminos" onclick="event.preventDefault(); irATerminos();">Términos y condiciones</a>

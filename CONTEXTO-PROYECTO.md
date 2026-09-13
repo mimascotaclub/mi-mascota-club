@@ -1217,3 +1217,45 @@ que agregarle la misma casilla antes de que se pueda inscribir un negocio.
 También quedó anotado que el **formulario de registro sigue mostrando los precios** Pro $2.990 y
 Premium $4.990 en el paso de planes, aunque la página `/planes` se sacó del menú justo para no
 anclar precios que van a cambiar. Es incoherente y conviene resolverlo.
+
+## 24. Buzón de sugerencias y planes "Muy pronto" (13 de septiembre 2026)
+
+### 24.1 `/sugerencias`
+
+Página nueva para que cualquiera —socio o no— mande ideas, reclamos o avise que falta un negocio.
+Enlace en la columna CLUB del footer. El nombre y el correo son opcionales a propósito: si alguien
+quiere decir algo y quedarse anónimo, mejor que lo diga.
+
+**Las sugerencias se guardan en la base, no se mandan por correo.** La idea original era enviarlas
+a holamimascotaclub@gmail.com, pero un formulario público que dispara correos es un blanco fácil:
+un bot lo golpea mil veces y quema los 200 correos mensuales de EmailJS — los mismos que sostienen
+el registro de socios y el acceso de los negocios. Jaime las lee en `/mi-panel`, en una sección
+nueva arriba de las fichas por aprobar, con contador de no leídas y botón para marcarlas.
+
+En la página hay igual un enlace `mailto:` para quien prefiera escribir directo. Ese correo lo
+manda la persona desde su propia cuenta, así que no gasta cuota.
+
+Protecciones: mínimo 10 y máximo 3.000 caracteres, campo trampa invisible para bots (si viene
+lleno se muestra el "gracias" pero no se guarda nada, para no darle pistas), y un tope de 20
+sugerencias por hora en total. Ver `supabase-sugerencias-v21.sql`, ya ejecutado.
+
+### 24.2 Planes Pro y Premium como "Muy pronto"
+
+El último paso del formulario de registro mostraba Pro $2.990 y Premium $4.990, justo los precios
+que se habían escondido del menú por no estar definidos. Ahora las dos tarjetas aparecen
+atenuadas, con borde punteado, **sin precio** y con la etiqueta MUY PRONTO, y no se pueden
+seleccionar. Free quedó como la única opción y dice "Directorio, carnet digital y todos los
+beneficios de socio", que hoy es literalmente cierto.
+
+Se retiró también el aviso de "aquí se conectará el checkout de Mercado Pago" que saltaba al
+elegir un plan pago.
+
+### 24.3 El correo de bienvenida
+
+Se corrigió el logo: apuntaba a `tranquil-torte-695e25.netlify.app`, un sitio de Netlify que ya no
+existe, así que **llegaba roto en todos los correos**. Ahora apunta al dominio actual y además es
+clicable. Se agregó el botón amarillo al carnet (`{{carnet_url}}`), se usa `{{mascota}}` en el
+saludo, y un bloque final invitando a mandar sugerencias con un botón `mailto:`.
+
+La plantilla vive en EmailJS (`template_u9x5p1i`), no en el repo. Recibe: `to_name`, `to_email`,
+`codigo`, `mascota`, `carnet_url` y `mensaje_extra`.

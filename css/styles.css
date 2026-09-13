@@ -1037,3 +1037,34 @@ body.pagina-legal .announce-bar{ display:none; }
 }
 .btn-borrar{ background:var(--rust); color:#fff; border-color:var(--rust); }
 .btn-borrar:hover{ background:#b8482c; }
+
+/* Sugerencias (/sugerencias) */
+body.pagina-sugerencias .hero,
+body.pagina-sugerencias #categorias,
+body.pagina-sugerencias #como-funciona,
+body.pagina-sugerencias #directorio,
+body.pagina-sugerencias #fichaNegocio,
+body.pagina-sugerencias #negocios,
+body.pagina-sugerencias #validar,
+body.pagina-sugerencias #planes,
+body.pagina-sugerencias #panelNegocio,
+body.pagina-sugerencias #panelSocio,
+body.pagina-sugerencias #paginaLegal,
+body.pagina-sugerencias #panel{ display:none !important; }
+body.pagina-sugerencias #paginaSugerencias{ display:block; min-height:calc(100vh - 140px); }
+body.pagina-sugerencias .announce-bar{ display:none; }
+#paginaSugerencias{ display:none; }
+body.pagina-legal #paginaSugerencias,
+body.pagina-negocio #paginaSugerencias,
+body.pagina-socio #paginaSugerencias,
+body.pagina-validar #paginaSugerencias,
+body.pagina-admin #paginaSugerencias{ display:none !important; }
+
+/* Buzón de sugerencias en el panel del club */
+.sug-item{ background:#fff; border:2px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:12px; }
+.sug-item.nueva{ border-color:var(--yellow); background:var(--paper-tint-yellow); }
+.sug-item__cab{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:8px; }
+.sug-item__quien{ font-weight:800; font-size:13.5px; }
+.sug-item__fecha{ font-size:11.5px; color:var(--gray); font-family:var(--font-mono); white-space:nowrap; }
+.sug-item__texto{ font-size:14px; line-height:1.6; white-space:pre-wrap; }
+.sug-item__pie{ margin-top:10px; display:flex; gap:14px; align-items:center; }

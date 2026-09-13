@@ -325,6 +325,7 @@ function mostrarPaginaPlanes(){
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
   document.body.classList.remove('pagina-legal');
+  document.body.classList.remove('pagina-sugerencias');
   document.body.classList.add('pagina-planes');
   renderPageBanner('planesBanner', BANNER_PLANES);
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
@@ -342,6 +343,7 @@ function volverAlInicio(){
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
   document.body.classList.remove('pagina-legal');
+  document.body.classList.remove('pagina-sugerencias');
   const secValidar = document.getElementById('validar');
   if(secValidar) secValidar.style.display = 'none';
   if(location.pathname !== '/') history.pushState({}, '', '/');
@@ -356,6 +358,7 @@ function mostrarPaginaDirectorio(opts){
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
   document.body.classList.remove('pagina-legal');
+  document.body.classList.remove('pagina-sugerencias');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
   modoDirectorioBeneficios = !!opts.beneficios;
@@ -402,6 +405,8 @@ function manejarRutaActual(){
     mostrarPaginaLegal('terminos');
   } else if(parts[0] === 'privacidad'){
     mostrarPaginaLegal('privacidad');
+  } else if(parts[0] === 'sugerencias'){
+    mostrarPaginaSugerencias();
   } else if(parts[0] === 'validar'){
     /* Es la URL que trae el QR del carnet del socio. Llega el negocio, con el
        celular, después de escanear. */
@@ -415,6 +420,7 @@ function manejarRutaActual(){
     document.body.classList.remove('pagina-validar');
     document.body.classList.remove('pagina-admin');
     document.body.classList.remove('pagina-legal');
+    document.body.classList.remove('pagina-sugerencias');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
@@ -1063,6 +1069,7 @@ function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
   document.body.classList.remove('pagina-legal');
+  document.body.classList.remove('pagina-sugerencias');
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
@@ -2133,7 +2140,7 @@ function irAMiNegocio(){
 }
 
 function mostrarPaginaNegocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar','pagina-admin','pagina-legal');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar','pagina-admin','pagina-legal','pagina-sugerencias');
   document.body.classList.add('pagina-negocio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   if(negToken()) cargarPanelNegocio();
@@ -2475,6 +2482,7 @@ async function tryUnlock(){
     err.style.display='none';
     await refreshAdmin();
     cargarColaFichas();
+    cargarSugerencias();
   }catch(e){
     err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
     err.style.display='block';
@@ -2483,10 +2491,93 @@ async function tryUnlock(){
   }
 }
 
+/* ---------------- Sugerencias (/sugerencias) ----------------
+   Se guardan en la base, no se mandan por correo. Un formulario público que
+   dispara correos es un blanco fácil para bots, y quemarían la cuota mensual
+   que sostiene el registro de socios. Jaime las lee en /mi-panel. */
+function mostrarPaginaSugerencias(){
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-admin','pagina-legal');
+  document.body.classList.add('pagina-sugerencias');
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+}
+function irASugerencias(){
+  history.pushState({ sugerencias:true }, '', '/sugerencias');
+  mostrarPaginaSugerencias();
+}
+function sugReiniciar(){
+  const caja = document.getElementById('sugCaja');
+  const gracias = document.getElementById('sugGracias');
+  if(caja) caja.style.display = '';
+  if(gracias) gracias.style.display = 'none';
+  const t = document.getElementById('sugTexto');
+  if(t){ t.value = ''; t.focus(); }
+  const c = document.getElementById('sugContador');
+  if(c) c.textContent = '0 caracteres';
+  const m = document.getElementById('sugMsg');
+  if(m) m.style.display = 'none';
+}
+
+(function initSugerencias(){
+  const form = document.getElementById('sugForm');
+  if(!form) return;
+
+  const texto = document.getElementById('sugTexto');
+  const cont = document.getElementById('sugContador');
+  if(texto && cont){
+    texto.addEventListener('input', () => {
+      cont.textContent = texto.value.length + ' caracteres';
+    });
+  }
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = document.getElementById('sugBtn');
+    const msg = document.getElementById('sugMsg');
+    const decir = (t, ok) => {
+      if(!msg) return;
+      msg.textContent = t;
+      msg.className = 'soc-msg ' + (ok ? 'ok' : 'mal');
+      msg.style.display = 'block';
+    };
+
+    /* Si la trampa invisible trae texto, no era una persona. Se agradece
+       igual y no se guarda nada, para no darle pistas al bot. */
+    const trampa = document.getElementById('sugTrampa');
+    if(trampa && trampa.value){
+      document.getElementById('sugCaja').style.display = 'none';
+      document.getElementById('sugGracias').style.display = '';
+      return;
+    }
+
+    const t = (texto.value || '').trim();
+    if(t.length < 10){ decir('Cuéntanos un poco más, con al menos 10 caracteres.', false); return; }
+
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
+    try{
+      const { data, error } = await supabase.rpc('enviar_sugerencia', {
+        p_texto: t,
+        p_nombre: (document.getElementById('sugNombre').value || '').trim() || null,
+        p_email:  (document.getElementById('sugEmail').value || '').trim() || null
+      });
+      if(error) throw error;
+      const r = data && data[0];
+      if(!r || !r.ok){ decir((r && r.mensaje) || 'No se pudo enviar.', false); return; }
+      document.getElementById('sugCaja').style.display = 'none';
+      document.getElementById('sugGracias').style.display = '';
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }catch(err){
+      console.error(err);
+      decir('No pudimos enviarla. Revisa la señal e intenta de nuevo.', false);
+    }finally{
+      btn.disabled = false; btn.textContent = 'Enviar sugerencia';
+    }
+  });
+})();
+
 /* ---------------- Páginas legales (/terminos y /privacidad) ----------------
    Son dos artículos dentro de una misma sección: se muestra uno u otro. */
 function mostrarPaginaLegal(cual){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-admin');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-admin','pagina-sugerencias');
   document.body.classList.add('pagina-legal');
   const t = document.getElementById('legalTerminos');
   const pr = document.getElementById('legalPrivacidad');
@@ -2513,7 +2604,7 @@ function irAMiPanel(){
 }
 
 function mostrarPaginaAdmin(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-legal');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-legal','pagina-sugerencias');
   document.body.classList.add('pagina-admin');
   const sec = document.getElementById('panel');
   if(sec) sec.style.display = '';
@@ -2528,6 +2619,7 @@ function mostrarPaginaAdmin(){
       if(panel) panel.style.display = 'block';
       refreshAdmin();
       cargarColaFichas();
+      cargarSugerencias();
     }
   }).catch(() => {});
 }
@@ -2538,6 +2630,57 @@ async function salirAdmin(){
   document.getElementById('adminLockWrap').style.display = '';
   document.getElementById('adminEmail').value = '';
   document.getElementById('adminPass').value = '';
+}
+
+/* ---------------- Buzón de sugerencias en /mi-panel ---------------- */
+async function cargarSugerencias(){
+  const cont = document.getElementById('sugLista');
+  const cnt = document.getElementById('sugCount');
+  if(!cont) return;
+  cont.innerHTML = '<div class="cola-vacia">Cargando…</div>';
+  try{
+    const { data, error } = await supabase
+      .from('sugerencias').select('*').order('created_at', { ascending:false });
+    if(error) throw error;
+    const filas = data || [];
+    const nuevas = filas.filter(f => !f.leida).length;
+    if(cnt){ cnt.textContent = nuevas; cnt.dataset.cero = nuevas ? '0' : '1'; }
+
+    if(!filas.length){
+      cont.innerHTML = '<div class="cola-vacia">Todavía no hay sugerencias.</div>';
+      return;
+    }
+    cont.innerHTML = filas.map(f => {
+      const d = new Date(f.created_at);
+      const cuando = d.toLocaleDateString('es-CL',{day:'2-digit',month:'short'}) + ' ' +
+                     d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
+      const quien = colaEsc(f.nombre || 'Anónimo') +
+        (f.email ? ` · <a href="mailto:${colaEsc(f.email)}" style="color:var(--teal-dark);font-weight:700;">${colaEsc(f.email)}</a>` : '');
+      return `<div class="sug-item${f.leida ? '' : ' nueva'}">
+        <div class="sug-item__cab">
+          <span class="sug-item__quien">${quien}</span>
+          <span class="sug-item__fecha">${cuando}</span>
+        </div>
+        <div class="sug-item__texto">${colaEsc(f.texto)}</div>
+        <div class="sug-item__pie">
+          <button class="btn btn-sm btn-outline" onclick="marcarSugerencia('${f.id}', ${f.leida ? 'false' : 'true'})">
+            ${f.leida ? 'Marcar como no leída' : 'Marcar como leída'}
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<div class="cola-vacia">No pudimos cargar las sugerencias.</div>';
+  }
+}
+
+async function marcarSugerencia(id, leida){
+  try{
+    const { error } = await supabase.rpc('admin_sugerencia_leida', { p_id: id, p_leida: leida });
+    if(error) throw error;
+    cargarSugerencias();
+  }catch(e){ console.error(e); toast('No se pudo actualizar.'); }
 }
 
 async function refreshAdmin(){
@@ -2880,6 +3023,9 @@ window.mostrarSeccion = mostrarSeccion;
 window.irAMiPanel = irAMiPanel;
 window.irATerminos = irATerminos;
 window.irAPrivacidad = irAPrivacidad;
+window.irASugerencias = irASugerencias;
+window.mostrarPaginaSugerencias = mostrarPaginaSugerencias;
+window.sugReiniciar = sugReiniciar;
 window.mostrarPaginaAdmin = mostrarPaginaAdmin;
 window.salirAdmin = salirAdmin;
 window.tryUnlock = tryUnlock;
@@ -2894,6 +3040,8 @@ window.toggleDropdown = toggleDropdown;
 window.irABuscar = irABuscar;
 window.refreshAdmin = refreshAdmin;
 window.cargarColaFichas = cargarColaFichas;
+window.cargarSugerencias = cargarSugerencias;
+window.marcarSugerencia = marcarSugerencia;
 window.aprobarFicha = aprobarFicha;
 window.rechazarFicha = rechazarFicha;
 window.editarFicha = editarFicha;
@@ -2978,7 +3126,7 @@ async function salirPanelSocio(){
 }
 
 function mostrarPaginaSocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar','pagina-admin','pagina-legal');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar','pagina-admin','pagina-legal','pagina-sugerencias');
   document.body.classList.add('pagina-socio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const token = sesionSocio();
