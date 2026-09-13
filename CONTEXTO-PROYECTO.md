@@ -1014,3 +1014,63 @@ La plantilla `template_u9x5p1i` ahora recibe dos variables nuevas: `{{mascota}}`
 3. Mercado Pago Preapproval + webhook.
 4. Migrar el formulario de negocios al estilo v3 (OTP + mascota animada).
 5. Moderación de las fotos que suben los dueños.
+
+## 20. Cerrar el acceso a los datos (13 de septiembre 2026)
+
+Antes de empezar a inscribir socios reales se auditó quién puede leer qué. Se encontraron dos
+problemas, uno se cerró y el otro quedó identificado con su arreglo definido.
+
+### 20.1 Cerrado: `auth.role() = 'authenticated'` no significa "administrador"
+
+Las políticas de `socios`, `canjes` y `validaciones` decían `auth.role() = 'authenticated'`. Eso
+no quiere decir "un administrador": quiere decir **cualquiera con una cuenta en el proyecto**.
+Con el registro público de Supabase Auth habilitado, cualquier persona podía crearse una cuenta y
+leer la tabla completa de socios — RUT, teléfono, correo y notas médicas de cada dueño.
+
+Ahora las tres piden `es_admin()`, que verifica contra la tabla `admins`. Hay un solo admin: Jaime.
+
+También se quitaron los permisos de INSERT, UPDATE y DELETE que `anon` y `authenticated` tenían
+sobre todas las tablas. RLS ya los bloqueaba por no haber políticas de escritura, pero eso dejaba
+la seguridad colgando de una sola cosa. Se revisó todo el frontend antes de revocar: no existe un
+solo `.insert()`, `.update()` ni `.delete()` — todo pasa por funciones RPC. La Netlify Function
+usa la Service Role Key, que no pasa por estos permisos, así que el envío de códigos sigue igual.
+
+Verificado con llamadas reales a la API pública: `negocios` responde 200 (es el directorio) y
+`socios`, `canjes`, `codigos_verificacion`, `negocios_solicitudes`, `admins` y `sesiones_socio`
+responden 401.
+
+Ver `supabase-cerrar-acceso-v17.sql` — ya ejecutado, no hay que volver a correrlo.
+
+### 20.2 Abierto: el correo del negocio es a la vez contacto público y credencial
+
+La tabla `negocios` es el directorio público, así que se lee entera sin login — y ahí va el correo
+del negocio, en la columna `email` y también dentro de `contacto`. Eso está bien: es el contacto
+que el negocio quiere que la gente use.
+
+El problema es que ese mismo correo es hoy **la credencial** para entrar a `/mi-negocio` y para
+validar canjes, y los códigos son correlativos. Con una sola llamada pública cualquiera obtiene el
+par (NEG0001, su correo) y con eso puede entrar al panel de ese negocio, ver su lista completa de
+clientes, y registrar canjes falsos a su nombre.
+
+**Esconder el correo no es la solución** — es información de contacto que debe ser pública. El
+arreglo es dejar de usarlo como credencial: pasar el acceso del negocio a código por correo (OTP),
+igual que el de los dueños en el parche v15, reutilizando `netlify/functions/enviar-codigo.js` y
+una tabla `sesiones_negocio` espejo de `sesiones_socio`. El correo seguiría siendo público; lo que
+autoriza pasaría a ser el código de 6 dígitos que solo llega a su bandeja.
+
+Esto afecta a `negocio_acceso()`, `historial_negocio()` y `registrar_canje_v2()`, y a las pantallas
+`/mi-negocio` y `/validar`.
+
+### 20.3 Pendiente manual en el panel de Supabase
+
+1. Authentication → Sign In / Providers → desactivar el registro público de usuarios.
+2. Authentication → activar la protección de contraseñas filtradas (HaveIBeenPwned).
+
+### 20.4 Ruido que NO es problema
+
+El linter de Supabase marca 26 funciones `SECURITY DEFINER` ejecutables por `anon`. La mayoría son
+así a propósito — es como funciona el sitio entero (`registrar_socio`, `socio_login`,
+`canje_previo`). Las cuatro de administración (`admin_fichas_pendientes`, `admin_editar_ficha`,
+`aprobar_solicitud_negocio`, `rechazar_solicitud_negocio`) se revisaron una por una: todas
+verifican `es_admin()` adentro, así que se pueden llamar pero no hacen nada. El linter no puede ver
+eso.
