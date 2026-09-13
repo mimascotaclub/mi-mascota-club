@@ -46,7 +46,8 @@
       <a href="/beneficios" onclick="event.preventDefault(); irABeneficios();">Beneficios</a>
       <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();" style="display:none;" aria-hidden="true">Especialistas</a>
       <a href="/mi-mascota" onclick="event.preventDefault(); irAMiMascota();">Mi Mascota ID</a>
-      <a href="/planes" onclick="event.preventDefault(); irAPlanes();">Planes</a>
+      <!-- "Planes" fuera del menú mientras no haya precios definitivos (13 sept 2026).
+           La ruta /planes sigue funcionando: los avisos de plan Premium enlazan ahí. -->
     </div>
     <a href="#negocios" class="btn btn-nav-join btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
   </div>
@@ -550,6 +551,169 @@
 </section>
 
 <!-- ============================================================
+     PÁGINAS LEGALES (/terminos y /privacidad)
+     Escritas sobre lo que el sitio REALMENTE hace: los datos que
+     pide, dónde se guardan y cómo se borran. Son un borrador para
+     que lo revise un abogado antes del lanzamiento — no reemplazan
+     esa revisión.
+     ============================================================ -->
+<section id="paginaLegal" class="band">
+  <div class="wrap wrap-legal">
+
+    <!-- ---------- Términos y condiciones ---------- -->
+    <article id="legalTerminos" class="legal" style="display:none;">
+      <span class="eyebrow">Legal</span>
+      <h1>Términos y condiciones</h1>
+      <p class="legal-fecha">Última actualización: 13 de septiembre de 2026</p>
+
+      <h2>1. Qué es Mi Mascota Club</h2>
+      <p>Mi Mascota Club es un club de beneficios para dueños de mascotas en Chile. Reunimos un
+      directorio de negocios —veterinarias, peluquerías, tiendas y también negocios pensados para
+      ti como dueño— que ofrecen un beneficio a quienes son socios del club.</p>
+      <p>El club es operado por Jaime Florián, en Santiago de Chile. Puedes escribirnos al
+      +56 9 5059 1447 o a <a href="mailto:holamimascotaclub@gmail.com">holamimascotaclub@gmail.com</a>.</p>
+
+      <h2>2. Hacerse socio</h2>
+      <p>Inscribirse es gratis. Al hacerlo recibes un carnet digital con un código de socio y un
+      código QR. El carnet es personal: sirve para identificarte en los negocios del club y no
+      debe compartirse ni cederse a terceros.</p>
+      <p>Para inscribirte necesitas ser mayor de 18 años y entregar datos verdaderos. Si detectamos
+      registros falsos o duplicados podemos dar de baja la cuenta.</p>
+
+      <h2>3. Los beneficios los entrega el negocio, no el club</h2>
+      <p>Esto es lo más importante de esta página. <strong>Mi Mascota Club no presta los servicios
+      ni vende los productos.</strong> Cada beneficio lo define y lo entrega el negocio adherido,
+      bajo sus propias condiciones, precios y horarios.</p>
+      <p>Eso significa que la calidad del servicio, la atención, los resultados de un tratamiento
+      veterinario o cualquier problema con una compra son responsabilidad del negocio que la
+      realizó, y cualquier reclamo debe dirigirse a él. El club puede ayudarte a canalizarlo y
+      puede sacar del directorio a un negocio que no cumpla, pero no responde por su servicio.</p>
+
+      <h2>4. Los beneficios pueden cambiar</h2>
+      <p>Un negocio puede modificar o retirar su beneficio, y puede dejar de participar en el club.
+      Publicamos el beneficio tal como el negocio nos lo informa y lo actualizamos cuando nos avisa.
+      Te recomendamos confirmar el beneficio vigente al momento de usarlo.</p>
+      <p>Algunos beneficios tienen condiciones —un monto mínimo de compra, días específicos, no
+      acumulable con otras promociones— que se indican en la ficha de cada negocio.</p>
+
+      <h2>5. Cómo se usa un beneficio</h2>
+      <p>Muestras el código QR de tu carnet en el local. El negocio lo escanea, ve tu condición de
+      socio y el beneficio que le corresponde, y confirma la visita. Esa confirmación deja un
+      registro con un folio que ves tanto tú como el negocio.</p>
+      <p>El registro de una visita no es un comprobante de pago ni una boleta: la boleta la emite
+      el negocio.</p>
+
+      <h2>6. Planes</h2>
+      <p>Hoy la membresía de socio es gratuita. Si en el futuro ofrecemos planes pagados, sus
+      precios y condiciones se informarán con claridad antes de cualquier cobro, y hacerse socio
+      seguirá teniendo una opción gratuita.</p>
+
+      <h2>7. Uso indebido</h2>
+      <p>Podemos suspender o eliminar una cuenta que use el carnet de forma fraudulenta, que
+      entregue datos falsos, que suba contenido ofensivo o que perjudique a los negocios adheridos
+      o a otros socios.</p>
+
+      <h2>8. Disponibilidad</h2>
+      <p>El club está en marcha blanca. Hacemos lo posible por mantener el sitio funcionando, pero
+      puede haber interrupciones, cambios y errores. No garantizamos disponibilidad continua.</p>
+
+      <h2>9. Cambios a estos términos</h2>
+      <p>Podemos actualizar estos términos. Cuando el cambio sea relevante lo avisaremos por correo
+      a los socios registrados. La fecha de arriba indica la última versión.</p>
+
+      <h2>10. Ley aplicable</h2>
+      <p>Estos términos se rigen por la ley chilena. Cualquier controversia se somete a los
+      tribunales de Santiago de Chile.</p>
+
+      <p class="legal-nav"><a href="/privacidad" onclick="event.preventDefault(); irAPrivacidad();">Ver la política de privacidad →</a></p>
+    </article>
+
+    <!-- ---------- Política de privacidad ---------- -->
+    <article id="legalPrivacidad" class="legal" style="display:none;">
+      <span class="eyebrow">Legal</span>
+      <h1>Política de privacidad</h1>
+      <p class="legal-fecha">Última actualización: 13 de septiembre de 2026</p>
+
+      <h2>Quién es responsable de tus datos</h2>
+      <p>Jaime Florián, responsable de Mi Mascota Club, Santiago de Chile.
+      Contacto: <a href="mailto:holamimascotaclub@gmail.com">holamimascotaclub@gmail.com</a> · +56 9 5059 1447.
+      A esa dirección puedes escribir para cualquier cosa relacionada con tus datos.</p>
+
+      <h2>Qué datos pedimos y para qué</h2>
+      <p>Solo pedimos lo que el club necesita para funcionar. Esto es todo, sin letra chica:</p>
+      <table class="legal-tabla">
+        <thead><tr><th>Dato</th><th>Para qué lo usamos</th></tr></thead>
+        <tbody>
+          <tr><td>Tu nombre</td><td>Identificarte como socio y dirigirnos a ti</td></tr>
+          <tr><td>Tu RUT</td><td>Evitar registros duplicados y verificar que el carnet es tuyo</td></tr>
+          <tr><td>Tu correo</td><td>Enviarte el carnet, el código para entrar a tu perfil y avisos del club</td></tr>
+          <tr><td>Tu teléfono</td><td>Contactarte si hay un problema con tu cuenta o un canje</td></tr>
+          <tr><td>Tu comuna</td><td>Mostrarte los beneficios que te quedan cerca</td></tr>
+          <tr><td>Datos de tu mascota<br><span class="dim">nombre, especie, raza, edad, peso, tamaño, foto</span></td><td>Armar su perfil y su carnet</td></tr>
+          <tr><td>Notas médicas de tu mascota</td><td>Que las tengas a mano si un veterinario las necesita. Es un campo opcional y privado: no se muestra a los negocios ni a nadie más.</td></tr>
+          <tr><td>Tus visitas a negocios<br><span class="dim">fecha, negocio, monto, ahorro</span></td><td>Que tú veas tu historial y que el negocio lleve el registro de sus propias ventas</td></tr>
+        </tbody>
+      </table>
+      <p>No pedimos datos de tarjetas ni cuentas bancarias, porque hoy no cobramos nada.</p>
+
+      <h2>Qué ve un negocio cuando escaneas tu carnet</h2>
+      <p>Solo el nombre y la especie de tu mascota, tu código de socio, si tu membresía está
+      vigente y si ya habías visitado ese negocio antes. <strong>No ve tu RUT, tu correo, tu
+      teléfono, tu dirección ni las notas médicas.</strong> Y después de la visita, en su panel
+      queda registrada esa visita con el nombre de tu mascota y tu código, nada más.</p>
+
+      <h2>Dónde se guardan</h2>
+      <p>En Supabase, un servicio de base de datos cuyos servidores para este proyecto están en
+      São Paulo, Brasil. El sitio se aloja en Netlify y los correos se envían con EmailJS. Eso
+      implica que tus datos se almacenan y procesan fuera de Chile, en servidores de esos
+      proveedores.</p>
+
+      <h2>Con quién los compartimos</h2>
+      <p>Con nadie más. No vendemos, arrendamos ni cedemos tus datos a terceros con fines
+      publicitarios. Los únicos que los procesan son los proveedores nombrados arriba, y solo para
+      que el club funcione. Podríamos entregarlos si una autoridad competente lo exige por ley.</p>
+
+      <h2>Cuánto tiempo los guardamos</h2>
+      <p>Mientras tengas cuenta en el club. Si la eliminas, borramos tus datos y los de tu mascota.
+      Los registros de visitas se conservan sin ningún dato que te identifique, porque son también
+      el registro de venta del negocio.</p>
+
+      <h2>Tus derechos</h2>
+      <p>Puedes pedirnos en cualquier momento:</p>
+      <ul>
+        <li><strong>Acceder</strong> a los datos que tenemos sobre ti</li>
+        <li><strong>Corregirlos</strong> si están mal — puedes hacerlo tú mismo en tu perfil</li>
+        <li><strong>Eliminarlos</strong> — hay un botón para borrar tu cuenta en Mi Mascota ID, y también puedes pedírnoslo por correo</li>
+        <li><strong>Llevártelos</strong> a otro servicio, en un archivo</li>
+        <li><strong>Oponerte</strong> a que los usemos para algo con lo que no estés de acuerdo</li>
+      </ul>
+      <p>Escríbenos y respondemos. Si crees que no tratamos bien tus datos, puedes reclamar ante la
+      autoridad de protección de datos que corresponda en Chile.</p>
+
+      <h2>Seguridad</h2>
+      <p>Las tablas con datos personales no son accesibles públicamente: se leen solo a través de
+      funciones controladas y con una sesión válida. Para entrar a tu perfil no usamos contraseña
+      sino un código de un solo uso que enviamos a tu correo. Ningún sistema es infalible, pero
+      esto es lo que hacemos para protegerte.</p>
+
+      <h2>Fotos que subes</h2>
+      <p>La foto de tu mascota se muestra en tu carnet y en la imagen que puedes compartir si tú
+      decides hacerlo. Sube solo fotos de tu mascota; podemos eliminar contenido inapropiado.</p>
+
+      <h2>Menores de edad</h2>
+      <p>El club es para mayores de 18 años. No pedimos ni queremos datos de menores.</p>
+
+      <h2>Cambios</h2>
+      <p>Si cambiamos algo relevante de esta política, avisaremos por correo a los socios
+      registrados. La fecha de arriba indica la última versión.</p>
+
+      <p class="legal-nav"><a href="/terminos" onclick="event.preventDefault(); irATerminos();">Ver los términos y condiciones →</a></p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============================================================
      MI MASCOTA ID — PANEL DEL DUEÑO (/mi-mascota)
      El dueño entra solo con su correo: le llega un código de 6
      dígitos al mail y con eso abre sesión. No necesita acordarse
@@ -681,6 +845,27 @@
       <!-- Historial de canjes -->
       <h4 class="neg-t" style="margin-top:38px;">Tus visitas y beneficios usados</h4>
       <div id="socHistorial"></div>
+
+      <!-- Borrar la cuenta. La ley de datos personales exige poder hacerlo,
+           y esconderlo en un correo de contacto no cuenta. -->
+      <div class="soc-borrar">
+        <h4 class="neg-t" style="margin:0 0 8px;">Borrar mi cuenta</h4>
+        <p class="soc-nota" style="margin:0 0 14px;">
+          Se eliminan tus datos y los de tus mascotas: nombre, RUT, teléfono, correo, fotos y notas
+          médicas. Las visitas que ya hiciste quedan en el registro del negocio pero sin nada que te
+          identifique. Esto no se puede deshacer.
+        </p>
+        <button type="button" class="btn btn-sm btn-borrar" onclick="socioPedirBorrado()">Borrar mi cuenta</button>
+        <div id="socBorrarCaja" style="display:none;margin-top:16px;">
+          <p class="soc-nota" style="margin:0 0 10px;">Para confirmar, escribe <b>BORRAR</b> abajo.</p>
+          <div class="field" style="max-width:240px;">
+            <input id="socBorrarConfirma" placeholder="BORRAR" style="text-transform:uppercase;" autocomplete="off">
+          </div>
+          <button type="button" id="socBorrarBtn" class="btn btn-sm btn-borrar" onclick="socioBorrarCuenta()">Sí, borrar todo</button>
+          <button type="button" class="soc-link" style="margin-left:14px;" onclick="socioCancelarBorrado()">Cancelar</button>
+          <div id="socBorrarMsg" class="soc-msg" style="display:none;"></div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -953,9 +1138,8 @@
       <a href="#" onclick="event.preventDefault(); proximamente('Por qué escogernos');">Por qué escogernos</a>
 
       <h4 class="foot-t foot-t--2">Legal</h4>
-      <a href="#" onclick="event.preventDefault(); proximamente('Términos de uso');">Términos de uso</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Política de privacidad');">Política de privacidad</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Términos y condiciones');">Términos y condiciones</a>
+      <a href="/terminos" onclick="event.preventDefault(); irATerminos();">Términos y condiciones</a>
+      <a href="/privacidad" onclick="event.preventDefault(); irAPrivacidad();">Política de privacidad</a>
     </div>
 
     <div class="foot-col">
@@ -978,13 +1162,10 @@
     </div>
   </div>
 
+  <!-- Los enlaces legales viven una sola vez, en la columna LEGAL de arriba.
+       Antes se repetían aquí abajo, al lado del copyright. -->
   <div class="wrap foot-bajo">
     <div class="foot-copy">© 2026 Mi Mascota Club. Todos los derechos reservados.</div>
-    <div class="foot-legal">
-      <a href="#" onclick="event.preventDefault(); proximamente('Términos de uso');">Términos de uso</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Políticas de Privacidad');">Políticas de Privacidad</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Términos y condiciones');">Términos y condiciones</a>
-    </div>
   </div>
 </footer>
 

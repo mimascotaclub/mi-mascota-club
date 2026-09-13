@@ -324,6 +324,7 @@ function mostrarPaginaPlanes(){
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
+  document.body.classList.remove('pagina-legal');
   document.body.classList.add('pagina-planes');
   renderPageBanner('planesBanner', BANNER_PLANES);
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
@@ -340,6 +341,7 @@ function volverAlInicio(){
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
+  document.body.classList.remove('pagina-legal');
   const secValidar = document.getElementById('validar');
   if(secValidar) secValidar.style.display = 'none';
   if(location.pathname !== '/') history.pushState({}, '', '/');
@@ -353,6 +355,7 @@ function mostrarPaginaDirectorio(opts){
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
+  document.body.classList.remove('pagina-legal');
   document.body.classList.add('pagina-directorio');
   modoDirectorioEspecialistas = !!opts.especialistas;
   modoDirectorioBeneficios = !!opts.beneficios;
@@ -395,6 +398,10 @@ function manejarRutaActual(){
     mostrarPaginaSocio();
   } else if(parts[0] === 'mi-panel'){
     mostrarPaginaAdmin();
+  } else if(parts[0] === 'terminos'){
+    mostrarPaginaLegal('terminos');
+  } else if(parts[0] === 'privacidad'){
+    mostrarPaginaLegal('privacidad');
   } else if(parts[0] === 'validar'){
     /* Es la URL que trae el QR del carnet del socio. Llega el negocio, con el
        celular, después de escanear. */
@@ -407,6 +414,7 @@ function manejarRutaActual(){
     document.body.classList.remove('pagina-socio');
     document.body.classList.remove('pagina-validar');
     document.body.classList.remove('pagina-admin');
+    document.body.classList.remove('pagina-legal');
   }
 }
 window.addEventListener('popstate', manejarRutaActual);
@@ -1054,6 +1062,7 @@ function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-socio');
   document.body.classList.remove('pagina-validar');
   document.body.classList.remove('pagina-admin');
+  document.body.classList.remove('pagina-legal');
   document.body.classList.add('pagina-ficha');
   renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
@@ -1798,7 +1807,7 @@ function valMostrarPasoNegocio(cual){
 function abrirValidarConSocio(socioCodigo){
   /* Página propia, como /mi-negocio: el cajero tiene un cliente esperando y no
      puede aterrizar en la portada con el formulario escondido bajo el fold. */
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-admin');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-admin','pagina-legal');
   document.body.classList.add('pagina-validar');
   const seccion = document.getElementById('validar');
   if(!seccion) return;
@@ -2124,7 +2133,7 @@ function irAMiNegocio(){
 }
 
 function mostrarPaginaNegocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar','pagina-admin');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar','pagina-admin','pagina-legal');
   document.body.classList.add('pagina-negocio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   if(negToken()) cargarPanelNegocio();
@@ -2474,6 +2483,26 @@ async function tryUnlock(){
   }
 }
 
+/* ---------------- Páginas legales (/terminos y /privacidad) ----------------
+   Son dos artículos dentro de una misma sección: se muestra uno u otro. */
+function mostrarPaginaLegal(cual){
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-admin');
+  document.body.classList.add('pagina-legal');
+  const t = document.getElementById('legalTerminos');
+  const pr = document.getElementById('legalPrivacidad');
+  if(t)  t.style.display  = cual === 'terminos'   ? '' : 'none';
+  if(pr) pr.style.display = cual === 'privacidad' ? '' : 'none';
+  window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
+}
+function irATerminos(){
+  history.pushState({ legal:'terminos' }, '', '/terminos');
+  mostrarPaginaLegal('terminos');
+}
+function irAPrivacidad(){
+  history.pushState({ legal:'privacidad' }, '', '/privacidad');
+  mostrarPaginaLegal('privacidad');
+}
+
 /* El panel privado vive en /mi-panel. Antes existía pero no había ningún link ni
    ruta que llevara ahí — se llegaba solo escribiendo mostrarSeccion('panel') en
    la consola. No lleva link visible en el sitio a propósito: la dirección se
@@ -2484,7 +2513,7 @@ function irAMiPanel(){
 }
 
 function mostrarPaginaAdmin(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-socio','pagina-validar','pagina-legal');
   document.body.classList.add('pagina-admin');
   const sec = document.getElementById('panel');
   if(sec) sec.style.display = '';
@@ -2849,6 +2878,8 @@ async function guardarEdicionFicha(id){
 window.mostrarFormulario = mostrarFormulario;
 window.mostrarSeccion = mostrarSeccion;
 window.irAMiPanel = irAMiPanel;
+window.irATerminos = irATerminos;
+window.irAPrivacidad = irAPrivacidad;
 window.mostrarPaginaAdmin = mostrarPaginaAdmin;
 window.salirAdmin = salirAdmin;
 window.tryUnlock = tryUnlock;
@@ -2947,7 +2978,7 @@ async function salirPanelSocio(){
 }
 
 function mostrarPaginaSocio(){
-  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar','pagina-admin');
+  document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-negocio','pagina-validar','pagina-admin','pagina-legal');
   document.body.classList.add('pagina-socio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   const token = sesionSocio();
@@ -3300,6 +3331,56 @@ async function socioQuitarFoto(){
   }
 }
 
+/* ---------------- Borrar la cuenta ----------------
+   Pide escribir BORRAR para que nadie lo haga por accidente. El servidor
+   anonimiza los canjes en vez de borrarlos: la visita ocurrió y es también
+   el registro de venta del negocio, pero deja de apuntar a la persona. */
+function socioPedirBorrado(){
+  const caja = document.getElementById('socBorrarCaja');
+  if(caja) caja.style.display = '';
+  const inp = document.getElementById('socBorrarConfirma');
+  if(inp){ inp.value = ''; inp.focus(); }
+}
+function socioCancelarBorrado(){
+  const caja = document.getElementById('socBorrarCaja');
+  if(caja) caja.style.display = 'none';
+  const msg = document.getElementById('socBorrarMsg');
+  if(msg) msg.style.display = 'none';
+}
+async function socioBorrarCuenta(){
+  const msg = document.getElementById('socBorrarMsg');
+  const btn = document.getElementById('socBorrarBtn');
+  const confirma = (document.getElementById('socBorrarConfirma').value || '').trim().toUpperCase();
+  const decir = (texto, ok) => {
+    if(!msg) return;
+    msg.textContent = texto;
+    msg.className = 'soc-msg ' + (ok ? 'ok' : 'mal');
+    msg.style.display = 'block';
+  };
+
+  if(confirma !== 'BORRAR'){ decir('Escribe BORRAR para confirmar.', false); return; }
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Borrando...';
+  try{
+    const { data, error } = await supabase.rpc('socio_eliminar_cuenta', { p_token: sesionSocio() });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ decir((r && r.mensaje) || 'No se pudo borrar la cuenta.', false); return; }
+    try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
+    socMascotas = []; socActual = null;
+    document.getElementById('socPanelBox').style.display = 'none';
+    document.getElementById('socLoginBox').style.display = '';
+    socMostrarPaso('email');
+    socError('Tu cuenta fue eliminada. Gracias por haber sido parte del club.');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }catch(e){
+    console.error(e);
+    decir('No se pudo borrar la cuenta. Intenta de nuevo.', false);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Sí, borrar todo';
+  }
+}
+
 /* ---------------- Historial de canjes del dueño ---------------- */
 async function cargarHistorialSocio(){
   const cont = document.getElementById('socHistorial');
@@ -3419,6 +3500,9 @@ window.socioSeleccionar = socioSeleccionar;
 window.socioVolverAlCorreo = socioVolverAlCorreo;
 window.socioReenviarCodigo = socioReenviarCodigo;
 window.socioQuitarFoto = socioQuitarFoto;
+window.socioPedirBorrado = socioPedirBorrado;
+window.socioCancelarBorrado = socioCancelarBorrado;
+window.socioBorrarCuenta = socioBorrarCuenta;
 
 
 })();

@@ -982,3 +982,58 @@ body.pagina-admin .announce-bar{ display:none; }
 .admin-table--canjes{ overflow-x:auto; }
 .admin-table--canjes .table-row{ min-width:860px; grid-template-columns:0.7fr 0.9fr 1.2fr 1.2fr 1.6fr 0.9fr 0.9fr; }
 .admin-table--canjes .table-row .mono{ font-family:var(--font-mono); font-size:12px; }
+
+/* ======================================================================
+   PÁGINAS LEGALES (/terminos y /privacidad)
+   ====================================================================== */
+body.pagina-legal .hero,
+body.pagina-legal #categorias,
+body.pagina-legal #como-funciona,
+body.pagina-legal #directorio,
+body.pagina-legal #fichaNegocio,
+body.pagina-legal #negocios,
+body.pagina-legal #validar,
+body.pagina-legal #planes,
+body.pagina-legal #panelNegocio,
+body.pagina-legal #panelSocio,
+body.pagina-legal #panel{ display:none !important; }
+body.pagina-legal #paginaLegal{ display:block; min-height:calc(100vh - 140px); }
+body.pagina-legal .announce-bar{ display:none; }
+#paginaLegal{ display:none; }
+
+.wrap-legal{ max-width:760px; }
+.legal h1{ font-size:34px; margin:10px 0 6px; }
+.legal h2{ font-size:19px; margin:34px 0 10px; }
+.legal p, .legal li{ font-size:15px; line-height:1.7; color:#31353a; }
+.legal ul{ padding-left:20px; }
+.legal li{ margin-bottom:7px; }
+.legal a{ color:var(--teal-dark); font-weight:700; }
+.legal-fecha{ font-size:12.5px !important; color:var(--gray) !important; font-weight:600; }
+.legal-nav{ margin-top:44px; padding-top:22px; border-top:1px solid var(--line); }
+
+.legal-tabla{ width:100%; border-collapse:collapse; margin:16px 0 8px; font-size:14px; }
+.legal-tabla th{
+  text-align:left; padding:10px 12px; font-size:11px; font-weight:800;
+  letter-spacing:0.05em; text-transform:uppercase; color:var(--gray);
+  border-bottom:2px solid var(--line);
+}
+.legal-tabla td{ padding:12px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55; }
+.legal-tabla td:first-child{ font-weight:700; width:34%; }
+.legal-tabla .dim{ color:var(--gray); font-weight:500; font-size:12.5px; }
+
+@media (max-width:620px){
+  .legal h1{ font-size:27px; }
+  .legal-tabla, .legal-tabla tbody, .legal-tabla tr, .legal-tabla td{ display:block; width:100%; }
+  .legal-tabla thead{ display:none; }
+  .legal-tabla tr{ border-bottom:1px solid var(--line); padding:10px 0; }
+  .legal-tabla td{ border:0; padding:3px 0; }
+  .legal-tabla td:first-child{ width:auto; }
+}
+
+/* Borrar cuenta — zona de peligro del panel del socio */
+.soc-borrar{
+  margin-top:40px; padding:22px; border-radius:18px;
+  background:#fff; border:2px solid rgba(214,90,58,0.35);
+}
+.btn-borrar{ background:var(--rust); color:#fff; border-color:var(--rust); }
+.btn-borrar:hover{ background:#b8482c; }

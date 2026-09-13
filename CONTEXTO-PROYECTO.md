@@ -1126,3 +1126,57 @@ Es solo la primera vez en ese teléfono. Después son dos toques: escanear y con
 pelado. Alguien podría dejar calificaciones a nombre de otro. Es de bajo impacto (son estrellas,
 está limitado a plan premium y a canjes reales dentro de 72 horas), pero conviene pasarlo a token
 cuando se retome esa función.
+
+## 22. Legal, borrar cuenta y planes fuera del menú (13 de septiembre 2026)
+
+Preparación para inscribir personas reales.
+
+### 22.1 Páginas legales (`/terminos` y `/privacidad`)
+
+Antes los tres enlaces del footer abrían un "próximamente". Ahora son dos páginas de verdad,
+escritas sobre lo que el sitio **realmente** hace: la tabla de datos de la política de privacidad
+sale de las columnas reales de `socios` y `canjes`, dice que los servidores de Supabase para este
+proyecto están en São Paulo (o sea, hay transferencia internacional), y explica exactamente qué ve
+un negocio al escanear un carnet — que no es el RUT, ni el correo, ni las notas médicas.
+
+**Son un borrador para que lo revise un abogado.** El contexto que lo hace urgente: la
+**Ley 21.719** de protección de datos entra en vigencia en Chile en **diciembre de 2026**, y el
+sitio pide RUT, nombre, teléfono, correo, comuna y notas médicas.
+
+De paso se eliminó la duplicación: el footer tenía "Términos de uso" y "Términos y condiciones"
+(lo mismo con dos nombres) en la columna LEGAL, y los tres enlaces repetidos otra vez abajo junto
+al copyright. Quedó una sola vez cada uno.
+
+El correo de contacto que aparece en ambas páginas es `holamimascotaclub@gmail.com`. Si Jaime
+prefiere otro (o uno del dominio cuando lo tenga), hay que cambiarlo en los dos artículos.
+
+### 22.2 Borrar mi cuenta
+
+Botón nuevo al final de Mi Mascota ID, en una zona marcada en rojo. Pide escribir `BORRAR` para
+confirmar. Ver `supabase-borrar-cuenta-v19.sql`, ya ejecutado.
+
+Lo importante es qué pasa con los canjes: **no se borran, se anonimizan**. La visita ocurrió de
+verdad y el negocio tiene derecho a conservar el registro de su propia venta; lo que desaparece es
+todo lo que apunta a la persona. Quedan fecha, monto y negocio — datos del negocio, no del socio.
+Hubo que cambiar el FK `canjes.socio_id` a `ON DELETE SET NULL`, porque antes impedía borrar un
+socio que tuviera visitas.
+
+### 22.3 Planes fuera del menú
+
+Se quitó el enlace "Planes" del nav mientras no haya precios definitivos: mostrar $14.990 y $29.990
+ancla un número que va a cambiar, y choca con la estrategia de captar dueños gratis primero.
+
+**La ruta `/planes` sigue viva a propósito**: los avisos de plan Premium (los de las calificaciones)
+enlazan ahí y quedarían muertos. Cuando haya precios reales, se devuelve el enlace al nav — es una
+línea en `index.html`.
+
+### 22.4 Lo que falta antes de invitar gente real
+
+1. Que un abogado revise las dos páginas legales.
+2. **EmailJS gratis son 200 correos al mes.** Cada registro gasta dos (código + bienvenida) y cada
+   login de negocio gasta uno. Con ~80 inscritos se llega al tope y ahí nadie puede registrarse ni
+   entrar. Hay que resolverlo antes de promocionar.
+3. Moderación de las fotos que suben los dueños — hoy no hay ninguna.
+4. Hay un solo negocio real en el directorio. Conviene ser explícito con los primeros socios de
+   que el club está armándose, en vez de prometer beneficios que todavía no existen.
+5. El aviso por correo a Jaime en cada canje (decidido, sin construir).
