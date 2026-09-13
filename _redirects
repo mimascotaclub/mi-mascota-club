@@ -9,6 +9,9 @@
 /directorio      /index.html  200
 /especialistas/* /index.html  200
 /especialistas   /index.html  200
+/beneficios/*    /index.html  200
+/beneficios      /index.html  200
+/planes          /index.html  200
 /negocio/*       /index.html  200
 /validar/*       /index.html  200
 /validar         /index.html  200
