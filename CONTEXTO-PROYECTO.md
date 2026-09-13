@@ -1180,3 +1180,40 @@ línea en `index.html`.
 4. Hay un solo negocio real en el directorio. Conviene ser explícito con los primeros socios de
    que el club está armándose, en vez de prometer beneficios que todavía no existen.
 5. El aviso por correo a Jaime en cada canje (decidido, sin construir).
+
+## 23. Consentimiento antes de crear la cuenta (13 de septiembre 2026)
+
+Faltaba lo más básico de todo: la persona nunca autorizaba nada. Se inscribía y listo.
+
+### 23.1 Cómo quedó
+
+En el último paso del formulario de registro, junto a la selección de plan, hay una casilla que
+hay que marcar a mano: *"He leído y acepto los términos y condiciones y la política de privacidad,
+y autorizo a Mi Mascota Club a tratar los datos míos y de mi mascota..."*, con los dos enlaces
+abriéndose en pestaña nueva. El botón "Confirmar registro" queda bloqueado hasta marcarla.
+
+**Y no es solo la casilla.** `registrar_socio` recibe ahora `p_acepta_terminos` y **lanza un error
+si viene en false**, así que aunque alguien desbloquee el botón desde el navegador, el registro no
+se completa. La casilla sola no habría servido de nada.
+
+Se guardan dos columnas nuevas en `socios`: `terminos_aceptados_en` (cuándo) y `terminos_version`
+(qué versión del texto aceptó, hoy `'2026-09-13'`). Eso es lo que hace el consentimiento
+demostrable: si mañana cambian los textos, se sabe cuál aceptó cada socio.
+
+Ver `supabase-consentimiento-v20.sql`, ya ejecutado.
+
+### 23.2 Las dos cláusulas nuevas
+
+- **Términos, punto 2:** explica que se pide la casilla y que se guarda fecha y versión.
+- **Privacidad, sección nueva "Con qué autorización los tratamos":** dice que la base es el
+  consentimiento, y que se puede retirar borrando la cuenta — aclarando que retirarlo significa
+  dejar de ser socio, porque sin esos datos no se puede emitir el carnet.
+
+### 23.3 Pendiente relacionado
+
+El **formulario de negocios** (`formulario-negocio-v3.html`) todavía no pide consentimiento. Hay
+que agregarle la misma casilla antes de que se pueda inscribir un negocio.
+
+También quedó anotado que el **formulario de registro sigue mostrando los precios** Pro $2.990 y
+Premium $4.990 en el paso de planes, aunque la página `/planes` se sacó del menú justo para no
+anclar precios que van a cambiar. Es incoherente y conviene resolverlo.

@@ -182,6 +182,25 @@
   .resumen-row:last-child{ border-bottom:none; }
   .resumen-row b{ color:var(--blanco); }
 
+  /* ---------- Consentimiento antes de crear la cuenta ----------
+     Una casilla que hay que marcar a mano. El servidor además rechaza
+     el registro si no viene marcada, así que no es solo decoración. */
+  .consentimiento{
+    display:flex; gap:12px; align-items:flex-start;
+    margin-top:26px; padding:16px 18px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.16);
+    border-radius:14px; cursor:pointer; text-align:left;
+  }
+  .consentimiento input{
+    width:22px; height:22px; flex:0 0 auto; margin:1px 0 0;
+    accent-color:var(--amarillo); cursor:pointer;
+  }
+  .consentimiento span{ font-size:13.5px; line-height:1.55; color:rgba(255,255,255,0.78); }
+  .consentimiento a{ color:var(--amarillo); font-weight:700; }
+  .btn-continuar:disabled, .btn-continuar.bloqueado{
+    opacity:0.4; cursor:not-allowed; transform:none;
+  }
+
   /* ---------- Carnet final con QR ----------
      Es lo único que el socio se lleva del registro: si no ve un carnet
      con un QR, no tiene nada que mostrar en el mesón del negocio. */
@@ -471,7 +490,15 @@ function renderPaso(index, direccion){
         <div><div class="plan-nombre">Premium</div><div class="plan-desc">Todo lo anterior + beneficios exclusivos</div></div>
         <div class="plan-precio">$4.990/mes</div>
       </div>
-    </div>`;
+    </div>
+    <label class="consentimiento" for="aceptaTerminos">
+      <input type="checkbox" id="aceptaTerminos">
+      <span>He leído y acepto los
+        <a href="/terminos" target="_blank" rel="noopener">términos y condiciones</a> y la
+        <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>,
+        y autorizo a Mi Mascota Club a tratar los datos míos y de mi mascota para las
+        finalidades que ahí se describen.</span>
+    </label>`;
   }
 
   if(q.tipo === 'select-buscable'){
@@ -701,6 +728,19 @@ function renderPaso(index, direccion){
     respuestas.plan = respuestas.plan || 'free';
     btn.textContent = 'Confirmar registro';
     btn.classList.add('activo');
+
+    /* El botón queda bloqueado hasta que marque la casilla. Y aunque alguien
+       lo desbloquee a mano desde el navegador, el servidor rechaza el registro
+       igual: la aceptación es obligatoria en la base de datos. */
+    const chk = div.querySelector('#aceptaTerminos');
+    const revisarConsentimiento = () => {
+      const ok = chk && chk.checked;
+      btn.classList.toggle('bloqueado', !ok);
+      btn.disabled = !ok;
+      respuestas.acepta_terminos = !!ok;
+    };
+    if(chk) chk.addEventListener('change', revisarConsentimiento);
+    revisarConsentimiento();
     div.querySelectorAll('.plan-card').forEach(card=>{
       card.addEventListener('click', ()=>{
         div.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
@@ -731,7 +771,9 @@ function renderPaso(index, direccion){
           p_representante_telefono: '',
           p_foto: null,
           p_documentos: null,
-          p_notas_medicas: null
+          p_notas_medicas: null,
+          p_acepta_terminos: respuestas.acepta_terminos === true,
+          p_terminos_version: '2026-09-13'
         });
         if(error || !data || !data[0]){
           alert('No se pudo registrar: ' + (error?.message || 'error desconocido'));
