@@ -1395,3 +1395,37 @@ scroll (`body.menu-abierto{ overflow:hidden }`). El botón anima a una X cuando 
 
 Probado con Playwright a 390px y a 1200px: en teléfono el botón aparece y el panel navega bien; en
 escritorio el botón está oculto y la barra de siempre sigue igual. Cero errores en consola.
+
+### 27.5 Ajuste al menú y aviso en Beneficios (mismo día)
+
+Se sacaron del menú de teléfono **"Para tu mascota"** y **"Para ti como dueño"**. No eran destinos
+distintos: son los mismos filtros que ya están dentro de la página de Beneficios, en la columna de
+la izquierda. Tenerlos arriba duplicaba la navegación y alargaba un menú que en el celular tiene
+que leerse de una sola mirada. El menú quedó en cuatro cosas: Mi Mascota ID, Beneficios,
+Sugerencias y el botón de unirse.
+
+En su lugar, la página de Beneficios (`/beneficios`) tiene ahora un aviso fijo arriba del listado:
+
+> **Cada semana se suman negocios nuevos.**
+> Aquí vas a encontrar los negocios adheridos al club con beneficios para tu mascota y para ti
+> como dueño. La lista crece todas las semanas, así que vuelve a mirar seguido. ¿Conoces un
+> negocio que debería estar acá? Cuéntanos y lo vamos a buscar.
+> [Recomendar un negocio →]
+
+Tres cosas que hace este bloque, y por eso queda puesto para siempre y no solo mientras la lista
+esté corta:
+
+1. **Explica de qué van los beneficios** — que hay para la mascota y para el dueño. Eso reemplaza
+   a los dos ítems que se sacaron del menú.
+2. **Da una razón para volver.** Un directorio sin esta línea se lee como una lista terminada. Con
+   ella se lee como algo que está creciendo.
+3. **Convierte al socio en buscador de negocios.** El botón lleva a `/sugerencias`, que ya pide
+   nombre y correo, así que cada recomendación llega identificada.
+
+El texto es a propósito genérico: no dice cuántos negocios hay ni nombra ninguno, así que no
+envejece ni hay que editarlo cuando la lista crezca.
+
+Técnicamente el bloque (`#benAviso`) vive en el mismo `<section id="directorio">` que el directorio
+—porque `/beneficios` reutiliza esa vista— y `mostrarPaginaDirectorio()` le pone o le saca el
+atributo `hidden` según `modoDirectorioBeneficios`. En `/directorio` y en `/especialistas` no
+aparece. Probado también entrando directo a la URL, no solo navegando desde el home.

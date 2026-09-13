@@ -72,9 +72,9 @@
       </span>
     </a>
 
+    <!-- "Para tu mascota" y "Para ti como dueño" no van aquí: son filtros que ya
+         viven dentro de Beneficios. En el teléfono el menú tiene que ser corto. -->
     <a href="/beneficios" onclick="event.preventDefault(); cerrarMenuMovil(); irABeneficios();">Beneficios</a>
-    <a href="/directorio" onclick="event.preventDefault(); cerrarMenuMovil(); irADirectorio({ tipo:'mascota' });">Para tu mascota</a>
-    <a href="/directorio" onclick="event.preventDefault(); cerrarMenuMovil(); irADirectorio({ tipo:'dueno' });">Para ti como dueño</a>
     <a href="/sugerencias" onclick="event.preventDefault(); cerrarMenuMovil(); irASugerencias();">Sugerencias</a>
 
     <button type="button" class="btn btn-primary menu-movil__cta"
@@ -155,6 +155,22 @@
       </div>
       <div class="featured-strip" id="featuredStrip"></div>
     </div>
+    <!-- Aviso fijo de la vista /beneficios. Se muestra siempre, tenga el club
+         3 negocios o 300: explica qué es esto y de dónde salen los negocios
+         nuevos. Se oculta solo en /directorio y /especialistas (ver
+         mostrarPaginaDirectorio en js/app.js). -->
+    <div class="ben-aviso" id="benAviso" hidden>
+      <div class="ben-aviso__ic">🐾</div>
+      <div class="ben-aviso__txt">
+        <b>Cada semana se suman negocios nuevos.</b>
+        <p>Aquí vas a encontrar los negocios adheridos al club con beneficios para tu mascota
+        y para ti como dueño. La lista crece todas las semanas, así que vuelve a mirar seguido.
+        ¿Conoces un negocio que debería estar acá? Cuéntanos y lo vamos a buscar.</p>
+      </div>
+      <a class="btn btn-sm btn-primary ben-aviso__cta" href="/sugerencias"
+         onclick="event.preventDefault(); irASugerencias();">Recomendar un negocio</a>
+    </div>
+
     <div class="section-head" style="margin-bottom:22px;margin-top:30px;">
       <span class="eyebrow" id="dirEyebrow" style="color:var(--brass);background:rgba(200,155,60,0.15);">Directorio</span>
     </div>

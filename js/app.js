@@ -365,6 +365,13 @@ function mostrarPaginaDirectorio(opts){
   const eyebrow = document.getElementById('dirEyebrow');
   if(eyebrow) eyebrow.textContent = modoDirectorioBeneficios ? 'Beneficios' : (modoDirectorioEspecialistas ? 'Especialistas' : 'Directorio');
   renderPageBanner('dirBanner', modoDirectorioBeneficios ? BANNER_BENEFICIOS : (modoDirectorioEspecialistas ? BANNER_ESPECIALISTAS : BANNER_DIRECTORIO));
+  /* El aviso de "cada semana sumamos negocios" es propio de /beneficios y va
+     siempre arriba del listado, tenga el club pocos negocios o muchos. */
+  const benAviso = document.getElementById('benAviso');
+  if(benAviso){
+    if(modoDirectorioBeneficios) benAviso.removeAttribute('hidden');
+    else benAviso.setAttribute('hidden','');
+  }
   const featuredWrap = document.getElementById('featuredStripWrap');
   if(modoDirectorioEspecialistas || modoDirectorioBeneficios){
     if(featuredWrap) featuredWrap.style.display = 'none';
