@@ -1563,3 +1563,47 @@ Los dos PNG se generaron a partir del SVG:
 
 Si el ícono no cambia al recargar, es la caché del navegador: los favicon son de los archivos que
 más se guardan en caché. Se ve al tiro en una ventana de incógnito.
+
+---
+
+## 30. Dominio propio: mimascotaclub.cl (13 de septiembre, 2026)
+
+Comprado en Hostinger, con renovación automática activada y vencimiento el 13 de septiembre de
+2027. El sitio sigue alojado en Netlify (proyecto `mimascotaclub`); Hostinger es solo el registrador
+del nombre.
+
+### 30.1 Qué se cambió en el código
+
+- Las tres URL absolutas que quedaban apuntando a `mimascotaclub.netlify.app` pasaron a
+  `https://mimascotaclub.cl`: las dos plantillas de correo y el botón "Explorar los beneficios" de
+  la pantalla final del formulario de registro.
+- Todo lo demás ya era relativo o usaba `location.origin`, así que se adaptó solo. El QR del carnet,
+  en particular, se dibuja con el dominio desde el que entra la persona: no hubo que tocarlo.
+
+### 30.2 Vista previa al compartir el enlace (Open Graph)
+
+El sitio **nunca tuvo etiquetas de vista previa**. Compartir el enlace por WhatsApp mostraba el
+link pelado, sin imagen ni descripción — justo lo contrario de lo que se quiere cuando el enlace
+se va a repartir por WhatsApp e Instagram.
+
+Se agregaron a `index.html` y a `formulario-registro-demo-v3.html`: `description`, `canonical`,
+`og:*` y `twitter:card`, cada una con su propio título y texto (el del formulario está escrito
+para el momento en que alguien recibe el enlace de inscripción, no para el sitio en general).
+
+La imagen es `assets/images/og-image.png`, de 1200×630 px, generada a partir del logo: fondo negro
+de la marca, el logo, el titular "Beneficios reales para tu mascota y para ti como dueño" y la
+franja amarillo/turquesa abajo.
+
+**Limitación conocida:** el sitio es de una sola página, así que `/beneficios`, `/sugerencias` y
+las demás rutas comparten las etiquetas del `index.html`. WhatsApp y Facebook no ejecutan
+JavaScript, así que no se pueden cambiar por ruta sin partir el sitio en archivos HTML separados.
+No vale la pena hoy.
+
+### 30.3 Qué queda pendiente del dominio
+
+- Conectarlo en Netlify (Domain management → Add a domain) y crear los dos registros DNS en
+  Hostinger. Ver el paso a paso en el chat del 13 de septiembre.
+- Cuando esté andando, revisar que el certificado HTTPS se haya emitido solo (Netlify lo hace con
+  Let's Encrypt, tarda unos minutos después de que el DNS propaga).
+- El dominio `mimascotaclub.netlify.app` sigue funcionando y redirige al nuevo. No se rompe ningún
+  correo ya enviado.

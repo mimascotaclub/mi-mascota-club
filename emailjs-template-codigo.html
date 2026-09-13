@@ -1,0 +1,111 @@
+<!--
+  ============================================================
+  PLANTILLA DE EMAILJS · CÓDIGO DE ACCESO  (template OTP)
+  ------------------------------------------------------------
+  Este correo lo manda la función netlify/functions/enviar-codigo.js
+  y se usa en TRES momentos distintos:
+    · cuando un socio se registra,
+    · cuando un socio entra a Mi Mascota ID,
+    · cuando un negocio entra a /mi-negocio o a /validar.
+  Por eso el texto es neutro: no dice "bienvenido" ni "socio".
+
+  VARIABLES DISPONIBLES (son las únicas dos que manda la función):
+    {{codigo}}     el número de 6 dígitos
+    {{to_email}}   el correo de destino
+
+  EN EMAILJS:
+    · "To Email"  →  {{to_email}}
+    · "Subject"   →  {{codigo}} es tu código de Mi Mascota Club
+    · "From Name" →  Mi Mascota Club
+    · Contenido   →  pegar todo lo que va debajo de esta nota,
+                     en la vista de código (</> Code Editor).
+  ============================================================
+-->
+<div style="margin:0;padding:0;background:#f4f4f2;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f2;padding:24px 12px;">
+<tr><td align="center">
+
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;font-family:Lato,'Segoe UI',Helvetica,Arial,sans-serif;">
+
+    <!-- Encabezado: el logo lleva al sitio -->
+    <tr>
+      <td align="center" style="background:#151515;padding:26px 20px;">
+        <a href="https://mimascotaclub.cl" target="_blank" style="text-decoration:none;">
+          <img src="https://mimascotaclub.cl/assets/images/logo-email.png"
+               alt="Mi Mascota Club" width="230"
+               style="display:block;border:0;width:230px;max-width:70%;height:auto;color:#ffffff;font-family:Lato,Helvetica,Arial,sans-serif;font-size:19px;font-weight:900;text-decoration:none;">
+        </a>
+      </td>
+    </tr>
+
+    <!-- Cuerpo -->
+    <tr>
+      <td style="padding:34px 34px 8px;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#8a908a;">
+          Verificación
+        </p>
+        <h1 style="margin:0 0 14px;font-size:25px;line-height:1.25;color:#1A1A1A;font-weight:900;">
+          Tu código de acceso
+        </h1>
+        <p style="margin:0 0 26px;font-size:15px;line-height:1.6;color:#4a524a;">
+          Escribe este código en la pantalla donde lo pediste. Es de un solo uso.
+        </p>
+      </td>
+    </tr>
+
+    <!-- El código -->
+    <tr>
+      <td style="padding:0 34px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center" style="background:#FFF8DE;border:2px solid #FFCE00;border-radius:14px;padding:26px 16px;">
+              <div style="font-family:'Courier New',Courier,monospace;font-size:40px;line-height:1;font-weight:700;letter-spacing:0.16em;color:#1A1A1A;">
+                {{codigo}}
+              </div>
+              <div style="margin-top:12px;font-size:13px;color:#7a8377;">
+                Vence en 10 minutos
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Aviso de seguridad -->
+    <tr>
+      <td style="padding:26px 34px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="background:#f7f8f7;border-radius:12px;padding:16px 18px;">
+              <p style="margin:0;font-size:13.5px;line-height:1.6;color:#5a6259;">
+                <strong style="color:#1A1A1A;">¿No pediste este código?</strong><br>
+                Ignora este correo. Nadie puede entrar a tu cuenta solo con tu dirección:
+                el código llega siempre acá, a tu bandeja. Y nunca te vamos a pedir
+                que nos lo respondas ni que nos lo mandes por mensaje.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Pie -->
+    <tr>
+      <td style="padding:28px 34px 32px;">
+        <hr style="border:0;border-top:1px solid #e6e8e6;margin:0 0 18px;">
+        <p style="margin:0 0 6px;font-size:12.5px;line-height:1.6;color:#8a908a;">
+          Enviado a {{to_email}} por
+          <a href="https://mimascotaclub.cl" target="_blank" style="color:#1A1A1A;text-decoration:none;font-weight:700;">Mi Mascota Club</a>.
+        </p>
+        <p style="margin:0;font-size:12.5px;line-height:1.6;color:#8a908a;">
+          ¿Dudas? Escríbenos a
+          <a href="mailto:holamimascotaclub@gmail.com" style="color:#1A1A1A;text-decoration:underline;">holamimascotaclub@gmail.com</a>
+        </p>
+      </td>
+    </tr>
+
+  </table>
+
+</td></tr>
+</table>
+</div>

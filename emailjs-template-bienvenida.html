@@ -1,0 +1,192 @@
+<!--
+  ============================================================
+  PLANTILLA DE EMAILJS · BIENVENIDA  (template_u9x5p1i)
+  ------------------------------------------------------------
+  Se manda una sola vez, justo después de que alguien completa el
+  registro en /registro (formulario-registro-demo-v3.html).
+
+  VARIABLES DISPONIBLES (las que manda el formulario):
+    {{to_name}}        nombre de la persona
+    {{mascota}}        nombre de la mascota
+    {{codigo}}         código de socio, ej. MMC00001
+    {{carnet_url}}     enlace a Mi Mascota ID
+    {{mensaje_extra}}  frase de cierre que arma el formulario
+    {{to_email}}       correo de destino
+
+  EN EMAILJS:
+    · "To Email"  →  {{to_email}}
+    · "Subject"   →  ¡Bienvenido al club, {{to_name}}! Este es el carnet de {{mascota}}
+    · "From Name" →  Mi Mascota Club
+    · Contenido   →  pegar todo lo que va debajo de esta nota,
+                     en la vista de código (</> Code Editor).
+  ============================================================
+-->
+<div style="margin:0;padding:0;background:#f4f4f2;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f2;padding:24px 12px;">
+<tr><td align="center">
+
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;font-family:Lato,'Segoe UI',Helvetica,Arial,sans-serif;">
+
+    <!-- Encabezado: el logo lleva al sitio -->
+    <tr>
+      <td align="center" style="background:#151515;padding:26px 20px;">
+        <a href="https://mimascotaclub.cl" target="_blank" style="text-decoration:none;">
+          <img src="https://mimascotaclub.cl/assets/images/logo-email.png"
+               alt="Mi Mascota Club" width="230"
+               style="display:block;border:0;width:230px;max-width:70%;height:auto;color:#ffffff;font-family:Lato,Helvetica,Arial,sans-serif;font-size:19px;font-weight:900;text-decoration:none;">
+        </a>
+      </td>
+    </tr>
+
+    <!-- Saludo -->
+    <tr>
+      <td style="padding:34px 34px 0;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#8a908a;">
+          Ya eres parte del club
+        </p>
+        <h1 style="margin:0 0 14px;font-size:26px;line-height:1.25;color:#1A1A1A;font-weight:900;">
+          ¡Bienvenido, {{to_name}}!
+        </h1>
+        <p style="margin:0 0 24px;font-size:15.5px;line-height:1.65;color:#4a524a;">
+          {{mascota}} ya tiene su carnet. Desde hoy los dos son parte de
+          Mi Mascota Club, y el carnet es lo único que necesitan para usar
+          los beneficios en los negocios adheridos.
+        </p>
+      </td>
+    </tr>
+
+    <!-- Carnet: código + botón -->
+    <tr>
+      <td style="padding:0 34px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center" style="background:#FFF8DE;border:2px solid #FFCE00;border-radius:16px;padding:26px 20px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#8a7a3a;">
+                Código de socio de {{mascota}}
+              </div>
+              <div style="margin-top:10px;font-family:'Courier New',Courier,monospace;font-size:31px;line-height:1;font-weight:700;letter-spacing:0.09em;color:#1A1A1A;">
+                {{codigo}}
+              </div>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
+                <tr>
+                  <td align="center" bgcolor="#1A1A1A" style="border-radius:999px;">
+                    <a href="{{carnet_url}}" target="_blank"
+                       style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:900;color:#ffffff;text-decoration:none;border-radius:999px;">
+                      Ver mi carnet &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="margin-top:14px;font-size:12.5px;line-height:1.55;color:#7a8377;">
+                Guarda ese enlace en tu teléfono.<br>Entras con tu correo y un código de 6 dígitos.
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Cómo se usa -->
+    <tr>
+      <td style="padding:32px 34px 0;">
+        <h2 style="margin:0 0 16px;font-size:17px;font-weight:900;color:#1A1A1A;">Cómo se usa</h2>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="34" valign="top" style="padding-bottom:14px;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#47C9C9;color:#ffffff;font-size:13px;font-weight:900;text-align:center;line-height:26px;">1</div>
+            </td>
+            <td valign="top" style="padding-bottom:14px;font-size:14.5px;line-height:1.6;color:#4a524a;">
+              Llegas al negocio y dices que eres socio de Mi Mascota Club.
+            </td>
+          </tr>
+          <tr>
+            <td width="34" valign="top" style="padding-bottom:14px;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#47C9C9;color:#ffffff;font-size:13px;font-weight:900;text-align:center;line-height:26px;">2</div>
+            </td>
+            <td valign="top" style="padding-bottom:14px;font-size:14.5px;line-height:1.6;color:#4a524a;">
+              Muestras tu carnet desde el teléfono, o simplemente dictas tu código <strong style="color:#1A1A1A;">{{codigo}}</strong>.
+            </td>
+          </tr>
+          <tr>
+            <td width="34" valign="top" style="padding-bottom:6px;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#47C9C9;color:#ffffff;font-size:13px;font-weight:900;text-align:center;line-height:26px;">3</div>
+            </td>
+            <td valign="top" style="padding-bottom:6px;font-size:14.5px;line-height:1.6;color:#4a524a;">
+              El negocio confirma la visita y te aplica el beneficio. Queda anotada en tu carnet.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Sugerencias -->
+    <tr>
+      <td style="padding:30px 34px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="background:#EAF9F9;border-radius:16px;padding:24px 22px;">
+              <h2 style="margin:0 0 8px;font-size:17px;font-weight:900;color:#1A1A1A;">
+                Ayúdanos a hacer crecer el club
+              </h2>
+              <p style="margin:0 0 18px;font-size:14.5px;line-height:1.6;color:#4a524a;">
+                Cada semana sumamos negocios nuevos. ¿Hay una veterinaria, una peluquería
+                o un café pet-friendly que te encanta y debería estar acá? Cuéntanos y
+                lo vamos a buscar. También queremos saber qué le falta al club: lo leemos todo.
+              </p>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" bgcolor="#FFCE00" style="border-radius:999px;">
+                    <a href="https://mimascotaclub.cl/sugerencias" target="_blank"
+                       style="display:inline-block;padding:13px 26px;font-size:14.5px;font-weight:900;color:#1A1A1A;text-decoration:none;border-radius:999px;">
+                      Dejar una sugerencia
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:14px 0 0;font-size:12.5px;line-height:1.55;color:#5a6259;">
+                O respóndenos este correo a
+                <a href="mailto:holamimascotaclub@gmail.com" style="color:#1A1A1A;text-decoration:underline;font-weight:700;">holamimascotaclub@gmail.com</a>.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Cierre -->
+    <tr>
+      <td style="padding:28px 34px 0;">
+        <p style="margin:0;font-size:14.5px;line-height:1.65;color:#4a524a;">
+          {{mensaje_extra}}
+        </p>
+      </td>
+    </tr>
+
+    <!-- Pie -->
+    <tr>
+      <td style="padding:26px 34px 32px;">
+        <hr style="border:0;border-top:1px solid #e6e8e6;margin:0 0 18px;">
+        <p style="margin:0 0 8px;font-size:12.5px;line-height:1.6;color:#8a908a;">
+          Recibes este correo porque te registraste en
+          <a href="https://mimascotaclub.cl" target="_blank" style="color:#1A1A1A;text-decoration:none;font-weight:700;">Mi Mascota Club</a>
+          con la dirección {{to_email}}.
+        </p>
+        <p style="margin:0 0 8px;font-size:12.5px;line-height:1.6;color:#8a908a;">
+          <a href="https://mimascotaclub.cl/terminos" target="_blank" style="color:#8a908a;text-decoration:underline;">Términos y condiciones</a>
+          &nbsp;·&nbsp;
+          <a href="https://mimascotaclub.cl/privacidad" target="_blank" style="color:#8a908a;text-decoration:underline;">Política de privacidad</a>
+        </p>
+        <p style="margin:0;font-size:12.5px;line-height:1.6;color:#8a908a;">
+          Puedes borrar tu cuenta y todos tus datos cuando quieras, desde tu carnet en Mi Mascota ID.
+        </p>
+      </td>
+    </tr>
+
+  </table>
+
+</td></tr>
+</table>
+</div>
