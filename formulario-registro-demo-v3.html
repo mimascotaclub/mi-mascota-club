@@ -277,6 +277,14 @@
   .plan-nombre{ color:var(--blanco); font-weight:900; font-size:17px; }
   .plan-desc{ color:rgba(255,255,255,0.5); font-size:13px; margin-top:4px; }
   .plan-precio{ color:var(--amarillo); font-weight:900; font-size:18px; white-space:nowrap; }
+  /* Planes que todavía no existen: se muestran para que se sepa que vienen,
+     pero sin precio (no está definido) y sin poder elegirlos. */
+  .plan-card.bloqueado{ opacity:0.55; cursor:default; border-style:dashed; }
+  .plan-card.bloqueado:hover{ border-color:rgba(255,255,255,0.18); }
+  .plan-pronto{
+    color:var(--turquesa); font-weight:900; font-size:11px;
+    letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;
+  }
 
   .hint.ok{ color:var(--turquesa); }
 
@@ -479,16 +487,16 @@ function renderPaso(index, direccion){
   if(q.tipo === 'plan'){
     camposHtml = `<div class="planes-grid">
       <div class="plan-card selected" data-plan="free">
-        <div><div class="plan-nombre">Free</div><div class="plan-desc">Directorio, carnet digital y descuentos base</div></div>
+        <div><div class="plan-nombre">Free</div><div class="plan-desc">Directorio, carnet digital y todos los beneficios de socio</div></div>
         <div class="plan-precio">Gratis</div>
       </div>
-      <div class="plan-card" data-plan="pro">
-        <div><div class="plan-nombre">Pro</div><div class="plan-desc">Incluye calificar negocios y ver reputación</div></div>
-        <div class="plan-precio">$2.990/mes</div>
+      <div class="plan-card bloqueado">
+        <div><div class="plan-nombre">Pro</div><div class="plan-desc">Calificar negocios y ver su reputación</div></div>
+        <div class="plan-pronto">Muy pronto</div>
       </div>
-      <div class="plan-card" data-plan="premium">
+      <div class="plan-card bloqueado">
         <div><div class="plan-nombre">Premium</div><div class="plan-desc">Todo lo anterior + beneficios exclusivos</div></div>
-        <div class="plan-precio">$4.990/mes</div>
+        <div class="plan-pronto">Muy pronto</div>
       </div>
     </div>
     <label class="consentimiento" for="aceptaTerminos">
@@ -741,19 +749,16 @@ function renderPaso(index, direccion){
     };
     if(chk) chk.addEventListener('change', revisarConsentimiento);
     revisarConsentimiento();
-    div.querySelectorAll('.plan-card').forEach(card=>{
+    /* Solo se puede elegir Free: los otros dos están de muestra, sin precio,
+       hasta que se definan de verdad. */
+    div.querySelectorAll('.plan-card:not(.bloqueado)').forEach(card=>{
       card.addEventListener('click', ()=>{
         div.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
         card.classList.add('selected');
         respuestas.plan = card.dataset.plan;
-        btn.textContent = card.dataset.plan === 'free' ? 'Confirmar registro' : 'Ir a pagar';
       });
     });
     btn.addEventListener('click', async ()=>{
-      if(respuestas.plan !== 'free'){
-        alert('Aquí se conectará el checkout de Mercado Pago (pendiente de integrar).');
-        return;
-      }
       btn.textContent = 'Registrando...';
       btn.classList.remove('activo');
       try{
