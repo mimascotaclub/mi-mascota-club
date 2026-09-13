@@ -438,28 +438,67 @@ function irAMiMascota(){
   history.pushState({ miMascota:true }, '', '/mi-mascota');
   mostrarPaginaSocio();
 }
+/* ============================================================
+   ¿ESTÁ ABIERTO EL REGISTRO DE NEGOCIOS?
+   ------------------------------------------------------------
+   En false (13 de septiembre de 2026): el club está abriendo con
+   socios reales, pero el circuito del negocio —cómo se registra,
+   cómo se aprueba, cómo valida una visita— todavía se está
+   afinando. Un negocio que se inscribe solo y queda esperando es
+   una mala primera impresión que no se puede deshacer.
+
+   Mientras esté en false:
+     · El botón "Quiero unirme al club" muestra el registro de
+       negocios apagado, con la etiqueta "Próximamente".
+     · El formulario sigue vivo y funcionando en
+       /formulario-negocio — solo que nadie llega solo. Se le manda
+       el enlace a los negocios que se quieran sumar a mano.
+
+   PARA ABRIRLO: cambiar esta línea a true. Nada más.
+   ============================================================ */
+const NEGOCIOS_ABIERTO = false;
+
+/* Las dos URL públicas de los formularios. Los archivos en el
+   repositorio tienen otro nombre (…-v3.html); estas rutas limpias
+   las sirve Netlify con las reglas del archivo _redirects. */
+const URL_REGISTRO_SOCIO   = '/registro';
+const URL_REGISTRO_NEGOCIO = '/formulario-negocio';
+
 function abrirElegirCamino(){
+  const botonNegocio = NEGOCIOS_ABIERTO
+    ? `<button type="button" class="btn btn-brass" style="width:100%;justify-content:center;" onclick="mostrarFormulario('negocio')">🏪 Soy un negocio</button>`
+    : `<div class="camino-pronto">
+         <span>🏪 Soy un negocio</span>
+         <em>Próximamente</em>
+       </div>
+       <p style="font-size:12.5px;color:#7a8377;margin:-4px 0 0;line-height:1.5;">
+         Estamos terminando de armar la experiencia para los negocios.
+         ¿Tienes uno, o conoces alguno que debería estar en el club?
+         <a href="/sugerencias" onclick="event.preventDefault(); closeModal(); irASugerencias();"
+            style="color:var(--brass);text-decoration:underline;font-weight:800;">Cuéntanos aquí</a>.
+       </p>`;
   openModal(`
     <div style="text-align:center;padding:6px 2px 4px;">
       <h3 style="margin:0 0 6px;">¿Cómo quieres unirte?</h3>
       <p style="font-size:13.5px;color:#5a6259;margin:0 0 22px;">Elige un camino para continuar.</p>
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <button type="button" class="btn btn-brass" style="width:100%;justify-content:center;" onclick="mostrarFormulario('negocio')">🏪 Soy un negocio</button>
         <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="mostrarFormulario('dueno')">🐾 Quiero registrar mi mascota</button>
+        ${botonNegocio}
       </div>
     </div>
   `);
 }
 function mostrarFormulario(tipo){
   if(tipo === 'negocio'){
-    // El registro de negocios ahora usa el formulario v3 (ficha, beneficio en 3 pasos
-    // y aprobación manual). El asistente antiguo del index queda como respaldo.
-    window.location.href = '/formulario-negocio-v3.html';
+    // Guardia por si alguien llama a esta función con el registro cerrado
+    // (por ejemplo desde un enlace viejo o desde la consola del navegador).
+    if(!NEGOCIOS_ABIERTO){ toast('El registro de negocios todavía no está abierto.'); return; }
+    window.location.href = URL_REGISTRO_NEGOCIO;
     return;
   }
   if(tipo === 'dueno'){
-    // El registro de mascota ahora usa el formulario animado v3 (con verificación OTP)
-    window.location.href = '/formulario-registro-demo-v3.html';
+    // El registro de mascota usa el formulario animado con verificación por código.
+    window.location.href = URL_REGISTRO_SOCIO;
     return;
   }
   closeModal();
@@ -1023,7 +1062,7 @@ function abrirBeneficio(){
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" onclick="confirmarBeneficio()">Mostrar mi carnet</button>
       <div style="margin-top:14px;font-size:12.5px;color:#6B7280;text-align:center;line-height:1.5;">
         ¿Todavía no eres socio?
-        <a href="formulario-registro-demo-v3.html" style="color:var(--brass);text-decoration:underline;font-weight:800;">Regístrate gratis →</a>
+        <a href="/registro" style="color:var(--brass);text-decoration:underline;font-weight:800;">Regístrate gratis →</a>
       </div>
     </div>
   `);
@@ -1532,7 +1571,11 @@ function renderTrustMarquee(){
   });
 
   const faltan = Math.max(espacios - tarjetas.length, 0);
-  const placeholders = Array.from({length:faltan}, () => `<div class="trust-card" onclick="abrirElegirCamino()">➕ Tu negocio aquí</div>`);
+  /* Con el registro de negocios cerrado, los espacios libres de la cinta
+     llevan a Sugerencias (donde sí se puede recomendar un negocio) en vez
+     de a un formulario que todavía no está abierto. */
+  const accionHueco = NEGOCIOS_ABIERTO ? 'abrirElegirCamino()' : 'irASugerencias()';
+  const placeholders = Array.from({length:faltan}, () => `<div class="trust-card" onclick="${accionHueco}">➕ Tu negocio aquí</div>`);
   const html = [...tarjetas, ...placeholders].join('');
   track.innerHTML = html + html;   // duplicado para que el bucle no tenga costura
 }

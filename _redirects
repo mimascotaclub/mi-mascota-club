@@ -21,3 +21,16 @@
 /terminos        /index.html  200
 /privacidad      /index.html  200
 /sugerencias     /index.html  200
+
+# ---------------------------------------------------------------------
+# URLs "bonitas" de los dos formularios.
+# Los archivos siguen llamándose formulario-registro-demo-v3.html y
+# formulario-negocio-v3.html (no se renombraron para no romper nada),
+# pero nadie ve ese nombre: la regla 200 sirve el archivo SIN cambiar
+# lo que muestra la barra de direcciones.
+#   mimascotaclub.netlify.app/registro            → registro de socios
+#   mimascotaclub.netlify.app/formulario-negocio  → registro de negocios
+# El enlace que se reparte es SIEMPRE /registro.
+# ---------------------------------------------------------------------
+/registro            /formulario-registro-demo-v3.html  200
+/formulario-negocio  /formulario-negocio-v3.html        200

@@ -1483,3 +1483,83 @@ aparecían al revisar Supabase.
 
 La cinta de logos pagados (`js/logos-partners.js`) ya estaba vacía — los dos ejemplos que tiene
 están comentados. No hubo que tocarla.
+
+---
+
+## 29. Cerrar el registro de negocios, URLs limpias y favicon (13 de septiembre, 2026)
+
+### 29.1 El registro de negocios queda cerrado al público
+
+El club abre con socios reales, pero el circuito del negocio —cómo se inscribe, cómo se aprueba,
+cómo valida una visita— todavía no está probado de punta a punta. Un negocio que se inscribe solo
+y queda esperando una respuesta que no llega es una primera impresión que no se puede deshacer, y
+un negocio es mucho más difícil de recuperar que un socio.
+
+La solución es una sola línea al principio de `js/app.js`:
+
+```js
+const NEGOCIOS_ABIERTO = false;
+```
+
+Con eso en `false`:
+
+- La ventana "¿Cómo quieres unirte?" pone **primero** el botón de registrar mascota, y debajo
+  muestra "🏪 Soy un negocio" apagado, con etiqueta amarilla **PRÓXIMAMENTE** y una línea que
+  invita a recomendar negocios por `/sugerencias`.
+- Los espacios vacíos de la cinta de logos ("➕ Tu negocio aquí") llevan a `/sugerencias` en vez de
+  al formulario.
+- `mostrarFormulario('negocio')` tiene una guardia: si alguien la llama igual —desde un enlace
+  viejo o desde la consola— avisa y no navega.
+- **El formulario sigue vivo y funcionando** en `/formulario-negocio`. No se llega solo; se le
+  manda el enlace a mano a los negocios que se quieran sumar.
+
+**Para abrirlo al público:** cambiar esa línea a `true`. Nada más.
+
+### 29.2 URLs limpias de los dos formularios
+
+Antes la barra de direcciones mostraba `formulario-registro-demo-v3.html` — un nombre de archivo de
+trabajo, con la palabra "demo" adentro, en el enlace que se iba a repartir por WhatsApp.
+
+Ahora:
+
+| Lo que ve la gente | Archivo que se sirve |
+|---|---|
+| `mimascotaclub.netlify.app/registro` | `formulario-registro-demo-v3.html` |
+| `mimascotaclub.netlify.app/formulario-negocio` | `formulario-negocio-v3.html` |
+
+Se hizo con dos reglas `200` en `_redirects`, **no renombrando los archivos**. Una regla 200 en
+Netlify es una reescritura: sirve el archivo sin cambiar lo que muestra la barra de direcciones.
+Se eligió así a propósito, porque el formulario de socios está a punto de salir a gente real y
+renombrar el archivo tocaría el despliegue, el historial de Git y cualquier enlace guardado. Con
+la reescritura no se mueve ni un byte de los formularios.
+
+**El enlace que se reparte es `/registro`.** Las URLs viejas siguen respondiendo (el archivo está
+ahí), pero ya no hay nada en el sitio que apunte a ellas.
+
+### 29.3 Favicon
+
+El sitio nunca declaró un ícono, así que en la pestaña salía la hoja en blanco del navegador. El
+archivo `assets/favicon.svg` (la casita amarilla con la huella) ya existía y se usaba dentro del
+carnet, pero no estaba enlazado en el `<head>`.
+
+Netlify no tiene una casilla de "favicon": el ícono es parte del sitio, se declara en el HTML. Se
+agregó a las **tres** páginas (`index.html` y los dos formularios):
+
+```html
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#FFCE00">
+```
+
+Los dos PNG se generaron a partir del SVG:
+
+- `favicon-32.png` — respaldo para navegadores que no leen SVG, fondo transparente.
+- `apple-touch-icon.png` — el que sale al guardar el sitio en la pantalla de inicio del iPhone.
+  Va **sobre fondo blanco y con aire alrededor** a propósito: iOS pinta de negro cualquier
+  transparencia, y el logo tiene contorno negro, así que sobre transparente se perdería.
+
+`theme-color` es el color de la barra del navegador en Android cuando se abre el sitio.
+
+Si el ícono no cambia al recargar, es la caché del navegador: los favicon son de los archivos que
+más se guardan en caché. Se ve al tiro en una ventana de incógnito.

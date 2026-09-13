@@ -1194,3 +1194,27 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
   }
   .ben-aviso__cta{ width:100%; text-align:center; }
 }
+
+/* ============================================================
+   OPCIÓN APAGADA EN "¿CÓMO QUIERES UNIRTE?"
+   El registro de negocios está cerrado mientras se afina el
+   circuito (ver NEGOCIOS_ABIERTO en js/app.js). Se muestra con
+   la misma forma de un botón, pero sin cursor ni clic, para que
+   se lea como "esto existe y viene", no como un error.
+   ============================================================ */
+.camino-pronto{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; padding:13px 18px;
+  border:2px dashed var(--line);
+  border-radius:14px;
+  background:rgba(26,26,26,0.02);
+  color:rgba(26,26,26,0.45);
+  font-weight:800; font-size:14.5px;
+  cursor:default; user-select:none;
+}
+.camino-pronto em{
+  font-style:normal;
+  font-size:9.5px; font-weight:900; letter-spacing:0.07em; text-transform:uppercase;
+  padding:3px 8px; border-radius:999px;
+  color:#1A1A1A; background:var(--yellow);
+}
