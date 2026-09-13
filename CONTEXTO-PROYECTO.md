@@ -1660,3 +1660,60 @@ EmailJS marque ~150 de 200, se comparan **Brevo** (300 correos al día en su pla
 **Resend** (3.000 al mes), y se elige el que dé más por menos si hay que pagar. El cambio toca
 `netlify/functions/enviar-codigo.js`, el envío del formulario de registro y las dos plantillas —
 no el sitio.
+
+---
+
+## 31. El formulario no se podía desplazar en Android (13 de septiembre, 2026)
+
+Reportado por Jaime con el club ya abierto a las primeras personas: en un teléfono Android, al
+llegar a la pantalla final del registro —la del carnet con el QR— **no se podía deslizar**. Los dos
+botones de abajo ("Ver mi carnet cuando quiera" y "Explorar los beneficios") quedaban fuera de
+pantalla y no había forma de llegar a ellos. En iPhone se veía bien, por eso pasó desapercibido.
+
+### 31.1 Por qué pasaba — tres cosas a la vez
+
+1. **`body{overflow:hidden}` + `.paso` sin desplazamiento propio.** El formulario está armado como
+   una "app": un escenario fijo del alto de la pantalla y cada pregunta encima, centrada. Mientras
+   cada paso cupo en pantalla, funcionó. La pantalla final es la única más alta que el resto.
+
+2. **`.paso-inner` era un hijo flexible sin `flex-shrink:0`.** Dentro de un contenedor flex en
+   columna, un hijo se *aplasta* para caber en vez de sobresalir. Así que el bloque del carnet se
+   comprimía y su contenido se salía por abajo **sin generar desplazamiento** — el navegador creía
+   que todo cabía.
+
+3. **`height:100vh` en Android.** `100vh` mide la pantalla sin descontar la barra del navegador, que
+   en Chrome de Android ocupa bastante. En iPhone la diferencia es menor, y por eso ahí sí alcanzaba.
+
+Las tres juntas: contenido más alto que el espacio real, aplastado, y sin scroll para rescatarlo.
+
+### 31.2 El arreglo
+
+```css
+.stage{ height:100vh; height:100dvh; }        /* dvh sí descuenta la barra */
+.paso{
+  /* se quitó justify-content:center */
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.paso-inner{ margin:auto 0; flex-shrink:0; }  /* centra si sobra, desplaza si falta */
+```
+
+El detalle fino es el centrado: combinar `justify-content:center` con `overflow` **recorta el borde
+de arriba** y lo deja inalcanzable. Centrar con `margin:auto 0` en el hijo no tiene ese defecto —
+centra cuando sobra espacio y se comporta como margen cero cuando falta.
+
+### 31.3 Comprobado
+
+Con Playwright, pintando la pantalla final real (`mostrarFinal()`) en cinco tamaños:
+
+| Pantalla | Resultado |
+|---|---|
+| Android chico 360×600 | necesita desplazar 155px · botón final alcanzable ✓ · título visible ✓ |
+| Android Samsung 412×780 | cabe entera ✓ |
+| iPhone SE 375×667 | necesita desplazar 88px · botón alcanzable ✓ |
+| iPhone 14 390×844 | cabe entera ✓ |
+| Escritorio 1280×900 | cabe entera ✓ |
+
+**Lección para el futuro:** probar siempre en una pantalla de 360×600, no solo en el iPhone. Es el
+tamaño donde aparecen estos problemas, y es un teléfono muy común en Chile.

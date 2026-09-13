@@ -79,12 +79,29 @@
 
   /* ---------- Escenario de pasos ---------- */
   .stage{
-    position:relative; height:100vh; width:100vw;
+    position:relative; width:100vw;
+    /* 100vh en Android Chrome mide la pantalla SIN descontar la barra del
+       navegador, así que parte del contenido queda debajo de ella y no hay
+       forma de alcanzarlo. 100dvh sí descuenta la barra; el 100vh queda
+       primero como respaldo para navegadores viejos que no entienden dvh. */
+    height:100vh;
+    height:100dvh;
     background:var(--negro);
   }
   .paso{
     position:absolute; inset:0;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    display:flex; flex-direction:column; align-items:center;
+    /* Antes esto era justify-content:center sin overflow. Cuando un paso es
+       más alto que la pantalla —la pantalla final con el carnet y el QR, en
+       teléfonos Android— el contenido se salía y NO se podía desplazar: los
+       botones de abajo quedaban inalcanzables.
+       Ahora el paso se desplaza por dentro, y el centrado vertical lo hace
+       "margin:auto 0" del .paso-inner: centra cuando sobra espacio y deja
+       desplazar cuando falta, sin recortar el borde de arriba (que es lo que
+       pasa al combinar justify-content:center con overflow). */
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
     padding:32px 24px;
     opacity:0; pointer-events:none;
     transform:translateX(40px);
@@ -97,7 +114,12 @@
     opacity:0; transform:translateX(-40px);
   }
 
-  .paso-inner{ width:100%; max-width:520px; }
+  /* flex-shrink:0 es imprescindible: sin él, este bloque es un hijo flexible
+     que se APLASTA para caber en la pantalla en vez de sobresalir, y entonces
+     su contenido (el carnet, el QR, los botones) se sale por abajo sin generar
+     desplazamiento. Con shrink en 0 el bloque conserva su alto real y el .paso
+     sí puede desplazarse. */
+  .paso-inner{ width:100%; max-width:520px; margin:auto 0; flex-shrink:0; }
 
   .eyebrow{
     color:var(--turquesa); font-weight:900; font-size:13px;
