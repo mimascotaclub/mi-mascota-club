@@ -2550,14 +2550,17 @@ function sugReiniciar(){
     }
 
     const t = (texto.value || '').trim();
+    const nombre = (document.getElementById('sugNombre').value || '').trim();
+    const email = (document.getElementById('sugEmail').value || '').trim().toLowerCase();
+
     if(t.length < 10){ decir('Cuéntanos un poco más, con al menos 10 caracteres.', false); return; }
+    if(nombre.length < 3){ decir('Escribe tu nombre para saber quién nos escribe.', false); document.getElementById('sugNombre').focus(); return; }
+    if(!validarEmail(email)){ decir('Revisa el correo: lo necesitamos para poder responderte.', false); document.getElementById('sugEmail').focus(); return; }
 
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
     try{
       const { data, error } = await supabase.rpc('enviar_sugerencia', {
-        p_texto: t,
-        p_nombre: (document.getElementById('sugNombre').value || '').trim() || null,
-        p_email:  (document.getElementById('sugEmail').value || '').trim() || null
+        p_texto: t, p_nombre: nombre, p_email: email
       });
       if(error) throw error;
       const r = data && data[0];

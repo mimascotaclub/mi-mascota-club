@@ -52,3 +52,19 @@ REVOKE ALL ON FUNCTION public.enviar_sugerencia(text, text, text) FROM public;
 GRANT EXECUTE ON FUNCTION public.enviar_sugerencia(text, text, text) TO anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_sugerencia_leida(uuid, boolean) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_sugerencia_leida(uuid, boolean) TO authenticated;
+
+
+-- ============================================================
+--  ACTUALIZACIÓN v22 (mismo día): nombre y correo OBLIGATORIOS
+--
+--  Dejarlas anónimas invitaba a que alguien dejara odio sin costo.
+--  Pedir nombre y correo no verifica a nadie —se puede escribir uno
+--  falso— pero sube la barrera para el impulso y deja con quién
+--  responder cuando la idea es buena.
+--
+--  enviar_sugerencia() ahora exige:
+--    · nombre de al menos 3 caracteres
+--    · correo con formato válido
+--    · máximo 3 sugerencias por correo cada 24 horas
+--  (además de los topes que ya tenía de largo y de ráfaga por hora)
+-- ============================================================

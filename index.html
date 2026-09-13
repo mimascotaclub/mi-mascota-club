@@ -578,12 +578,12 @@
 
         <div class="field-row">
           <div class="field">
-            <label for="sugNombre">Tu nombre <span class="soc-opt">(opcional)</span></label>
-            <input id="sugNombre" maxlength="120" autocomplete="name">
+            <label for="sugNombre">Tu nombre</label>
+            <input id="sugNombre" required minlength="3" maxlength="120" autocomplete="name">
           </div>
           <div class="field">
-            <label for="sugEmail">Tu correo <span class="soc-opt">(opcional)</span></label>
-            <input id="sugEmail" type="email" maxlength="160" placeholder="por si queremos responderte" autocomplete="email">
+            <label for="sugEmail">Tu correo</label>
+            <input id="sugEmail" type="email" required maxlength="160" placeholder="para poder responderte" autocomplete="email">
           </div>
         </div>
 
@@ -593,8 +593,8 @@
 
         <button type="submit" id="sugBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Enviar sugerencia</button>
         <div id="sugMsg" class="soc-msg" style="display:none;"></div>
-        <p class="soc-nota">Puedes dejarlo anónimo: el nombre y el correo son opcionales. Si nos
-        dejas el correo es solo para responderte, nada más.</p>
+        <p class="soc-nota">Te pedimos tu nombre y correo para saber quién nos escribe y poder
+        responderte. No los publicamos ni los usamos para enviarte publicidad.</p>
       </form>
     </div>
 
@@ -724,6 +724,12 @@
         </tbody>
       </table>
       <p>No pedimos datos de tarjetas ni cuentas bancarias, porque hoy no cobramos nada.</p>
+
+      <h2>Si nos escribes una sugerencia</h2>
+      <p>El formulario de sugerencias pide tu nombre y tu correo. Los usamos solo para saber quién
+      nos escribe y para responderte si hace falta. No los publicamos, no los sumamos a ninguna
+      lista de correos y no te enviamos publicidad. Si quieres que borremos tu sugerencia y tus
+      datos, escríbenos y lo hacemos.</p>
 
       <h2>Con qué autorización los tratamos</h2>
       <p>Con la tuya. Antes de crear tu cuenta marcas una casilla aceptando estos textos, y sin eso
@@ -1201,11 +1207,11 @@
 
 <!-- ============================================================
      PIE DE PÁGINA
-     Los enlaces que todavía no tienen página propia (Acerca de
-     nosotros, Servicios, Por qué escogernos y los tres legales)
-     llaman a proximamente(): muestran un aviso en vez de llevar a
-     un 404. Cuando exista la página, se cambia el onclick por la
-     ruta real y listo.
+     El 13 de septiembre de 2026 se sacaron "Acerca de nosotros",
+     "Servicios" y "Por qué escogernos": no existen todavía y solo
+     abrían un aviso de "próximamente", que en un sitio que va a
+     recibir gente real se lee como algo a medio hacer. Cuando esas
+     páginas existan, se vuelven a poner apuntando a su ruta.
      ============================================================ -->
 <footer>
   <div class="wrap foot-grid">
@@ -1221,9 +1227,6 @@
     <div class="foot-col">
       <h4 class="foot-t">Club</h4>
       <a href="/" onclick="event.preventDefault(); volverAlInicio();">Inicio</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Acerca de nosotros');">Acerca de nosotros</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Servicios');">Servicios</a>
-      <a href="#" onclick="event.preventDefault(); proximamente('Por qué escogernos');">Por qué escogernos</a>
       <a href="/sugerencias" onclick="event.preventDefault(); irASugerencias();">Sugerencias</a>
 
       <h4 class="foot-t foot-t--2">Legal</h4>
