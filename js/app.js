@@ -1683,6 +1683,74 @@ function compressImage(file, maxDim, quality){
 }
 
 /* ============================================================
+   SESIÓN DEL NEGOCIO — compartida por /mi-negocio y /validar
+   ------------------------------------------------------------
+   El negocio entra con su código NEG0001 y un código de 6 dígitos
+   que le llega al correo con el que se inscribió.
+
+   Por qué NO se usa el correo como contraseña, aunque sería más
+   cómodo: el correo del negocio sale público en su ficha del
+   directorio, y los códigos son correlativos. Cualquiera podía
+   leer el par (NEG0001, su correo) con una sola consulta y con eso
+   entrar a su panel, ver su lista completa de clientes y registrar
+   visitas falsas a su nombre. El correo sigue siendo público —es
+   su contacto— pero lo que autoriza es el código que solo llega a
+   su bandeja.
+
+   El correo tampoco se elige desde el navegador: la función de
+   Netlify lo busca en la base con la Service Role Key. Si no,
+   bastaría pedir el código de NEG0001 a la bandeja de uno mismo.
+
+   Ver supabase-sesion-negocio-v18.sql.
+   ============================================================ */
+const LS_NEG_SES = 'mmc_sesion_negocio';   // { token, codigo, nombre }
+
+function negSesion(){
+  try{ return JSON.parse(localStorage.getItem(LS_NEG_SES) || 'null'); }catch(e){ return null; }
+}
+function negToken(){ const s = negSesion(); return (s && s.token) || ''; }
+function guardarNegSesion(token, codigo, nombre){
+  try{ localStorage.setItem(LS_NEG_SES, JSON.stringify({ token, codigo, nombre })); }catch(e){}
+}
+function borrarNegSesion(){
+  try{ localStorage.removeItem(LS_NEG_SES); }catch(e){}
+}
+async function negCerrarSesion(){
+  const t = negToken();
+  if(t){ try{ await supabase.rpc('negocio_logout', { p_token: t }); }catch(e){} }
+  borrarNegSesion();
+}
+
+/* Pide el código: primero confirma que el negocio existe y tiene correo
+   cargado, y recién ahí manda el correo. Devuelve el correo tapado. */
+async function negSolicitarCodigo(codigoNegocio){
+  const { data, error } = await supabase.rpc('negocio_puede_entrar', { p_codigo: codigoNegocio });
+  if(error) throw error;
+  const p = data && data[0];
+  if(!p || !p.ok) return { ok:false, mensaje: (p && p.mensaje) || 'No pudimos verificar ese código.' };
+
+  const res = await fetch('/.netlify/functions/enviar-codigo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ negocio: codigoNegocio })
+  });
+  const r = await res.json().catch(() => ({}));
+  if(!res.ok || !r.ok) return { ok:false, mensaje: r.mensaje || 'No pudimos enviar el código. Intenta de nuevo.' };
+
+  return { ok:true, correoTapado: r.correo_tapado || p.correo_tapado, nombre: p.nombre };
+}
+
+async function negValidarCodigo(codigoNegocio, otp){
+  const { data, error } = await supabase.rpc('negocio_login', { p_codigo: codigoNegocio, p_otp: otp });
+  if(error) throw error;
+  const r = data && data[0];
+  if(!r || !r.ok) return { ok:false, mensaje: (r && r.mensaje) || 'No pudimos validar el código.' };
+  guardarNegSesion(r.token, String(codigoNegocio).toUpperCase(), r.nombre);
+  return { ok:true, nombre: r.nombre };
+}
+
+
+/* ============================================================
    VALIDAR UNA VISITA  (/validar/MMC00001)
    ------------------------------------------------------------
    Es el momento en que el beneficio de verdad ocurre, así que es
@@ -1694,45 +1762,22 @@ function compressImage(file, maxDim, quality){
    beneficio y si ese socio ya vino antes — porque el que atiende
    casi nunca es el dueño y no tiene por qué acordarse.
 
-   El correo del negocio se pide recién al confirmar, y solo la
-   primera vez en ese teléfono. Así nadie queda bloqueado y ninguna
-   visita se pierde, pero cada canje queda amarrado a un negocio
-   que probó su correo: sin eso cualquiera podría escribir NEG0001
-   y registrar visitas falsas, o un socio autovalidarse.
-
-   Ver supabase-canje-trazable-v16.sql.
+   La primera vez en ese teléfono se identifica con su código y el
+   código que le llega al correo. El código del socio escaneado no
+   se pierde: apenas entra, sigue derecho a la ficha.
    ============================================================ */
-const LS_NEGOCIO = 'mmc_codigo_negocio';     // solo el código (compatibilidad)
-const LS_NEG_SES = 'mmc_sesion_negocio';     // { codigo, email } — la sesión real
-
 let valSocio = '';       // MMC00001
-let valNegocio = '';     // NEG0001
 let valPrevio = null;    // lo que devolvió canje_previo()
 
-function valSesion(){
-  try{ return JSON.parse(localStorage.getItem(LS_NEG_SES) || 'null'); }catch(e){ return null; }
-}
-/* El correo guardado solo sirve si es del MISMO negocio que se está validando:
-   si en ese teléfono se cambió de código, hay que volver a identificarse. */
-function valEmailGuardado(codigo){
-  const s = valSesion();
-  return (s && s.email && String(s.codigo).toUpperCase() === String(codigo).toUpperCase()) ? s.email : '';
-}
-function valCodigoGuardado(){
-  const s = valSesion();
-  if(s && s.codigo) return String(s.codigo).toUpperCase();
-  try{ return (localStorage.getItem(LS_NEGOCIO) || '').toUpperCase(); }catch(e){ return ''; }
-}
-
 function valMostrarPaso(n){
-  ['valPaso1','valPaso2','valPaso3'].forEach((id, i) => {
+  ['valPaso0','valPaso1','valPaso2','valPaso3'].forEach((id, i) => {
     const el = document.getElementById(id);
-    if(el) el.style.display = (i + 1 === n) ? '' : 'none';
+    if(el) el.style.display = (i === n) ? '' : 'none';
   });
-  const err1 = document.getElementById('valPaso1Error');
-  const err2 = document.getElementById('valPaso2Error');
-  if(err1) err1.style.display = 'none';
-  if(err2) err2.style.display = 'none';
+  ['valPaso0Error','valPaso1Error','valPaso2Error'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
 }
 
 function valError(id, texto){
@@ -1743,6 +1788,13 @@ function valError(id, texto){
   box.style.display = 'block';
 }
 
+function valMostrarPasoNegocio(cual){
+  const a = document.getElementById('valNegCodigoForm');
+  const b = document.getElementById('valNegOtpForm');
+  if(a) a.style.display = cual === 'codigo' ? '' : 'none';
+  if(b) b.style.display = cual === 'otp' ? '' : 'none';
+}
+
 function abrirValidarConSocio(socioCodigo){
   /* Página propia, como /mi-negocio: el cajero tiene un cliente esperando y no
      puede aterrizar en la portada con el formulario escondido bajo el fold. */
@@ -1751,56 +1803,97 @@ function abrirValidarConSocio(socioCodigo){
   const seccion = document.getElementById('validar');
   if(!seccion) return;
   seccion.style.display = '';
-
-  valSocio = (socioCodigo || '').toUpperCase();
-  valNegocio = valCodigoGuardado();
-
-  const inputBiz = document.getElementById('valBizCode');
-  const inputSocio = document.getElementById('valSocioCode');
-  if(inputBiz) inputBiz.value = valNegocio;
-  if(inputSocio) inputSocio.value = valSocio;
-
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
 
-  /* Si ya sabemos los dos códigos (el del socio vino en el QR y el del negocio
-     está guardado en este teléfono), saltamos derecho a la ficha. */
-  if(valSocio && valNegocio) cargarPrevioCanje();
+  valSocio = (socioCodigo || '').toUpperCase();
+  const inputSocio = document.getElementById('valSocioCode');
+  if(inputSocio) inputSocio.value = valSocio;
+
+  valSeguirDesdeDonde();
+}
+
+/* Decide qué pantalla toca según lo que ya sabemos. Se llama al entrar y
+   también justo después de identificarse, para no perder el código escaneado. */
+function valSeguirDesdeDonde(){
+  const s = negSesion();
+  if(!s || !s.token){
+    valMostrarPaso(0);
+    valMostrarPasoNegocio('codigo');
+    setTimeout(() => { const el = document.getElementById('valBizCode'); if(el) el.focus(); }, 200);
+    return;
+  }
+  const eco = document.getElementById('valNegNombre');
+  if(eco) eco.textContent = s.nombre || s.codigo || '';
+  if(valSocio) cargarPrevioCanje();
   else {
     valMostrarPaso(1);
-    setTimeout(() => { const foco = valNegocio ? inputSocio : inputBiz; if(foco) foco.focus(); }, 200);
+    setTimeout(() => { const el = document.getElementById('valSocioCode'); if(el) el.focus(); }, 200);
   }
 }
 
-function validarReiniciar(){
-  valSocio = '';
-  valPrevio = null;
-  const inputSocio = document.getElementById('valSocioCode');
-  const inputMonto = document.getElementById('valMonto');
-  if(inputSocio) inputSocio.value = '';
-  if(inputMonto) inputMonto.value = '';
-  const inputBiz = document.getElementById('valBizCode');
-  if(inputBiz) inputBiz.value = valNegocio || valCodigoGuardado();
-  valMostrarPaso(1);
-  if(inputSocio) inputSocio.focus();
+async function valSalirNegocio(){
+  await negCerrarSesion();
+  valMostrarPaso(0);
+  valMostrarPasoNegocio('codigo');
+  const el = document.getElementById('valBizCode');
+  if(el){ el.value = ''; el.focus(); }
+}
+
+function valVolverAlCodigoNegocio(){
+  valMostrarPasoNegocio('codigo');
+  valError('valPaso0Error', '');
+}
+
+async function valPedirCodigoNegocio(codigo, btn, textoBtn){
+  valError('valPaso0Error', '');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...'; }
+  try{
+    const r = await negSolicitarCodigo(codigo);
+    if(!r.ok){ valError('valPaso0Error', r.mensaje); return false; }
+    document.getElementById('valCorreoEco').textContent = r.correoTapado || 'tu correo';
+    valMostrarPasoNegocio('otp');
+    const el = document.getElementById('valNegOtp');
+    if(el){ el.value = ''; el.focus(); }
+    return true;
+  }catch(e){
+    console.error(e);
+    valError('valPaso0Error', 'No pudimos enviar el código. Revisa la señal e intenta de nuevo.');
+    return false;
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = textoBtn; }
+  }
+}
+
+async function valReenviarCodigoNegocio(){
+  const codigo = (document.getElementById('valBizCode').value || '').trim().toUpperCase();
+  if(!codigo){ valVolverAlCodigoNegocio(); return; }
+  const btn = document.getElementById('valReenviarBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  await valPedirCodigoNegocio(codigo, null, '');
+  if(btn){
+    btn.textContent = 'Código reenviado';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Reenviar código'; }, 20000);
+  }
 }
 
 /* ---------------- Paso 2: la ficha, antes de confirmar ---------------- */
 async function cargarPrevioCanje(){
+  const s = negSesion();
+  if(!s || !s.codigo){ valSeguirDesdeDonde(); return; }
   const btn = document.getElementById('valBuscarBtn');
   if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Buscando...'; }
   try{
     const { data, error } = await supabase.rpc('canje_previo', {
-      p_negocio_codigo: valNegocio, p_socio_codigo: valSocio
+      p_negocio_codigo: s.codigo, p_socio_codigo: valSocio
     });
     if(error) throw error;
     const p = data && data[0];
     if(!p || !p.ok){
       valMostrarPaso(1);
-      valError('valPaso1Error', (p && p.mensaje) || 'No pudimos encontrar esos códigos.');
+      valError('valPaso1Error', (p && p.mensaje) || 'No pudimos encontrar ese código.');
       return;
     }
     valPrevio = p;
-    try{ localStorage.setItem(LS_NEGOCIO, valNegocio); }catch(e){}
     renderFichaValidar(p);
     valMostrarPaso(2);
   }catch(e){
@@ -1858,10 +1951,6 @@ function renderFichaValidar(p){
     </div>
     <div class="val-visitas">${visitas}</div>`;
 
-  /* La identificación solo aparece si este teléfono todavía no la hizo. */
-  const cajaId = document.getElementById('valIdentifica');
-  if(cajaId) cajaId.style.display = valEmailGuardado(valNegocio) ? 'none' : '';
-
   const btnConf = document.getElementById('valConfirmarBtn');
   if(btnConf) btnConf.textContent = 'Confirmar visita de ' + p.socio_pet;
 }
@@ -1872,24 +1961,18 @@ async function confirmarVisita(){
   const montoRaw = (document.getElementById('valMonto').value || '').trim();
   const monto = montoRaw === '' ? null : Number(montoRaw);
 
-  let email = valEmailGuardado(valNegocio);
-  if(!email){
-    email = (document.getElementById('valBizEmail').value || '').trim().toLowerCase();
-    if(!validarEmail(email)){
-      valError('valPaso2Error', 'Necesitamos el correo con el que inscribiste tu negocio.');
-      document.getElementById('valBizEmail').focus();
-      return;
-    }
+  const token = negToken();
+  if(!token){
+    valError('valPaso2Error', 'Tu sesión venció. Identifica tu negocio de nuevo.');
+    setTimeout(valSeguirDesdeDonde, 1200);
+    return;
   }
 
   valError('valPaso2Error', '');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Registrando...';
   try{
-    const { data, error } = await supabase.rpc('registrar_canje_v2', {
-      p_negocio_codigo: valNegocio,
-      p_negocio_email: email,
-      p_socio_codigo: valSocio,
-      p_monto: monto
+    const { data, error } = await supabase.rpc('registrar_canje_v3', {
+      p_token: token, p_socio_codigo: valSocio, p_monto: monto
     });
     if(error) throw error;
     const r = data && data[0];
@@ -1897,10 +1980,6 @@ async function confirmarVisita(){
       valError('valPaso2Error', (r && r.mensaje) || 'No se pudo registrar la visita.');
       return;
     }
-
-    /* Recién ahora guardamos la sesión: el servidor confirmó que ese código y
-       ese correo son del mismo negocio. */
-    try{ localStorage.setItem(LS_NEG_SES, JSON.stringify({ codigo: valNegocio, email })); }catch(e){}
     canjesCount++;
     updateCounts();
     renderComprobante(r);
@@ -1919,8 +1998,9 @@ function renderComprobante(r){
     ? `Compra de ${formatCLP(r.monto)}` + (r.ahorro != null ? ` · ahorró ${formatCLP(r.ahorro)}` : '')
     : 'Sin monto anotado';
 
+  const s = negSesion() || {};
   const calCta = (r.negocio_plan === 'premium' && r.canje_id)
-    ? `<div style="margin-top:16px;"><button type="button" class="btn btn-sm btn-outline" onclick="abrirFormularioCalificar('${r.canje_id}','negocio','${valNegocio}','${String(r.nombre_mostrar).replace(/'/g,"\\'")}')">⭐ Calificar a este socio</button></div>`
+    ? `<div style="margin-top:16px;"><button type="button" class="btn btn-sm btn-outline" onclick="abrirFormularioCalificar('${r.canje_id}','negocio','${s.codigo || ''}','${String(r.nombre_mostrar).replace(/'/g,"\\'")}')">⭐ Calificar a este socio</button></div>`
     : '';
 
   document.getElementById('valComprobante').innerHTML = `
@@ -1939,11 +2019,53 @@ function renderComprobante(r){
     </p>`;
 }
 
-document.getElementById('valNegocioForm').addEventListener('submit', function(e){
+function validarReiniciar(){
+  valSocio = '';
+  valPrevio = null;
+  const inputSocio = document.getElementById('valSocioCode');
+  const inputMonto = document.getElementById('valMonto');
+  if(inputSocio) inputSocio.value = '';
+  if(inputMonto) inputMonto.value = '';
+  valSeguirDesdeDonde();
+}
+
+/* ---------------- Conexiones con el HTML ---------------- */
+document.getElementById('valNegCodigoForm').addEventListener('submit', function(e){
   e.preventDefault();
-  valNegocio = (document.getElementById('valBizCode').value || '').trim().toUpperCase();
+  const codigo = (document.getElementById('valBizCode').value || '').trim().toUpperCase();
+  if(!codigo){ valError('valPaso0Error', 'Escribe tu código de negocio.'); return; }
+  valPedirCodigoNegocio(codigo, document.getElementById('valNegCodigoBtn'), 'Enviarme el código');
+});
+
+document.getElementById('valNegOtpForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const codigo = (document.getElementById('valBizCode').value || '').trim().toUpperCase();
+  const otp = (document.getElementById('valNegOtp').value || '').trim();
+  if(otp.length !== 6){ valError('valPaso0Error', 'El código son 6 dígitos.'); return; }
+  const btn = document.getElementById('valNegOtpBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Entrando...';
+  try{
+    const r = await negValidarCodigo(codigo, otp);
+    if(!r.ok){ valError('valPaso0Error', r.mensaje); return; }
+    valError('valPaso0Error', '');
+    valSeguirDesdeDonde();   // sigue derecho al carnet escaneado, si lo había
+  }catch(e2){
+    console.error(e2);
+    valError('valPaso0Error', 'No pudimos validar el código. Intenta de nuevo.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+});
+
+document.getElementById('valNegOtp').addEventListener('input', function(){
+  this.value = this.value.replace(/\D/g, '').slice(0,6);
+  if(this.value.length === 6) document.getElementById('valNegOtpForm').requestSubmit();
+});
+
+document.getElementById('valSocioForm').addEventListener('submit', function(e){
+  e.preventDefault();
   valSocio = (document.getElementById('valSocioCode').value || '').trim().toUpperCase();
-  if(!valNegocio || !valSocio){ valError('valPaso1Error', 'Faltan los dos códigos.'); return; }
+  if(!valSocio){ valError('valPaso1Error', 'Escribe el código del socio.'); return; }
   cargarPrevioCanje();
 });
 
@@ -1957,24 +2079,43 @@ document.getElementById('valConfirmarBtn').addEventListener('click', confirmarVi
    le trajo el club, cuántos socios distintos, cuánto sumaron las
    compras y quién repitió.
 
-   El acceso pide código + correo de registro (ver
-   supabase-panel-negocio-v14.sql). El par queda guardado en ese
-   navegador para no escribirlo cada vez.
+   Entra con su código y un código de 6 dígitos que le llega al
+   correo — la misma sesión que usa /validar. Ver el bloque
+   "SESIÓN DEL NEGOCIO" más arriba para por qué el correo dejó de
+   servir como contraseña.
    ============================================================ */
-const LS_NEG_SESION = 'mmc_sesion_negocio';
+function negMostrarPaso(cual){
+  const a = document.getElementById('negCodigoForm');
+  const b = document.getElementById('negOtpForm');
+  if(a) a.style.display = cual === 'codigo' ? '' : 'none';
+  if(b) b.style.display = cual === 'otp' ? '' : 'none';
+}
 
-function sesionNegocio(){
-  try{ return JSON.parse(localStorage.getItem(LS_NEG_SESION) || 'null'); }catch(e){ return null; }
+function negError(texto){
+  const box = document.getElementById('negLoginError');
+  if(!box) return;
+  if(!texto){ box.style.display = 'none'; return; }
+  box.textContent = texto;
+  box.style.display = 'block';
 }
-function guardarSesionNegocio(codigo, email){
-  try{ localStorage.setItem(LS_NEG_SESION, JSON.stringify({ codigo, email })); }catch(e){}
+
+async function salirPanelNegocio(){
+  await negCerrarSesion();
+  const panel = document.getElementById('negPanelBox');
+  const login = document.getElementById('negLoginBox');
+  if(panel) panel.style.display = 'none';
+  if(login) login.style.display = '';
+  negMostrarPaso('codigo');
+  negError('');
+  const c = document.getElementById('negCodigo');
+  const o = document.getElementById('negOtp');
+  if(c) c.value = '';
+  if(o) o.value = '';
 }
-function salirPanelNegocio(){
-  try{ localStorage.removeItem(LS_NEG_SESION); }catch(e){}
-  document.getElementById('negPanelBox').style.display = 'none';
-  document.getElementById('negLoginBox').style.display = '';
-  document.getElementById('negCodigo').value = '';
-  document.getElementById('negEmail').value = '';
+
+function negVolverAlCodigo(){
+  negMostrarPaso('codigo');
+  negError('');
 }
 
 function irAMiNegocio(){
@@ -1986,50 +2127,111 @@ function mostrarPaginaNegocio(){
   document.body.classList.remove('pagina-directorio','pagina-ficha','pagina-planes','pagina-socio','pagina-validar','pagina-admin');
   document.body.classList.add('pagina-negocio');
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
-  const s = sesionNegocio();
-  if(s && s.codigo && s.email) cargarPanelNegocio(s.codigo, s.email);
-  else salirPanelNegocio();
+  if(negToken()) cargarPanelNegocio();
+  else {
+    document.getElementById('negPanelBox').style.display = 'none';
+    document.getElementById('negLoginBox').style.display = '';
+    negMostrarPaso('codigo');
+  }
 }
 
-async function cargarPanelNegocio(codigo, email){
-  const errBox = document.getElementById('negLoginError');
-  const btn = document.getElementById('negLoginBtn');
-  if(errBox) errBox.style.display = 'none';
-  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Entrando...'; }
+async function negPedirCodigo(codigo, btn, textoBtn){
+  negError('');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...'; }
   try{
-    const { data, error } = await supabase.rpc('negocio_acceso', { p_codigo: codigo, p_email: email });
+    const r = await negSolicitarCodigo(codigo);
+    if(!r.ok){ negError(r.mensaje); return false; }
+    document.getElementById('negCorreoEco').textContent = r.correoTapado || 'tu correo';
+    negMostrarPaso('otp');
+    const el = document.getElementById('negOtp');
+    if(el){ el.value = ''; el.focus(); }
+    return true;
+  }catch(e){
+    console.error(e);
+    negError('No pudimos enviar el código. Intenta de nuevo en un momento.');
+    return false;
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = textoBtn; }
+  }
+}
+
+async function negReenviarCodigo(){
+  const codigo = (document.getElementById('negCodigo').value || '').trim().toUpperCase();
+  if(!codigo){ negVolverAlCodigo(); return; }
+  const btn = document.getElementById('negReenviarBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  await negPedirCodigo(codigo, null, '');
+  if(btn){
+    btn.textContent = 'Código reenviado';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Reenviar código'; }, 20000);
+  }
+}
+
+async function cargarPanelNegocio(){
+  const token = negToken();
+  if(!token){ salirPanelNegocio(); return; }
+  try{
+    const { data, error } = await supabase.rpc('negocio_perfil', { p_token: token });
     if(error) throw error;
     const acc = data && data[0];
     if(!acc || !acc.ok){
-      salirPanelNegocio();
-      if(errBox){
-        errBox.textContent = 'No encontramos un negocio con ese código y ese correo. Revisa que sea el mismo correo con el que te inscribiste.';
-        errBox.style.display = 'block';
-      }
-      document.getElementById('negCodigo').value = codigo;
-      document.getElementById('negEmail').value = email;
+      borrarNegSesion();
+      document.getElementById('negPanelBox').style.display = 'none';
+      document.getElementById('negLoginBox').style.display = '';
+      negMostrarPaso('codigo');
+      negError('Tu sesión venció. Entra de nuevo con tu código.');
       return;
     }
-    guardarSesionNegocio(codigo.toUpperCase(), email);
+
     document.getElementById('negLoginBox').style.display = 'none';
     document.getElementById('negPanelBox').style.display = '';
     document.getElementById('negNombre').textContent = acc.nombre;
     const desde = acc.desde ? new Date(acc.desde).toLocaleDateString('es-CL', { month:'long', year:'numeric' }) : '';
     document.getElementById('negSub').textContent =
-      [codigo.toUpperCase(),
+      [acc.codigo,
        acc.founder_number ? 'Fundador #' + String(acc.founder_number).padStart(3,'0') : '',
        desde ? 'en el club desde ' + desde : ''].filter(Boolean).join(' · ');
 
-    const { data: filas, error: err2 } = await supabase.rpc('historial_negocio', { p_codigo: codigo, p_email: email });
+    const { data: filas, error: err2 } = await supabase.rpc('historial_negocio_v2', { p_token: token });
     if(err2) throw err2;
     renderPanelNegocio(filas || []);
   }catch(e){
     console.error(e);
-    if(errBox){ errBox.textContent = 'No pudimos cargar tus visitas. Inténtalo de nuevo en un momento.'; errBox.style.display = 'block'; }
-  }finally{
-    if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
+    negError('No pudimos cargar tus visitas. Inténtalo de nuevo en un momento.');
   }
 }
+
+document.getElementById('negCodigoForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const codigo = (document.getElementById('negCodigo').value || '').trim().toUpperCase();
+  if(!codigo){ negError('Escribe tu código de negocio.'); return; }
+  negPedirCodigo(codigo, document.getElementById('negCodigoBtn'), 'Enviarme el código');
+});
+
+document.getElementById('negOtpForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const codigo = (document.getElementById('negCodigo').value || '').trim().toUpperCase();
+  const otp = (document.getElementById('negOtp').value || '').trim();
+  if(otp.length !== 6){ negError('El código son 6 dígitos.'); return; }
+  const btn = document.getElementById('negOtpBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Entrando...';
+  try{
+    const r = await negValidarCodigo(codigo, otp);
+    if(!r.ok){ negError(r.mensaje); return; }
+    negError('');
+    await cargarPanelNegocio();
+  }catch(e2){
+    console.error(e2);
+    negError('No pudimos validar el código. Intenta de nuevo.');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+});
+
+document.getElementById('negOtp').addEventListener('input', function(){
+  this.value = this.value.replace(/\D/g, '').slice(0,6);
+  if(this.value.length === 6) document.getElementById('negOtpForm').requestSubmit();
+});
 
 function renderPanelNegocio(filas){
   const ahora = new Date();
@@ -2401,13 +2603,8 @@ document.getElementById('dirSearch').addEventListener('input', renderDirectory);
 document.getElementById('dirCat').addEventListener('change', renderDirectory);
 document.getElementById('dirComuna').addEventListener('change', renderDirectory);
 document.getElementById('dirOrden').addEventListener('change', renderDirectory);
-document.getElementById('negLoginForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  cargarPanelNegocio(
-    document.getElementById('negCodigo').value.trim().toUpperCase(),
-    document.getElementById('negEmail').value.trim()
-  );
-});
+// (El acceso del negocio ya no vive aquí: son dos pasos y sus listeners están
+//  junto al resto del panel, en el bloque "PANEL DEL NEGOCIO".)
 // Cerrar el panel de filtros del celular con la tecla Esc
 document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarFiltrosDir(); });
 
@@ -2434,6 +2631,11 @@ window.proximamente = proximamente;
 window.abrirBeneficio = abrirBeneficio;
 window.abrirValidarConSocio = abrirValidarConSocio;
 window.validarReiniciar = validarReiniciar;
+window.valSalirNegocio = valSalirNegocio;
+window.valVolverAlCodigoNegocio = valVolverAlCodigoNegocio;
+window.valReenviarCodigoNegocio = valReenviarCodigoNegocio;
+window.negVolverAlCodigo = negVolverAlCodigo;
+window.negReenviarCodigo = negReenviarCodigo;
 window.irAMiNegocio = irAMiNegocio;
 window.salirPanelNegocio = salirPanelNegocio;
 window.confirmarBeneficio = confirmarBeneficio;

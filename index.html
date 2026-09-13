@@ -472,21 +472,53 @@
       <p id="valSubtitulo">Escanea el carnet del socio y confirma la visita. Queda registrada para los dos.</p>
     </div>
 
-    <!-- ---------- Paso 1: quien eres (solo la primera vez) ---------- -->
-    <div class="panel full val-panel" id="valPaso1" style="display:none;">
-      <form id="valNegocioForm">
+    <!-- ---------- Paso 0: identificar el negocio (solo la primera vez) ---------- -->
+    <div class="panel full val-panel" id="valPaso0" style="display:none;">
+      <div class="val-identifica__t" style="margin-bottom:16px;">Primero, identifica tu negocio</div>
+
+      <form id="valNegCodigoForm">
         <div class="field">
           <label for="valBizCode">Tu código de negocio</label>
           <input id="valBizCode" required placeholder="NEG0001" style="text-transform:uppercase;" autocomplete="off">
         </div>
+        <button type="submit" id="valNegCodigoBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Enviarme el código</button>
+      </form>
+
+      <form id="valNegOtpForm" style="display:none;">
+        <p class="soc-enviado">Enviamos un código de 6 dígitos a <b id="valCorreoEco"></b>. Llega en menos de un minuto.</p>
+        <div class="field">
+          <label for="valNegOtp">Código de 6 dígitos</label>
+          <input id="valNegOtp" inputmode="numeric" maxlength="6" required placeholder="123456" class="soc-otp" autocomplete="one-time-code">
+        </div>
+        <button type="submit" id="valNegOtpBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Entrar</button>
+        <div class="soc-reenvio">
+          <button type="button" class="soc-link" onclick="valVolverAlCodigoNegocio()">← Usar otro código</button>
+          <button type="button" class="soc-link" id="valReenviarBtn" onclick="valReenviarCodigoNegocio()">Reenviar código</button>
+        </div>
+      </form>
+
+      <div id="valPaso0Error" class="soc-error" style="display:none;"></div>
+      <p class="soc-nota">
+        Es solo la primera vez en este teléfono: después queda listo por 30 días y validar son dos toques.
+        Te pedimos un código al correo y no tu correo directo, porque tu correo aparece público en el directorio.
+      </p>
+    </div>
+
+    <!-- ---------- Paso 1: el código del socio ---------- -->
+    <div class="panel full val-panel" id="valPaso1" style="display:none;">
+      <form id="valSocioForm">
         <div class="field">
           <label for="valSocioCode">Código del socio</label>
           <input id="valSocioCode" required placeholder="MMC00001" style="text-transform:uppercase;" autocomplete="off">
         </div>
         <button type="submit" id="valBuscarBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Ver el carnet</button>
         <div id="valPaso1Error" class="soc-error" style="display:none;"></div>
-        <p class="soc-nota">Tu código de negocio queda guardado en este teléfono. La próxima vez basta con escanear el QR del socio.</p>
+        <p class="soc-nota">Normalmente no tienes que escribirlo: al escanear el QR del carnet llega puesto solo.</p>
       </form>
+      <div style="margin-top:16px;text-align:center;">
+        <span class="soc-nota" style="margin:0;">Validando como <b id="valNegNombre"></b></span>
+        <button type="button" class="soc-link" style="display:block;margin:6px auto 0;" onclick="valSalirNegocio()">No es mi negocio, salir</button>
+      </div>
     </div>
 
     <!-- ---------- Paso 2: la ficha del socio y el beneficio ---------- -->
@@ -498,18 +530,6 @@
           <label for="valMonto">Monto de la compra <span class="soc-opt">— opcional</span></label>
           <input id="valMonto" type="number" min="1" inputmode="numeric" placeholder="15000">
           <p class="soc-nota">Si el beneficio no tiene un monto claro (2x1, un servicio gratis), déjalo vacío: la visita se registra igual.</p>
-        </div>
-
-        <!-- Identificación: aparece sola si este teléfono todavía no está identificado -->
-        <div id="valIdentifica" style="display:none;">
-          <div class="val-identifica">
-            <div class="val-identifica__t">Una sola vez: confirma que eres el negocio</div>
-            <div class="field" style="margin-bottom:10px;">
-              <label for="valBizEmail">Correo con el que inscribiste tu negocio</label>
-              <input id="valBizEmail" type="email" placeholder="hola@tunegocio.cl" autocomplete="email">
-            </div>
-            <p class="soc-nota" style="margin:0;">Sin esto cualquiera podría escribir tu código y registrar visitas falsas. Después de esta vez este teléfono queda identificado.</p>
-          </div>
         </div>
 
         <button type="button" id="valConfirmarBtn" class="btn btn-primary btn-grande" style="width:100%;justify-content:center;">Confirmar visita</button>
@@ -680,18 +700,36 @@
       <p>Cada vez que validas el carnet de un socio queda registrada la visita. Aquí las ves todas.</p>
     </div>
 
-    <div class="panel full" style="max-width:520px;" id="negLoginBox">
-      <form id="negLoginForm">
-        <div class="field-row">
-          <div class="field"><label for="negCodigo">Tu código de negocio</label><input id="negCodigo" required placeholder="NEG0001" style="text-transform:uppercase;"></div>
-          <div class="field"><label for="negEmail">Correo con el que te registraste</label><input id="negEmail" type="email" required placeholder="hola@tunegocio.cl"></div>
+    <div class="panel full" style="max-width:460px;" id="negLoginBox">
+      <!-- Paso 1: el código del negocio -->
+      <form id="negCodigoForm">
+        <div class="field">
+          <label for="negCodigo">Tu código de negocio</label>
+          <input id="negCodigo" required placeholder="NEG0001" style="text-transform:uppercase;" autocomplete="off">
         </div>
-        <button type="submit" id="negLoginBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Entrar</button>
-        <div id="negLoginError" style="color:var(--rust);font-size:12.5px;margin-top:10px;display:none;"></div>
-        <div style="margin-top:12px;font-size:12px;color:#7a8377;line-height:1.45;">
-          Te pedimos el correo además del código porque los códigos son correlativos: sin esto, cualquiera podría escribir NEG0002 y ver los clientes de otro negocio.
+        <button type="submit" id="negCodigoBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Enviarme el código</button>
+        <p class="soc-nota">
+          Te mandamos un código de 6 dígitos al correo con el que inscribiste tu negocio.
+          No usamos ese correo como contraseña porque aparece público en tu ficha del directorio:
+          cualquiera podría leerlo y entrar aquí.
+        </p>
+      </form>
+
+      <!-- Paso 2: el código que llegó al correo -->
+      <form id="negOtpForm" style="display:none;">
+        <p class="soc-enviado">Enviamos un código a <b id="negCorreoEco"></b>. Llega en menos de un minuto — si no lo ves, revisa el spam.</p>
+        <div class="field">
+          <label for="negOtp">Código de 6 dígitos</label>
+          <input id="negOtp" inputmode="numeric" maxlength="6" required placeholder="123456" class="soc-otp" autocomplete="one-time-code">
+        </div>
+        <button type="submit" id="negOtpBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Entrar</button>
+        <div class="soc-reenvio">
+          <button type="button" class="soc-link" onclick="negVolverAlCodigo()">← Usar otro código</button>
+          <button type="button" class="soc-link" id="negReenviarBtn" onclick="negReenviarCodigo()">Reenviar código</button>
         </div>
       </form>
+
+      <div id="negLoginError" class="soc-error" style="display:none;"></div>
     </div>
 
     <div id="negPanelBox" style="display:none;">

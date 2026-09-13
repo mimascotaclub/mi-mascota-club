@@ -1074,3 +1074,55 @@ así a propósito — es como funciona el sitio entero (`registrar_socio`, `soci
 `aprobar_solicitud_negocio`, `rechazar_solicitud_negocio`) se revisaron una por una: todas
 verifican `es_admin()` adentro, así que se pueden llamar pero no hacen nada. El linter no puede ver
 eso.
+
+## 21. El negocio entra con código, no con correo (13 de septiembre 2026)
+
+Cierra el agujero que quedó identificado en la sección 20.2.
+
+### 21.1 Qué estaba mal
+
+El negocio entraba a `/mi-negocio` y validaba canjes con su código + su correo. Pero el correo del
+negocio **sale público en su ficha del directorio** — es su contacto, y así debe ser — y los
+códigos son correlativos. Con una sola consulta pública cualquiera obtenía el par (NEG0001, su
+correo) y con eso entraba a su panel, veía su lista completa de clientes y registraba canjes falsos
+a su nombre.
+
+Esconder el correo no era la solución. La solución es dejar de usarlo como credencial.
+
+### 21.2 Cómo quedó
+
+El negocio escribe su código `NEG0001`, le llega un código de 6 dígitos al correo con el que se
+inscribió, y con eso se abre una sesión de 30 días guardada en ese teléfono. El correo sigue siendo
+público; lo que autoriza es el código que solo llega a su bandeja. Es el mismo modelo del acceso de
+los dueños (v15).
+
+**El detalle que hace que esto funcione:** el correo de destino no lo elige el navegador.
+`netlify/functions/enviar-codigo.js` ahora acepta `{ negocio: "NEG0001" }` y busca el correo en la
+base con la Service Role Key. Si el navegador pudiera decir a dónde mandar el código, cualquiera
+pediría el de NEG0001 a su propia bandeja y el arreglo no serviría de nada. La función devuelve el
+correo tapado (`j••••4@gmail.com`) para que sepan a qué bandeja mirar.
+
+### 21.3 En `/validar`, sin perder el carnet escaneado
+
+Antes el correo se pedía al confirmar. Ahora la identificación va primero, porque ya no es escribir
+un correo sino esperar un código. Para que eso no cueste una visita: el código del socio que llegó
+en el QR **se guarda mientras el negocio se identifica**, y apenas entra, la pantalla sigue derecho
+al carnet. No hay que volver a escanear ni escribir nada.
+
+Es solo la primera vez en ese teléfono. Después son dos toques: escanear y confirmar.
+
+### 21.4 Archivos
+
+- `netlify/functions/enviar-codigo.js`: acepta `{email}` (dueños) o `{negocio}` (negocios).
+- `supabase-sesion-negocio-v18.sql`: ya ejecutado, documentación.
+- `js/app.js`: bloque nuevo "SESIÓN DEL NEGOCIO" compartido por las dos pantallas; los bloques de
+  `/validar` y `/mi-negocio` reescritos. Se eliminó un listener viejo sobre `negLoginForm` que
+  quedaba huérfano y **rompía el `app.js` entero** al no encontrar el elemento.
+- `index.html`: los dos accesos ahora son de dos pasos.
+
+### 21.5 Sigue con identidad débil (bajo impacto)
+
+`enviar_validacion()` — las calificaciones mutuas del parche v9 — todavía identifica por código
+pelado. Alguien podría dejar calificaciones a nombre de otro. Es de bajo impacto (son estrellas,
+está limitado a plan premium y a canjes reales dentro de 72 horas), pero conviene pasarlo a token
+cuando se retome esa función.
