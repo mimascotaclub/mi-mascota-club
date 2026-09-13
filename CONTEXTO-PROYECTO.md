@@ -1295,3 +1295,54 @@ mensaje claro en vez de crear un negocio inutilizable.
 Quedan **4 archivos en Storage** (logos y fotos de los negocios de prueba). Supabase no permite
 borrarlos por SQL, hay que hacerlo desde el panel: Storage → bucket `negocios` → seleccionar y
 borrar.
+
+## 26. El formulario de negocios estaba roto, y el bucket abierto (13 de septiembre 2026)
+
+### 26.1 El error
+
+`formulario-negocio-v3.html` insertaba **directo en la tabla**:
+
+```js
+await sb.from('negocios_solicitudes').insert(payload)
+```
+
+El parche v17 revocó los permisos de escritura directa sobre todas las tablas. Eso dejó el
+formulario de negocios roto desde ese momento: **ningún negocio podía inscribirse**.
+
+Cómo se pasó por alto: al revisar si algo escribía directo, la búsqueda incluyó este archivo pero
+el archivo no estaba descargado en ese momento, así que no arrojó coincidencias y se leyó como
+"nadie escribe directo". La lección: verificar que el archivo exista antes de concluir desde una
+búsqueda vacía.
+
+### 26.2 La corrección
+
+No se reabrió el permiso directo. La inscripción ahora pasa por
+`registrar_solicitud_negocio(jsonb)`, que valida en el servidor: consentimiento obligatorio, los 12
+campos que la tabla exige (con mensaje claro de cuál falta), correo del responsable con formato
+válido, y tope de 10 inscripciones por hora.
+
+**Por qué el correo del responsable importa tanto:** es la credencial con la que el negocio entra a
+su panel y valida canjes. Antes podía quedar vacío y el negocio nacía inutilizable — el mismo
+problema que se arregló en v23 del lado de la aprobación.
+
+Se agregaron `terminos_aceptados_en` y `terminos_version`, igual que en socios.
+
+### 26.3 Consentimiento legal en el formulario de negocios
+
+Tenía una sola casilla, y era un **compromiso comercial** ("confirmo que la información es real y
+respetaré el beneficio"), no consentimiento de datos. Se agregó una segunda casilla con los
+enlaces a términos y privacidad, y ahora se exigen las dos.
+
+### 26.4 El bucket de imágenes
+
+Dos problemas, uno señalado por Supabase y otro no:
+
+1. Una política permitía **listar todos los archivos** del bucket. Un bucket público sirve las
+   imágenes por URL sin pasar por RLS, así que no aportaba nada y sí dejaba pedir el inventario
+   completo. Eliminada.
+2. Aceptaba **cualquier archivo de cualquier tamaño**. Alguien podía llenar el gigabyte gratis con
+   basura —y ahí se cae el registro de negocios— o alojar archivos propios en el proyecto.
+
+Ahora: máximo 5 MB, y solo PNG y JPG. Se descartó el SVG porque puede llevar código adentro. Los
+dos selectores de archivo del formulario se alinearon a PNG/JPG y avisan con palabras claras antes
+de intentar subir.

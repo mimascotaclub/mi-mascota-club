@@ -282,7 +282,7 @@
         <div class="field" id="f-logo">
           <label class="field__label">Logo</label>
           <label class="drop drop--logo" id="dropLogo">
-            <input type="file" id="fileLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+            <input type="file" id="fileLogo" accept="image/png,image/jpeg">
             <div class="drop__body">
               <div class="drop__ico">◻︎</div>
               <div class="drop__t">Sube tu logo</div>
@@ -295,7 +295,7 @@
         <div class="field" id="f-foto">
           <label class="field__label">Foto del negocio</label>
           <label class="drop" id="dropFoto">
-            <input type="file" id="fileFoto" accept="image/png,image/jpeg,image/webp">
+            <input type="file" id="fileFoto" accept="image/png,image/jpeg">
             <div class="drop__body">
               <div class="drop__ico">▣</div>
               <div class="drop__t">Sube la foto</div>
@@ -395,7 +395,12 @@
           <span class="choice__dot" style="border-radius:6px;margin-top:1px"></span>
           <span class="choice__txt">Confirmo que la información es real y me comprometo a respetar el beneficio publicado con los socios de Mi Mascota Club.<small>Puedes cambiar o retirar el beneficio avisándonos con 15 días.</small></span>
         </label>
-        <div class="field__err">Necesitamos tu confirmación para continuar.</div>
+        <label class="choice" style="align-items:flex-start;margin-top:12px">
+          <input type="checkbox" id="acepta_legal">
+          <span class="choice__dot" style="border-radius:6px;margin-top:1px"></span>
+          <span class="choice__txt">He leído y acepto los <a href="/terminos" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a>, y autorizo el tratamiento de los datos de mi negocio.<small>El RUT y los datos del responsable no se publican: quedan solo en nuestros registros.</small></span>
+        </label>
+        <div class="field__err">Necesitamos las dos confirmaciones para continuar.</div>
       </div>
 
       <div id="envioError" class="note" hidden style="border-color:var(--mmc-err);color:var(--mmc-err)"><span class="note__ico">!</span><div id="envioErrorTxt"></div></div>
@@ -808,6 +813,16 @@ function pintarPreview() {
    ============================================================ */
 async function subirImagen(file, carpeta) {
   if (!sb || !file) return null;
+
+  /* El bucket solo acepta PNG y JPG, y hasta 5 MB. Se avisa aquí con palabras
+     claras en vez de dejar que falle la subida con un error técnico. */
+  if (!['image/png', 'image/jpeg'].includes(file.type)) {
+    throw new Error('La imagen "' + file.name + '" no es PNG ni JPG. Conviértela y vuelve a intentarlo.');
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('La imagen "' + file.name + '" pesa más de 5 MB. Usa una más liviana.');
+  }
+
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const path = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await sb.storage.from(MMC_CONFIG.BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
@@ -816,7 +831,7 @@ async function subirImagen(file, carpeta) {
 }
 
 $('btnEnviar').addEventListener('click', async () => {
-  if (!marcar('f-terminos', $('acepta_terminos').checked)) return;
+  if (!marcar('f-terminos', $('acepta_terminos').checked && $('acepta_legal').checked)) return;
 
   const btn = $('btnEnviar');
   const textoOriginal = btn.textContent;
@@ -832,9 +847,15 @@ $('btnEnviar').addEventListener('click', async () => {
       subirImagen(D.fotoFile, 'fotos')
     ]);
 
-    const payload = { ...datosNegocio(), logo_url, foto_url };
-    const { error } = await sb.from('negocios_solicitudes').insert(payload);
+    /* Antes esto insertaba directo en la tabla. Ahora pasa por una función que
+       valida en el servidor: obliga el consentimiento, revisa los campos que no
+       pueden faltar y exige un correo válido del responsable — que es la
+       credencial con la que después entra a su panel. */
+    const payload = { ...datosNegocio(), logo_url, foto_url, terminos_version: '2026-09-13' };
+    const { data, error } = await sb.rpc('registrar_solicitud_negocio', { p_datos: payload });
     if (error) throw error;
+    const r = data && data[0];
+    if (!r || !r.ok) throw new Error((r && r.mensaje) || 'No pudimos registrar tu inscripción.');
 
     $('mailConfirm').textContent = payload.responsable_email;
     irA(9);
