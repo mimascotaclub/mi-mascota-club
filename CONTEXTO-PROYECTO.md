@@ -1607,3 +1607,56 @@ No vale la pena hoy.
   Let's Encrypt, tarda unos minutos después de que el DNS propaga).
 - El dominio `mimascotaclub.netlify.app` sigue funcionando y redirige al nuevo. No se rompe ningún
   correo ya enviado.
+
+### 30.4 El dominio quedó andando (13 de septiembre, 2026, en la tarde)
+
+`https://mimascotaclub.cl` con certificado de Let's Encrypt emitido y funcionando.
+
+Cómo quedó armado:
+
+- **Registrador y DNS:** Hostinger. Los nameservers siguen siendo los de Hostinger
+  (`aurora.dns-parking.com` / `nebula.dns-parking.com`) — no se migró el DNS a Netlify, así el
+  dominio se administra desde un solo lugar.
+- **Dos registros DNS**, y solo dos:
+  ```
+  A       @      75.2.60.5
+  CNAME   www    mimascotaclub.netlify.app
+  ```
+  Hubo que borrar los que Hostinger crea solo al comprar el dominio (un A al parking `2.57.91.91`
+  y un CNAME `www` que apuntaba al propio dominio). Si se dejan, conviven con los nuevos y el
+  sitio cae a veces en Netlify y a veces en la página de parking, al azar.
+- **En Netlify:** `mimascotaclub.cl` como Primary domain y `www.mimascotaclub.cl` como alias que
+  redirige al principal.
+
+**Un tropiezo que puede repetirse:** al pedir el certificado salió dos veces el error
+*"certificate parameter is required when updating an existing certificate"* y después
+*"We could not provision a Let's Encrypt certificate"*. No era un problema de configuración —el DNS
+estaba correcto y sin registros CAA que bloquearan—, era que Let's Encrypt todavía no veía el
+dominio desde sus propios servidores. Se resolvió esperando ~30 minutos y volviendo a apretar
+**Verify DNS configuration** y luego **Provision certificate**. La lección: no insistir con el
+botón, porque Let's Encrypt limita los intentos fallidos por hora.
+
+`mimascotaclub.netlify.app` sigue funcionando y redirige al dominio nuevo, así que ningún enlace
+viejo se rompió.
+
+### 30.5 Anotado para cuando el club crezca: el límite de correos
+
+EmailJS gratis da **200 correos al mes** (al 13 de septiembre iban 58, se reinicia el día 14).
+
+El número engaña, porque los correos no se gastan solo en registros:
+
+| Acción | Correos que consume |
+|---|---|
+| Alguien se registra | 2 (código + bienvenida) |
+| Un socio entra a Mi Mascota ID | 1 |
+| Un negocio entra a validar una visita | 1 |
+
+O sea que el límite se aprieta **cuando el club empieza a usarse**, no cuando crece — y ese es el
+peor momento para que falle: un socio parado en la veterinaria que no recibe el código para
+mostrar su carnet.
+
+**Acuerdo con Jaime:** no se migra ahora. Cuando el club llegue a unos **50 socios**, o cuando
+EmailJS marque ~150 de 200, se comparan **Brevo** (300 correos al día en su plan gratis) y
+**Resend** (3.000 al mes), y se elige el que dé más por menos si hay que pagar. El cambio toca
+`netlify/functions/enviar-codigo.js`, el envío del formulario de registro y las dos plantillas —
+no el sitio.
