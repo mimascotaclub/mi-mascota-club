@@ -1,0 +1,37 @@
+-- ============================================================
+--  Mi Mascota Club — El correo al aprobar un negocio (v23)
+--  13 de septiembre de 2026
+--
+--  ⚠️ YA EJECUTADO. Documentación: NO volver a correrlo.
+-- ------------------------------------------------------------
+--  EL ERROR
+--
+--  aprobar_solicitud_negocio() insertaba el negocio con email = NULL.
+--  Estaba escrito así, literal:
+--
+--      codigo, nombre, cat, tipo, comuna, email, telefono, ...
+--      values (v_codigo, s.nombre, s.dir_cat, s.dir_tipo, s.comuna,
+--              null, s.telefono_local, ...
+--
+--  Por eso NEG0002 y NEG0003 no tenían correo. No fue un olvido al
+--  cargarlos a mano: fue la función, cada vez que se aprobaba una ficha.
+--
+--  POR QUÉ IMPORTABA TANTO
+--
+--  Desde el parche v18 el correo del negocio es lo ÚNICO con lo que
+--  puede entrar a su panel y validar canjes: ahí le llega el código de
+--  6 dígitos. Con email en NULL, cada negocio aprobado nacía mudo — no
+--  podía entrar a /mi-negocio ni validar una sola visita, y no había
+--  manera de arreglarlo salvo editando la base a mano.
+--
+--  Se habría descubierto con el primer negocio real, en el peor momento
+--  posible: después de venderle la idea.
+--
+--  EL ARREGLO
+--
+--  Ahora copia responsable_email desde la solicitud. Y si la solicitud
+--  viniera sin correo, la aprobación falla con un mensaje claro en vez
+--  de crear un negocio inutilizable.
+-- ============================================================
+
+-- (Definición completa aplicada en la migración fix_email_al_aprobar_negocio_v23.)

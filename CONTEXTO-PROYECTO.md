@@ -1259,3 +1259,39 @@ saludo, y un bloque final invitando a mandar sugerencias con un botón `mailto:`
 
 La plantilla vive en EmailJS (`template_u9x5p1i`), no en el repo. Recibe: `to_name`, `to_email`,
 `codigo`, `mascota`, `carnet_url` y `mensaje_extra`.
+
+## 25. Base limpia para empezar con datos reales (13 de septiembre 2026)
+
+Se borraron todos los datos de prueba: 6 socios, 3 negocios, 2 solicitudes, 2 canjes, 2
+sugerencias, 24 códigos de verificación y las sesiones. Todos eran de prueba — los socios usaban
+los correos del propio Jaime y de su pareja, y los tres negocios también.
+
+**Respaldo antes de borrar:** `respaldo-datos-prueba-2026-09-13.json` en la raíz del repo, con las
+20 filas completas. El plan gratis de Supabase no tiene recuperación a un punto en el tiempo, así
+que sin ese archivo no habría vuelta atrás.
+
+**Contadores reseteados.** `socio_seq` y `negocio_seq` vuelven a 1, así que el primer socio real
+será **MMC00001** y el primer negocio **NEG0001 / Fundador #001**. No es cosmético: "Fundador #001"
+es un argumento concreto al ofrecerle a un negocio ser de los primeros, y el socio número 1 es
+alguien a quien se puede tratar distinto para pedirle una recomendación o un testimonio.
+
+La cuenta de administrador no se tocó: vive en `admins` + Supabase Auth, no en `socios`.
+
+### 25.1 El error que apareció al hacer esto
+
+Revisando por qué NEG0002 y NEG0003 no tenían correo, resultó que **no era un olvido: era la
+función**. `aprobar_solicitud_negocio()` insertaba `email = null`, escrito literal en el INSERT.
+
+Eso significa que **cada negocio aprobado nacía sin correo**, y desde el parche v18 el correo es lo
+único con lo que un negocio entra a su panel y valida canjes. Cada negocio real habría quedado mudo
+desde el primer día, y se habría descubierto en el peor momento: después de venderle la idea.
+
+Corregido en `supabase-fix-email-aprobacion-v23.sql` (ya ejecutado): ahora copia
+`responsable_email` desde la solicitud, y si la solicitud no trae correo la aprobación falla con un
+mensaje claro en vez de crear un negocio inutilizable.
+
+### 25.2 Pendiente manual
+
+Quedan **4 archivos en Storage** (logos y fotos de los negocios de prueba). Supabase no permite
+borrarlos por SQL, hay que hacerlo desde el panel: Storage → bucket `negocios` → seleccionar y
+borrar.
