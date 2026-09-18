@@ -179,11 +179,19 @@ beneficio y ve su historial, no falta ninguna pieza. Lo que queda abajo es otra 
 
 ### Flujo de los negocios (el que sigue)
 
-6. **Casilla de consentimiento en el formulario de negocios** — todavía no la pide, y el de
-   dueños sí. Es una incoherencia legal.
-7. **Migrar el formulario de negocios al estilo v3** (OTP + mascota animada).
-8. **Afiche imprimible con el QR** para el mesón del negocio.
-9. **Páginas de categoría curadas** (ej. `/veterinarias`) como material de venta.
+6. **Migrar el formulario de negocios al estilo v3** (OTP + mascota animada). Es lo primero
+   que ve un negocio cuando Jaime le manda el link: hoy se ve de otra época al lado del de
+   dueños.
+7. **Afiche imprimible con el QR** para el mesón del negocio.
+8. **Páginas de categoría curadas** (ej. `/veterinarias`) como material de venta.
+
+> **Corrección (18 de septiembre):** esta lista decía que al formulario de negocios le
+> faltaba la casilla de consentimiento. **Es falso**: tiene dos, las dos obligatorias, y
+> `registrar_solicitud_negocio` las valida en el servidor desde el parche v24 del 13 de
+> septiembre. La nota venía de la sección 23.3 del CONTEXTO, escrita antes de ese parche.
+> Lo que sí estaba mal y se arregló: registraba `terminos_version: '2026-09-13'` cuando los
+> términos publicados son del 17. **Al editar los términos hay que cambiar esa fecha en los
+> DOS formularios**, el de dueños y el de negocios.
 
 ### Cuando haya volumen
 

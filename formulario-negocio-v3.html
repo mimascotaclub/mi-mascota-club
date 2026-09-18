@@ -859,7 +859,11 @@ $('btnEnviar').addEventListener('click', async () => {
        valida en el servidor: obliga el consentimiento, revisa los campos que no
        pueden faltar y exige un correo válido del responsable — que es la
        credencial con la que después entra a su panel. */
-    const payload = { ...datosNegocio(), logo_url, foto_url, terminos_version: '2026-09-13' };
+    /* Esta fecha tiene que ser la de los términos PUBLICADOS, no la del día que
+       se escribió este código: es el registro de a qué texto exactamente dijo
+       que sí el negocio. Si se vuelven a editar los términos, se cambia acá y
+       también en formulario-registro-demo-v3.html. */
+    const payload = { ...datosNegocio(), logo_url, foto_url, terminos_version: '2026-09-17' };
     const { data, error } = await sb.rpc('registrar_solicitud_negocio', { p_datos: payload });
     if (error) throw error;
     const r = data && data[0];
