@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 17 de septiembre de 2026**
+**Última actualización: 18 de septiembre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `CONTEXTO-PROYECTO.md` es la bitácora histórica: tiene el detalle de cómo se construyó
@@ -72,7 +72,7 @@ septiembre.
 
 ---
 
-## Qué se está construyendo ahora — Verificación de tenencia
+## Verificación de tenencia — TERMINADA (17-18 de septiembre)
 
 El agujero: no había forma de saber si quien se inscribe tiene mascota de verdad.
 Cualquiera podía inventar los datos y llevarse los descuentos, lo que además arruina el
@@ -106,10 +106,12 @@ argumento de venta ante los negocios ("tengo X dueños verificados").
 | Contactos del dueño y del negocio en `/mi-panel` | ✅ Construido |
 | Visor de la cartilla en el registro y en `/mi-mascota` | ✅ Construido (v27) |
 | Eliminar una sola mascota sin borrar la cuenta | ✅ Construido (v27) |
-| **QA de punta a punta contra la base real** | ✅ Hecho el 17 de septiembre |
-| **Encender el interruptor** | ⬜ **Pendiente** |
 | Correo al socio cuando se aprueba o rechaza | ✅ Construido y probado |
-| Correo a Jaime en cada canje | ✅ Construido (`netlify/functions/aviso-canje.js`) |
+| Correo a Jaime en cada canje | ✅ Construido y probado (`netlify/functions/aviso-canje.js`) |
+| Gasto total y columna de compra en el historial | ✅ Construido y probado |
+| **QA de punta a punta contra la base real** | ✅ Hecho el 17-18 de septiembre |
+| Auditoría en pantalla de Android (360×640) | ✅ Hecha el 18 de septiembre |
+| **Encender el interruptor** | ⬜ **Lo único que falta, y es una decisión, no código** |
 
 **El interruptor está APAGADO.** Mientras lo esté, cualquier socio puede canjear aunque
 no esté verificado. Se prende en `/mi-panel` → "Ajustes del club", **después del QA**.
@@ -117,11 +119,15 @@ no esté verificado. Se prende en `/mi-panel` → "Ajustes del club", **después
 Ojo: la pantalla final del registro y el correo de bienvenida ya dicen que falta verificar
 para canjear. Es verdad en el estado final; no lo es mientras el interruptor siga apagado.
 
-### ⚠️ Pendiente inmediato: los socios viejos
+### ⚠️ Pendiente: los socios de prueba
 
-Los socios inscritos **antes** del parche v25 quedaron en `registrado`. Si se enciende el
-interruptor sin arreglarlos, no pueden canjear. Hay que decidir uno por uno: verificarlos a
-mano (si Jaime los conoce) o borrarlos (si eran de prueba).
+Al 18 de septiembre los socios que hay en la base **son todos de prueba y se dejan a
+propósito**, porque sirven para seguir probando. Jaime los borra cuando termine de
+construir el lado de los negocios.
+
+Cuando llegue ese momento, ojo con esto: los inscritos **antes** del parche v25 quedaron en
+`registrado`, así que si se enciende el interruptor sin resolverlos, no pueden canjear. Hay
+que decidir uno por uno: verificarlos a mano o borrarlos.
 
 ```sql
 select codigo, pet, email, verificacion from socios order by socio_number;
@@ -151,30 +157,46 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 
 ## Pendientes, en orden
 
-1. **Encender el interruptor del bloqueo** (ver arriba) después de resolver los socios
-   viejos y borrar las mascotas de prueba.
-   **Se hacen con EmailJS, no hace falta Resend ni pagar nada.** `enviar-codigo.js` ya
-   manda correos por EmailJS desde el servidor con la clave privada, y el formulario los
-   manda desde el navegador con la pública: las dos vías ya funcionan.
-   El límite real del plan gratis **no son los envíos (200/mes) sino las plantillas: son
-   2 y las dos están usadas** (OTP y bienvenida). La salida sin costo es convertir la de
-   bienvenida en una plantilla **genérica de aviso** (`{{asunto}}`, `{{titulo}}`,
-   `{{mensaje}}`, `{{boton_texto}}`, `{{boton_url}}` — EmailJS acepta variables en todos
-   los campos, incluido el asunto), que sirve para bienvenida, verificación aprobada,
-   rechazada y aviso de canje. Cuando el volumen pase de ~40-50 socios nuevos al mes, el
-   plan Personal de US$9 da 2.000 envíos y 6 plantillas.
-2. Resolver los socios viejos y encender el interruptor (ver arriba).
-3. **Sacar los precios del formulario de registro** (Pro $2.990 / Premium $4.990). La
-   página `/planes` se sacó del menú justo para no anclar precios, así que es incoherente.
-4. **Casilla de consentimiento en el formulario de negocios** — todavía no la pide.
-5. **Migrar el formulario de negocios al estilo v3** (OTP + mascota animada).
-6. **Afiche imprimible con el QR** para el mesón del negocio.
-7. **El QR del carnet no se escanea todavía**: el negocio escribe el código a mano.
-8. **Moderación de las fotos** que suben los dueños — hoy no hay ninguna revisión.
-9. **Mercado Pago Preapproval + webhook** (cobro recurrente). Solo hay plan de pasos.
-10. Contenido y tips para dueños, para dar valor mientras hay pocos negocios.
-11. Login con Google (prioridad baja, el acceso por correo ya cubre el caso).
-12. `supabase-fix-foto.sql` sigue sin resolver (firma de función en conflicto).
+**El flujo del dueño está cerrado.** Desde que alguien descubre el club hasta que usa un
+beneficio y ve su historial, no falta ninguna pieza. Lo que queda abajo es otra cosa.
+
+### Para poner el club en marcha (no es construir, es decidir)
+
+1. **Borrar las mascotas de prueba** y **resolver los socios viejos**: los inscritos antes
+   del parche v25 quedaron en `registrado` y no van a poder canjear cuando se encienda el
+   bloqueo. Ver el bloque de arriba con el SQL.
+2. **Encender el interruptor** en `/mi-panel` → Ajustes del club.
+3. **Conseguir negocios.** Es el verdadero cuello de botella: un club de beneficios con
+   cero beneficios no retiene a nadie, por muy bien construido que esté el registro.
+
+### Deuda real del flujo del dueño
+
+4. **Moderación de las fotos** que suben los dueños — hoy no hay ninguna revisión y
+   cualquiera puede subir cualquier imagen como foto de su mascota. Es el único agujero
+   que queda de este lado.
+5. **Contenido y tips para dueños.** La estrategia del 10 de septiembre era captar dueños
+   gratis dándoles valor desde ya, mientras hay pocos negocios. Ese valor todavía no existe.
+
+### Flujo de los negocios (el que sigue)
+
+6. **Casilla de consentimiento en el formulario de negocios** — todavía no la pide, y el de
+   dueños sí. Es una incoherencia legal.
+7. **Migrar el formulario de negocios al estilo v3** (OTP + mascota animada).
+8. **Afiche imprimible con el QR** para el mesón del negocio.
+9. **Páginas de categoría curadas** (ej. `/veterinarias`) como material de venta.
+
+### Cuando haya volumen
+
+10. **Sacar los precios del formulario de registro** (Pro $2.990 / Premium $4.990). La
+    página `/planes` se sacó del menú justo para no anclar precios: es incoherente.
+11. **Mercado Pago Preapproval + webhook** (cobro recurrente). Solo hay plan de pasos.
+12. **Gamificación** (insignias, racha, referidos) — ver "Decidido pero sin construir".
+13. Login con Google (prioridad baja, el acceso por correo ya cubre el caso).
+14. `supabase-fix-foto.sql` sigue sin resolver (firma de función en conflicto).
+
+> **Corrección:** una versión anterior de esta lista decía que el QR del carnet no se
+> escaneaba. Es falso desde el 12 de septiembre: el QR lleva a `/validar/<codigo>`, el
+> negocio lo escanea con la cámara del teléfono y el código del socio llega puesto solo.
 
 ---
 
@@ -206,6 +228,15 @@ update socios set verificacion = 'verificado', verificacion_en = now()
   un electricista y una relojería.
 - **Probar siempre en 360×600**, no solo en iPhone. Es donde aparecen los problemas de
   scroll y es un teléfono muy común en Chile.
+- **Nunca `width:100vw`, siempre `width:100%`.** El 18 de septiembre se encontró que el
+  `.stage` del formulario en `100vw` estiraba la página unos 40px en Android y empujaba el
+  contador de pasos fuera de la pantalla: se leía "11 /" en vez de "11 / 12". `100vw` mide
+  el viewport ideal, no lo que se ve. Lo mismo vale para el campo trampa anti-bots, que
+  heredaba `width:100%` de la regla global de los inputs y medía 360px de ancho aunque
+  estuviera fuera de pantalla: va en `position:fixed` y 1px.
+- **Un archivo escrito no es un archivo guardado.** El 17 de septiembre un cambio se dio por
+  subido, el commit llevaba su nombre y el código nunca llegó al repo. Después de escribir
+  algo importante, leerlo de vuelta antes de decir que está listo.
 - **Nada del chip puede hacer fracasar una inscripción.** Duplicado, mal formato o foto
   pesada: se inscribe igual y se avisa.
 

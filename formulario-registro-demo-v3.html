@@ -43,7 +43,7 @@
     --gris-linea:#E4E2DC;
   }
   *{box-sizing:border-box;}
-  html,body{height:100%;}
+  html,body{height:100%; max-width:100%; overflow-x:hidden;}
   body{
     margin:0;
     font-family:'Lato',sans-serif;
@@ -79,7 +79,12 @@
 
   /* ---------- Escenario de pasos ---------- */
   .stage{
-    position:relative; width:100vw;
+    /* width:100% y NO 100vw. 100vw mide el viewport "ideal" y en Android
+       terminaba siendo más ancho que la pantalla real: eso estiraba la página
+       unos 40px y empujaba el contador de pasos fuera de la vista (se leía
+       "11 /" en vez de "11 / 12"). Con 100% se mide contra el body, que sí
+       mide lo que se ve. */
+    position:relative; width:100%;
     /* 100vh en Android Chrome mide la pantalla SIN descontar la barra del
        navegador, así que parte del contenido queda debajo de ella y no hay
        forma de alcanzarlo. 100dvh sí descuenta la barra; el 100vh queda
@@ -458,7 +463,16 @@
 
 <div class="stage" id="stage"></div>
 
-<input type="text" name="sitio_web" id="honeypot" style="position:absolute; left:-9999px;" tabindex="-1" autocomplete="off">
+<!-- Campo trampa para bots: invisible para una persona, irresistible para un
+     robot que rellena todo.
+     Va en position:FIXED, no absolute. Con absolute, aun estando a -9999px,
+     el navegador lo sumaba al ancho desplazable de la página: 41px de más que
+     en un Android de 360px empujaban el contador de pasos fuera de la
+     pantalla (se veía "11 /" en vez de "11 / 12"). Un elemento fixed no entra
+     en ese cálculo. El tamaño de 1px es por lo mismo: la regla global
+     input[type=text]{width:100%} lo hacía de 360px de ancho. -->
+<input type="text" name="sitio_web" id="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true"
+       style="position:fixed; left:-9999px; top:0; width:1px; height:1px; padding:0; border:0; opacity:0;">
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
