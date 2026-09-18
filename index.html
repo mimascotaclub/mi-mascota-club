@@ -1042,6 +1042,29 @@
       <h4 class="neg-t" style="margin-top:38px;">Tus visitas y beneficios usados</h4>
       <div id="socHistorial"></div>
 
+      <!-- Eliminar una sola mascota. Un correo puede tener varias inscritas, y
+           hasta ahora la única salida era borrar la cuenta entera: demasiado
+           para "inscribí una por error". Actúa sobre la que está seleccionada
+           arriba, para no repetir la lista de mascotas. -->
+      <div id="socBorrarMascotaCaja" class="soc-borrar soc-borrar--suave" style="display:none;">
+        <h4 class="neg-t" style="margin:0 0 8px;">Eliminar una mascota</h4>
+        <p class="soc-nota" style="margin:0 0 14px;">
+          Elimina de tu cuenta <b id="socBorrarMascotaNombre">la mascota seleccionada</b> y todos sus
+          datos. Tus otras mascotas y tu cuenta siguen igual. Las visitas que hizo quedan en el
+          registro del negocio pero sin nada que la identifique. Esto no se puede deshacer.
+        </p>
+        <button type="button" class="btn btn-sm btn-outline" id="socBorrarMascotaBtn"
+                onclick="socioPedirBorrarMascota()">Eliminar esta mascota</button>
+        <div id="socBorrarMascotaConfirma" style="display:none;margin-top:16px;">
+          <p class="soc-nota" style="margin:0 0 10px;">
+            ¿Seguro que quieres eliminar a <b id="socBorrarMascotaNombre2"></b>?
+          </p>
+          <button type="button" class="btn btn-sm btn-borrar" onclick="socioBorrarMascota()">Sí, eliminarla</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="socioCancelarBorrarMascota()">Cancelar</button>
+        </div>
+        <div id="socBorrarMascotaMsg" class="soc-msg" style="display:none;"></div>
+      </div>
+
       <!-- Borrar la cuenta. La ley de datos personales exige poder hacerlo,
            y esconderlo en un correo de contacto no cuenta. -->
       <div class="soc-borrar">
@@ -1296,14 +1319,6 @@
         </div>
       </div>
 
-      <!-- Visor de la cartilla. Vive fuera de la lista porque se superpone a
-           todo el panel; Chrome no deja abrir un data: URL en otra pestaña. -->
-      <div id="cartillaLupa" class="cartilla-lupa" onclick="cerrarCartilla()">
-        <button type="button" class="cartilla-lupa__cerrar" onclick="cerrarCartilla()">✕ Cerrar</button>
-        <img id="cartillaLupaImg" alt="" onclick="zoomCartilla(event)">
-        <div class="cartilla-lupa__ayuda">Toca la imagen para verla a tamaño real</div>
-      </div>
-
       <!-- ===== Buzón de sugerencias ===== -->
       <div class="admin-table" id="sugWrap">
         <h4>Sugerencias <span id="sugCount" class="cola-count">0</span>
@@ -1432,5 +1447,15 @@
 <script src="/js/catalogos-negocio.js"></script>
 <script src="/js/ficha-negocio.js"></script>
 <script src="/js/app.js"></script>
+<!-- Visor de la cartilla veterinaria. Vive suelto al final del documento a
+     propósito: lo usan tanto /mi-panel (para revisar) como /mi-mascota (para
+     que el dueño confirme que su foto se lee antes de mandarla), y si viviera
+     dentro de cualquiera de los dos heredaría su display:none. -->
+<div id="cartillaLupa" class="cartilla-lupa" onclick="cerrarCartilla()">
+  <button type="button" class="cartilla-lupa__cerrar" onclick="cerrarCartilla()">✕ Cerrar</button>
+  <img id="cartillaLupaImg" alt="" onclick="zoomCartilla(event)">
+  <div class="cartilla-lupa__ayuda">Toca la imagen para verla a tamaño real</div>
+</div>
+
 </body>
 </html>

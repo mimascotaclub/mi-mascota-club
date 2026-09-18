@@ -1275,3 +1275,13 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
   border:1px solid rgba(255,206,0,0.55); border-radius:12px;
   padding:13px 15px;
 }
+
+/* Ver y cambiar son dos acciones distintas: con la foto ya puesta, tocar el
+   recuadro la amplía, y cambiarla es un botón aparte. Reabrir el selector de
+   fotos sin querer puede descargar la página en el teléfono. */
+.soc-verif__acciones{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.soc-verif__foto.cargada{ cursor:zoom-in; }
+
+/* Eliminar una mascota es reversible en la práctica (se vuelve a inscribir);
+   borrar la cuenta no. Por eso este bloque no lleva el rojo del otro. */
+.soc-borrar--suave{ border-color:var(--line); }

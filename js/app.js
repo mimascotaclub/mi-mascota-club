@@ -3084,15 +3084,19 @@ function verifItemEl(s){
 /* Chrome bloquea navegar a un data: URL, así que la cartilla se amplía en una
    capa encima del panel. Un toque sobre la imagen la lleva a tamaño real: en un
    teléfono es la única forma de leer un número escrito a mano en la cartilla. */
-function ampliarCartilla(codigo){
-  const img    = document.getElementById('cartilla-' + codigo);
+function ampliarCartillaDesde(idImagen){
+  const img    = document.getElementById(idImagen);
   const lupa   = document.getElementById('cartillaLupa');
   const grande = document.getElementById('cartillaLupaImg');
-  if(!img || !lupa || !grande) return;
+  if(!img || !img.src || !lupa || !grande) return;
   grande.src = img.src;
   lupa.classList.remove('zoom');
   lupa.classList.add('abierta');
   document.body.style.overflow = 'hidden';
+}
+
+function ampliarCartilla(codigo){
+  ampliarCartillaDesde('cartilla-' + codigo);
 }
 
 function zoomCartilla(ev){
@@ -3429,6 +3433,10 @@ window.cargarColaFichas = cargarColaFichas;
    que estar en window — app.js corre dentro de un IIFE. */
 window.cargarColaVerificaciones = cargarColaVerificaciones;
 window.ampliarCartilla = ampliarCartilla;
+window.ampliarCartillaDesde = ampliarCartillaDesde;
+window.socioPedirBorrarMascota = socioPedirBorrarMascota;
+window.socioCancelarBorrarMascota = socioCancelarBorrarMascota;
+window.socioBorrarMascota = socioBorrarMascota;
 window.zoomCartilla = zoomCartilla;
 window.cerrarCartilla = cerrarCartilla;
 window.resolverVerificacion = resolverVerificacion;
@@ -3683,6 +3691,7 @@ function socioSeleccionar(codigo){
   renderCarnetSocio(m);
   renderVerifSocio(m);
   renderCompletitudSocio(m);
+  renderBorrarMascota(m);
   llenarFormSocio(m);
   renderFotoPrev(m.foto);
 }
@@ -3802,9 +3811,13 @@ function renderVerifSocio(m){
       <button type="button" class="soc-verif__foto" id="socCartillaBtn">
         <img id="socCartillaPrev" alt="">
         <span id="socCartillaTxt">${m.tiene_cartilla
-          ? 'Cartilla cargada — toca para cambiarla'
+          ? 'Cartilla cargada'
           : 'Subir foto de la cartilla veterinaria'}</span>
       </button>
+      <div class="soc-verif__acciones" id="socCartillaAcciones" style="display:none;">
+        <button type="button" class="btn btn-sm btn-outline" id="socCartillaVerBtn">Ver la foto</button>
+        <button type="button" class="btn btn-sm btn-outline" id="socCartillaCambiarBtn">Cambiar la foto</button>
+      </div>
       <button type="button" class="btn btn-primary" id="socVerifBtn" style="width:100%;justify-content:center;margin-top:14px;">Enviar para verificar</button>
       <div id="socVerifMsg" class="soc-msg" style="display:none;"></div>
     </div>`;
@@ -3814,9 +3827,21 @@ function renderVerifSocio(m){
   pintarHintChip(inp.value, hint);
   inp.addEventListener('input', () => pintarHintChip(inp.value, hint));
 
-  const fotoBtn = document.getElementById('socCartillaBtn');
-  const fotoInp = document.getElementById('socCartillaInput');
-  fotoBtn.addEventListener('click', () => fotoInp.click());
+  const fotoBtn  = document.getElementById('socCartillaBtn');
+  const fotoInp  = document.getElementById('socCartillaInput');
+  const acciones = document.getElementById('socCartillaAcciones');
+
+  /* Una vez que hay foto, tocar el recuadro la AMPLÍA en vez de volver a abrir
+     el selector. Volver a abrirlo por accidente es peor de lo que parece: en el
+     teléfono el selector de fotos puede descargar la página y perder todo lo
+     que iba escrito. Cambiarla queda como botón aparte, explícito. */
+  fotoBtn.addEventListener('click', () => {
+    if(fotoBtn.classList.contains('cargada')) ampliarCartillaDesde('socCartillaPrev');
+    else fotoInp.click();
+  });
+  document.getElementById('socCartillaVerBtn').addEventListener('click', () => ampliarCartillaDesde('socCartillaPrev'));
+  document.getElementById('socCartillaCambiarBtn').addEventListener('click', () => fotoInp.click());
+
   fotoInp.addEventListener('change', async () => {
     const f = fotoInp.files && fotoInp.files[0];
     if(!f) return;
@@ -3832,11 +3857,13 @@ function renderVerifSocio(m){
       if(socCartillaPendiente.length > 800000) throw new Error('La imagen quedó demasiado pesada');
       document.getElementById('socCartillaPrev').src = socCartillaPendiente;
       fotoBtn.classList.add('cargada');
-      txt.textContent = 'Cartilla lista — toca para cambiarla';
+      acciones.style.display = '';
+      txt.textContent = 'Cartilla lista — revísala antes de enviar';
     }catch(e){
       console.error(e);
       socCartillaPendiente = null;
       fotoBtn.classList.remove('cargada');
+      acciones.style.display = 'none';
       txt.textContent = 'No pudimos leer esa imagen. Intenta con otra.';
     }
   });
@@ -4041,6 +4068,69 @@ async function socioQuitarFoto(){
   }catch(e){
     console.error(e);
     socMsgGuardar('No se pudo quitar la foto.', false);
+  }
+}
+
+/* ---------------- Eliminar una sola mascota ----------------
+   Un correo puede tener varias mascotas inscritas y hasta ahora la única salida
+   era borrar la cuenta entera. Actúa sobre la mascota seleccionada arriba. La
+   última no se puede eliminar por acá: ese caso es "Borrar mi cuenta", que
+   además limpia sesiones y códigos. */
+function renderBorrarMascota(m){
+  const caja = document.getElementById('socBorrarMascotaCaja');
+  if(!caja) return;
+  /* Con una sola mascota este bloque no tiene sentido: borrarla es darse de
+     baja, y para eso está el bloque de abajo. */
+  if(socMascotas.length < 2){ caja.style.display = 'none'; return; }
+  caja.style.display = '';
+  const n1 = document.getElementById('socBorrarMascotaNombre');
+  const n2 = document.getElementById('socBorrarMascotaNombre2');
+  if(n1) n1.textContent = m.pet;
+  if(n2) n2.textContent = m.pet;
+  socioCancelarBorrarMascota();
+}
+
+function socioPedirBorrarMascota(){
+  const c = document.getElementById('socBorrarMascotaConfirma');
+  if(c) c.style.display = '';
+  const b = document.getElementById('socBorrarMascotaBtn');
+  if(b) b.style.display = 'none';
+}
+
+function socioCancelarBorrarMascota(){
+  const c = document.getElementById('socBorrarMascotaConfirma');
+  if(c) c.style.display = 'none';
+  const b = document.getElementById('socBorrarMascotaBtn');
+  if(b) b.style.display = '';
+  const msg = document.getElementById('socBorrarMascotaMsg');
+  if(msg) msg.style.display = 'none';
+}
+
+async function socioBorrarMascota(){
+  if(!socActual) return;
+  const msg = document.getElementById('socBorrarMascotaMsg');
+  const pintar = (texto, ok) => {
+    if(!msg) return;
+    msg.textContent = texto;
+    msg.className = 'soc-msg ' + (ok ? 'ok' : 'mal');
+    msg.style.display = 'block';
+  };
+
+  pintar('Eliminando…', true);
+  try{
+    const { data, error } = await supabase.rpc('socio_eliminar_mascota', {
+      p_token: sesionSocio(), p_codigo: socActual.codigo
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ pintar((r && r.mensaje) || 'No se pudo eliminar.', false); return; }
+
+    pintar(r.mensaje, true);
+    socActual = null;              // la seleccionada ya no existe
+    setTimeout(cargarPanelSocio, 900);
+  }catch(e){
+    console.error(e);
+    pintar('No se pudo eliminar. Inténtalo de nuevo.', false);
   }
 }
 

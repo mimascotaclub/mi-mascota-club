@@ -104,6 +104,8 @@ argumento de venta ante los negocios ("tengo X dueños verificados").
 | Mensaje del bloqueo en el panel del negocio | ✅ Construido |
 | Políticas y Términos con el SLA de 48 h | ✅ Actualizados (versión 2026-09-17) |
 | Contactos del dueño y del negocio en `/mi-panel` | ✅ Construido |
+| Visor de la cartilla en el registro y en `/mi-mascota` | ✅ Construido (v27) |
+| Eliminar una sola mascota sin borrar la cuenta | ✅ Construido (v27) |
 | **QA de punta a punta contra la base real** | ✅ Hecho el 17 de septiembre |
 | **Encender el interruptor** | ⬜ **Pendiente** |
 | **Correo al socio cuando se aprueba o rechaza** | ⬜ **Pendiente — el sitio lo promete y no existe** |
@@ -148,10 +150,19 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 
 ## Pendientes, en orden
 
-1. **Correos automáticos del servidor.** Son dos y comparten la misma pieza que falta
-   (Resend + Netlify Function; EmailJS no sirve porque se manda desde el navegador):
-   avisarle al socio cuando su verificación se aprueba o se rechaza — **hoy el sitio lo
-   promete y no ocurre** — y avisarle a Jaime en cada canje.
+1. **Correos automáticos.** Avisarle al socio cuando su verificación se aprueba o se
+   rechaza — **hoy el sitio lo promete tres veces y no ocurre** — y avisarle a Jaime en
+   cada canje.
+   **Se hacen con EmailJS, no hace falta Resend ni pagar nada.** `enviar-codigo.js` ya
+   manda correos por EmailJS desde el servidor con la clave privada, y el formulario los
+   manda desde el navegador con la pública: las dos vías ya funcionan.
+   El límite real del plan gratis **no son los envíos (200/mes) sino las plantillas: son
+   2 y las dos están usadas** (OTP y bienvenida). La salida sin costo es convertir la de
+   bienvenida en una plantilla **genérica de aviso** (`{{asunto}}`, `{{titulo}}`,
+   `{{mensaje}}`, `{{boton_texto}}`, `{{boton_url}}` — EmailJS acepta variables en todos
+   los campos, incluido el asunto), que sirve para bienvenida, verificación aprobada,
+   rechazada y aviso de canje. Cuando el volumen pase de ~40-50 socios nuevos al mes, el
+   plan Personal de US$9 da 2.000 envíos y 6 plantillas.
 2. Resolver los socios viejos y encender el interruptor (ver arriba).
 3. **Sacar los precios del formulario de registro** (Pro $2.990 / Premium $4.990). La
    página `/planes` se sacó del menú justo para no anclar precios, así que es incoherente.
