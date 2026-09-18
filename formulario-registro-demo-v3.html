@@ -1115,10 +1115,13 @@ function renderPaso(index, direccion){
             carnet_url: urlCarnet,
             boton_url: urlCarnet,
 
-            asunto: '¡Bienvenido al club, ' + (respuestas.nombre || '').split(' ')[0]
-                  + '! Este es el carnet de ' + respuestas.mascota,
+            /* Este asunto es EXACTAMENTE el que estaba escrito en la plantilla
+               antes de hacerla genérica, emoji incluido. No es lugar para
+               mejorarlo: el correo de bienvenida ya funciona y se ve así. */
+            asunto: '¡Bienvenido al club, ' + respuestas.nombre
+                  + '! Este es el carnet de ' + respuestas.mascota + ' 🐾',
             eyebrow: 'Ya eres parte del club',
-            titulo: '¡Bienvenido, ' + (respuestas.nombre || '').split(' ')[0] + '!',
+            titulo: '¡Bienvenido, ' + respuestas.nombre + '!',
             intro: respuestas.mascota + ' ya tiene su carnet. Desde hoy los dos son parte de '
                  + 'Mi Mascota Club, y el carnet es lo único que necesitan para usar los '
                  + 'beneficios en los negocios adheridos.',

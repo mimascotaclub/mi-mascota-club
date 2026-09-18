@@ -1,47 +1,24 @@
 <!--
   ============================================================
-  PLANTILLA DE EMAILJS · AVISO GENÉRICO  (template_u9x5p1i)
+  PLANTILLA DE EMAILJS · BIENVENIDA  (template_u9x5p1i)
   ------------------------------------------------------------
-  OJO: esta plantilla ya NO es solo la de bienvenida. Es la
-  plantilla ÚNICA de avisos al socio, y sirve para los tres
-  correos que manda el sitio hoy:
+  Se manda una sola vez, justo después de que alguien completa el
+  registro en /registro (formulario-registro-demo-v3.html).
 
-    1. Bienvenida        → al terminar el registro
-    2. Verificación OK   → cuando Jaime aprueba en /mi-panel
-    3. Verificación NO   → cuando Jaime rechaza en /mi-panel
-
-  Por qué una sola: el plan gratuito de EmailJS permite 2
-  plantillas y las dos están ocupadas (el código OTP y esta).
-  En vez de pagar por más, el texto viaja como variables y el
-  diseño se queda acá. Para un correo nuevo no hay que crear
-  nada: se manda con otras variables y listo.
-
-  VARIABLES
-    {{to_email}}       correo de destino
+  VARIABLES DISPONIBLES (las que manda el formulario):
     {{to_name}}        nombre de la persona
     {{mascota}}        nombre de la mascota
-    {{asunto}}         asunto del correo  ← va en el campo Subject
-    {{eyebrow}}        línea chica de arriba, en mayúsculas
-    {{titulo}}         el titular
-    {{intro}}          párrafo bajo el titular
-    {{caja_titulo}}    rótulo de la caja amarilla
-    {{caja_dato}}      el dato grande de la caja (código o estado)
-    {{boton_texto}}    texto del botón
-    {{boton_url}}      a dónde lleva el botón
-    {{caja_nota}}      línea chica debajo del botón
-    {{mensaje_extra}}  párrafo de cierre
+    {{codigo}}         código de socio, ej. MMC00001
+    {{carnet_url}}     enlace a Mi Mascota ID
+    {{mensaje_extra}}  frase de cierre que arma el formulario
+    {{to_email}}       correo de destino
 
-  CONFIGURACIÓN EN EMAILJS
+  EN EMAILJS:
     · "To Email"  →  {{to_email}}
-    · "Subject"   →  {{asunto}}
+    · "Subject"   →  ¡Bienvenido al club, {{to_name}}! Este es el carnet de {{mascota}}
     · "From Name" →  Mi Mascota Club
     · Contenido   →  pegar todo lo que va debajo de esta nota,
                      en la vista de código (</> Code Editor).
-
-  NOTA: el bloque "Cómo se usa" es fijo y sale en los tres
-  correos a propósito. En el de bienvenida enseña, en el de
-  verificación aprobada es justo lo que la persona ya puede
-  hacer, y en el rechazado muestra lo que se está perdiendo.
   ============================================================
 -->
 <div style="margin:0;padding:0;background:#f4f4f2;">
@@ -65,43 +42,45 @@
     <tr>
       <td style="padding:34px 34px 0;">
         <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#8a908a;">
-          {{eyebrow}}
+          Ya eres parte del club
         </p>
         <h1 style="margin:0 0 14px;font-size:26px;line-height:1.25;color:#1A1A1A;font-weight:900;">
-          {{titulo}}
+          ¡Bienvenido, {{to_name}}!
         </h1>
         <p style="margin:0 0 24px;font-size:15.5px;line-height:1.65;color:#4a524a;">
-          {{intro}}
+          {{mascota}} ya tiene su carnet. Desde hoy los dos son parte de
+          Mi Mascota Club, y el carnet es lo único que necesitan para usar
+          los beneficios en los negocios adheridos.
         </p>
       </td>
     </tr>
 
-    <!-- Caja destacada: el dato y la acción -->
+    <!-- Carnet: código + botón -->
     <tr>
       <td style="padding:0 34px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td align="center" style="background:#FFF8DE;border:2px solid #FFCE00;border-radius:16px;padding:26px 20px;">
               <div style="font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#8a7a3a;">
-                {{caja_titulo}}
+                Código de socio de {{mascota}}
               </div>
               <div style="margin-top:10px;font-family:'Courier New',Courier,monospace;font-size:31px;line-height:1;font-weight:700;letter-spacing:0.09em;color:#1A1A1A;">
-                {{caja_dato}}
+                {{codigo}}
               </div>
 
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
                 <tr>
                   <td align="center" bgcolor="#1A1A1A" style="border-radius:999px;">
-                    <a href="{{boton_url}}" target="_blank"
+                    <a href="{{carnet_url}}" target="_blank"
                        style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:900;color:#ffffff;text-decoration:none;border-radius:999px;">
-                      {{boton_texto}}
+                      Ver mi carnet &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
               <div style="margin-top:14px;font-size:12.5px;line-height:1.55;color:#7a8377;">
-                {{caja_nota}}
+                Guarda ese enlace en tu teléfono.<br>Entras con tu correo y un código de 6 dígitos.
               </div>
             </td>
           </tr>
