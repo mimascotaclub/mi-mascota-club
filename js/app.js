@@ -4315,17 +4315,24 @@ function renderHistorialSocio(filas){
     </div>`;
     return;
   }
-  const conMonto = filas.filter(f => f.ahorro != null);
-  const ahorroTotal = conMonto.reduce((a,f) => a + Number(f.ahorro || 0), 0);
+  /* El monto y el ahorro se cuentan por separado: una visita puede tener monto
+     anotado sin ahorro calculado (si el beneficio no es un porcentaje), así que
+     mezclarlos haría que los dos números se contradigan. */
+  const conMonto  = filas.filter(f => f.monto  != null);
+  const conAhorro = filas.filter(f => f.ahorro != null);
+  const gastoTotal  = conMonto.reduce((a,f)  => a + Number(f.monto  || 0), 0);
+  const ahorroTotal = conAhorro.reduce((a,f) => a + Number(f.ahorro || 0), 0);
+  const enVisitas = n => 'en ' + n + ' de ' + filas.length + (filas.length === 1 ? ' visita' : ' visitas');
 
   cont.innerHTML = `
     <div class="neg-kpis">
       <div class="neg-kpi"><div class="neg-kpi__n">${filas.length}</div><div class="neg-kpi__l">Visitas</div></div>
       <div class="neg-kpi"><div class="neg-kpi__n">${new Set(filas.map(f => f.negocio_codigo)).size}</div><div class="neg-kpi__l">Negocios visitados</div></div>
-      <div class="neg-kpi"><div class="neg-kpi__n">${conMonto.length ? formatCLP(ahorroTotal) : '—'}</div><div class="neg-kpi__l">Ahorro acumulado</div><div class="neg-kpi__h">${conMonto.length ? 'en ' + conMonto.length + ' de ' + filas.length + ' visitas' : 'aparece cuando el negocio anota el monto'}</div></div>
+      <div class="neg-kpi"><div class="neg-kpi__n">${conMonto.length ? formatCLP(gastoTotal) : '—'}</div><div class="neg-kpi__l">Gasto total</div><div class="neg-kpi__h">${conMonto.length ? enVisitas(conMonto.length) : 'aparece cuando el negocio anota el monto'}</div></div>
+      <div class="neg-kpi"><div class="neg-kpi__n">${conAhorro.length ? formatCLP(ahorroTotal) : '—'}</div><div class="neg-kpi__l">Ahorro acumulado</div><div class="neg-kpi__h">${conAhorro.length ? enVisitas(conAhorro.length) : 'aparece cuando el negocio anota el monto'}</div></div>
     </div>
     <div class="neg-tabla"><table>
-      <thead><tr><th>Folio</th><th>Fecha</th><th>Negocio</th><th>Beneficio</th><th class="num">Ahorro</th></tr></thead>
+      <thead><tr><th>Folio</th><th>Fecha</th><th>Negocio</th><th>Beneficio</th><th class="num">Compra</th><th class="num">Ahorro</th></tr></thead>
       <tbody>${filas.map(f => {
         const d = new Date(f.fecha);
         const fecha = d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' }) + ' · ' +
@@ -4336,7 +4343,8 @@ function renderHistorialSocio(filas){
           <td class="soc-hist-neg">${colaEsc(f.negocio_nombre || '')}
             <div class="dim" style="font-weight:600;font-size:11.5px;">${colaEsc(f.socio_mascota || '')}</div></td>
           <td class="dim" style="font-size:12.5px;">${f.beneficio_texto ? colaEsc(f.beneficio_texto) : '—'}</td>
-          <td class="num">${f.ahorro != null ? formatCLP(Number(f.ahorro)) : '<span class="dim">—</span>'}</td>
+          <td class="num">${f.monto  != null ? formatCLP(Number(f.monto))  : '<span class="dim">—</span>'}</td>
+          <td class="num soc-hist-ahorro">${f.ahorro != null ? formatCLP(Number(f.ahorro)) : '<span class="dim">—</span>'}</td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
