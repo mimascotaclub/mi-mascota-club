@@ -1098,17 +1098,40 @@ function renderPaso(index, direccion){
 
         // Correo de bienvenida (público, seguro de enviar desde el navegador)
         try{
+          /* La plantilla u9x5p1i es genérica: el diseño vive allá y el texto
+             viaja como variables, porque el plan gratuito de EmailJS solo
+             permite 2 plantillas y las dos están ocupadas. Las variables
+             viejas (carnet_url, mensaje_extra) se siguen mandando para que
+             este correo funcione igual con la plantilla anterior mientras se
+             cambia: así el push y la edición de la plantilla no tienen que
+             ocurrir en el mismo minuto. */
+          const enRevision = respuestas.verificacion === 'en_revision';
+          const urlCarnet = location.origin + '/mi-mascota';
           await emailjs.send('service_ch7ncxl', 'template_u9x5p1i', {
             to_email: respuestas.correo,
             to_name: respuestas.nombre,
             codigo: respuestas.codigo_socio,
             mascota: respuestas.mascota,
-            carnet_url: location.origin + '/mi-mascota',
+            carnet_url: urlCarnet,
+            boton_url: urlCarnet,
+
+            asunto: '¡Bienvenido al club, ' + (respuestas.nombre || '').split(' ')[0]
+                  + '! Este es el carnet de ' + respuestas.mascota,
+            eyebrow: 'Ya eres parte del club',
+            titulo: '¡Bienvenido, ' + (respuestas.nombre || '').split(' ')[0] + '!',
+            intro: respuestas.mascota + ' ya tiene su carnet. Desde hoy los dos son parte de '
+                 + 'Mi Mascota Club, y el carnet es lo único que necesitan para usar los '
+                 + 'beneficios en los negocios adheridos.',
+            caja_titulo: 'Código de socio de ' + respuestas.mascota,
+            caja_dato: respuestas.codigo_socio,
+            boton_texto: 'Ver mi carnet →',
+            caja_nota: 'Guarda ese enlace en tu teléfono. Entras con tu correo y un código de 6 dígitos.',
+
             /* El correo dice lo mismo que la pantalla final: si falta verificar,
                este es el segundo recordatorio y llega cuando ya cerró el sitio. */
-            mensaje_extra: respuestas.verificacion === 'en_revision'
-              ? 'Tu carnet ya está listo y lo abres cuando quieras en Mi Mascota ID. Estamos revisando la cartilla de ' + respuestas.mascota + ': dentro de 48 horas hábiles queda verificada y tu carnet empieza a canjear beneficios.'
-              : 'Tu carnet ya está listo y lo abres cuando quieras en Mi Mascota ID. Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tu mascota, con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet.'
+            mensaje_extra: enRevision
+              ? 'Estamos revisando la cartilla de ' + respuestas.mascota + ': dentro de 48 horas hábiles queda verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté listo.'
+              : 'Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tu mascota, con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet, en Mi Mascota ID.'
           });
         } catch(emailErr){
           console.warn('El registro se guardó, pero el correo de bienvenida falló:', emailErr);

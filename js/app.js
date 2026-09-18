@@ -39,6 +39,69 @@ async function enviarCorreoBienvenida(params){
   }
 }
 
+/* ---------------- Avisos al socio ----------------
+   `template_u9x5p1i` dejó de ser solo la plantilla de bienvenida: ahora es LA
+   plantilla de avisos. El plan gratuito de EmailJS permite 2 plantillas y las
+   dos están ocupadas (el código OTP y esta), así que en vez de pagar por más,
+   el texto viaja como variables y el diseño se queda en la plantilla.
+
+   A diferencia del correo de bienvenida, acá sí importa saber si falló: el que
+   aprueba es Jaime, mirando la pantalla, y si el correo no salió tiene que
+   enterarse para escribirle a mano. Por eso esta versión lanza el error en vez
+   de tragárselo. */
+async function enviarAvisoSocio(params){
+  if(!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID){
+    throw new Error('EmailJS no está configurado.');
+  }
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
+}
+
+/* Arma las variables de los dos avisos de verificación. Los textos evitan
+   género: "tu mascota", "estado", nunca "verificada" ni "verificado" referido
+   al animal, porque el nombre no dice si es macho o hembra. */
+function avisoVerificacion(s, decision, nota){
+  const pet = s.pet || 'tu mascota';
+  const url = location.origin + '/mi-mascota';
+  const base = {
+    to_email: s.email,
+    to_name: (s.representante_nombre || '').split(' ')[0] || 'Hola',
+    mascota: pet,
+    codigo: s.codigo,
+    carnet_url: url,
+    boton_url: url
+  };
+
+  if(decision === 'verificado'){
+    return Object.assign(base, {
+      asunto: 'Listo: la verificación de ' + pet + ' está aprobada',
+      eyebrow: 'Verificación aprobada',
+      titulo: 'Tu mascota está verificada',
+      intro: 'Revisamos los datos de ' + pet + ' y está todo en orden. Desde ahora tu carnet '
+           + 'canjea beneficios en todos los negocios del club.',
+      caja_titulo: 'Estado de ' + pet,
+      caja_dato: 'VERIFICADO',
+      boton_texto: 'Ver mi carnet →',
+      caja_nota: 'Muéstralo en el negocio y ellos confirman la visita.',
+      mensaje_extra: 'Gracias por tomarte el minuto de verificar. Es lo que hace que los negocios '
+                   + 'del club sepan que del otro lado hay un dueño de verdad.'
+    });
+  }
+
+  return Object.assign(base, {
+    asunto: 'No pudimos verificar a ' + pet + ' todavía',
+    eyebrow: 'Falta un dato',
+    titulo: 'Necesitamos revisar algo',
+    intro: 'Revisamos lo que enviaste para ' + pet + ' y no pudimos confirmarlo. '
+         + (nota ? '«' + nota + '» ' : '')
+         + 'Puedes volver a enviarlo cuando quieras: toma un minuto.',
+    caja_titulo: 'Estado de ' + pet,
+    caja_dato: 'PENDIENTE',
+    boton_texto: 'Completar la verificación →',
+    caja_nota: 'Entras con tu correo y un código de 6 dígitos.',
+    mensaje_extra: 'Si crees que hay un error, responde este correo y lo revisamos a mano.'
+  });
+}
+
 /* Negocios de ejemplo del directorio.
    Vaciado el 13 de septiembre de 2026, antes de abrir el club a socios reales.
    Eran nueve negocios inventados (Veterinaria Los Robles, Café Con Patas,
@@ -3154,8 +3217,25 @@ async function resolverVerificacion(codigo, decision){
     if(error) throw error;
     const r = data && data[0];
     if(!r || !r.ok){ verifMsg(codigo, (r && r.mensaje) || 'No se pudo guardar.', false); if(item) item.dataset.ocupado='0'; return; }
-    verifMsg(codigo, r.mensaje, true);
-    setTimeout(cargarColaVerificaciones, 900);
+
+    /* El aviso sale después de que la base confirmó el cambio, nunca antes: un
+       correo que dice "quedaste verificado" cuando la base falló es peor que
+       ningún correo. Si el envío falla, el estado YA está guardado, así que no
+       se revierte nada — solo se avisa para escribirle a mano. */
+    const s = colaVerifCache.find(x => x.codigo === codigo);
+    let aviso = '';
+    if(s && s.email){
+      try{
+        await enviarAvisoSocio(avisoVerificacion(s, decision, nota));
+        aviso = ' Le avisamos por correo.';
+      }catch(e){
+        console.error('No se pudo enviar el aviso al socio:', e);
+        aviso = ' ⚠️ El correo NO salió — escríbele a ' + s.email;
+      }
+    }
+
+    verifMsg(codigo, r.mensaje + aviso, true);
+    setTimeout(cargarColaVerificaciones, aviso.indexOf('⚠️') >= 0 ? 6000 : 900);
   }catch(e){
     console.error(e);
     verifMsg(codigo, 'No se pudo guardar. Inténtalo de nuevo.', false);

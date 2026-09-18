@@ -29,7 +29,7 @@ Si una sesión termina sin tocar este archivo, la siguiente empieza a ciegas.
 | Repo local | `/Users/jaimeflorian/Desktop/Repositorio MI MASCOTA CLUB/mi-mascota-club-12-8` |
 | Despliegue | `git add .` → `git commit -m "..."` → `git push`. Netlify construye solo. |
 | Base de datos | Supabase, proyecto `mzsqyjxqnomsbqzhygkx` (São Paulo) |
-| Correos | EmailJS desde el navegador (público) + Netlify Function `enviar-codigo.js` para los OTP |
+| Correos | EmailJS. Dos plantillas y no caben más en el plan gratis: `EMAILJS_TEMPLATE_ID_OTP` (el código de 6 dígitos, se manda desde la Netlify Function `enviar-codigo.js` con la clave privada) y **`template_u9x5p1i`, que es la plantilla GENÉRICA de avisos** — bienvenida, verificación aprobada y rechazada salen todas de ahí, con el texto viajando como variables |
 
 `index.html` es la home real. **`index-combinado.html` es legado y no se toca.**
 
@@ -108,7 +108,7 @@ argumento de venta ante los negocios ("tengo X dueños verificados").
 | Eliminar una sola mascota sin borrar la cuenta | ✅ Construido (v27) |
 | **QA de punta a punta contra la base real** | ✅ Hecho el 17 de septiembre |
 | **Encender el interruptor** | ⬜ **Pendiente** |
-| **Correo al socio cuando se aprueba o rechaza** | ⬜ **Pendiente — el sitio lo promete y no existe** |
+| Correo al socio cuando se aprueba o rechaza | ✅ Construido — falta pegar la plantilla en EmailJS |
 
 **El interruptor está APAGADO.** Mientras lo esté, cualquier socio puede canjear aunque
 no esté verificado. Se prende en `/mi-panel` → "Ajustes del club", **después del QA**.
@@ -150,9 +150,9 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 
 ## Pendientes, en orden
 
-1. **Correos automáticos.** Avisarle al socio cuando su verificación se aprueba o se
-   rechaza — **hoy el sitio lo promete tres veces y no ocurre** — y avisarle a Jaime en
-   cada canje.
+1. **Correo a Jaime en cada canje.** Es lo último que falta de la trazabilidad. Se hace
+   igual que los avisos al socio: `enviarAvisoSocio()` con otras variables, desde el
+   navegador del negocio al confirmar la visita.
    **Se hacen con EmailJS, no hace falta Resend ni pagar nada.** `enviar-codigo.js` ya
    manda correos por EmailJS desde el servidor con la clave privada, y el formulario los
    manda desde el navegador con la pública: las dos vías ya funcionan.
