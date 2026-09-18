@@ -1,5 +1,13 @@
 # Mi Mascota Club — Contexto completo del proyecto
 
+> **⚠️ NO EMPIECES POR AQUÍ.** Este documento es la *bitácora histórica*: más de 1.700 líneas
+> con el detalle de cómo se construyó cada pieza y por qué. Sirve para consultar una sección
+> puntual, no para leerlo entero — nadie lo hace, y por eso se desactualiza.
+>
+> **Para empezar una sesión nueva, lee `ESTADO.md`**: una página con el estado real del
+> proyecto, qué está a medio construir y qué sigue. Este archivo se consulta después, si hace
+> falta entender cómo funciona algo en particular.
+
 Este documento resume TODO lo construido hasta ahora, para que puedas pegarlo al inicio de una
 conversación nueva (en otra cuenta de Claude, u otra IA como ChatGPT/Gemini) y que quien te ayude
 entienda el proyecto sin que tengas que reexplicar todo desde cero.
@@ -1717,3 +1725,153 @@ Con Playwright, pintando la pantalla final real (`mostrarFinal()`) en cinco tama
 
 **Lección para el futuro:** probar siempre en una pantalla de 360×600, no solo en el iPhone. Es el
 tamaño donde aparecen estos problemas, y es un teléfono muy común en Chile.
+
+
+## 32. Reformular de qué se trata el club (14 de septiembre, 2026)
+
+Sesión de decisiones, sin código. El club dejó de definirse como "un club para dueños de
+mascotas" y pasó a ser **"el club que compensa el gasto y el sacrificio de tener mascota con
+beneficios en otras áreas de la vida"**.
+
+El giro no es de redacción. Cambia a quién se le vende y con qué argumento:
+
+- Tener mascota es el **filtro de entrada**, no la razón de valor. Antes el valor prometido
+  eran descuentos en cosas de mascota, que es exactamente donde el socio ya gasta y donde
+  compite con cualquier tienda de mascotas.
+- Eso abre el directorio a rubros que no tienen nada que ver con animales, y lo convierte en
+  una ventaja en vez de una incoherencia.
+
+Lo confirma la realidad: los primeros cinco negocios candidatos, que son conocidos cercanos,
+**ninguno tiene relación con mascotas** — un estudio de tatuajes, una gasfitería, una
+electricidad y una tienda de relojes.
+
+
+## 33. El agujero de la tenencia (16 de septiembre, 2026)
+
+Otra sesión de decisiones, sin código. Se detectó que **no existe ninguna validación de que
+quien se inscribe tenga mascota**: los datos se escriben a mano y nadie los revisa. Cualquiera
+puede inventar una mascota y llevarse los beneficios.
+
+No es solo un problema de fraude. Es un problema de **argumento de venta**: si la base está
+llena de gente que no tiene mascota, el número de socios deja de significar algo frente a un
+negocio al que se le está pidiendo un descuento.
+
+### 33.1 Lo que se descartó
+
+Automatizar la validación del chip contra registros externos, oficiales o privados. Es
+inviable técnica y legalmente. **Decisión: construir base verificada propia en vez de depender
+de terceros.**
+
+### 33.2 Lo que se decidió
+
+1. **Chip + foto de la cartilla veterinaria** en el registro, como sello de "dueño verificado".
+2. Partir por **validación de formato del chip + constraint de duplicado**, dejando el OCR de
+   la cartilla para más adelante.
+3. **Dos etiquetas de estado**: "Registrado" y "Verificado". Solo "Verificado" puede canjear.
+4. **SLA de verificación manual: 48 horas hábiles**, que hay que reflejar en Políticas y
+   Términos.
+5. **Un solo campo de estado** en la base; cada panel muestra solo lo que le corresponde. El
+   panel del negocio no necesita ver el chip ni la cartilla, solo si el socio puede canjear.
+6. **No crear rutas por rubro** (`/vet/<slug>`). `/negocio/<slug>` sigue siendo la única
+   plantilla, y en su lugar se crean **páginas de categoría curadas** (ej. `/veterinarias`)
+   que listan tarjetas apuntando a las fichas reales. Sirven también como material de venta.
+7. **Veterinarias como socias fundadoras** que registren el chip al momento de implantarlo, y
+   una función de **alerta de mascota perdida** como gancho de registro real.
+8. Ideas de **gamificación** para fidelidad, pendientes de trabajar: insignias en el carnet
+   (Verificado, fiel a un negocio por canjes repetidos, "Explorador" por canjear en varios
+   negocios distintos), racha de meses activo, y referidos con premio cuando el referido **se
+   verifica**, no cuando se registra. Sin ranking público comparando usuarios entre sí, y
+   separada de los planes de pago (free/pro/premium) para no confundirlas.
+
+
+## 34. Verificación de tenencia — la construcción (17 de septiembre, 2026)
+
+### 34.1 La discusión que definió el diseño
+
+La duda de fondo era si el chip debía ser obligatorio en el formulario, y si el bloqueo del
+canje debía activarse de inmediato. El razonamiento que quedó:
+
+- **Obligar el chip en el formulario no es el arreglo**: se pierde a todo el que no tiene el
+  número a mano, que es casi todo el mundo. El arreglo es que **el carnet no sirva hasta
+  verificar y que eso se diga en la misma pantalla donde acaban de recibirlo**, cuando ya
+  invirtieron cinco pasos y quieren el beneficio. Convierte mejor que un campo obligatorio.
+- **Lo que no puede pasar es que se entere en el mesón.** Misma regla que llevó a pedir el
+  correo del negocio recién al confirmar la primera visita: nadie bloqueado frente al cajero.
+  Por eso el estado grita en el carnet, en `/mi-mascota` y en el correo de bienvenida.
+- **El riesgo real del bloqueo es el SLA de 48 horas.** Con pocos socios se revisa el mismo
+  día desde el celular y no se nota; con volumen hay que mirarlo de nuevo.
+
+Por eso el bloqueo se construyó **con un interruptor**, que se prende desde `/mi-panel` y no
+desde una línea de SQL: si mata las primeras visitas, se apaga desde el teléfono.
+
+### 34.2 `supabase-verificacion-v25.sql` — YA EJECUTADO
+
+Aplicado el 17 de septiembre de 2026.
+
+- Columnas nuevas en `socios`: `chip`, `cartilla`, `verificacion`, `verificacion_en`,
+  `verificacion_nota`, con constraint de los cuatro estados posibles.
+- **Índice único parcial** `socios_chip_uniq`: un chip = un animal. Los rechazados quedan
+  fuera del índice, para que un número mal escrito no bloquee al dueño real de ese chip.
+- `chip_normalizar()`, `chip_formato_ok()` (15 dígitos ISO 11784/11785) y `chip_aceptable()`
+  (9 a 20 alfanuméricos). **El formato orienta pero no bloquea**: hay mascotas viejas con
+  chips antiguos, y decide la revisión manual.
+- Tabla `ajustes` (clave/valor) con RLS encendido y **sin políticas** — invisible desde el
+  navegador, solo la tocan las funciones `security definer`. Ahí vive
+  `canje_exige_verificacion`, que nace en `false`.
+- `socio_enviar_verificacion(token, codigo, chip, cartilla)` — el dueño manda su verificación.
+  Solo pasa a `en_revision` si están **las dos cosas**; con el chip solo, queda guardado y el
+  estado no cambia.
+- `registrar_socio()` ahora acepta `p_chip` y `p_cartilla` y devuelve además `verificacion` y
+  `aviso`. **Regla de oro: nada del chip puede hacer fracasar la inscripción.** Duplicado, mal
+  formato o foto demasiado pesada se resuelven inscribiendo igual y devolviendo un aviso.
+  (Hubo que DROP porque cambia el tipo de retorno.)
+- `socio_perfil()` devuelve el estado, el chip y si hay cartilla cargada — **no** devuelve la
+  imagen, que pesa y el dueño ya la tiene. (También DROP por el tipo de retorno.)
+- `admin_verificaciones_pendientes()` y `admin_resolver_verificacion()`, ambas detrás de
+  `es_admin()`. **La cartilla se borra al resolver, se apruebe o se rechace**: ya cumplió su
+  función y es el dato más sensible de la base.
+- `admin_ajustes()` y `admin_ajuste_set()` para el interruptor.
+- `canje_previo()` y `registrar_canje_v3()` respetan el interruptor. `canje_previo` es el que
+  frena en pantalla, **antes** de que el cajero llegue a confirmar nada, con un mensaje
+  distinto según el estado del socio. `registrar_canje_v3` lo repite por si alguien llama a la
+  función directamente.
+
+### 34.3 El paso nuevo del formulario
+
+`formulario-registro-demo-v3.html`: paso `chip` entre el código de verificación y el plan.
+
+- Caja turquesa "Por qué te lo pedimos" que explica las tres razones: confirmar que la mascota
+  existe y es suya, poder canjear, y que quede guardado por si se pierde.
+- Campo de chip con ayuda en vivo que cuenta los dígitos y avisa cuando el formato no es el
+  chileno de 15, sin impedir continuar.
+- Botón para subir la foto de la cartilla, con `comprimirImagen()` nuevo: achica a 1280 px y
+  baja la calidad por pasos hasta quedar bajo 800 KB, en vez de fallar.
+- Botón "Lo hago después, desde Mi Mascota ID" — **el paso nunca obliga**.
+- La pantalla final muestra el estado real en el carnet ("Falta verificar" en naranja o "En
+  revisión" en amarillo) con el bloque explicativo y, si falta, un botón grande a
+  `/mi-mascota`. El correo de bienvenida dice lo mismo.
+- **Arreglo de paso:** `.paso` pasó a `padding:56px 24px 32px`. El padding de arriba deja libre
+  la franja del botón "Atrás", que va fijo; sin él, en un paso más alto que la pantalla el
+  eyebrow quedaba debajo del botón.
+
+Probado con Playwright en 360×600 y 390×844: el botón final se alcanza en los dos, la ayuda del
+chip responde a los tres casos (15 dígitos, corto, formato raro) y el carnet muestra el estado
+correcto en los dos escenarios.
+
+### 34.4 Lo que queda de esta tanda
+
+1. Subir chip y cartilla desde `/mi-mascota` (es donde cae el que saltó el paso).
+2. Revisar y aprobar desde `/mi-panel`, con el interruptor del bloqueo.
+3. Mensaje del bloqueo en el panel del negocio.
+4. Políticas y Términos con el SLA de 48 horas hábiles y el tratamiento de la cartilla.
+
+### 34.5 Por qué existe ESTADO.md desde hoy
+
+Este documento quedó parado el 13 de septiembre: las sesiones del 14 y del 16 —donde se
+reformuló el concepto y se decidió todo el sistema de verificación— no dejaron rastro en el
+repo. Se recuperaron de memoria, no de acá. La causa es el tamaño: 114 KB que nadie lee
+enteros, ni siquiera para actualizarlos.
+
+Desde hoy, **`ESTADO.md`** es la página que se lee al empezar y se actualiza **en el mismo
+commit del trabajo, antes del push**. Este archivo sigue siendo la bitácora, pero deja de ser
+el punto de entrada.

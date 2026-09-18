@@ -1218,3 +1218,58 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
   padding:3px 8px; border-radius:999px;
   color:#1A1A1A; background:var(--yellow);
 }
+
+/* ============================================================
+   Verificación de tenencia (panel del dueño, /mi-mascota)
+   Tres caras del mismo bloque según el estado. El color hace la
+   mitad del trabajo: ámbar = te falta algo, amarillo = espera,
+   verde = listo.
+   ============================================================ */
+.soc-verif{
+  border-radius:18px; padding:18px 20px; margin-bottom:22px;
+  border:2px solid var(--line); background:#fff;
+}
+.soc-verif.pend{ border-color:rgba(214,138,42,0.45); background:#FFF8EC; }
+.soc-verif.rev { border-color:rgba(199,154,22,0.45); background:var(--paper-tint-yellow); }
+.soc-verif.ok  { border-color:rgba(63,174,122,0.45); background:#EEF9F3; }
+
+.soc-verif__cab{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.soc-verif__badge{
+  font-size:10px; font-weight:900; letter-spacing:0.07em; text-transform:uppercase;
+  padding:5px 11px; border-radius:999px; color:#fff;
+}
+.soc-verif__badge.pend{ background:#D68A2A; }
+.soc-verif__badge.rev { background:#C79A16; }
+.soc-verif__badge.ok  { background:var(--sage); }
+
+.soc-verif__txt{ margin:0; font-size:14px; line-height:1.6; color:var(--ink); }
+.soc-verif__txt b{ font-weight:900; }
+
+.soc-verif__nota{
+  margin-top:12px; padding:11px 14px; border-radius:12px;
+  background:rgba(214,90,58,0.10); border:1px solid rgba(214,90,58,0.3);
+  font-size:13px; line-height:1.55; color:var(--ink);
+}
+
+.soc-verif__form{ margin-top:18px; }
+
+.soc-verif__foto{
+  display:flex; align-items:center; gap:12px; width:100%;
+  margin-top:14px; padding:13px 15px; text-align:left; cursor:pointer;
+  background:#fff; border:2px dashed var(--line); border-radius:14px;
+  font-family:var(--font-body); font-size:14px; font-weight:800; color:var(--ink);
+  transition:border-color .2s, background .2s;
+}
+.soc-verif__foto:hover{ border-color:var(--teal); }
+.soc-verif__foto img{ width:44px; height:44px; flex:none; object-fit:cover; border-radius:10px; display:none; }
+.soc-verif__foto.cargada{ border-style:solid; border-color:var(--teal); background:var(--paper-tint-teal); }
+.soc-verif__foto.cargada img{ display:block; }
+
+/* Un socio sin verificar no es un error: se muestra en tono informativo para
+   que el cajero pueda leérselo al cliente sin alarmarlo. */
+.soc-error.soc-error--info{
+  color:var(--ink); font-size:14px; font-weight:700;
+  background:var(--paper-tint-yellow);
+  border:1px solid rgba(255,206,0,0.55); border-radius:12px;
+  padding:13px 15px;
+}

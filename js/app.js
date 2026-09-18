@@ -1955,9 +1955,17 @@ async function cargarPrevioCanje(){
     const p = data && data[0];
     if(!p || !p.ok){
       valMostrarPaso(1);
+      /* Un socio sin verificar no es un error del negocio ni un código mal
+         escrito: es información. Se muestra en tono neutro para que el cajero
+         se lo pueda leer al cliente sin que parezca que algo falló. */
+      const caja = document.getElementById('valPaso1Error');
+      const esVerif = !!(p && p.socio_verificacion && p.socio_verificacion !== 'verificado');
+      if(caja) caja.classList.toggle('soc-error--info', esVerif);
       valError('valPaso1Error', (p && p.mensaje) || 'No pudimos encontrar ese código.');
       return;
     }
+    const cajaOk = document.getElementById('valPaso1Error');
+    if(cajaOk) cajaOk.classList.remove('soc-error--info');
     valPrevio = p;
     renderFichaValidar(p);
     valMostrarPaso(2);
@@ -2003,7 +2011,7 @@ function renderFichaValidar(p){
         <div class="val-ficha__pet">${colaEsc(p.socio_pet)}</div>
         <div class="val-ficha__sub">${colaEsc([p.socio_species, p.socio_breed].filter(Boolean).join(' · '))}</div>
       </div>
-      <div class="val-chip val-chip--ok">✓ Socio activo</div>
+      <div class="val-chip val-chip--ok">${p.socio_verificacion === 'verificado' ? '✓ Mascota verificada' : '✓ Socio activo'}</div>
     </div>
     <div class="val-ficha__meta">
       <span class="mono">${colaEsc(p.socio_codigo)}</span>
@@ -2531,6 +2539,8 @@ async function tryUnlock(){
     err.style.display='none';
     await refreshAdmin();
     cargarColaFichas();
+    cargarColaVerificaciones();
+    cargarAjustesAdmin();
     cargarSugerencias();
   }catch(e){
     err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
@@ -2716,6 +2726,8 @@ function mostrarPaginaAdmin(){
       if(panel) panel.style.display = 'block';
       refreshAdmin();
       cargarColaFichas();
+      cargarColaVerificaciones();
+      cargarAjustesAdmin();
       cargarSugerencias();
     }
   }).catch(() => {});
@@ -2928,6 +2940,204 @@ window.abrirElegirCamino = abrirElegirCamino;
    anon key por sí sola no puede ver ni aprobar nada.
    ============================================================ */
 
+/* ================= Verificaciones de tenencia en /mi-panel =================
+   La cola de mascotas que mandaron chip + cartilla y esperan que alguien mire.
+   El compromiso con el socio son 48 horas hábiles, así que esto tiene que ser
+   revisable desde el teléfono, en la fila del banco, sin abrir Supabase. */
+let colaVerifCache = [];
+
+async function cargarColaVerificaciones(){
+  const cont = document.getElementById('colaVerif');
+  const cnt  = document.getElementById('verifCount');
+  if(!cont) return;
+  cont.innerHTML = '<div class="cola-vacia">Cargando…</div>';
+  try{
+    const { data, error } = await supabase.rpc('admin_verificaciones_pendientes');
+    if(error) throw error;
+    colaVerifCache = data || [];
+    if(cnt){ cnt.textContent = colaVerifCache.length; cnt.dataset.cero = colaVerifCache.length ? '0' : '1'; }
+    if(!colaVerifCache.length){
+      cont.innerHTML = '<div class="cola-vacia">No hay verificaciones esperando. 🎉</div>';
+      return;
+    }
+    cont.innerHTML = '';
+    colaVerifCache.forEach(s => cont.appendChild(verifItemEl(s)));
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<div class="cola-vacia">No pudimos cargar las verificaciones. Vuelve a entrar al panel e inténtalo otra vez.</div>';
+    if(cnt){ cnt.textContent = '0'; cnt.dataset.cero = '1'; }
+  }
+}
+
+function verifItemEl(s){
+  const el = document.createElement('div');
+  el.className = 'cola-item';
+  el.id = 'verif-' + s.codigo;
+
+  const enviado = s.verificacion_en
+    ? new Date(s.verificacion_en).toLocaleString('es-CL', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
+    : '—';
+
+  /* Las 48 horas hábiles son una promesa escrita en los términos, así que el
+     reloj va a la vista y no en la cabeza de nadie. */
+  const horas = s.verificacion_en
+    ? Math.floor((Date.now() - new Date(s.verificacion_en).getTime()) / 3600000)
+    : 0;
+  const alerta = horas >= 48 ? ' verif-item--tarde' : '';
+
+  const chipTxt = colaEsc(s.chip || '—');
+  const chipSello = s.chip
+    ? (s.formato_ok
+        ? '<span class="verif-sello ok">15 dígitos ✓</span>'
+        : '<span class="verif-sello raro">formato distinto — revisar a mano</span>')
+    : '';
+
+  el.className += alerta;
+  el.innerHTML = `
+    <div class="cola-fecha">Enviada el ${colaEsc(enviado)}${horas >= 48 ? ' · lleva más de 48 horas' : ''}</div>
+
+    <div class="verif-item__cab">
+      <div class="verif-item__av">${s.foto ? `<img src="${s.foto}" alt="">` : '🐾'}</div>
+      <div>
+        <div class="verif-item__pet">${colaEsc(s.pet)}</div>
+        <div class="verif-item__sub">${colaEsc([s.species, s.breed].filter(Boolean).join(' · '))} · ${colaEsc(s.comuna || 'sin comuna')}</div>
+        <div class="verif-item__cod mono">${colaEsc(s.codigo)}</div>
+      </div>
+    </div>
+
+    <div class="cola-priv">
+      <div class="cola-priv__t">Lo que hay que contrastar</div>
+      <div class="cola-priv__row"><span>Número de chip</span><b class="mono">${chipTxt} ${chipSello}</b></div>
+      <div class="cola-priv__row"><span>Dueño</span><b>${colaEsc(s.representante_nombre || '—')}</b></div>
+      <div class="cola-priv__row"><span>Correo</span><b><a href="mailto:${colaEsc(s.email)}">${colaEsc(s.email)}</a></b></div>
+      <div class="cola-priv__row"><span>Teléfono</span><b>${colaEsc(s.representante_telefono || '—')}</b></div>
+    </div>
+
+    ${s.cartilla
+      ? `<div class="verif-cartilla">
+           <div class="cola-priv__t">Cartilla veterinaria — toca para ampliar</div>
+           <a href="${s.cartilla}" target="_blank" rel="noopener"><img src="${s.cartilla}" alt="Cartilla de ${colaEsc(s.pet)}"></a>
+         </div>`
+      : `<div class="verif-cartilla verif-cartilla--vacia">No subió foto de la cartilla. Solo mandó el número de chip.</div>`}
+
+    <div class="cola-acciones verif-acciones">
+      <button class="cola-btn cola-btn--ok" onclick="resolverVerificacion('${colaEsc(s.codigo)}','verificado')">✓ Verificar</button>
+      <button class="cola-btn cola-btn--no" onclick="pedirMotivoVerif('${colaEsc(s.codigo)}')">✕ Rechazar</button>
+    </div>
+
+    <div class="verif-motivo" id="verifmotivo-${colaEsc(s.codigo)}" style="display:none;">
+      <label for="verifnota-${colaEsc(s.codigo)}">Por qué se rechaza (lo va a leer el socio)</label>
+      <textarea id="verifnota-${colaEsc(s.codigo)}" rows="2" placeholder="La foto de la cartilla no se leía, el número no coincide..."></textarea>
+      <div class="cola-acciones verif-acciones" style="margin-top:8px;">
+        <button class="cola-btn cola-btn--no" onclick="resolverVerificacion('${colaEsc(s.codigo)}','rechazado')">Confirmar rechazo</button>
+        <button class="cola-btn cola-btn--edit" onclick="cancelarMotivoVerif('${colaEsc(s.codigo)}')">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="cola-msg" id="verifmsg-${colaEsc(s.codigo)}"></div>`;
+  return el;
+}
+
+function pedirMotivoVerif(codigo){
+  const caja = document.getElementById('verifmotivo-' + codigo);
+  if(caja){ caja.style.display = ''; const t = document.getElementById('verifnota-' + codigo); if(t) t.focus(); }
+}
+function cancelarMotivoVerif(codigo){
+  const caja = document.getElementById('verifmotivo-' + codigo);
+  if(caja) caja.style.display = 'none';
+}
+function verifMsg(codigo, texto, ok){
+  const el = document.getElementById('verifmsg-' + codigo);
+  if(el){ el.textContent = texto; el.className = 'cola-msg ' + (ok ? 'cola-msg--ok' : 'cola-msg--err'); }
+}
+
+async function resolverVerificacion(codigo, decision){
+  const item = document.getElementById('verif-' + codigo);
+  if(item && item.dataset.ocupado === '1') return;
+  if(item) item.dataset.ocupado = '1';
+
+  const nota = decision === 'rechazado'
+    ? ((document.getElementById('verifnota-' + codigo) || {}).value || '').trim()
+    : null;
+
+  if(decision === 'rechazado' && !nota){
+    verifMsg(codigo, 'Escribe el motivo: el socio lo va a leer en su panel.', false);
+    if(item) item.dataset.ocupado = '0';
+    return;
+  }
+
+  verifMsg(codigo, decision === 'verificado' ? 'Verificando…' : 'Rechazando…', true);
+  try{
+    const { data, error } = await supabase.rpc('admin_resolver_verificacion', {
+      p_codigo: codigo, p_decision: decision, p_nota: nota
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ verifMsg(codigo, (r && r.mensaje) || 'No se pudo guardar.', false); if(item) item.dataset.ocupado='0'; return; }
+    verifMsg(codigo, r.mensaje, true);
+    setTimeout(cargarColaVerificaciones, 900);
+  }catch(e){
+    console.error(e);
+    verifMsg(codigo, 'No se pudo guardar. Inténtalo de nuevo.', false);
+    if(item) item.dataset.ocupado = '0';
+  }
+}
+
+/* ---------------- El interruptor del bloqueo ---------------- */
+let ajusteVerifValor = false;
+
+async function cargarAjustesAdmin(){
+  const est = document.getElementById('ajusteVerifEstado');
+  const btn = document.getElementById('ajusteVerifBtn');
+  if(!est || !btn) return;
+  est.textContent = 'Cargando…';
+  try{
+    const { data, error } = await supabase.rpc('admin_ajustes');
+    if(error) throw error;
+    const fila = (data || []).find(a => a.clave === 'canje_exige_verificacion');
+    ajusteVerifValor = !!(fila && fila.valor === 'true');
+    pintarAjusteVerif();
+  }catch(e){
+    console.error(e);
+    est.textContent = 'No pudimos leerlo';
+    est.className = 'adm-ajuste__estado mal';
+  }
+}
+
+function pintarAjusteVerif(){
+  const est = document.getElementById('ajusteVerifEstado');
+  const btn = document.getElementById('ajusteVerifBtn');
+  if(!est || !btn) return;
+  btn.classList.toggle('on', ajusteVerifValor);
+  btn.setAttribute('aria-pressed', ajusteVerifValor ? 'true' : 'false');
+  est.textContent = ajusteVerifValor ? 'Encendido' : 'Apagado';
+  est.className = 'adm-ajuste__estado ' + (ajusteVerifValor ? 'on' : 'off');
+}
+
+async function alternarAjusteVerif(){
+  const btn = document.getElementById('ajusteVerifBtn');
+  const nuevo = !ajusteVerifValor;
+  if(btn) btn.disabled = true;
+  try{
+    const { data, error } = await supabase.rpc('admin_ajuste_set', {
+      p_clave: 'canje_exige_verificacion', p_valor: nuevo ? 'true' : 'false'
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ toast((r && r.mensaje) || 'No se pudo guardar el ajuste.'); return; }
+    ajusteVerifValor = nuevo;
+    pintarAjusteVerif();
+    toast(nuevo
+      ? 'Listo: ahora solo las mascotas verificadas pueden canjear.'
+      : 'Listo: cualquier socio puede canjear, verificado o no.');
+  }catch(e){
+    console.error(e);
+    toast('No se pudo guardar el ajuste.');
+  }finally{
+    if(btn) btn.disabled = false;
+  }
+}
+
 let colaFichasCache = [];
 
 function colaEsc(v){
@@ -3139,6 +3349,14 @@ window.toggleDropdown = toggleDropdown;
 window.irABuscar = irABuscar;
 window.refreshAdmin = refreshAdmin;
 window.cargarColaFichas = cargarColaFichas;
+/* Verificación de tenencia: estas viven en onclick del HTML, así que tienen
+   que estar en window — app.js corre dentro de un IIFE. */
+window.cargarColaVerificaciones = cargarColaVerificaciones;
+window.resolverVerificacion = resolverVerificacion;
+window.pedirMotivoVerif = pedirMotivoVerif;
+window.cancelarMotivoVerif = cancelarMotivoVerif;
+window.cargarAjustesAdmin = cargarAjustesAdmin;
+window.alternarAjusteVerif = alternarAjusteVerif;
 window.cargarSugerencias = cargarSugerencias;
 window.marcarSugerencia = marcarSugerencia;
 window.aprobarFicha = aprobarFicha;
@@ -3184,6 +3402,7 @@ const LS_SOC_SESION = 'mmc_sesion_socio';
 let socMascotas = [];        // todas las mascotas de ese correo
 let socActual = null;        // la que se está viendo
 let socFotoPendiente = null; // foto recién elegida, antes de guardar
+let socCartillaPendiente = null; // foto de cartilla elegida, antes de enviarla a verificar
 
 function sesionSocio(){
   try{ return localStorage.getItem(LS_SOC_SESION) || ''; }catch(e){ return ''; }
@@ -3213,7 +3432,7 @@ async function salirPanelSocio(){
     try{ await supabase.rpc('socio_logout', { p_token: token }); }catch(e){ /* da igual: igual se borra local */ }
   }
   try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
-  socMascotas = []; socActual = null; socFotoPendiente = null;
+  socMascotas = []; socActual = null; socFotoPendiente = null; socCartillaPendiente = null;
   const panel = document.getElementById('socPanelBox');
   const login = document.getElementById('socLoginBox');
   if(panel) panel.style.display = 'none';
@@ -3383,6 +3602,7 @@ function socioSeleccionar(codigo){
   });
 
   renderCarnetSocio(m);
+  renderVerifSocio(m);
   renderCompletitudSocio(m);
   llenarFormSocio(m);
   renderFotoPrev(m.foto);
@@ -3392,6 +3612,10 @@ function socioSeleccionar(codigo){
 function renderCarnetSocio(m){
   const cont = document.getElementById('socCarnet');
   if(!cont) return;
+  /* El carnet dice la verdad sobre lo que puede hacer. Un carnet que dice
+     "Activo" cuando el socio todavía no puede canjear es exactamente lo que
+     manda a alguien al mesón a que le digan que no. */
+  const et = VERIF_ETIQUETA[m.verificacion || 'registrado'] || VERIF_ETIQUETA.registrado;
   const avatar = m.foto
     ? `<img src="${m.foto}" alt="${colaEsc(m.pet)}" style="width:100%;height:100%;object-fit:cover;">`
     : `<img src="/assets/favicon.svg" alt="">`;
@@ -3408,10 +3632,170 @@ function renderCarnetSocio(m){
       <div id="socCarnetQR" class="cred-qr"></div>
       <div class="cred-row" style="margin-top:14px;">
         <div>Comuna<b>${colaEsc(m.comuna || '—')}</b></div>
-        <div>Estado<b style="color:var(--sage);">Activo</b></div>
+        <div>Estado<b style="color:${et.color};">${et.txt}</b></div>
       </div>
     </div>`;
   renderQR('socCarnetQR', urlCarnet(m.codigo));
+}
+
+/* ---------------- Verificación de tenencia ----------------
+   Cuatro estados en la base y una sola cosa que le importa al socio: si su
+   carnet canjea o no. Por eso el bloque va arriba del panel y, cuando falta,
+   trae el formulario adentro en vez de mandarlo a otra pantalla. */
+const VERIF_ETIQUETA = {
+  registrado:  { txt:'Sin verificar', color:'#D68A2A' },
+  en_revision: { txt:'En revisión',   color:'#C79A16' },
+  verificado:  { txt:'Verificado',    color:'var(--sage)' },
+  rechazado:   { txt:'Sin verificar', color:'var(--rust)' }
+};
+
+/* El formato orienta, no bloquea: hay mascotas viejas con chips antiguos que no
+   son de 15 dígitos, y esos los resuelve la revisión manual. */
+function pintarHintChip(valor, el){
+  if(!el) return;
+  const limpio = (valor || '').replace(/[^0-9A-Za-z]/g, '');
+  if(!limpio){
+    el.textContent = 'Está en la cartilla veterinaria o en el carnet del microchip.';
+  }else if(/^[0-9]{15}$/.test(limpio)){
+    el.textContent = '✓ Formato correcto.';
+  }else if(limpio.length < 9){
+    el.textContent = 'Van ' + limpio.length + ' — los chips en Chile tienen 15 dígitos.';
+  }else{
+    el.textContent = 'No parece un chip de 15 dígitos. Si es uno antiguo, sube igual la foto de la cartilla y lo revisamos a mano.';
+  }
+}
+
+function socVerifMsg(texto, ok){
+  const msg = document.getElementById('socVerifMsg');
+  if(!msg) return;
+  msg.textContent = texto;
+  msg.className = 'soc-msg ' + (ok ? 'ok' : 'mal');
+  msg.style.display = 'block';
+}
+
+function renderVerifSocio(m){
+  const cont = document.getElementById('socVerif');
+  if(!cont) return;
+  socCartillaPendiente = null;
+  const estado = m.verificacion || 'registrado';
+
+  if(estado === 'verificado'){
+    cont.className = 'soc-verif ok';
+    cont.innerHTML = `
+      <div class="soc-verif__cab"><span class="soc-verif__badge ok">✓ Verificado</span></div>
+      <p class="soc-verif__txt">${colaEsc(m.pet)} está verificada. Tu carnet canjea beneficios en todos los negocios del club.</p>`;
+    return;
+  }
+
+  if(estado === 'en_revision'){
+    cont.className = 'soc-verif rev';
+    cont.innerHTML = `
+      <div class="soc-verif__cab"><span class="soc-verif__badge rev">En revisión</span></div>
+      <p class="soc-verif__txt">Estamos revisando los datos de ${colaEsc(m.pet)}. Dentro de 48 horas hábiles queda
+      verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté lista.</p>`;
+    return;
+  }
+
+  /* registrado o rechazado: hay que pedirlo */
+  const nota = estado === 'rechazado'
+    ? `<div class="soc-verif__nota"><b>No pudimos verificarla.</b> ${
+         m.verificacion_nota
+           ? colaEsc(m.verificacion_nota)
+           : 'Revisa el número del chip y sube una foto donde la cartilla se lea bien.'}</div>`
+    : '';
+
+  cont.className = 'soc-verif pend';
+  cont.innerHTML = `
+    <div class="soc-verif__cab"><span class="soc-verif__badge pend">Falta verificar</span></div>
+    <p class="soc-verif__txt">
+      Tu carnet ya existe, pero para <b>canjear beneficios</b> necesitamos confirmar que
+      ${colaEsc(m.pet)} es tuya. Toma un minuto: su número de chip y una foto de la cartilla
+      veterinaria. Además queda guardado por si algún día se pierde.
+    </p>
+    ${nota}
+    <div class="soc-verif__form">
+      <div class="field">
+        <label for="socChip">Número de chip</label>
+        <input id="socChip" inputmode="numeric" maxlength="24" placeholder="15 dígitos" value="${colaEsc(m.chip || '')}">
+        <div class="soc-nota" id="socChipHint"></div>
+      </div>
+      <input type="file" id="socCartillaInput" accept="image/*" style="display:none;">
+      <button type="button" class="soc-verif__foto" id="socCartillaBtn">
+        <img id="socCartillaPrev" alt="">
+        <span id="socCartillaTxt">${m.tiene_cartilla
+          ? 'Cartilla cargada — toca para cambiarla'
+          : 'Subir foto de la cartilla veterinaria'}</span>
+      </button>
+      <button type="button" class="btn btn-primary" id="socVerifBtn" style="width:100%;justify-content:center;margin-top:14px;">Enviar para verificar</button>
+      <div id="socVerifMsg" class="soc-msg" style="display:none;"></div>
+    </div>`;
+
+  const inp  = document.getElementById('socChip');
+  const hint = document.getElementById('socChipHint');
+  pintarHintChip(inp.value, hint);
+  inp.addEventListener('input', () => pintarHintChip(inp.value, hint));
+
+  const fotoBtn = document.getElementById('socCartillaBtn');
+  const fotoInp = document.getElementById('socCartillaInput');
+  fotoBtn.addEventListener('click', () => fotoInp.click());
+  fotoInp.addEventListener('change', async () => {
+    const f = fotoInp.files && fotoInp.files[0];
+    if(!f) return;
+    const txt = document.getElementById('socCartillaTxt');
+    txt.textContent = 'Preparando la foto...';
+    try{
+      /* 1280 px, no 640 como la foto de la mascota: acá hay que poder LEER el
+         número escrito en la cartilla, no solo reconocerla. Si aun así queda
+         sobre el tope del servidor (900 KB), se baja por pasos en vez de fallar. */
+      socCartillaPendiente = await compressImage(f, 1280, 0.72);
+      if(socCartillaPendiente.length > 800000) socCartillaPendiente = await compressImage(f, 1100, 0.6);
+      if(socCartillaPendiente.length > 800000) socCartillaPendiente = await compressImage(f, 900, 0.5);
+      if(socCartillaPendiente.length > 800000) throw new Error('La imagen quedó demasiado pesada');
+      document.getElementById('socCartillaPrev').src = socCartillaPendiente;
+      fotoBtn.classList.add('cargada');
+      txt.textContent = 'Cartilla lista — toca para cambiarla';
+    }catch(e){
+      console.error(e);
+      socCartillaPendiente = null;
+      fotoBtn.classList.remove('cargada');
+      txt.textContent = 'No pudimos leer esa imagen. Intenta con otra.';
+    }
+  });
+
+  document.getElementById('socVerifBtn').addEventListener('click', socioEnviarVerificacion);
+}
+
+async function socioEnviarVerificacion(){
+  if(!socActual) return;
+  const btn  = document.getElementById('socVerifBtn');
+  const chip = (document.getElementById('socChip').value || '').trim();
+
+  if(!chip && !socCartillaPendiente && !socActual.tiene_cartilla){
+    socVerifMsg('Necesitamos el número de chip o la foto de la cartilla.', false);
+    return;
+  }
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  try{
+    const { data, error } = await supabase.rpc('socio_enviar_verificacion', {
+      p_token: sesionSocio(),
+      p_codigo: socActual.codigo,
+      p_chip: chip || null,
+      p_cartilla: socCartillaPendiente || null
+    });
+    if(error) throw error;
+    const r = data && data[0];
+    if(!r || !r.ok){ socVerifMsg((r && r.mensaje) || 'No se pudo enviar.', false); return; }
+
+    socVerifMsg(r.mensaje, true);
+    socCartillaPendiente = null;
+    setTimeout(cargarPanelSocio, 1200);
+  }catch(e){
+    console.error(e);
+    socVerifMsg('No pudimos enviarlo. Revisa la señal e intenta de nuevo.', false);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Enviar para verificar';
+  }
 }
 
 /* ---------------- Barra "Completa tu perfil" ---------------- */

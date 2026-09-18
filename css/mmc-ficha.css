@@ -563,3 +563,90 @@
 .biz-card .mmcard__nombre { font-size: 17px; margin: 0; font-family: var(--mmc-font-display); }
 .biz-card .mmcard__meta   { font-size: 12.5px; color: var(--mmc-ink-2); margin: 0; }
 .featured-strip .biz-card .mmcard__nombre { font-size: 15.5px; }
+
+
+/* ============================================================
+   Cola de verificaciones de tenencia (/mi-panel)
+   Reusa .cola-item, .cola-priv, .cola-btn y .cola-msg. Lo de acá
+   es lo propio: la ficha de la mascota, el sello del formato del
+   chip, la foto de la cartilla y el motivo del rechazo.
+   ============================================================ */
+.verif-acciones { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 560px) { .verif-acciones { grid-template-columns: 1fr; } }
+
+/* Una solicitud que pasó las 48 horas prometidas se marca sola. */
+.verif-item--tarde { border-color: color-mix(in srgb, var(--mmc-warn) 45%, transparent); }
+.verif-item--tarde .cola-fecha { color: var(--mmc-warn); }
+
+.verif-item__cab { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.verif-item__av {
+  width: 62px; height: 62px; flex: 0 0 auto;
+  border-radius: 16px; overflow: hidden;
+  background: var(--mmc-surface-3); border: 1px solid var(--mmc-line);
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.verif-item__av img { width: 100%; height: 100%; object-fit: cover; }
+.verif-item__pet { font-size: 19px; font-weight: 900; line-height: 1.2; }
+.verif-item__sub { font-size: 13px; color: var(--mmc-ink-2); margin-top: 2px; }
+.verif-item__cod { font-size: 12px; color: var(--mmc-ink-3); margin-top: 3px; }
+
+.verif-sello {
+  display: inline-block; margin-left: 8px;
+  font-family: var(--mmc-font-body); font-size: 10px; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: var(--mmc-r-pill);
+}
+.verif-sello.ok   { background: color-mix(in srgb, var(--mmc-turquesa) 18%, #fff); color: #1F7A7A; }
+.verif-sello.raro { background: color-mix(in srgb, var(--mmc-warn) 14%, #fff); color: var(--mmc-warn); }
+
+/* La foto es lo que de verdad se revisa, así que va grande y se puede ampliar. */
+.verif-cartilla { margin-top: 16px; border: 1px solid var(--mmc-line); border-radius: var(--mmc-r-md); overflow: hidden; }
+.verif-cartilla .cola-priv__t { margin: 0; }
+.verif-cartilla img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: var(--mmc-surface-3); }
+.verif-cartilla--vacia {
+  padding: 14px; font-size: 13px; color: var(--mmc-warn);
+  background: color-mix(in srgb, var(--mmc-warn) 7%, #fff);
+  border-color: color-mix(in srgb, var(--mmc-warn) 30%, transparent);
+}
+
+.verif-motivo { margin-top: 16px; }
+.verif-motivo label {
+  display: block; font-size: 11.5px; font-weight: 800;
+  letter-spacing: .04em; text-transform: uppercase; color: var(--mmc-ink-3); margin-bottom: 6px;
+}
+.verif-motivo textarea {
+  width: 100%; font: inherit; font-size: 15px; color: var(--mmc-ink);
+  background: #fff; border: 1px solid var(--mmc-line-strong);
+  border-radius: var(--mmc-r-sm); padding: 11px 13px; outline: none; resize: vertical;
+}
+.verif-motivo textarea:focus { border-color: var(--mmc-turquesa); box-shadow: 0 0 0 3px rgba(71,201,201,.28); }
+
+/* ---- Interruptor de ajustes ---- */
+.adm-ajuste { display: flex; align-items: flex-start; gap: 18px; padding: 4px 0; }
+.adm-ajuste__txt { flex: 1 1 auto; min-width: 0; }
+.adm-ajuste__txt b { font-size: 15px; font-weight: 900; display: block; }
+.adm-ajuste__txt p { margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: var(--mmc-ink-2); }
+.adm-ajuste__estado {
+  display: inline-block; margin-top: 5px;
+  font-size: 10.5px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: var(--mmc-r-pill);
+  background: var(--mmc-surface-3); color: var(--mmc-ink-3);
+}
+.adm-ajuste__estado.on  { background: color-mix(in srgb, var(--mmc-turquesa) 20%, #fff); color: #1F7A7A; }
+.adm-ajuste__estado.off { background: color-mix(in srgb, var(--mmc-warn) 14%, #fff); color: var(--mmc-warn); }
+.adm-ajuste__estado.mal { background: color-mix(in srgb, var(--mmc-err) 14%, #fff); color: var(--mmc-err); }
+
+.adm-switch {
+  appearance: none; flex: 0 0 auto; cursor: pointer;
+  width: 62px; height: 34px; border-radius: var(--mmc-r-pill);
+  border: 1px solid var(--mmc-line-strong); background: var(--mmc-surface-3);
+  padding: 3px; transition: background .2s var(--mmc-ease), border-color .2s var(--mmc-ease);
+}
+.adm-switch__bola {
+  display: block; width: 26px; height: 26px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  transition: transform .2s var(--mmc-ease);
+}
+.adm-switch.on { background: var(--mmc-turquesa); border-color: var(--mmc-turquesa); }
+.adm-switch.on .adm-switch__bola { transform: translateX(28px); }
+.adm-switch:disabled { opacity: .5; cursor: default; }
