@@ -2092,6 +2092,21 @@ function renderFichaValidar(p){
 }
 
 /* ---------------- Confirmar ---------------- */
+/* Aviso de canje a Jaime. No devuelve nada ni bloquea la pantalla del negocio:
+   es información para el dueño del club, no parte de la visita. */
+function avisarCanjeAJaime(token, canjeId){
+  if(!token || !canjeId) return;
+  fetch('/.netlify/functions/aviso-canje', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, canje_id: canjeId })
+  }).then(res => {
+    if(!res.ok) console.warn('El aviso de canje no salió (la visita sí quedó guardada).');
+  }).catch(e => {
+    console.warn('El aviso de canje no salió (la visita sí quedó guardada):', e);
+  });
+}
+
 async function confirmarVisita(){
   const btn = document.getElementById('valConfirmarBtn');
   const montoRaw = (document.getElementById('valMonto').value || '').trim();
@@ -2120,6 +2135,16 @@ async function confirmarVisita(){
     updateCounts();
     renderComprobante(r);
     valMostrarPaso(3);
+
+    /* El aviso a Jaime sale después de mostrar el comprobante y sin esperarlo:
+       para el negocio, la visita ya terminó. Y va a una función del servidor,
+       no a EmailJS directo, porque el correo lleva el nombre, correo y teléfono
+       del dueño — datos que la política de privacidad promete que el negocio no
+       ve. El navegador solo manda su token y el id del canje; el resto lo busca
+       el servidor.
+       Si falla, no se le dice nada al negocio: el canje ya está guardado y
+       Jaime igual lo ve en /mi-panel. */
+    avisarCanjeAJaime(token, r.canje_id);
   }catch(e){
     console.error(e);
     valError('valPaso2Error', 'No pudimos registrar la visita. Revisa la señal e intenta de nuevo.');
