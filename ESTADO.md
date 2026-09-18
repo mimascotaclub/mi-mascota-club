@@ -103,7 +103,10 @@ argumento de venta ante los negocios ("tengo X dueños verificados").
 | Interruptor del bloqueo en `/mi-panel` | ✅ Construido y probado |
 | Mensaje del bloqueo en el panel del negocio | ✅ Construido |
 | Políticas y Términos con el SLA de 48 h | ✅ Actualizados (versión 2026-09-17) |
-| **QA de punta a punta contra la base real** | ⬜ **Pendiente — le toca a Jaime** |
+| Contactos del dueño y del negocio en `/mi-panel` | ✅ Construido |
+| **QA de punta a punta contra la base real** | ✅ Hecho el 17 de septiembre |
+| **Encender el interruptor** | ⬜ **Pendiente** |
+| **Correo al socio cuando se aprueba o rechaza** | ⬜ **Pendiente — el sitio lo promete y no existe** |
 
 **El interruptor está APAGADO.** Mientras lo esté, cualquier socio puede canjear aunque
 no esté verificado. Se prende en `/mi-panel` → "Ajustes del club", **después del QA**.
@@ -111,8 +114,15 @@ no esté verificado. Se prende en `/mi-panel` → "Ajustes del club", **después
 Ojo: la pantalla final del registro y el correo de bienvenida ya dicen que falta verificar
 para canjear. Es verdad en el estado final; no lo es mientras el interruptor siga apagado.
 
-Los 3 socios que ya estaban inscritos quedaron en `registrado`. Para dar por verificado a
-alguien que conoces, sin esperar que suba nada:
+### ⚠️ Pendiente inmediato: los socios viejos
+
+Los socios inscritos **antes** del parche v25 quedaron en `registrado`. Si se enciende el
+interruptor sin arreglarlos, no pueden canjear. Hay que decidir uno por uno: verificarlos a
+mano (si Jaime los conoce) o borrarlos (si eran de prueba).
+
+```sql
+select codigo, pet, email, verificacion from socios order by socio_number;
+```
 
 ```sql
 update socios set verificacion = 'verificado', verificacion_en = now()
@@ -138,9 +148,11 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 
 ## Pendientes, en orden
 
-1. QA de la verificación de tenencia y encender el interruptor (tabla de arriba).
-2. **Correo automático a Jaime en cada canje.** Es lo único que falta de la trazabilidad;
-   el lado negocio y el lado dueño ya están.
+1. **Correos automáticos del servidor.** Son dos y comparten la misma pieza que falta
+   (Resend + Netlify Function; EmailJS no sirve porque se manda desde el navegador):
+   avisarle al socio cuando su verificación se aprueba o se rechaza — **hoy el sitio lo
+   promete y no ocurre** — y avisarle a Jaime en cada canje.
+2. Resolver los socios viejos y encender el interruptor (ver arriba).
 3. **Sacar los precios del formulario de registro** (Pro $2.990 / Premium $4.990). La
    página `/planes` se sacó del menú justo para no anclar precios, así que es incoherente.
 4. **Casilla de consentimiento en el formulario de negocios** — todavía no la pide.

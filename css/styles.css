@@ -995,7 +995,9 @@ body.pagina-admin .announce-bar{ display:none; }
 /* La tabla de canjes tiene 7 columnas y no cabe en un teléfono:
    se deja desplazable en vez de apretarla hasta que no se lea. */
 .admin-table--canjes{ overflow-x:auto; }
-.admin-table--canjes .table-row{ min-width:860px; grid-template-columns:0.7fr 0.9fr 1.2fr 1.2fr 1.6fr 0.9fr 0.9fr; }
+.admin-table--canjes .table-row{ min-width:1080px; grid-template-columns:0.7fr 0.9fr 1.3fr 1fr 1.4fr 1.4fr 0.8fr 0.8fr; align-items:start; }
+.admin-table--canjes .table-row a{ color:var(--teal-dark); font-weight:700; overflow-wrap:anywhere; }
+.admin-table span a{ color:var(--teal-dark); font-weight:700; overflow-wrap:anywhere; }
 .admin-table--canjes .table-row .mono{ font-family:var(--font-mono); font-size:12px; }
 
 /* ======================================================================

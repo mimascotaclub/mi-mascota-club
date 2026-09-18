@@ -624,7 +624,7 @@ function renderPaso(index, direccion){
     camposHtml = `
       <div class="verif-caja">
         <b>Por qué te lo pedimos</b>
-        <p>Es lo que nos permite confirmar que ${respuestas.mascota || 'tu mascota'} existe y es tuya.
+        <p>Es lo que nos permite confirmar que ${respuestas.mascota || 'tu mascota'} existe y es tu mascota.
         Solo los socios verificados pueden canjear beneficios, y así el negocio sabe que del otro lado
         hay un dueño de verdad. Además queda guardado por si algún día se pierde.</p>
       </div>
@@ -1030,7 +1030,7 @@ function renderPaso(index, direccion){
                este es el segundo recordatorio y llega cuando ya cerró el sitio. */
             mensaje_extra: respuestas.verificacion === 'en_revision'
               ? 'Tu carnet ya está listo y lo abres cuando quieras en Mi Mascota ID. Estamos revisando la cartilla de ' + respuestas.mascota + ': dentro de 48 horas hábiles queda verificada y tu carnet empieza a canjear beneficios.'
-              : 'Tu carnet ya está listo y lo abres cuando quieras en Mi Mascota ID. Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tuya con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet.'
+              : 'Tu carnet ya está listo y lo abres cuando quieras en Mi Mascota ID. Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tu mascota, con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet.'
           });
         } catch(emailErr){
           console.warn('El registro se guardó, pero el correo de bienvenida falló:', emailErr);
@@ -1111,7 +1111,7 @@ function mostrarFinal(){
     : `<div class="verif-aviso">
          <b style="color:#fff;">Falta un paso: verificar a ${mascotaNom}.</b><br>
          Tu carnet ya existe, pero para canjear beneficios necesitamos confirmar que
-         ${mascotaNom} es tuya. Toma un minuto: su número de chip y una foto de la cartilla veterinaria.
+         ${mascotaNom} es tu mascota. Toma un minuto: su número de chip y una foto de la cartilla veterinaria.
        </div>
        <a href="/mi-mascota" class="verif-cta">Verificar a ${mascotaNom} ahora</a>`;
 

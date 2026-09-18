@@ -622,7 +622,7 @@
 .verif-motivo textarea:focus { border-color: var(--mmc-turquesa); box-shadow: 0 0 0 3px rgba(71,201,201,.28); }
 
 /* ---- Interruptor de ajustes ---- */
-.adm-ajuste { display: flex; align-items: flex-start; gap: 18px; padding: 4px 0; }
+.adm-ajuste { display: flex; align-items: flex-start; gap: 18px; padding: 18px 20px; }
 .adm-ajuste__txt { flex: 1 1 auto; min-width: 0; }
 .adm-ajuste__txt b { font-size: 15px; font-weight: 900; display: block; }
 .adm-ajuste__txt p { margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: var(--mmc-ink-2); }
@@ -650,3 +650,41 @@
 .adm-switch.on { background: var(--mmc-turquesa); border-color: var(--mmc-turquesa); }
 .adm-switch.on .adm-switch__bola { transform: translateX(28px); }
 .adm-switch:disabled { opacity: .5; cursor: default; }
+
+
+/* ---- Visor de la cartilla ----
+   Chrome bloquea abrir un data: URL como página, así que ampliar la cartilla
+   abre una capa encima del panel en vez de una pestaña nueva. Un toque más
+   sobre la imagen la lleva a tamaño real y la capa se puede desplazar: en un
+   teléfono es la única forma de leer un número escrito a mano. */
+.verif-cartilla__btn {
+  display: block; width: 100%; padding: 0; border: 0; cursor: zoom-in;
+  background: var(--mmc-surface-3);
+}
+.verif-cartilla__btn img { display: block; width: 100%; max-height: 420px; object-fit: contain; }
+
+.cartilla-lupa {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,10,10,.92);
+  display: none; align-items: center; justify-content: center;
+  padding: 64px 16px 16px; overflow: auto;
+}
+.cartilla-lupa.abierta { display: flex; }
+.cartilla-lupa img {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+  border-radius: 10px; cursor: zoom-in;
+}
+.cartilla-lupa.zoom { align-items: flex-start; justify-content: flex-start; }
+.cartilla-lupa.zoom img { max-width: none; max-height: none; cursor: zoom-out; }
+.cartilla-lupa__cerrar {
+  position: fixed; top: 14px; right: 14px; z-index: 201;
+  appearance: none; cursor: pointer;
+  background: #fff; color: var(--mmc-ink);
+  border: 0; border-radius: var(--mmc-r-pill);
+  padding: 11px 20px; font-family: var(--mmc-font-body);
+  font-size: 14px; font-weight: 800;
+}
+.cartilla-lupa__ayuda {
+  position: fixed; bottom: 16px; left: 0; right: 0; text-align: center;
+  color: rgba(255,255,255,.7); font-size: 12.5px; pointer-events: none;
+}

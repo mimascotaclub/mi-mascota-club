@@ -1296,6 +1296,14 @@
         </div>
       </div>
 
+      <!-- Visor de la cartilla. Vive fuera de la lista porque se superpone a
+           todo el panel; Chrome no deja abrir un data: URL en otra pestaña. -->
+      <div id="cartillaLupa" class="cartilla-lupa" onclick="cerrarCartilla()">
+        <button type="button" class="cartilla-lupa__cerrar" onclick="cerrarCartilla()">✕ Cerrar</button>
+        <img id="cartillaLupaImg" alt="" onclick="zoomCartilla(event)">
+        <div class="cartilla-lupa__ayuda">Toca la imagen para verla a tamaño real</div>
+      </div>
+
       <!-- ===== Buzón de sugerencias ===== -->
       <div class="admin-table" id="sugWrap">
         <h4>Sugerencias <span id="sugCount" class="cola-count">0</span>
@@ -1329,7 +1337,7 @@
       </div>
       <div class="admin-table admin-table--canjes">
         <h4>Últimas visitas validadas <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
-        <div class="table-row head"><span>Folio</span><span>Fecha</span><span>Negocio</span><span>Socio</span><span>Beneficio</span><span>Compra</span><span>Ahorro</span></div>
+        <div class="table-row head"><span>Folio</span><span>Fecha</span><span>Negocio</span><span>Mascota</span><span>Dueño y contacto</span><span>Beneficio</span><span>Compra</span><span>Ahorro</span></div>
         <div id="adminCanjesTable"></div>
       </div>
       <div class="admin-table">
@@ -1339,7 +1347,7 @@
       </div>
       <div class="admin-table">
         <h4>Dueños y mascotas</h4>
-        <div class="table-row head"><span>Mascota</span><span>Especie</span><span>Comuna</span><span>Email</span></div>
+        <div class="table-row head"><span>Mascota</span><span>Dueño</span><span>Verificación</span><span>Contacto</span></div>
         <div id="adminOwnerTable"></div>
       </div>
     </div>

@@ -2792,6 +2792,24 @@ async function marcarSugerencia(id, leida){
   }catch(e){ console.error(e); toast('No se pudo actualizar.'); }
 }
 
+/* Correo y teléfono como enlaces: en el celular, tocar el número marca y tocar
+   el correo abre el cliente de correo. Es la diferencia entre un dato y un
+   contacto. */
+function contactoHtml(email, telefono){
+  const partes = [];
+  if(email)    partes.push(`<a href="mailto:${colaEsc(email)}">${colaEsc(email)}</a>`);
+  if(telefono) partes.push(`<a href="tel:${colaEsc(String(telefono).replace(/[^0-9+]/g,''))}">${colaEsc(telefono)}</a>`);
+  return partes.length ? partes.join('<br>') : '—';
+}
+
+function etiquetaVerifHtml(estado){
+  const e = estado || 'registrado';
+  const et = (typeof VERIF_ETIQUETA !== 'undefined' && VERIF_ETIQUETA[e]) ? VERIF_ETIQUETA[e] : null;
+  const txt = et ? et.txt : e;
+  const color = et ? et.color : 'inherit';
+  return `<b style="color:${color};font-size:12.5px;">${colaEsc(txt)}</b>`;
+}
+
 async function refreshAdmin(){
   try{
     const [rNeg, rSoc, rCan] = await Promise.all([
@@ -2804,6 +2822,10 @@ async function refreshAdmin(){
     if(rCan.error) throw new Error('Canjes: ' + rCan.error.message);
     const neg = rNeg.data || [], soc = rSoc.data || [], can = rCan.data || [];
 
+    /* Índices por código para no recorrer los arreglos dentro de cada fila. */
+    const socPorCodigo = {}; soc.forEach(o => { if(o.codigo) socPorCodigo[o.codigo] = o; });
+    const negPorCodigo = {}; neg.forEach(n => { if(n.codigo) negPorCodigo[n.codigo] = n; });
+
     document.getElementById('statBiz').textContent = neg.length;
     document.getElementById('statOwners').textContent = soc.length;
     const clientesUnicos = new Set(can.map(c=>c.socio_id)).size;
@@ -2815,22 +2837,41 @@ async function refreshAdmin(){
       formatCLP(can.reduce((t,c)=>t+Number(c.ahorro||0),0));
 
     document.getElementById('adminBizTable').innerHTML = neg.map(n=>`
-      <div class="table-row"><span>${n.nombre}</span><span class="dim">${n.cat}</span><span class="dim">${n.comuna}</span><span class="dim">${n.contacto}</span></div>
+      <div class="table-row">
+        <span>${colaEsc(n.nombre)}<br><small class="mono dim">${colaEsc(n.codigo || '')}</small></span>
+        <span class="dim">${colaEsc(n.cat || '')}</span>
+        <span class="dim">${colaEsc(n.comuna || '')}</span>
+        <span class="dim">${contactoHtml(n.email, n.telefono || n.whatsapp || n.contacto)}</span>
+      </div>
     `).join('') || `<div class="table-row"><span class="dim">Aún no hay negocios reales inscritos.</span></div>`;
 
+    /* Nombre, correo y teléfono del dueño a la vista: son datos de contacto que
+       ya están en la base y sirven para escribirle a alguien y preguntarle cómo
+       le fue. Tenerlos solo en Supabase era tenerlos en ninguna parte. */
     document.getElementById('adminOwnerTable').innerHTML = soc.map(o=>`
-      <div class="table-row"><span>${o.pet} <small class="dim" style="font-weight:600;">· ${planLabel(o.plan)}</small></span><span class="dim">${o.species||''}</span><span class="dim">${o.comuna||''}</span><span class="dim">${o.email||''}</span></div>
+      <div class="table-row">
+        <span>${colaEsc(o.pet)}<br><small class="dim" style="font-weight:600;">${colaEsc(o.species||'')}${o.comuna ? ' · ' + colaEsc(o.comuna) : ''} · ${planLabel(o.plan)}</small><br><small class="mono dim">${colaEsc(o.codigo||'')}</small></span>
+        <span>${colaEsc(o.representante_nombre || '—')}</span>
+        <span>${etiquetaVerifHtml(o.verificacion)}</span>
+        <span class="dim">${contactoHtml(o.email, o.representante_telefono)}</span>
+      </div>
     `).join('') || `<div class="table-row"><span class="dim">Aún no hay dueños reales inscritos.</span></div>`;
 
     document.getElementById('adminCanjesTable').innerHTML = can.map(c=>{
       const d = new Date(c.created_at);
       const cuando = d.toLocaleDateString('es-CL',{day:'2-digit',month:'short'}) + ' ' +
                      d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
+      /* Cada visita trae a la vista con quién hablar de los dos lados: al socio
+         para preguntarle cómo le fue, al negocio para lo mismo. Los datos ya
+         estaban cargados acá, solo no se estaban mostrando. */
+      const sc = socPorCodigo[c.socio_codigo]   || {};
+      const ng = negPorCodigo[c.negocio_codigo] || {};
       return `<div class="table-row">
         <span class="mono">${c.folio ? colaEsc(c.folio) : '—'}</span>
         <span class="dim">${cuando}</span>
-        <span>${colaEsc(c.negocio_nombre || '')}</span>
-        <span class="dim">${colaEsc(c.socio_mascota || c.socio_nombre || '')}<br><small class="mono">${colaEsc(c.socio_codigo || '')}</small></span>
+        <span>${colaEsc(c.negocio_nombre || '')}<br><small class="dim" style="font-weight:500;">${contactoHtml(ng.email, ng.telefono || ng.whatsapp)}</small></span>
+        <span>${colaEsc(c.socio_mascota || c.socio_nombre || '')}<br><small class="mono dim">${colaEsc(c.socio_codigo || '')}</small></span>
+        <span class="dim">${colaEsc(sc.representante_nombre || c.socio_nombre || '—')}<br><small style="font-weight:500;">${contactoHtml(sc.email, sc.representante_telefono)}</small></span>
         <span class="dim">${c.beneficio_texto ? colaEsc(c.beneficio_texto) : '—'}</span>
         <span class="dim">${c.monto != null ? formatCLP(Number(c.monto)) : '—'}</span>
         <span class="dim">${c.ahorro != null ? formatCLP(Number(c.ahorro)) : '—'}</span>
@@ -3016,7 +3057,9 @@ function verifItemEl(s){
     ${s.cartilla
       ? `<div class="verif-cartilla">
            <div class="cola-priv__t">Cartilla veterinaria — toca para ampliar</div>
-           <a href="${s.cartilla}" target="_blank" rel="noopener"><img src="${s.cartilla}" alt="Cartilla de ${colaEsc(s.pet)}"></a>
+           <button type="button" class="verif-cartilla__btn" onclick="ampliarCartilla('${colaEsc(s.codigo)}')">
+             <img id="cartilla-${colaEsc(s.codigo)}" src="${s.cartilla}" alt="Cartilla de ${colaEsc(s.pet)}">
+           </button>
          </div>`
       : `<div class="verif-cartilla verif-cartilla--vacia">No subió foto de la cartilla. Solo mandó el número de chip.</div>`}
 
@@ -3037,6 +3080,39 @@ function verifItemEl(s){
     <div class="cola-msg" id="verifmsg-${colaEsc(s.codigo)}"></div>`;
   return el;
 }
+
+/* Chrome bloquea navegar a un data: URL, así que la cartilla se amplía en una
+   capa encima del panel. Un toque sobre la imagen la lleva a tamaño real: en un
+   teléfono es la única forma de leer un número escrito a mano en la cartilla. */
+function ampliarCartilla(codigo){
+  const img    = document.getElementById('cartilla-' + codigo);
+  const lupa   = document.getElementById('cartillaLupa');
+  const grande = document.getElementById('cartillaLupaImg');
+  if(!img || !lupa || !grande) return;
+  grande.src = img.src;
+  lupa.classList.remove('zoom');
+  lupa.classList.add('abierta');
+  document.body.style.overflow = 'hidden';
+}
+
+function zoomCartilla(ev){
+  if(ev) ev.stopPropagation();
+  const lupa = document.getElementById('cartillaLupa');
+  if(lupa) lupa.classList.toggle('zoom');
+}
+
+function cerrarCartilla(){
+  const lupa = document.getElementById('cartillaLupa');
+  if(!lupa) return;
+  lupa.classList.remove('abierta','zoom');
+  const grande = document.getElementById('cartillaLupaImg');
+  if(grande) grande.src = '';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') cerrarCartilla();
+});
 
 function pedirMotivoVerif(codigo){
   const caja = document.getElementById('verifmotivo-' + codigo);
@@ -3352,6 +3428,9 @@ window.cargarColaFichas = cargarColaFichas;
 /* Verificación de tenencia: estas viven en onclick del HTML, así que tienen
    que estar en window — app.js corre dentro de un IIFE. */
 window.cargarColaVerificaciones = cargarColaVerificaciones;
+window.ampliarCartilla = ampliarCartilla;
+window.zoomCartilla = zoomCartilla;
+window.cerrarCartilla = cerrarCartilla;
 window.resolverVerificacion = resolverVerificacion;
 window.pedirMotivoVerif = pedirMotivoVerif;
 window.cancelarMotivoVerif = cancelarMotivoVerif;
@@ -3683,7 +3762,7 @@ function renderVerifSocio(m){
     cont.className = 'soc-verif ok';
     cont.innerHTML = `
       <div class="soc-verif__cab"><span class="soc-verif__badge ok">✓ Verificado</span></div>
-      <p class="soc-verif__txt">${colaEsc(m.pet)} está verificada. Tu carnet canjea beneficios en todos los negocios del club.</p>`;
+      <p class="soc-verif__txt">Tu mascota está verificada. Tu carnet canjea beneficios en todos los negocios del club.</p>`;
     return;
   }
 
@@ -3691,14 +3770,14 @@ function renderVerifSocio(m){
     cont.className = 'soc-verif rev';
     cont.innerHTML = `
       <div class="soc-verif__cab"><span class="soc-verif__badge rev">En revisión</span></div>
-      <p class="soc-verif__txt">Estamos revisando los datos de ${colaEsc(m.pet)}. Dentro de 48 horas hábiles queda
-      verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté lista.</p>`;
+      <p class="soc-verif__txt">Estamos revisando los datos de ${colaEsc(m.pet)}. Dentro de 48 horas hábiles
+      queda verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté listo.</p>`;
     return;
   }
 
   /* registrado o rechazado: hay que pedirlo */
   const nota = estado === 'rechazado'
-    ? `<div class="soc-verif__nota"><b>No pudimos verificarla.</b> ${
+    ? `<div class="soc-verif__nota"><b>No pudimos verificar a tu mascota.</b> ${
          m.verificacion_nota
            ? colaEsc(m.verificacion_nota)
            : 'Revisa el número del chip y sube una foto donde la cartilla se lea bien.'}</div>`
@@ -3709,7 +3788,7 @@ function renderVerifSocio(m){
     <div class="soc-verif__cab"><span class="soc-verif__badge pend">Falta verificar</span></div>
     <p class="soc-verif__txt">
       Tu carnet ya existe, pero para <b>canjear beneficios</b> necesitamos confirmar que
-      ${colaEsc(m.pet)} es tuya. Toma un minuto: su número de chip y una foto de la cartilla
+      ${colaEsc(m.pet)} es tu mascota. Toma un minuto: su número de chip y una foto de la cartilla
       veterinaria. Además queda guardado por si algún día se pierde.
     </p>
     ${nota}
@@ -3804,9 +3883,12 @@ function renderCompletitudSocio(m){
   if(!cont) return;
   const pct = Number(m.completitud || 0);
 
-  /* Las mismas 9 casillas que cuenta socio_perfil() en la base, para que el
-     porcentaje y la lista de "te falta" nunca se contradigan. */
+  /* Las mismas 10 casillas que cuenta socio_perfil() en la base, para que el
+     porcentaje y la lista de "te falta" nunca se contradigan. La verificación
+     es una de ellas: un perfil "100% completo" que no puede canjear beneficios
+     se contradice a sí mismo en la misma pantalla. */
   const faltan = [];
+  if(m.verificacion !== 'verificado') faltan.push('verificar a tu mascota');
   if(!m.foto)                    faltan.push('subir una foto');
   if(!m.breed)                   faltan.push('la raza');
   if(!m.edad)                    faltan.push('la edad');
