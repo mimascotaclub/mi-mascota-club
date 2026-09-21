@@ -3,6 +3,8 @@
 **Última actualización: 18 de septiembre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
+`MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
+**para qué existe** (el porqué, el lema, cómo se explica y las líneas de negocio).
 `CONTEXTO-PROYECTO.md` es la bitácora histórica: tiene el detalle de cómo se construyó
 cada cosa y por qué, pero son más de 1.700 líneas y **no hay que leerlo entero** — se
 consulta por secciones cuando hace falta entender una pieza específica.
@@ -14,7 +16,7 @@ Si una sesión termina sin tocar este archivo, la siguiente empieza a ciegas.
 
 ## Cómo orientarse en dos minutos
 
-1. Leer este archivo completo.
+1. Leer este archivo completo, y `MARCA.md` si la sesión toca concepto, textos o negocio.
 2. Mirar el esquema real en Supabase (proyecto `mzsqyjxqnomsbqzhygkx`). **La base es la
    verdad, no el documento.** Las funciones RPC en vivo mandan sobre cualquier `.sql` del repo.
 3. `git log --oneline -15` para ver lo último que se hizo.
@@ -230,10 +232,19 @@ beneficio y ve su historial, no falta ninguna pieza. Lo que queda abajo es otra 
   que apuntan a ella, no rutas nuevas.
 - **Un solo campo de estado de verificación** en la base. Cada panel muestra solo lo que
   le corresponde: el negocio ve si el socio puede canjear, nunca el chip ni la cartilla.
-- **El concepto es compensar el gasto de tener mascota con beneficios en otras áreas de la
-  vida**, no dar descuentos en cosas de mascota. Tener mascota es el filtro de entrada, no
-  la razón de valor. Por eso los primeros negocios candidatos son un tatuador, un gásfiter,
-  un electricista y una relojería.
+- **El club es full mascotas** (decidido el 18 de septiembre; reemplaza la regla anterior).
+  Un negocio entra solo si es pet-friendly o tiene una especialidad de mascotas — un
+  tatuador entra si hace retratos de mascotas, no por ser tatuador. Se descartó la versión
+  anterior del concepto ("compensar el gasto de tener mascota con beneficios en otras áreas
+  de la vida"), cuyos candidatos eran un gásfiter, un electricista y una relojería.
+  **Consecuencia: el pipeline de negocios volvió a cero y hay que reclutar en veterinarias
+  y peluquerías caninas, donde no hay contactos previos.**
+- **El porqué vive en `MARCA.md`** y manda sobre las decisiones de producto: querer a un
+  animal no debería salir tan caro; las mascotas no son un negocio, son vida. Lema:
+  *Porque son familia.*
+- **Nunca prometer "ahorra 50 mil al mes".** Con 100 mil de gasto mensual y descuentos de
+  10-15%, el ahorro real es de 10 a 15 mil — que ya es 2 o 3 veces la membresía y es
+  verdad. La frase que se usa siempre es **"se paga sola con un baño"**.
 - **Probar siempre en 360×600**, no solo en iPhone. Es donde aparecen los problemas de
   scroll y es un teléfono muy común en Chile.
 - **Nunca `width:100vw`, siempre `width:100%`.** El 18 de septiembre se encontró que el
