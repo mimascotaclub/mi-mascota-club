@@ -2630,6 +2630,7 @@ async function tryUnlock(){
     cargarColaVerificaciones();
     cargarAjustesAdmin();
     cargarSugerencias();
+    cargarFundadores();
   }catch(e){
     err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
     err.style.display='block';
@@ -2817,6 +2818,7 @@ function mostrarPaginaAdmin(){
       cargarColaVerificaciones();
       cargarAjustesAdmin();
       cargarSugerencias();
+      cargarFundadores();
     }
   }).catch(() => {});
 }
@@ -2827,6 +2829,114 @@ async function salirAdmin(){
   document.getElementById('adminLockWrap').style.display = '';
   document.getElementById('adminEmail').value = '';
   document.getElementById('adminPass').value = '';
+}
+
+/* ================= Socios Fundadores en /mi-panel =====================
+   El pase se paga por un link de Mercado Pago, y ese link no sabe qué socio
+   pagó. El socio avisa su código por WhatsApp y acá se marca.
+
+   El número de fundador NO se escribe a mano: lo asigna la base con
+   admin_marcar_fundador() (parche v28), que además comprueba que el correo
+   esté inscrito en el club. Así un correo mal tipeado no gasta un número.
+   ====================================================================== */
+
+function fundMsg(texto, ok){
+  const el = document.getElementById('fundMsg');
+  if(!el) return;
+  el.textContent = texto;
+  el.className = 'fund-msg ' + (ok ? 'ok' : 'mal');
+  el.hidden = false;
+}
+
+async function cargarFundadores(){
+  const cont = document.getElementById('fundLista');
+  const cnt  = document.getElementById('fundCount');
+  if(!cont) return;
+  cont.innerHTML = '<div class="cola-vacia">Cargando…</div>';
+  try{
+    const { data, error } = await supabase.rpc('admin_fundadores');
+    if(error) throw error;
+    const filas = data || [];
+    if(cnt){ cnt.textContent = filas.length; cnt.dataset.cero = filas.length ? '0' : '1'; }
+
+    if(!filas.length){
+      cont.innerHTML = '<div class="cola-vacia">Todavía no hay fundadores. Quedan 100 cupos.</div>';
+      return;
+    }
+
+    cont.innerHTML = filas.map(f => {
+      const d = f.pagado_en ? new Date(f.pagado_en) : null;
+      const cuando = d ? d.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}) : '';
+      /* El número va con ceros a la izquierda porque así se muestra en el
+         carnet: #007, no #7. */
+      const num = '#' + String(f.numero).padStart(3, '0');
+      return `<div class="fund-item">
+        <div class="fund-item__num">${num}</div>
+        <div class="fund-item__datos">
+          <b>${colaEsc(f.mascotas || '(sin mascotas inscritas)')}</b>
+          <a href="mailto:${colaEsc(f.email)}">${colaEsc(f.email)}</a>
+          <small>${cuando}${f.monto ? ' · $' + Number(f.monto).toLocaleString('es-CL') : ''}${f.referencia ? ' · op. ' + colaEsc(f.referencia) : ''}</small>
+        </div>
+        <button type="button" class="fund-item__quitar"
+                onclick="quitarFundador('${colaEsc(f.email)}', ${f.numero})">Quitar</button>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<div class="cola-vacia">No pudimos cargar la lista.</div>';
+  }
+}
+
+async function marcarFundador(){
+  const inEmail = document.getElementById('fundEmail');
+  const inRef   = document.getElementById('fundRef');
+  const btn     = document.getElementById('fundBtn');
+  if(!inEmail) return;
+
+  const email = (inEmail.value || '').trim().toLowerCase();
+  if(!email || email.indexOf('@') < 0){
+    fundMsg('Escribe el correo con el que el socio se inscribió.', false);
+    inEmail.focus();
+    return;
+  }
+
+  if(btn) btn.disabled = true;
+  fundMsg('Guardando…', true);
+  try{
+    const { data, error } = await supabase.rpc('admin_marcar_fundador', {
+      p_email: email,
+      p_referencia: (inRef && inRef.value.trim()) || null,
+      p_monto: 9990
+    });
+    if(error) throw error;
+
+    const num = '#' + String(data).padStart(3, '0');
+    fundMsg('Listo: quedó como Socio Fundador ' + num + '.', true);
+    inEmail.value = '';
+    if(inRef) inRef.value = '';
+    cargarFundadores();
+  }catch(e){
+    console.error(e);
+    /* El mensaje del correo no inscrito viene de la base y está escrito para
+       leerse tal cual, así que se muestra completo en vez de uno genérico. */
+    fundMsg(e.message || 'No se pudo marcar. Inténtalo de nuevo.', false);
+  }finally{
+    if(btn) btn.disabled = false;
+  }
+}
+
+async function quitarFundador(email, numero){
+  const num = '#' + String(numero).padStart(3, '0');
+  if(!confirm('¿Quitar el Socio Fundador ' + num + ' (' + email + ')?\n\nEl número no se reutiliza: el próximo fundador seguirá con el siguiente.')) return;
+  try{
+    const { error } = await supabase.rpc('admin_quitar_fundador', { p_email: email });
+    if(error) throw error;
+    fundMsg('Se quitó el fundador ' + num + '.', true);
+    cargarFundadores();
+  }catch(e){
+    console.error(e);
+    fundMsg('No se pudo quitar.', false);
+  }
 }
 
 /* ---------------- Buzón de sugerencias en /mi-panel ---------------- */

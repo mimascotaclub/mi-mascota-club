@@ -1287,3 +1287,41 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
 /* Eliminar una mascota es reversible en la práctica (se vuelve a inscribir);
    borrar la cuenta no. Por eso este bloque no lleva el rojo del otro. */
 .soc-borrar--suave{ border-color:var(--line); }
+
+/* ======================================================================
+   SOCIOS FUNDADORES EN /mi-panel
+   ----------------------------------------------------------------------
+   Jaime marca fundadores desde el teléfono, así que el formulario es una
+   columna: dos campos y un botón ancho, sin filas que se aprieten.
+   ====================================================================== */
+.fund-alta{ display:grid; gap:10px; margin-bottom:16px; }
+.fund-alta input{
+  width:100%; padding:12px 14px; border:2px solid var(--line); border-radius:12px;
+  font-family:var(--font-body); font-size:15px; font-weight:600; background:#fff;
+}
+.fund-alta input:focus{ outline:none; border-color:var(--teal-dark); }
+.fund-alta .btn{ justify-content:center; }
+
+.fund-msg{ font-size:14px; font-weight:700; line-height:1.45; padding:10px 12px; border-radius:10px; }
+.fund-msg.ok{  background:var(--paper-tint-teal);   color:#1b6b6b; }
+.fund-msg.mal{ background:#FDEDE8; color:#9c3a20; }
+
+.fund-item{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 0; border-bottom:1px solid var(--line);
+}
+.fund-item:last-child{ border-bottom:none; }
+.fund-item__num{
+  flex-shrink:0; min-width:54px; text-align:center;
+  font-family:var(--font-mono); font-weight:600; font-size:14px;
+  background:var(--yellow); border-radius:999px; padding:6px 8px;
+}
+.fund-item__datos{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.fund-item__datos b{ font-size:15px; }
+.fund-item__datos a{ font-size:13.5px; color:var(--teal-dark); font-weight:700; text-decoration:none; word-break:break-all; }
+.fund-item__datos small{ font-size:12.5px; color:var(--gray); font-weight:600; }
+.fund-item__quitar{
+  flex-shrink:0; background:none; border:none; cursor:pointer;
+  font-family:var(--font-body); font-size:13px; font-weight:800; color:var(--rust);
+  padding:6px 4px;
+}

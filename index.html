@@ -1313,6 +1313,30 @@
         </div>
       </div>
 
+      <!-- ===== Socios Fundadores =====
+           El pago llega a Mercado Pago sin el código de la mascota, así que el
+           socio avisa por WhatsApp y Jaime lo marca acá. El número de fundador
+           lo asigna la base (admin_marcar_fundador, parche v28): nunca se
+           escribe a mano ni se repite. -->
+      <div class="admin-table" id="fundWrap">
+        <h4>Socios Fundadores <span id="fundCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarFundadores()">↻ Actualizar</button>
+        </h4>
+        <div class="fund-alta">
+          <input type="email" id="fundEmail" inputmode="email" autocomplete="off"
+                 autocapitalize="off" spellcheck="false" placeholder="Correo con el que se inscribió">
+          <input type="text" id="fundRef" autocomplete="off"
+                 placeholder="N° de operación de Mercado Pago (opcional)">
+          <button type="button" class="btn btn-primary" id="fundBtn" onclick="marcarFundador()">
+            Marcar como fundador
+          </button>
+          <div id="fundMsg" class="fund-msg" hidden></div>
+        </div>
+        <div id="fundLista" class="cola-lista">
+          <div class="cola-vacia">Cargando…</div>
+        </div>
+      </div>
+
       <!-- ===== Verificaciones de mascota por revisar ===== -->
       <div class="admin-table" id="verifWrap">
         <h4>Verificaciones por revisar <span id="verifCount" class="cola-count">0</span>
