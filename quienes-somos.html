@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiénes somos — Mi Mascota Club</title>
+
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#FFCE00">
+
+<meta name="description" content="Querer a un animal no debería salir tan caro. Mi Mascota Club es el club de quienes los quieren como familia: descuentos permanentes en veterinarias, peluquerías y comida en Santiago.">
+<link rel="canonical" href="https://mimascotaclub.cl/quienes-somos">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mi Mascota Club">
+<meta property="og:locale" content="es_CL">
+<meta property="og:url" content="https://mimascotaclub.cl/quienes-somos">
+<meta property="og:title" content="Porque son familia — Mi Mascota Club">
+<meta property="og:description" content="El club de quienes los quieren como familia. Descuentos permanentes donde ya gastas en tu mascota.">
+<meta property="og:image" content="https://mimascotaclub.cl/assets/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+
+<style>
+/* ======================================================================
+   QUIÉNES SOMOS — estilos propios de esta página
+   ----------------------------------------------------------------------
+   Vive aparte de styles.css a propósito: es una página suelta (no la SPA),
+   así nada de lo que se toque acá puede romper la home.
+   Usa las variables de marca de styles.css (--yellow, --teal, --ink...).
+   REGLA: nunca width:100vw, siempre width:100%.
+   ====================================================================== */
+
+.qs-wrap{ max-width:760px; margin:0 auto; padding:0 16px; }
+
+/* --- Portada --- */
+.qs-hero{ background:var(--paper-tint-yellow); padding:56px 0 48px; text-align:center; }
+.qs-hero h1{ font-size:clamp(38px, 11vw, 64px); line-height:1.02; margin:0 0 18px; letter-spacing:-0.02em; }
+.qs-hero .qs-bajada{ font-size:clamp(17px, 4.6vw, 20px); line-height:1.5; font-weight:700; color:#3a3a3a; margin:0 auto 28px; max-width:520px; }
+.qs-ctas{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.qs-ctas .btn{ flex:1 1 auto; justify-content:center; min-width:200px; }
+
+/* --- Bloques --- */
+.qs-bloque{ padding:52px 0; border-bottom:1px solid var(--line); }
+.qs-bloque:last-of-type{ border-bottom:none; }
+.qs-bloque--tinte{ background:var(--paper-tint-teal); border-bottom:none; }
+.qs-bloque--oscuro{ background:var(--black); color:#fff; border-bottom:none; }
+.qs-bloque h2{ font-size:clamp(26px, 7vw, 34px); line-height:1.15; margin:0 0 18px; }
+.qs-bloque p{ font-size:17px; line-height:1.65; color:#3a3a3a; margin:0 0 16px; }
+.qs-bloque--oscuro p{ color:#d8d8d8; }
+.qs-eyebrow{ display:inline-block; font-size:12.5px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--teal-dark); margin-bottom:12px; }
+.qs-bloque--oscuro .qs-eyebrow{ color:var(--yellow); }
+
+/* --- La historia --- */
+.qs-firma{ font-size:15px; font-weight:800; margin-top:24px; }
+.qs-firma small{ display:block; font-weight:600; color:var(--gray); margin-top:2px; }
+
+/* --- Los números del gasto --- */
+.qs-gastos{ list-style:none; margin:22px 0; padding:0; border:2px solid var(--ink); border-radius:16px; background:#fff; overflow:hidden; }
+.qs-gastos li{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 18px; font-weight:700; font-size:16px; border-bottom:1px solid var(--line); }
+.qs-gastos li:last-child{ border-bottom:none; background:var(--paper-tint-yellow); font-weight:900; font-size:18px; }
+.qs-gastos .qs-monto{ font-family:var(--font-mono); white-space:nowrap; }
+.qs-nota{ font-size:14px; color:var(--gray); font-weight:600; line-height:1.5; }
+
+/* --- Manifiesto --- */
+.qs-credo{ list-style:none; margin:0; padding:0; }
+.qs-credo li{ padding:16px 0 16px 34px; position:relative; font-size:17px; line-height:1.55; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.12); color:#eaeaea; }
+.qs-credo li:last-child{ border-bottom:none; }
+.qs-credo li::before{ content:"🐾"; position:absolute; left:0; top:15px; font-size:17px; }
+.qs-credo b{ color:#fff; }
+
+/* --- Cómo funciona --- */
+.qs-pasos{ display:grid; gap:16px; margin-top:26px; }
+.qs-paso{ background:#fff; border:2px solid var(--ink); border-radius:16px; padding:20px; }
+.qs-paso__n{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:var(--yellow); font-family:var(--font-display); font-weight:900; font-size:17px; margin-bottom:12px; }
+.qs-paso h3{ font-size:19px; margin:0 0 6px; }
+.qs-paso p{ font-size:15.5px; margin:0; }
+
+/* --- Pase fundador --- */
+.qs-pase{ background:#fff; border:3px solid var(--ink); border-radius:22px; padding:26px 20px; box-shadow:0 6px 0 var(--yellow); margin-top:24px; }
+.qs-pase__precio{ font-family:var(--font-display); font-weight:900; font-size:clamp(40px, 12vw, 56px); line-height:1; margin:6px 0 4px; }
+.qs-pase__precio small{ display:block; font-size:14px; font-weight:700; color:var(--gray); letter-spacing:0.02em; margin-top:8px; }
+.qs-pase ul{ list-style:none; margin:22px 0; padding:0; }
+.qs-pase li{ padding:11px 0 11px 30px; position:relative; font-size:16px; line-height:1.45; font-weight:600; border-bottom:1px solid var(--line); }
+.qs-pase li:last-child{ border-bottom:none; }
+.qs-pase li::before{ content:"✓"; position:absolute; left:2px; top:11px; color:var(--teal-dark); font-weight:900; }
+.qs-contador{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:14.5px; margin-bottom:6px; }
+.qs-contador .dot{ width:9px; height:9px; border-radius:50%; background:var(--sage); flex-shrink:0; }
+.qs-barra{ height:10px; border-radius:999px; background:rgba(26,26,26,0.10); overflow:hidden; margin:12px 0 18px; }
+.qs-barra span{ display:block; height:100%; background:var(--teal); border-radius:999px; transition:width .5s ease; }
+.qs-pase .btn{ width:100%; justify-content:center; }
+.qs-pase__letra{ font-size:13.5px; color:var(--gray); font-weight:600; line-height:1.5; margin:14px 0 0; }
+
+/* --- Preguntas --- */
+.qs-faq details{ border-bottom:1px solid var(--line); padding:4px 0; }
+.qs-faq summary{ cursor:pointer; padding:16px 0; font-weight:800; font-size:16.5px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:14px; }
+.qs-faq summary::-webkit-details-marker{ display:none; }
+.qs-faq summary::after{ content:"+"; font-size:22px; font-weight:900; color:var(--teal-dark); flex-shrink:0; }
+.qs-faq details[open] summary::after{ content:"–"; }
+.qs-faq p{ font-size:15.5px; padding:0 0 16px; margin:0; }
+
+/* --- Cierre --- */
+.qs-cierre{ text-align:center; padding:60px 0; background:var(--paper-tint-yellow); }
+.qs-cierre h2{ font-size:clamp(28px, 8vw, 40px); margin:0 0 22px; }
+
+/* --- Barra superior y pie propios --- */
+.qs-nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
+.qs-nav__in{ max-width:760px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.qs-nav__in img{ height:32px; width:auto; display:block; }
+.qs-pie{ background:var(--black); color:#9a9a9a; padding:34px 0; font-size:14px; text-align:center; }
+.qs-pie a{ color:#d8d8d8; text-decoration:none; font-weight:700; }
+.qs-pie__links{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-bottom:16px; }
+
+@media (min-width:760px){
+  .qs-pasos{ grid-template-columns:repeat(3, 1fr); }
+  .qs-pase{ padding:34px; }
+  .qs-bloque{ padding:64px 0; }
+}
+</style>
+</head>
+<body>
+
+<nav class="qs-nav">
+  <div class="qs-nav__in">
+    <a href="/" aria-label="Ir al inicio"><img src="/assets/logo.svg" alt="Mi Mascota Club"></a>
+    <a href="/registro" class="btn btn-nav-join btn-sm">Inscribirme gratis</a>
+  </div>
+</nav>
+
+<!-- 1 · PORTADA -->
+<header class="qs-hero">
+  <div class="qs-wrap">
+    <h1>Porque son familia.</h1>
+    <p class="qs-bajada">El club de quienes los quieren como familia.</p>
+    <div class="qs-ctas">
+      <a href="/registro" class="btn btn-primary btn-grande">Inscribir a mi mascota, gratis</a>
+      <a href="#fundador" class="btn btn-outline btn-grande">Ser Socio Fundador</a>
+    </div>
+  </div>
+</header>
+
+<!-- 2 · LA HISTORIA -->
+<section class="qs-bloque">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">Por qué existe este club</span>
+    <h2>A Max le pasó algo y en una semana gasté casi dos millones.</h2>
+    <p>
+      Ecografía, hospitalización, remedios. Siete días. No lo pensé ni un segundo,
+      porque cuando es tu familia no sacas la calculadora: pagas.
+    </p>
+    <p>
+      Pero después, cuando pasó el susto, saqué la cuenta de todo lo demás. El baño,
+      la comida, los snacks. Ser un dueño responsable en Chile cuesta cerca de cien mil
+      pesos al mes, todos los meses, sin que pase nada raro. Y a cambio no recibes nada.
+      Alguna promo suelta, un cupón de vez en cuando, y se acabó.
+    </p>
+    <p>
+      Ahí entendí algo que me dio rabia: <b>la industria sabe que por ellos haces
+      cualquier cosa, y le pone precio a eso.</b> Mientras más lo quieres, más pagas.
+    </p>
+    <p>
+      Así que armé el club que me hubiera gustado tener esa semana.
+    </p>
+    <p class="qs-firma">
+      Jaime
+      <small>Fundador de Mi Mascota Club · Dueño de Max</small>
+    </p>
+  </div>
+</section>
+
+<!-- 3 · EL PROBLEMA EN NÚMEROS -->
+<section class="qs-bloque qs-bloque--tinte">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">El problema</span>
+    <h2>Cien mil al mes por hacer las cosas bien.</h2>
+    <ul class="qs-gastos">
+      <li><span>Baño y peluquería</span><span class="qs-monto">$40.000</span></li>
+      <li><span>Comida</span><span class="qs-monto">$40.000</span></li>
+      <li><span>Snacks y premios</span><span class="qs-monto">$10.000</span></li>
+      <li><span>Al mes, sin emergencias</span><span class="qs-monto">≈ $90.000</span></li>
+    </ul>
+    <p class="qs-nota">
+      Valores de referencia de un perro mediano en Santiago. No incluyen vacunas,
+      desparasitación, control anual ni una sola urgencia.
+    </p>
+  </div>
+</section>
+
+<!-- 4 · EN QUÉ CREEMOS -->
+<section class="qs-bloque qs-bloque--oscuro">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">En qué creemos</span>
+    <h2 style="color:#fff;">Las mascotas no son un negocio. Son vida.</h2>
+    <ul class="qs-credo">
+      <li><b>Querer a un animal no debería salir tan caro.</b> El amor debería conseguirte un mejor trato, no encarecértelo.</li>
+      <li><b>Este club no es de una tienda.</b> No te damos descuento para que compres acá: te lo damos en todo lo que ya ibas a gastar igual.</li>
+      <li><b>Solo entran negocios que respetan a las mascotas.</b> El lugar en el club no se compra.</li>
+      <li><b>Verificamos que seas dueño de verdad.</b> Un club donde entra cualquiera no es un club.</li>
+      <li><b>Nadie decide solo.</b> Lo que antes se sabía de boca a boca, acá está en un lugar y respondido por gente que ya pasó por eso.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5 · CÓMO FUNCIONA -->
+<section class="qs-bloque">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">Cómo funciona</span>
+    <h2>Tres pasos y listo.</h2>
+    <div class="qs-pasos">
+      <div class="qs-paso">
+        <div class="qs-paso__n">1</div>
+        <h3>Te inscribes</h3>
+        <p>Gratis, en dos minutos. Recibes el carnet de tu mascota con su código y su QR.</p>
+      </div>
+      <div class="qs-paso">
+        <div class="qs-paso__n">2</div>
+        <h3>Verificas a tu mascota</h3>
+        <p>Subes el número de chip y una foto de la cartilla. Revisamos a mano en 48 horas hábiles.</p>
+      </div>
+      <div class="qs-paso">
+        <div class="qs-paso__n">3</div>
+        <h3>Ahorras donde ya gastas</h3>
+        <p>Muestras tu carnet en el local. El negocio confirma la visita y queda registrada en tu historial.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · LOS SOCIOS ELIGEN -->
+<section class="qs-bloque qs-bloque--tinte">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">Lo que nos hace distintos</span>
+    <h2>Los negocios del club los eligen los socios.</h2>
+    <p>
+      No salimos a llenar el directorio con cualquiera. Cada socio puede recomendar los
+      lugares donde de verdad lleva a su mascota, y <b>cada semana visitamos al negocio
+      más recomendado</b> para invitarlo a entrar.
+    </p>
+    <p>
+      Por eso el club crece despacio y por eso vale la pena: cuando veas una veterinaria
+      acá, es porque alguien que quiere a su mascota como tú la puso ahí.
+    </p>
+    <p style="margin-bottom:26px;">
+      Un negocio también puede postular solo, y lo revisamos igual. Si es nuevo y nadie
+      lo conoce todavía, entra con la etiqueta <b>Nuevo en el club</b> y se gana su lugar
+      con las visitas.
+    </p>
+    <a href="/registro" class="btn btn-brass btn-grande">Quiero recomendar un negocio</a>
+  </div>
+</section>
+
+<!-- 7 · PASE FUNDADOR -->
+<section class="qs-bloque" id="fundador">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">Los primeros 100</span>
+    <h2>Así se construye un club: con los primeros que creen en él.</h2>
+    <p>
+      Mi Mascota Club lo estoy construyendo yo solo, de noche y los fines de semana,
+      peleando por conseguir beneficios de verdad frente a una industria que no tiene
+      ningún apuro en darlos.
+    </p>
+    <p>
+      Los primeros 100 Socios Fundadores son los que hacen posible lo que viene. No es
+      una donación: es entrar antes que nadie y quedarse con un lugar que después no va
+      a existir.
+    </p>
+
+    <div class="qs-pase">
+      <div class="qs-contador">
+        <span class="dot"></span>
+        <span>Quedan <b id="qsQuedan">100</b> de 100 cupos</span>
+      </div>
+      <div class="qs-barra"><span id="qsBarra" style="width:0%;"></span></div>
+
+      <div class="qs-pase__precio">
+        $9.990
+        <small>PAGO ÚNICO · 12 MESES DE MEMBRESÍA</small>
+      </div>
+
+      <ul>
+        <li><b>Tu número de fundador</b> del #001 al #100, visible en el carnet de tu mascota.</li>
+        <li><b>Insignia de Socio Fundador</b> permanente. No se vuelve a entregar nunca.</li>
+        <li><b>Voto</b> para elegir qué negocios entran al club.</li>
+        <li><b>Precio congelado de por vida.</b> Cuando el club suba de precio, tú no.</li>
+        <li><b>12 meses de membresía completa</b> desde que se activen los beneficios.</li>
+      </ul>
+
+      <a href="#" id="qsPagar" class="btn btn-primary btn-grande">Quiero ser Socio Fundador</a>
+
+      <p class="qs-pase__letra">
+        Para ser fundador primero tienes que estar inscrito, y la inscripción es gratis.
+        Si todavía no lo estás, <a href="/registro" style="font-weight:800;">inscríbete acá</a> y vuelve a esta página.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · PREGUNTAS -->
+<section class="qs-bloque qs-faq">
+  <div class="qs-wrap">
+    <span class="qs-eyebrow">Preguntas</span>
+    <h2>Lo que todos preguntan.</h2>
+
+    <details>
+      <summary>¿Inscribirme cuesta algo?</summary>
+      <p>No. Inscribir a tu mascota y tener tu carnet es gratis. El pase de Socio Fundador es aparte y es opcional.</p>
+    </details>
+
+    <details>
+      <summary>¿Cuántos negocios hay hoy?</summary>
+      <p>Pocos, y preferimos decirlo de frente. El club está partiendo y los negocios los estamos eligiendo con los socios, uno por uno, en Santiago Centro, Ñuñoa y Providencia. Si buscas un directorio gigante, todavía no somos eso.</p>
+    </details>
+
+    <details>
+      <summary>¿Cuánto voy a ahorrar?</summary>
+      <p>Depende de cuánto gastes, porque el descuento es un porcentaje de lo que ya ibas a pagar. La referencia honesta: con un gasto de cien mil al mes, un descuento del 10 al 15% son diez a quince mil pesos mensuales. Con un solo baño la membresía se paga sola.</p>
+    </details>
+
+    <details>
+      <summary>¿Para qué piden el número de chip?</summary>
+      <p>Para saber que eres dueño de verdad. Es lo que hace que el club valga algo y es nuestro argumento cuando le pedimos a un negocio que dé un descuento permanente. Es opcional al inscribirse: puedes completarlo después desde Mi Mascota ID.</p>
+    </details>
+
+    <details>
+      <summary>¿Qué pasa con la foto de la cartilla?</summary>
+      <p>Se borra apenas se resuelve la verificación, se apruebe o se rechace. Es el dato más sensible que recibimos y no lo guardamos más de lo necesario.</p>
+    </details>
+
+    <details>
+      <summary>Tengo un negocio, ¿cómo entro?</summary>
+      <p>Puedes postular en <a href="/formulario-negocio" style="font-weight:800;">este formulario</a>. Revisamos cada ficha a mano antes de publicarla.</p>
+    </details>
+  </div>
+</section>
+
+<!-- 9 · CIERRE -->
+<section class="qs-cierre">
+  <div class="qs-wrap">
+    <h2>¿Lo quieres como familia?<br>Este es tu club.</h2>
+    <div class="qs-ctas">
+      <a href="/registro" class="btn btn-primary btn-grande">Inscribir a mi mascota, gratis</a>
+    </div>
+  </div>
+</section>
+
+<footer class="qs-pie">
+  <div class="qs-wrap">
+    <div class="qs-pie__links">
+      <a href="/">Inicio</a>
+      <a href="/registro">Inscribirme</a>
+      <a href="/sugerencias">Sugerencias</a>
+      <a href="/terminos">Términos</a>
+      <a href="/privacidad">Privacidad</a>
+    </div>
+    <div><a href="mailto:holamimascotaclub@gmail.com">holamimascotaclub@gmail.com</a> · Santiago, Chile</div>
+    <div style="margin-top:12px;">© 2026 Mi Mascota Club</div>
+  </div>
+</footer>
+
+<script>
+/* ======================================================================
+   DOS COSAS QUE JAIME EDITA A MANO — y nada más en este archivo
+   ----------------------------------------------------------------------
+   1) FUNDADORES_TOMADOS: cuántos pases se han vendido. Cada vez que
+      entre uno nuevo, cambias el número, guardas y haces push.
+      Tiene que ser el número REAL: si dice 40 y no es verdad, el día que
+      alguien se dé cuenta pierdes lo único que no se recupera.
+   2) LINK_MERCADOPAGO: el link de pago que creas en Mercado Pago.
+      Mientras diga "", el botón avisa que el pago abre pronto en vez de
+      llevar a una página rota.
+   ====================================================================== */
+const FUNDADORES_TOMADOS = 0;
+const LINK_MERCADOPAGO   = "";
+
+const CUPOS_TOTALES = 100;
+
+(function pintarPase(){
+  const tomados = Math.max(0, Math.min(FUNDADORES_TOMADOS, CUPOS_TOTALES));
+  const quedan  = CUPOS_TOTALES - tomados;
+
+  document.getElementById('qsQuedan').textContent = quedan;
+  document.getElementById('qsBarra').style.width  = (tomados / CUPOS_TOTALES * 100) + '%';
+
+  const boton = document.getElementById('qsPagar');
+
+  if (quedan === 0){
+    boton.textContent = 'Los 100 cupos ya se agotaron';
+    boton.classList.remove('btn-primary');
+    boton.classList.add('btn-outline');
+    boton.style.pointerEvents = 'none';
+    return;
+  }
+
+  if (LINK_MERCADOPAGO){
+    boton.href = LINK_MERCADOPAGO;
+    boton.target = '_blank';
+    boton.rel = 'noopener';
+  } else {
+    boton.addEventListener('click', function(e){
+      e.preventDefault();
+      alert('El pago se abre en unos días. Inscríbete gratis mientras tanto y te avisamos por correo apenas esté listo.');
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

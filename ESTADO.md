@@ -212,12 +212,18 @@ beneficio y ve su historial, no falta ninguna pieza. Lo que queda abajo es otra 
 
 ## Manuales pendientes en paneles externos
 
-- **Supabase → Authentication:** desactivar el registro público de usuarios y activar la
-  protección de contraseñas filtradas (HaveIBeenPwned).
-- **Supabase → Storage → bucket `negocios`:** quedan 4 archivos de prueba por borrar.
-- **EmailJS, plantilla `template_u9x5p1i`:** agregar un botón grande a `{{carnet_url}}`
-  que diga "Ver el carnet de {{mascota}}". El carnet tiene que estar en el teléfono, no
-  en el correo.
+- **Supabase → Storage → bucket `negocios`:** quedan 4 archivos de prueba por borrar. Sin
+  apuro: Jaime decidió (21 de septiembre) que no es necesario por ahora.
+
+Resueltos (verificado el 21 de septiembre):
+
+- ✅ **Registro público de Supabase Auth: APAGADO.** "Allow new users to sign up" está
+  desactivado. El sitio no usa el login de Supabase, así que no rompe nada.
+- ✅ **Botón "Ver el carnet" en el correo de bienvenida:** ya estaba hecho. Esta lista lo
+  daba como pendiente por error.
+- ➖ **Protección de contraseñas filtradas (HaveIBeenPwned):** se descarta. El sitio no usa
+  contraseñas (todo el acceso es por código OTP al correo), y en el plan gratis de Supabase
+  la opción ni siquiera aparece.
 
 ---
 

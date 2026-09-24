@@ -34,3 +34,10 @@
 # ---------------------------------------------------------------------
 /registro            /formulario-registro-demo-v3.html  200
 /formulario-negocio  /formulario-negocio-v3.html        200
+
+# ---------------------------------------------------------------------
+# "Quiénes somos" es una página SUELTA, no una vista de la SPA. Se hizo
+# así a propósito: es la página que más va a cambiar durante el
+# lanzamiento y nada de lo que se toque ahí puede romper la home.
+# ---------------------------------------------------------------------
+/quienes-somos       /quienes-somos.html                200

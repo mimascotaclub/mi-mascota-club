@@ -76,6 +76,9 @@
       <a href="/beneficios" onclick="event.preventDefault(); irABeneficios();">Beneficios</a>
       <a href="/especialistas" onclick="event.preventDefault(); irAEspecialistas();" style="display:none;" aria-hidden="true">Especialistas</a>
       <a href="/mi-mascota" onclick="event.preventDefault(); irAMiMascota();">Mi Mascota ID</a>
+      <!-- Enlace normal, SIN JavaScript: /quienes-somos es una página suelta,
+           no una vista de esta SPA. -->
+      <a href="/quienes-somos">Quiénes somos</a>
       <!-- "Planes" fuera del menú mientras no haya precios definitivos (13 sept 2026).
            La ruta /planes sigue funcionando: los avisos de plan Premium enlazan ahí. -->
     </div>
@@ -105,6 +108,7 @@
     <!-- "Para tu mascota" y "Para ti como dueño" no van aquí: son filtros que ya
          viven dentro de Beneficios. En el teléfono el menú tiene que ser corto. -->
     <a href="/beneficios" onclick="event.preventDefault(); cerrarMenuMovil(); irABeneficios();">Beneficios</a>
+    <a href="/quienes-somos">Quiénes somos</a>
     <a href="/sugerencias" onclick="event.preventDefault(); cerrarMenuMovil(); irASugerencias();">Sugerencias</a>
 
     <button type="button" class="btn btn-primary menu-movil__cta"
@@ -1391,6 +1395,7 @@
     <div class="foot-col">
       <h4 class="foot-t">Club</h4>
       <a href="/" onclick="event.preventDefault(); volverAlInicio();">Inicio</a>
+      <a href="/quienes-somos">Quiénes somos</a>
       <a href="/sugerencias" onclick="event.preventDefault(); irASugerencias();">Sugerencias</a>
 
       <h4 class="foot-t foot-t--2">Legal</h4>
