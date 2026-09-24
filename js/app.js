@@ -3709,6 +3709,10 @@ const LS_SOC_SESION = 'mmc_sesion_socio';
 
 let socMascotas = [];        // todas las mascotas de ese correo
 let socActual = null;        // la que se está viendo
+/* El número de Socio Fundador es del DUEÑO, no de cada mascota: si tiene tres
+   perros, la insignia es la misma en los tres carnets. Por eso se guarda acá
+   afuera y se pide una sola vez al cargar el panel. null = no es fundador. */
+let socFundador = null;
 let socFotoPendiente = null; // foto recién elegida, antes de guardar
 let socCartillaPendiente = null; // foto de cartilla elegida, antes de enviarla a verificar
 
@@ -3857,6 +3861,15 @@ async function cargarPanelSocio(){
     const { data, error } = await supabase.rpc('socio_perfil', { p_token: token });
     if(error) throw error;
     socMascotas = data || [];
+
+    /* Si esto falla, el panel se muestra igual sin la insignia: nadie se queda
+       fuera de su carnet porque no pudimos leer un número decorativo. */
+    try{
+      const r = await supabase.rpc('socio_fundador', { p_token: token });
+      socFundador = (r && !r.error) ? r.data : null;
+    }catch(e){
+      socFundador = null;
+    }
     if(!socMascotas.length){
       /* El token venció o alguien borró la mascota: se vuelve al acceso. */
       try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
@@ -3925,6 +3938,9 @@ function renderCarnetSocio(m){
      "Activo" cuando el socio todavía no puede canjear es exactamente lo que
      manda a alguien al mesón a que le digan que no. */
   const et = VERIF_ETIQUETA[m.verificacion || 'registrado'] || VERIF_ETIQUETA.registrado;
+  /* #007, no #7: el número con ceros se ve como una credencial y no como un
+     contador. Es el mismo formato que usa la lista de /mi-panel. */
+  const fundador = socFundador ? '#' + String(socFundador).padStart(3, '0') : '';
   const avatar = m.foto
     ? `<img src="${m.foto}" alt="${colaEsc(m.pet)}" style="width:100%;height:100%;object-fit:cover;">`
     : `<img src="/assets/favicon.svg" alt="">`;
@@ -3938,6 +3954,7 @@ function renderCarnetSocio(m){
       <div class="cred-photo" style="overflow:hidden;">${avatar}</div>
       <div class="cred-name">${colaEsc(m.pet)}</div>
       <div class="cred-breed">${colaEsc(m.breed ? m.species + ' · ' + m.breed : (m.species || ''))}</div>
+      ${fundador ? `<div class="cred-fundador">★ Socio Fundador ${fundador}</div>` : ''}
       <div id="socCarnetQR" class="cred-qr"></div>
       <div class="cred-row" style="margin-top:14px;">
         <div>Comuna<b>${colaEsc(m.comuna || '—')}</b></div>
