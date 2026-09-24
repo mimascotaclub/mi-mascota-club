@@ -254,6 +254,17 @@ también. Lo que queda abajo es otra cosa.
 5. **Contenido y tips para dueños.** La estrategia del 10 de septiembre era captar dueños
    gratis dándoles valor desde ya, mientras hay pocos negocios. Ese valor todavía no existe.
 
+### Menú y navegación (pendiente del 23 de septiembre)
+
+5a1. **Revisar el menú superior en TODAS las páginas del sitio.** `/quienes-somos` tenía
+   uno distinto hasta que se igualó; hay que confirmar una por una que la barra sea la
+   misma en la home, el directorio, las fichas, los formularios, las legales y los paneles.
+5a2. **Marcar en el menú la página en la que estás**, en negrita y con color. Hoy todos los
+   enlaces se ven iguales y no hay ninguna señal de dónde está parada la persona.
+   Ojo: el menú de la home lo pinta `js/app.js` y el de `/quienes-somos` está escrito a
+   mano en su HTML, así que el estado activo hay que resolverlo en los dos lados.
+   Lo mismo vale al agregar o sacar una categoría del desplegable.
+
 ### Del lanzamiento, lo que falta construir
 
 5b. **"Recomienda un negocio"** — adaptar el buzón de sugerencias (v21) para que los socios
