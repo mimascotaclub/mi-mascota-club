@@ -161,22 +161,39 @@ recomendado"*.
 **Montaje**
 
 - [x] Landing `/quienes-somos` con el pase fundador.
-- [ ] WhatsApp Business: perfil de empresa con el número del negocio (nunca el personal).
+- [x] Link de pago de Mercado Pago creado y conectado (`https://mpago.la/1gq8qDj`).
+- [x] URL de retorno del pago: `https://mimascotaclub.cl/quienes-somos#ya-pague`.
+- [ ] **Pegar esa URL de retorno en la configuración del link en Mercado Pago.**
+- [ ] Cambiar el nombre del negocio en Mercado Pago (hoy "Jaime Florian Design").
+- [ ] WhatsApp Business: perfil de empresa con el número +56 9 9713 2591.
 - [ ] Comunidad de WhatsApp + grupo "Dudas y recomendaciones" con aprobación de miembros.
-- [ ] Link de pago de Mercado Pago → pegarlo en `LINK_MERCADOPAGO` dentro de
-      `quienes-somos.html`.
 - [ ] Textos de WhatsApp: descripción, bienvenida automática y respuestas rápidas.
+- [ ] Fotos para la landing: una de Jaime con Max, otra del carnet.
 
-**Por construir**
+**Construido el 23 de septiembre**
 
-- [ ] "Recomienda un negocio" (adaptar el buzón de sugerencias v21) + contador de votos.
+- [x] Parche `supabase-fundadores-v28.sql` aplicado.
+- [x] Contador "quedan X de 100" leyendo `contar_fundadores()` desde la base.
+- [x] Bloque "Socios Fundadores" en `/mi-panel` para marcar y quitar.
+- [x] Insignia "★ Socio Fundador #001" en el carnet de `/mi-mascota`.
+- [x] Aviso por WhatsApp después de pagar, oculto hasta que corresponde.
+
+**Por construir, en orden de urgencia**
+
+- [ ] **"Recomienda un negocio"** (adaptar el buzón de sugerencias v21) + contador de
+      votos. La landing ya promete que cada semana se visita al más recomendado, así que
+      esto es lo primero: hoy la promesa no tiene dónde ocurrir.
 - [ ] Etiquetas "Recomendado por X socios" y "Nuevo en el club" en las fichas.
-- [ ] Botón "Compartir en historias" en `/mi-mascota` con la imagen vertical del carnet.
+- [ ] Botón "Compartir en historias" en `/mi-mascota` con la imagen vertical del carnet,
+      incluyendo la insignia de fundador.
 - [ ] Bloque "Únete a la comunidad" en `/mi-mascota` y al final del registro.
 - [ ] Oferta del pase fundador en la pantalla final del registro.
-- [ ] Marcar al socio como fundador en la base (por ahora a mano, cruzando el correo del
-      pago).
 - [ ] PWA: `manifest.json`, íconos y service worker para que el sitio se instale en el
       teléfono. Las notificaciones push funcionan en iOS 16.4+ en PWA instaladas.
 - [ ] Columnas de latitud y longitud en `negocios`, para que el mapa tenga datos cuando
-      valga la pena mostrarlo (unos 15-20 negocios).
+      valga la pena mostrarlo (unos 15-20 negocios). Leaflet ya está cargado.
+
+**Antes de publicar el pase (bloqueante)**
+
+- [ ] Resolver la boleta con el contador. Mercado Pago no emite boletas del SII.
+- [ ] Borrar el fundador de prueba #001 para que el primero real sea el #001.

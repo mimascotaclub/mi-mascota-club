@@ -1,10 +1,12 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 18 de septiembre de 2026**
+**Última actualización: 23 de septiembre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
 **para qué existe** (el porqué, el lema, cómo se explica y las líneas de negocio).
+`LANZAMIENTO.md` dice **cómo se sale a buscar socios**: canales, calendario y el pase de
+Socio Fundador.
 `CONTEXTO-PROYECTO.md` es la bitácora histórica: tiene el detalle de cómo se construyó
 cada cosa y por qué, pero son más de 1.700 líneas y **no hay que leerlo entero** — se
 consulta por secciones cuando hace falta entender una pieza específica.
@@ -42,7 +44,11 @@ Si una sesión termina sin tocar este archivo, la siguiente empieza a ciegas.
 | `/mi-mascota` | El dueño — Mi Mascota ID: carnet, QR, perfil, historial |
 | `/mi-negocio` | El negocio — su panel y sus visitas |
 | `/validar` | El negocio — confirmar una visita |
-| `/mi-panel` | Jaime — aprobar fichas, ver canjes, ajustes |
+| `/mi-panel` | Jaime — aprobar fichas, ver canjes, marcar fundadores, ajustes |
+
+`/quienes-somos` sí es pública y va en el menú. **Es una página suelta** (`quienes-somos.html`
+servida por una regla de `_redirects`), no una vista de la SPA: se hizo así porque es la que
+más va a cambiar durante el lanzamiento y así nada de lo que se toque ahí puede romper la home.
 
 ---
 
@@ -68,9 +74,66 @@ Si una sesión termina sin tocar este archivo, la siguiente empieza a ciegas.
 - **Seguridad**: RLS cerrado, RPC de administración detrás de `es_admin()`, sesiones por
   token, bucket de Storage cerrado.
 - **Dominio propio** con HTTPS de Let's Encrypt.
+- **Landing `/quienes-somos`** (23 de septiembre): la historia de Max, el gasto de $100.000
+  al mes, el manifiesto, los tres pasos, "los negocios los eligen los socios", el pase de
+  Socio Fundador y las preguntas frecuentes.
+- **Pase de Socio Fundador** (23 de septiembre): $9.990 pago único, 100 cupos, sin kit
+  físico por ahora. Ver el bloque de abajo.
 
 Base limpia de datos de prueba desde el 13 de septiembre. **3 socios reales** al 17 de
 septiembre.
+
+---
+
+## Socios Fundadores — TERMINADO (23 de septiembre)
+
+$9.990 de pago único, 12 meses de membresía, 100 cupos. Sin kit físico: se decidió lanzar
+solo con el pase digital para no frenarse cotizando y despachando.
+
+Lo que incluye: número de fundador visible en el carnet, insignia permanente, voto para
+elegir qué negocios entran y precio congelado de por vida.
+
+**El circuito completo, y por qué tiene un paso manual:**
+
+1. La persona paga en el link de Mercado Pago (`https://mpago.la/1gq8qDj`).
+2. Mercado Pago la devuelve a `/quienes-somos#ya-pague`, que muestra un recuadro con un
+   botón de WhatsApp al **+56 9 9713 2591**. **Ese recuadro está oculto por defecto** y solo
+   aparece al volver del pago, al apretar el botón de pagar, o desde el enlace "¿Ya pagaste
+   y no sabes cómo avisarnos?".
+3. La persona manda su código de mascota por WhatsApp.
+4. Jaime confirma el pago en Mercado Pago y la marca en `/mi-panel` → Socios Fundadores.
+
+**El paso manual es inevitable por ahora:** el link de pago no lleva el código de la
+mascota, así que Mercado Pago sabe que alguien pagó pero no quién. Automatizarlo necesita
+un webhook, y el webhook tampoco resolvería la identidad. Con 100 fundadores se marca a
+mano; el webhook recién vale la pena con cobro recurrente.
+
+| Pieza | Estado |
+|---|---|
+| Parche `supabase-fundadores-v28.sql` | ✅ Aplicado |
+| Landing `/quienes-somos` con el pase | ✅ Construido y probado |
+| Contador "quedan X de 100" leyendo la base | ✅ Construido y probado |
+| Link de pago de Mercado Pago conectado | ✅ Conectado |
+| Bloque "Socios Fundadores" en `/mi-panel` | ✅ Construido y probado |
+| Insignia "★ Socio Fundador #001" en el carnet | ✅ Construido y probado |
+| Aviso por WhatsApp después de pagar | ✅ Construido |
+| **Emitir boleta por las membresías** | ⬜ **Falta: consultar al contador antes de cobrarle al primer fundador** |
+| Cambiar el nombre del negocio en Mercado Pago | ⬜ Hoy el que paga ve "Jaime Florian Design" |
+
+**La tabla `fundadores` tiene el correo como llave, no la mascota**, porque `socios` es una
+fila por mascota y el pase es de la persona. Quien tiene tres perros ve la misma insignia
+en los tres carnets.
+
+### Dos trampas que ya costaron tiempo (23 de septiembre)
+
+- **`app.js` completo vive dentro de una función.** Cualquier función nueva que se llame
+  desde un `onclick` del HTML tiene que quedar colgada de `window` al final del archivo,
+  junto a las demás. Sin eso el botón simplemente no hace nada y no aparece ningún error
+  hasta que se mira la consola.
+- **Las funciones RPC que llama el sitio van `volatile`, no `stable`.** `socio_fundador`
+  se creó `stable` y la API respondía **405** a la llamada del navegador, así que la
+  insignia nunca aparecía. `socio_perfil` y `socio_historial` son `volatile`: hay que
+  seguir ese patrón.
 
 ---
 
@@ -159,8 +222,20 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 
 ## Pendientes, en orden
 
-**El flujo del dueño está cerrado.** Desde que alguien descubre el club hasta que usa un
-beneficio y ve su historial, no falta ninguna pieza. Lo que queda abajo es otra cosa.
+**El flujo del dueño está cerrado**, y desde el 23 de septiembre el del pase fundador
+también. Lo que queda abajo es otra cosa.
+
+### Antes de cobrarle a alguien (bloqueantes)
+
+0. **Consultar al contador**: si se puede emitir boleta por las membresías con el inicio de
+   actividades actual, o si hay que agregar un giro. Jaime es persona natural, sin empresa.
+   Mercado Pago **no** emite boletas del SII: entrega un comprobante de pago, que no es un
+   documento tributario. **No publicar el pase hasta resolverlo.**
+0b. **Cambiar el nombre del negocio en Mercado Pago**, hoy "Jaime Florian Design". Ojo: es
+   una cuenta por RUT, así que el nombre que quede lo verán también los clientes de
+   Valorgic. Después revisar el link en incógnito para confirmar cómo se ve.
+0c. **Borrar el fundador de prueba #001** desde `/mi-panel` para partir desde cero. Con la
+   tabla vacía el próximo vuelve a ser #001.
 
 ### Para poner el club en marcha (no es construir, es decidir)
 
@@ -178,6 +253,23 @@ beneficio y ve su historial, no falta ninguna pieza. Lo que queda abajo es otra 
    que queda de este lado.
 5. **Contenido y tips para dueños.** La estrategia del 10 de septiembre era captar dueños
    gratis dándoles valor desde ya, mientras hay pocos negocios. Ese valor todavía no existe.
+
+### Del lanzamiento, lo que falta construir
+
+5b. **"Recomienda un negocio"** — adaptar el buzón de sugerencias (v21) para que los socios
+   nominen negocios, con contador de votos. Es la pieza que sostiene la promesa de la
+   landing: *"cada semana visitamos al negocio más recomendado"*. Hoy está prometido y no
+   existe. Es lo más urgente de esta lista.
+5c. **Etiquetas en las fichas**: "Recomendado por X socios" y "Nuevo en el club".
+5d. **Botón "Compartir en historias"** en `/mi-mascota`, que genere la imagen vertical del
+   carnet con la insignia de fundador. Es el motor del boca a boca.
+5e. **Bloque "Únete a la comunidad"** en `/mi-mascota` y al final del registro, con el link
+   de la Comunidad de WhatsApp (falta crearla).
+5f. **Ofrecer el pase fundador al terminar el registro**, que es el momento de más ganas.
+5g. **PWA**: `manifest.json`, íconos y service worker para que el sitio se instale en el
+   teléfono como una app.
+5h. **Latitud y longitud en `negocios`**, para que el mapa tenga datos cuando valga la pena
+   mostrarlo (unos 15-20 negocios). Leaflet ya está cargado en el sitio.
 
 ### Flujo de los negocios (el que sigue)
 
