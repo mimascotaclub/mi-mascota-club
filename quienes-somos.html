@@ -122,10 +122,8 @@
 .qs-cierre{ text-align:center; padding:60px 0; background:var(--paper-tint-yellow); }
 .qs-cierre h2{ font-size:clamp(28px, 8vw, 40px); margin:0 0 22px; }
 
-/* --- Barra superior propia (el pie es el del sitio, de styles.css) --- */
-.qs-nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
-.qs-nav__in{ max-width:760px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.qs-nav__in img{ height:32px; width:auto; display:block; }
+/* La barra de arriba y el pie son los del sitio (styles.css). Acá no se
+   redefine nada de eso a propósito: si cambian allá, cambian también acá. */
 
 @media (min-width:760px){
   .qs-pasos{ grid-template-columns:repeat(3, 1fr); }
@@ -136,10 +134,42 @@
 </head>
 <body>
 
-<nav class="qs-nav">
-  <div class="qs-nav__in">
-    <a href="/" aria-label="Ir al inicio"><img src="/assets/logo.svg" alt="Mi Mascota Club"></a>
-    <a href="/registro" class="btn btn-nav-join btn-sm">Inscribirme gratis</a>
+<div class="announce-bar">🎉 Cada semana sumamos nuevos negocios y beneficios.</div>
+
+<!-- La misma barra de la home, con las mismas clases de styles.css, para que
+     nadie sienta que cambió de sitio. Única diferencia: acá son enlaces
+     normales (href) en vez de llamadas a JavaScript, porque esta página no
+     carga js/app.js y no existen irABeneficios(), irAMiMascota() ni las demás.
+     El menú de teléfono lo abre el trocito de script del final. -->
+<nav>
+  <div class="navbar">
+    <a href="/" class="logo"><img src="/assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
+    <div class="navlinks">
+      <a href="/beneficios">Beneficios</a>
+      <a href="/mi-mascota">Mi Mascota ID</a>
+      <a href="/quienes-somos">Quiénes somos</a>
+    </div>
+    <a href="/registro" class="btn btn-nav-join btn-sm">Quiero unirme al club</a>
+
+    <button type="button" class="nav-burger" id="navBurger"
+            aria-label="Abrir menú" aria-expanded="false" aria-controls="menuMovil"
+            onclick="alternarMenuMovilQS()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="menu-movil" id="menuMovil" hidden>
+    <a class="menu-movil__destacado" href="/mi-mascota">
+      <span class="menu-movil__ic">🐾</span>
+      <span>
+        <b>Mi Mascota ID</b>
+        <small>Tu carnet, tus datos y tus beneficios usados</small>
+      </span>
+    </a>
+    <a href="/beneficios">Beneficios</a>
+    <a href="/quienes-somos">Quiénes somos</a>
+    <a href="/sugerencias">Sugerencias</a>
+    <a href="/registro" class="btn btn-primary menu-movil__cta">Quiero unirme al club</a>
   </div>
 </nav>
 
@@ -438,6 +468,19 @@
 </footer>
 
 <script>
+/* El menú de teléfono. En la home lo maneja js/app.js, que esta página no
+   carga, así que acá va su versión mínima: abrir y cerrar, nada más. */
+function alternarMenuMovilQS(){
+  const menu = document.getElementById('menuMovil');
+  const burger = document.getElementById('navBurger');
+  if(!menu || !burger) return;
+  const abierto = !menu.hidden;
+  menu.hidden = abierto;
+  /* El aspa del botón la dibuja el CSS a partir de aria-expanded, no de una
+     clase: por eso basta con cambiar ese atributo. */
+  burger.setAttribute('aria-expanded', abierto ? 'false' : 'true');
+}
+
 /* ======================================================================
    LO ÚNICO QUE SE EDITA A MANO EN ESTE ARCHIVO
    ----------------------------------------------------------------------

@@ -1474,17 +1474,23 @@ function irABuscar(){
 }
 
 /* ---------------- Carrusel circular de categorías (hero) ---------------- */
+/* Desde el 23 de septiembre de 2026 el club es FULL MASCOTAS: un negocio entra
+   solo si es pet-friendly o tiene una especialidad de mascotas. Por eso salieron
+   de acá "Cancha de pádel" y "Barbería", que eran del concepto viejo (beneficios
+   para el dueño fuera del rubro). Los dos que quedan del lado "dueño" —café y
+   restaurante— se quedan porque dicen pet-friendly: son lugares a los que vas
+   CON tu mascota. Ver MARCA.md. */
 const FAN_CARDS = [
   {emoji:'🩺', label:'Veterinaria', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Veterinaria', tipo:'mascota'},
   {emoji:'☕', label:'Café pet-friendly', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Café', tipo:'dueno'},
-  {emoji:'🏓', label:'Cancha de pádel', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Deporte', tipo:'dueno'},
+  {emoji:'🍖', label:'Alimentos', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Alimentos', tipo:'mascota'},
   {emoji:'✂️', label:'Peluquería', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Peluquería', tipo:'mascota'},
   {emoji:'🦮', label:'Paseador', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Paseador', tipo:'mascota'},
-  {emoji:'🍽️', label:'Restaurante', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Restaurante', tipo:'dueno'},
+  {emoji:'🍽️', label:'Restaurante pet-friendly', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Restaurante', tipo:'dueno'},
   {emoji:'🏨', label:'Hotel / guardería', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Hotel / Pensión', tipo:'mascota'},
   {emoji:'🛍️', label:'Tienda', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Tienda', tipo:'mascota'},
   {emoji:'🏋️', label:'Adiestramiento', bg:'linear-gradient(135deg,#B9EDED,var(--teal))', cat:'Adiestramiento', tipo:'mascota'},
-  {emoji:'💈', label:'Barbería', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Barbería', tipo:'dueno'},
+  {emoji:'💊', label:'Salud y farmacia', bg:'linear-gradient(135deg,#FFE699,var(--yellow))', cat:'Salud', tipo:'mascota'},
 ];
 function renderFanCarousel(){
   const track = document.getElementById('fanTrack');
