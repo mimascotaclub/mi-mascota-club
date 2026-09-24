@@ -3661,6 +3661,12 @@ window.cargarAjustesAdmin = cargarAjustesAdmin;
 window.alternarAjusteVerif = alternarAjusteVerif;
 window.cargarSugerencias = cargarSugerencias;
 window.marcarSugerencia = marcarSugerencia;
+/* Socios Fundadores. Todo app.js vive dentro de una función, así que lo que
+   se llama desde un onclick del HTML tiene que quedar colgado de window:
+   si falta esta línea, el botón simplemente no hace nada. */
+window.cargarFundadores = cargarFundadores;
+window.marcarFundador = marcarFundador;
+window.quitarFundador = quitarFundador;
 window.aprobarFicha = aprobarFicha;
 window.rechazarFicha = rechazarFicha;
 window.editarFicha = editarFicha;
