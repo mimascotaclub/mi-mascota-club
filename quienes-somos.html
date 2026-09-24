@@ -99,7 +99,13 @@
 .qs-barra span{ display:block; height:100%; background:var(--teal); border-radius:999px; transition:width .5s ease; }
 .qs-pase .btn{ width:100%; justify-content:center; }
 .qs-pase__letra{ font-size:13.5px; color:var(--gray); font-weight:600; line-height:1.5; margin:14px 0 0; }
-.qs-despues{ margin-top:22px; padding:18px; border-radius:16px; background:var(--paper-tint-teal); border:2px dashed var(--teal-dark); }
+/* scroll-margin-top: la barra de arriba es sticky, así que sin esto el bloque
+   queda tapado cuando Mercado Pago devuelve a /quienes-somos#ya-pague. */
+.qs-despues{ margin-top:22px; padding:18px; border-radius:16px; background:var(--paper-tint-teal); border:2px dashed var(--teal-dark); scroll-margin-top:80px; }
+.qs-despues__alt{ font-size:13.5px !important; color:var(--gray) !important; margin:12px 0 0 !important; text-align:center; }
+.qs-despues__alt a{ font-weight:800; }
+#ya-pague:target{ animation:qsResalta 1.6s ease; }
+@keyframes qsResalta{ 0%,100%{ box-shadow:none; } 25%,60%{ box-shadow:0 0 0 6px rgba(71,201,201,0.35); } }
 .qs-despues h3{ font-size:17px; margin:0 0 8px; }
 .qs-despues p{ font-size:14.5px; line-height:1.5; margin:0 0 14px; color:#3a3a3a; }
 .qs-despues .btn{ width:100%; justify-content:center; }
@@ -300,7 +306,11 @@
       <!-- Paso 2, y es obligatorio: el link de pago de Mercado Pago no sabe
            qué socio pagó. Sin este aviso no hay forma de saber a quién
            activarle el número de fundador. -->
-      <div class="qs-despues" id="ya-pague">
+      <!-- Empieza oculto. Se muestra solo cuando la persona vuelve del pago
+           (la URL trae #ya-pague), cuando aprieta el botón de pagar, o cuando
+           toca el enlace de abajo. Si se mostrara siempre, cualquiera puede
+           mandar el WhatsApp sin haber pagado. -->
+      <div class="qs-despues" id="ya-pague" hidden>
         <h3>Después de pagar, un paso más</h3>
         <p>
           El pago llega a Mercado Pago, pero ahí no aparece el código de tu mascota.
@@ -320,6 +330,8 @@
       <p class="qs-pase__letra">
         Para ser fundador primero tienes que estar inscrito, y la inscripción es gratis.
         Si todavía no lo estás, <a href="/registro" style="font-weight:800;">inscríbete acá</a> y vuelve a esta página.
+        <br>
+        <a href="#ya-pague" id="qsYaPagueLink" style="font-weight:800;">¿Ya pagaste y no sabes cómo avisarnos?</a>
       </p>
     </div>
   </div>
@@ -467,12 +479,43 @@ function pintarPase(tomados){
     boton.href   = LINK_MERCADOPAGO;
     boton.target = '_blank';
     boton.rel    = 'noopener';
+    /* El pago abre en otra pestaña. Cuando la persona vuelva a esta, el
+       recuadro del WhatsApp ya va a estar visible esperándola. */
+    boton.addEventListener('click', mostrarYaPague);
   } else {
     boton.addEventListener('click', function(e){
       e.preventDefault();
       alert('El pago se abre en unos días. Inscríbete gratis mientras tanto y te avisamos por correo apenas esté listo.');
     });
   }
+}
+
+/* Muestra el recuadro de "ya pagué". Se llama desde tres lados: al volver del
+   pago (#ya-pague en la URL), al apretar el botón de pagar, y desde el enlace
+   chico de abajo para quien perdió el hilo.
+   Esto NO es seguridad: el filtro de verdad es que Jaime confirma el pago en
+   Mercado Pago antes de marcar a nadie. Es para no invitar a mandar el mensaje
+   a quien todavía no ha pagado. */
+function mostrarYaPague(){
+  const bloque = document.getElementById('ya-pague');
+  if (bloque) bloque.hidden = false;
+}
+
+if (location.hash === '#ya-pague') mostrarYaPague();
+window.addEventListener('hashchange', function(){
+  if (location.hash === '#ya-pague') mostrarYaPague();
+});
+
+const enlaceYaPague = document.getElementById('qsYaPagueLink');
+if (enlaceYaPague){
+  enlaceYaPague.addEventListener('click', function(){
+    mostrarYaPague();
+    /* El navegador no baja a un bloque que estaba oculto hasta este instante,
+       así que lo llevamos nosotros. */
+    setTimeout(function(){
+      document.getElementById('ya-pague').scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 30);
+  });
 }
 
 pintarPase(0);
