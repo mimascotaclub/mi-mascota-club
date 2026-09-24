@@ -27,6 +27,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
 
+<!-- Cliente de Supabase: solo para leer cuántos fundadores van. Nada más. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <style>
 /* ======================================================================
    QUIÉNES SOMOS — estilos propios de esta página
@@ -96,6 +99,10 @@
 .qs-barra span{ display:block; height:100%; background:var(--teal); border-radius:999px; transition:width .5s ease; }
 .qs-pase .btn{ width:100%; justify-content:center; }
 .qs-pase__letra{ font-size:13.5px; color:var(--gray); font-weight:600; line-height:1.5; margin:14px 0 0; }
+.qs-despues{ margin-top:22px; padding:18px; border-radius:16px; background:var(--paper-tint-teal); border:2px dashed var(--teal-dark); }
+.qs-despues h3{ font-size:17px; margin:0 0 8px; }
+.qs-despues p{ font-size:14.5px; line-height:1.5; margin:0 0 14px; color:#3a3a3a; }
+.qs-despues .btn{ width:100%; justify-content:center; }
 
 /* --- Preguntas --- */
 .qs-faq details{ border-bottom:1px solid var(--line); padding:4px 0; }
@@ -416,27 +423,31 @@
 
 <script>
 /* ======================================================================
-   DOS COSAS QUE JAIME EDITA A MANO — y nada más en este archivo
+   LO ÚNICO QUE SE EDITA A MANO EN ESTE ARCHIVO
    ----------------------------------------------------------------------
-   1) FUNDADORES_TOMADOS: cuántos pases se han vendido. Cada vez que
-      entre uno nuevo, cambias el número, guardas y haces push.
-      Tiene que ser el número REAL: si dice 40 y no es verdad, el día que
-      alguien se dé cuenta pierdes lo único que no se recupera.
-   2) LINK_MERCADOPAGO: el link de pago que creas en Mercado Pago.
-      Mientras diga "", el botón avisa que el pago abre pronto en vez de
-      llevar a una página rota.
+   LINK_MERCADOPAGO: el link de pago creado en Mercado Pago.
+   Si se deja en "", el botón avisa que el pago abre pronto en vez de
+   llevar a una página rota.
+
+   El contador YA NO se edita a mano: lo lee de la base con la función
+   contar_fundadores() del parche v28. Cada vez que marques a un fundador
+   con admin_marcar_fundador(), el número de la landing cambia solo.
    ====================================================================== */
-const FUNDADORES_TOMADOS = 0;
-const LINK_MERCADOPAGO   = "https://mpago.la/1gq8qDj";
+const LINK_MERCADOPAGO = "https://mpago.la/1gq8qDj";
 
-const CUPOS_TOTALES = 100;
+const CUPOS_TOTALES  = 100;
+const SUPABASE_URL   = 'https://mzsqyjxqnomsbqzhygkx.supabase.co';
+const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16c3F5anhxbm9tc2Jxemh5Z2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTA0NDAsImV4cCI6MjEwMzY4NjQ0MH0.v5MASfYE83x1Lr_p1Q4MlHtyqpJlopBbjUqhB2suTEc';
 
-(function pintarPase(){
-  const tomados = Math.max(0, Math.min(FUNDADORES_TOMADOS, CUPOS_TOTALES));
-  const quedan  = CUPOS_TOTALES - tomados;
+/* Pinta el contador, la barra y el botón. Se llama dos veces: una al cargar
+   con 0 fundadores (para que nunca se vea vacío ni roto si la base tarda o
+   falla) y otra con el número real apenas llega. */
+function pintarPase(tomados){
+  const n      = Math.max(0, Math.min(Number(tomados) || 0, CUPOS_TOTALES));
+  const quedan = CUPOS_TOTALES - n;
 
   document.getElementById('qsQuedan').textContent = quedan;
-  document.getElementById('qsBarra').style.width  = (tomados / CUPOS_TOTALES * 100) + '%';
+  document.getElementById('qsBarra').style.width  = (n / CUPOS_TOTALES * 100) + '%';
 
   const boton = document.getElementById('qsPagar');
 
@@ -449,14 +460,30 @@ const CUPOS_TOTALES = 100;
   }
 
   if (LINK_MERCADOPAGO){
-    boton.href = LINK_MERCADOPAGO;
+    boton.href   = LINK_MERCADOPAGO;
     boton.target = '_blank';
-    boton.rel = 'noopener';
+    boton.rel    = 'noopener';
   } else {
     boton.addEventListener('click', function(e){
       e.preventDefault();
       alert('El pago se abre en unos días. Inscríbete gratis mientras tanto y te avisamos por correo apenas esté listo.');
     });
+  }
+}
+
+pintarPase(0);
+
+/* Le pregunta a la base cuántos fundadores van. Si algo falla —sin internet,
+   Supabase caído— la página se queda con lo que ya pintó y no muestra ningún
+   error: es una landing, no puede romperse por un contador. */
+(async function traerFundadores(){
+  try {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const { data, error } = await sb.rpc('contar_fundadores');
+    if (error) throw error;
+    pintarPase(data);
+  } catch (e) {
+    console.warn('No se pudo leer el contador de fundadores:', e);
   }
 })();
 </script>
