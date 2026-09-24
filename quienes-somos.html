@@ -123,7 +123,10 @@
 .qs-cierre h2{ font-size:clamp(28px, 8vw, 40px); margin:0 0 22px; }
 
 /* La barra de arriba y el pie son los del sitio (styles.css). Acá no se
-   redefine nada de eso a propósito: si cambian allá, cambian también acá. */
+   redefine nada de eso a propósito: si cambian allá, cambian también acá.
+   Lo único: en la home los ítems del desplegable son <button> y acá son <a>,
+   así que hay que sacarles el subrayado. */
+.dd-item{ text-decoration:none; }
 
 @media (min-width:760px){
   .qs-pasos{ grid-template-columns:repeat(3, 1fr); }
@@ -145,6 +148,40 @@
   <div class="navbar">
     <a href="/" class="logo"><img src="/assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
     <div class="navlinks">
+      <!-- El mismo desplegable de la home. Allá lo llena js/app.js desde
+           CATS_MASCOTA y CATS_DUENO; acá va escrito a mano porque esta página
+           no carga app.js. Si se agrega o saca una categoría allá, hay que
+           tocarlo también acá. -->
+      <div class="nav-dropdown" id="qsDropdown">
+        <button class="nav-dropdown-btn" onclick="alternarDropdownQS()">Categorías <span class="caret">▾</span></button>
+        <div class="nav-dropdown-panel wide">
+          <div class="dd-col">
+            <div class="dd-col-title">🐾 Para mi mascota</div>
+            <a class="dd-item" href="/directorio/veterinaria">🩺 Veterinaria</a>
+            <a class="dd-item" href="/directorio/peluqueria">✂️ Peluquería</a>
+            <a class="dd-item" href="/directorio/paseador">🦮 Paseador</a>
+            <a class="dd-item" href="/directorio/hotel-pension">🏠 Hotel / Pensión</a>
+            <a class="dd-item" href="/directorio/tienda">🛍️ Tienda</a>
+            <a class="dd-item" href="/directorio/alimentos">🍖 Alimentos</a>
+            <a class="dd-item" href="/directorio/salud">💊 Salud</a>
+            <a class="dd-item" href="/directorio/accesorios">🎾 Accesorios</a>
+            <a class="dd-item" href="/directorio/adiestramiento">🏋️ Adiestramiento</a>
+            <a class="dd-item" href="/directorio/fotografia">📷 Fotografía</a>
+            <a class="dd-item" href="/directorio/servicios">🐾 Servicios</a>
+          </div>
+          <div class="dd-col">
+            <div class="dd-col-title">🙂 Para mí</div>
+            <a class="dd-item" href="/directorio/cafe">☕ Café</a>
+            <a class="dd-item" href="/directorio/restaurante">🍽️ Restaurante</a>
+            <a class="dd-item" href="/directorio/hotel">🏨 Hotel</a>
+            <a class="dd-item" href="/directorio/deporte">🏓 Deporte</a>
+            <a class="dd-item" href="/directorio/barberia">💈 Barbería</a>
+            <a class="dd-item" href="/directorio/belleza">💅 Belleza</a>
+            <a class="dd-item" href="/directorio/tienda">🛍️ Tienda</a>
+            <a class="dd-item" href="/directorio/otro">🎁 Otro</a>
+          </div>
+        </div>
+      </div>
       <a href="/beneficios">Beneficios</a>
       <a href="/mi-mascota">Mi Mascota ID</a>
       <a href="/quienes-somos">Quiénes somos</a>
@@ -468,6 +505,18 @@
 </footer>
 
 <script>
+/* El desplegable de Categorías: abre y cierra, y se cierra al tocar fuera.
+   Misma lógica que en la home, en versión corta. */
+function alternarDropdownQS(){
+  const dd = document.getElementById('qsDropdown');
+  if(dd) dd.classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.nav-dropdown')){
+    document.querySelectorAll('.nav-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+  }
+});
+
 /* El menú de teléfono. En la home lo maneja js/app.js, que esta página no
    carga, así que acá va su versión mínima: abrir y cerrar, nada más. */
 function alternarMenuMovilQS(){
