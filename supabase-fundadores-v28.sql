@@ -59,12 +59,16 @@ $$;
 -- Pide el token de sesión, igual que socio_perfil o socio_historial. Así nadie
 -- puede preguntar por el correo de otra persona.
 -- Devuelve el número, o NULL si no es fundador.
+--
+-- OJO CON EL "volatile": la primera versión decía `stable` y la API respondía
+-- 405 a la llamada que hace el sitio, así que la insignia nunca aparecía.
+-- socio_perfil y socio_historial son volatile y funcionan. No lo cambies.
 create or replace function public.socio_fundador(p_token uuid)
 returns integer
 language plpgsql
 security definer
 set search_path = public
-stable
+volatile
 as $$
 declare
   v_email text;
