@@ -991,8 +991,18 @@
         <!-- Columna izquierda: carnet -->
         <div class="soc-col-carnet">
           <div id="socCarnet"></div>
-          <button type="button" id="socShareBtn" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">📤 Compartir en Instagram</button>
-          <p class="soc-nota">La imagen para compartir no incluye tu código ni tu QR — es segura de publicar.</p>
+
+          <!-- ===== Compartir en Instagram: OCULTO DURANTE LA PRUEBA CERRADA =====
+               Decidido el 26 de septiembre de 2026. El club está en una prueba con
+               15 personas invitadas a mano, y este botón es justamente el que hace
+               que la cosa se vuelva pública: alguien comparte su carnet, lo ve un
+               conocido y entra gente que no estaba invitada.
+               Se vuelve a mostrar quitando el style="display:none;" de acá abajo,
+               cuando la prueba termine y se abra al público.
+               El código que genera la imagen sigue vivo y ya muestra la insignia
+               de Socio Fundador, así que al reactivarlo funciona al tiro. -->
+          <button type="button" id="socShareBtn" class="btn btn-primary" style="display:none;width:100%;justify-content:center;margin-top:16px;">📤 Compartir en Instagram</button>
+          <p class="soc-nota" style="display:none;">La imagen para compartir no incluye tu código ni tu QR — es segura de publicar.</p>
         </div>
 
         <!-- Columna derecha: datos editables -->

@@ -1317,8 +1317,25 @@ async function generateShareCardBlob(record){
   ctx.font = '700 38px Lato, sans-serif'; ctx.fillStyle = '#6B7280';
   const sub = record.breed ? `${record.species} · ${record.breed}` : (record.species || '');
   ctx.fillText(sub, W/2, photoY+photoSize+170);
-  ctx.font = '900 36px Lato, sans-serif'; ctx.fillStyle = '#2FA8A8';
-  ctx.fillText('🐾  ' + planLabel(record.plan).toUpperCase(), W/2, photoY+photoSize+250);
+  /* La franja bajo el nombre. Si el dueño es Socio Fundador, acá va su número
+     dentro de una píldora amarilla, porque es lo que pagó y es justo lo que va
+     a querer mostrar. Si no lo es, se mantiene la etiqueta del plan como
+     siempre. socFundador lo deja cargado el panel del socio; cuando la imagen
+     se genera recién terminado el registro todavía es null, y ahí cae solo en
+     la etiqueta del plan. */
+  const lineaY = photoY + photoSize + 250;
+  ctx.font = '900 36px Lato, sans-serif';
+  if(socFundador){
+    const txtF = '★ SOCIO FUNDADOR #' + String(socFundador).padStart(3, '0');
+    const anchoF = ctx.measureText(txtF).width + 64;
+    ctx.fillStyle = '#FFCE00';
+    roundRect(ctx, W/2 - anchoF/2, lineaY - 46, anchoF, 66, 33); ctx.fill();
+    ctx.fillStyle = '#151515';
+    ctx.fillText(txtF, W/2, lineaY);
+  }else{
+    ctx.fillStyle = '#2FA8A8';
+    ctx.fillText('🐾  ' + planLabel(record.plan).toUpperCase(), W/2, lineaY);
+  }
   ctx.font = '600 32px Lato, sans-serif'; ctx.fillStyle = '#1A1A1A';
   ctx.fillText(record.comuna || '', W/2, photoY+photoSize+305);
   drawPawIcon(ctx, W/2-150, H-150, 56, '#FFCE00');

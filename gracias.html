@@ -241,8 +241,15 @@
     const { data, error } = await sb.rpc('contar_fundadores');
     if(error) throw error;
     const tomados = Math.max(0, Math.min(Number(data) || 0, 100));
-    document.getElementById('grCupos').textContent =
-      'Eres uno de los ' + Math.max(1, tomados) + ' primeros · quedan ' + (100 - tomados) + ' cupos';
+    const quedan  = 100 - tomados;
+    /* Ojo con la redacción: la primera versión decía "eres uno de los N
+       primeros", y con un solo fundador quedaba "uno de los 1 primeros".
+       Esta forma se lee bien con cualquier número, incluido el cero. */
+    document.getElementById('grCupos').textContent = quedan === 0
+      ? 'Los 100 cupos de fundador están completos'
+      : (quedan === 1
+          ? 'Uno de los 100 fundadores · queda 1 cupo'
+          : 'Uno de los 100 fundadores · quedan ' + quedan + ' cupos');
   }catch(e){
     console.warn('No se pudo leer el contador de fundadores:', e);
   }

@@ -185,6 +185,24 @@ recomendado"*.
 - [x] Insignia "★ Socio Fundador #001" en el carnet de `/mi-mascota`.
 - [x] Aviso por WhatsApp después de pagar, oculto hasta que corresponde.
 
+**Construido el 26 de septiembre**
+
+- [x] Página `/gracias` para el retorno del pago, con el botón de WhatsApp como única
+      acción. La URL de retorno del link de Mercado Pago apunta ahí.
+- [x] La imagen para compartir del carnet muestra **★ SOCIO FUNDADOR #00X** en una
+      píldora amarilla cuando el dueño es fundador; si no lo es, mantiene la etiqueta
+      del plan.
+- [x] Fuera la palabra "voto": ahora dice que las recomendaciones del socio se visitan
+      primero, que es lo que de verdad ocurre.
+- [x] La barra amarilla de avisos aparece en todas las páginas públicas.
+- [x] La descripción que WhatsApp muestra al compartir el enlace dice el concepto actual.
+- [x] Borrado el negocio de demostración: el directorio queda en cero antes de invitar
+      gente real.
+
+**Plan acordado (26 de septiembre):** probar con **15 personas conocidas** primero,
+recoger el feedback, y recién después reiniciar los contadores y abrir al público. La
+prueba chica es para sacar los detalles que no se ven desde adentro.
+
 **Construido el 25 de septiembre**
 
 - [x] El grupo del club y el pase de fundador dentro de `/mi-mascota`, visibles solo con

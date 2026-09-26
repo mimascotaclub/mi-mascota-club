@@ -94,10 +94,26 @@ más va a cambiar durante el lanzamiento y así nada de lo que se toque ahí pue
 Base limpia de datos de prueba desde el 13 de septiembre. **3 socios reales** al 17 de
 septiembre.
 
+- **`/gracias`** (26 de septiembre): la página a la que Mercado Pago devuelve después de
+  pagar el pase. Antes el retorno era `/quienes-somos#ya-pague` y era un mal final —
+  pagabas y aterrizabas arriba de la misma página que te había vendido. Ahora es una
+  pantalla propia: el check, el contador de cupos y **un botón de WhatsApp gigante** como
+  única acción, más los tres pasos de qué pasa ahora.
+
 **Segunda limpieza (25 de septiembre):** se borraron las 6 mascotas de prueba
-(MMC00004 a MMC00009) y los 7 canjes contra negocios de demostración. Quedan los tres
-socios reales: Max, Emma y Lana. Los códigos MMC00004 en adelante vuelven a estar libres.
-Se conservó a propósito el **fundador #001** (Jaime) para seguir probando.
+(MMC00004 a MMC00009) y los 7 canjes contra negocios de demostración. Los códigos
+MMC00004 en adelante vuelven a estar libres.
+
+**Estado de la base al 26 de septiembre:** 5 mascotas, 2 fundadores, **0 negocios**
+(se borró el de demostración antes de invitar gente real) y 0 canjes.
+
+### ⚠️ La trampa del retorno de Mercado Pago
+
+Mercado Pago pega sus parámetros **después del `#`**, así que la URL de retorno vuelve
+como `…/gracias#ancla?collection_id=…&status=approved`. Cualquier comparación exacta con
+`location.hash` falla. Costó un QA descubrirlo. **Por eso el retorno es una ruta propia
+y no un ancla**, y en `quienes-somos.html` quedó una red de seguridad que manda a
+`/gracias` si detecta el ancla vieja.
 
 ---
 
