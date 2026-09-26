@@ -165,9 +165,16 @@ recomendado"*.
 - [x] URL de retorno del pago: `https://mimascotaclub.cl/quienes-somos#ya-pague`.
 - [ ] **Pegar esa URL de retorno en la configuración del link en Mercado Pago.**
 - [ ] Cambiar el nombre del negocio en Mercado Pago (hoy "Jaime Florian Design").
-- [ ] WhatsApp Business: perfil de empresa con el número +56 9 9713 2591.
-- [ ] Comunidad de WhatsApp + grupo "Dudas y recomendaciones" con aprobación de miembros.
-- [ ] Textos de WhatsApp: descripción, bienvenida automática y respuestas rápidas.
+- [x] WhatsApp Business: perfil de empresa listo (nombre, logo, categoría, sitio,
+      descripción, usuario `@mimascotaclub`) en el **+56 9 9713 2591**.
+- [x] Grupo de WhatsApp creado, con **aprobación de miembros activada** y los permisos
+      cerrados (los miembros no pueden editar el grupo ni agregar gente por su cuenta;
+      sí pueden compartir el enlace, porque igual pasan por la aprobación).
+      **Enlace del grupo:** `https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb`
+      *(Nota: WhatsApp Business no permite crear Comunidades — lo dice su propio artículo
+      de ayuda. Por eso es un grupo normal. Un grupo se puede meter en una comunidad más
+      adelante, así que no se pierde nada.)*
+- [ ] Textos de WhatsApp: bienvenida automática, mensaje de ausencia y respuestas rápidas.
 - [ ] Fotos para la landing: una de Jaime con Max, otra del carnet.
 
 **Construido el 23 de septiembre**
@@ -178,11 +185,24 @@ recomendado"*.
 - [x] Insignia "★ Socio Fundador #001" en el carnet de `/mi-mascota`.
 - [x] Aviso por WhatsApp después de pagar, oculto hasta que corresponde.
 
+**Construido el 25 de septiembre**
+
+- [x] El grupo del club y el pase de fundador dentro de `/mi-mascota`, visibles solo con
+      sesión iniciada.
+- [x] Los dos también en la pantalla final del registro y en el correo de bienvenida.
+- [x] El botón "Recomendar un negocio" de la landing apunta a `/sugerencias`.
+- [x] Fuera del club las categorías que no son de mascotas: barbería, salón de belleza,
+      uñas, gimnasio y tienda de ropa. Lo que era "Deporte" pasó a "Parques y piscinas",
+      que es lo que de verdad contenía: canchas y piscinas para perros.
+- [x] El titular de la home dejó de decir "para ti como dueño de mascota".
+- [x] El menú marca la página en la que estás.
+
 **Por construir, en orden de urgencia**
 
-- [ ] **"Recomienda un negocio"** (adaptar el buzón de sugerencias v21) + contador de
-      votos. La landing ya promete que cada semana se visita al más recomendado, así que
-      esto es lo primero: hoy la promesa no tiene dónde ocurrir.
+- [ ] **Sistema de votos de "Recomienda un negocio"** — por ahora el botón lleva al buzón
+      de sugerencias, que cumple la promesa de la landing con lo que ya existe. El
+      contador de votos y las etiquetas "Recomendado por X socios" quedan para cuando
+      vuelvan los créditos de despliegue.
 - [ ] Etiquetas "Recomendado por X socios" y "Nuevo en el club" en las fichas.
 - [ ] Botón "Compartir en historias" en `/mi-mascota` con la imagen vertical del carnet,
       incluyendo la insignia de fundador.
@@ -193,7 +213,19 @@ recomendado"*.
 - [ ] Columnas de latitud y longitud en `negocios`, para que el mapa tenga datos cuando
       valga la pena mostrarlo (unos 15-20 negocios). Leaflet ya está cargado.
 
-**Antes de publicar el pase (bloqueante)**
+**Antes de publicar el pase**
 
-- [ ] Resolver la boleta con el contador. Mercado Pago no emite boletas del SII.
 - [ ] Borrar el fundador de prueba #001 para que el primero real sea el #001.
+
+**Formalización — anotado, no urgente (decidido el 25 de septiembre)**
+
+Jaime decidió **partir sin formalizar** y validar primero: si el pase de fundador se llena,
+con esa plata paga la formalización. Es el orden correcto para un MVP y la decisión está
+tomada, así que no se vuelve a plantear como bloqueante.
+
+- [ ] Cuando haya volumen: inicio de actividades y emisión de boletas por las membresías.
+      **Ojo: no hace falta crear una empresa.** El inicio de actividades como persona
+      natural se hace online en sii.cl y es gratis; lo que sí conviene preguntarle a un
+      contador es qué giro corresponde y qué implica en impuestos.
+- [ ] Recordar que Mercado Pago **no** emite boletas del SII: entrega un comprobante de
+      pago, que no es un documento tributario.

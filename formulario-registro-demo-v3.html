@@ -418,6 +418,30 @@
   }
   .verif-cta:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(255,206,0,0.25); }
 
+  /* ---------- Grupo del club y pase de fundador (pantalla final) ---------- */
+  .final-extra{
+    width:100%; text-align:left; margin:0 auto 14px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18);
+    border-radius:16px; padding:16px 18px;
+  }
+  .final-extra--fundador{
+    background:rgba(255,206,0,0.10); border-color:rgba(255,206,0,0.40);
+  }
+  .final-extra__t{
+    font-weight:900; font-size:15px; color:#fff; margin-bottom:6px;
+  }
+  .final-extra p{
+    margin:0 0 14px; font-size:13.5px; line-height:1.55; color:rgba(255,255,255,0.72);
+  }
+  .final-extra__btn{
+    display:block; text-align:center; text-decoration:none;
+    background:var(--turquesa); color:var(--negro);
+    font-weight:900; font-size:15px; padding:13px 18px; border-radius:12px;
+    transition:transform .2s;
+  }
+  .final-extra__btn--amarillo{ background:var(--amarillo); }
+  .final-extra__btn:hover{ transform:translateY(-2px); }
+
   .verif-acciones{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
   .verif-mini{
     background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.22);
@@ -1145,10 +1169,21 @@ function renderPaso(index, direccion){
             caja_nota: 'Guarda ese enlace en tu teléfono. Entras con tu correo y un código de 6 dígitos.',
 
             /* El correo dice lo mismo que la pantalla final: si falta verificar,
-               este es el segundo recordatorio y llega cuando ya cerró el sitio. */
-            mensaje_extra: enRevision
-              ? 'Estamos revisando la cartilla de ' + respuestas.mascota + ': dentro de 48 horas hábiles queda verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté listo.'
-              : 'Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tu mascota, con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet, en Mi Mascota ID.'
+               este es el segundo recordatorio y llega cuando ya cerró el sitio.
+               Después van el grupo y el pase de fundador, como texto dentro de
+               mensaje_extra y NO como variables nuevas: así funcionan hoy con la
+               plantilla tal como está, sin tener que editarla en EmailJS. Los
+               enlaces se escriben completos porque los clientes de correo los
+               vuelven clicables solos. */
+            mensaje_extra: (enRevision
+                ? 'Estamos revisando la cartilla de ' + respuestas.mascota + ': dentro de 48 horas hábiles queda verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté listo.'
+                : 'Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tu mascota, con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet, en Mi Mascota ID.')
+              + '\n\n'
+              + 'El grupo del club, solo para socios: acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos. '
+              + 'https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb'
+              + '\n\n'
+              + '¿Quieres ser uno de los 100 Socios Fundadores? $9.990 por una vez: tu número del #001 al #100 en el carnet, voto para elegir qué negocios entran al club y precio congelado de por vida. '
+              + 'https://mimascotaclub.cl/quienes-somos#fundador'
           });
         } catch(emailErr){
           console.warn('El registro se guardó, pero el correo de bienvenida falló:', emailErr);
@@ -1237,6 +1272,29 @@ function mostrarFinal(){
     ? `<div class="verif-aviso">${respuestas.aviso_registro}</div>`
     : '';
 
+  /* Dos bloques que van DESPUÉS del carnet y de la verificación, nunca antes:
+     la inscripción ya terminó y nada de esto puede entorpecerla. Son enlaces
+     simples, sin lógica ni llamadas: aunque fallaran, el registro ya está
+     guardado y el carnet ya existe.
+       · El grupo de WhatsApp es solo para socios, y por eso su enlace aparece
+         recién acá y en el correo — nunca en el sitio público.
+       · El pase de fundador se ofrece en el mejor momento posible: cuando la
+         persona acaba de decir que sí. Lleva a /quienes-somos y no directo al
+         pago, para que primero lea qué incluye. */
+  const bloqueGrupo = `
+      <div class="final-extra">
+        <div class="final-extra__t">💬 El grupo del club</div>
+        <p>Solo para socios. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos.</p>
+        <a href="https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb" target="_blank" rel="noopener" class="final-extra__btn">Unirme al grupo</a>
+      </div>`;
+
+  const bloqueFundador = `
+      <div class="final-extra final-extra--fundador">
+        <div class="final-extra__t">★ Sé uno de los 100 fundadores</div>
+        <p>$9.990 por una vez. Tu número del #001 al #100 en el carnet de ${mascotaNom}, voto para elegir qué negocios entran al club y precio congelado de por vida.</p>
+        <a href="/quienes-somos#fundador" class="final-extra__btn final-extra__btn--amarillo">Quiero mi número</a>
+      </div>`;
+
   const div = document.createElement('div');
   div.className = 'paso';
   div.innerHTML = `
@@ -1268,6 +1326,9 @@ function mostrarFinal(){
         la cámara de su celular y confirman tu visita. Ahí mismo te aplican el beneficio y a los dos
         les queda el registro.
       </p>
+
+      ${bloqueGrupo}
+      ${bloqueFundador}
 
       <a href="/mi-mascota" class="btn-ir-inicio">Ver mi carnet cuando quiera</a>
       <div><a href="https://mimascotaclub.cl" class="btn-secundario">Explorar los beneficios</a></div>

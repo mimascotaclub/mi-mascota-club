@@ -115,10 +115,15 @@ const negociosSeed = [];
 const iconByCat = {
   "Veterinaria":"🩺","Peluquería":"✂️","Paseador":"🦮","Hotel / Pensión":"🏠","Tienda":"🛍️","Alimentos":"🍖",
   "Salud":"💊","Accesorios":"🎾","Adiestramiento":"🏋️","Fotografía":"📷",
-  "Barbería":"💈","Café":"☕","Restaurante":"🍽️","Belleza":"💅","Deporte":"🏓","Hotel":"🏨","Otro":"🎁"
+  "Café":"☕","Restaurante":"🍽️","Parques y piscinas":"🏞️","Hotel":"🏨","Otro":"🎁"
 };
 const CATS_MASCOTA = ["Veterinaria","Peluquería","Paseador","Hotel / Pensión","Tienda","Alimentos","Salud","Accesorios","Adiestramiento","Fotografía","Servicios"];
-const CATS_DUENO = ["Café","Restaurante","Hotel","Deporte","Barbería","Belleza","Tienda","Otro"];
+/* Estas son las categorías de lugares a los que vas CON tu mascota. El 25 de
+   septiembre de 2026 salieron "Barbería", "Belleza" y "Deporte": eran del
+   concepto anterior (beneficios para el dueño fuera del rubro mascotas). Lo que
+   era "Deporte" pasó a "Parques y piscinas", que es lo que de verdad había ahí:
+   canchas y piscinas para perros. Ver MARCA.md. */
+const CATS_DUENO = ["Café","Restaurante","Hotel","Parques y piscinas","Tienda","Otro"];
 /* Todas las categorías del directorio (las mismas 18 de "Explora por categoría"),
    en orden alfabético — se usan para llenar el filtro de categoría del directorio
    completo, no solo las que ya tienen algún negocio cargado. */
@@ -1437,6 +1442,44 @@ document.addEventListener('click', (e) => {
   }
 });
 
+/* ---------------- Marcar en el menú la página en la que estás ----------------
+   Antes todos los enlaces del menú se veían iguales y no había forma de saber
+   dónde estabas parado. Esto le pone la clase "activo" al que corresponde.
+
+   Cómo sabe cuál: compara la dirección de cada enlace con la URL actual. Como
+   el sitio es una sola página que cambia la URL con history.pushState, no basta
+   con hacerlo al cargar: hay que volver a marcarlo en cada navegación. Por eso
+   se envuelve pushState en vez de ir a tocar las veinte funciones irA...(),
+   que sería mucho más invasivo y con más riesgo de romper algo. */
+function marcarNavActivo(){
+  const aqui = location.pathname.replace(/\/+$/, '') || '/';
+  document.querySelectorAll('nav a[href^="/"], .menu-movil a[href^="/"]').forEach(a => {
+    const destino = (a.getAttribute('href') || '').replace(/\/+$/, '') || '/';
+    /* La home solo se marca en la home exacta; el resto marca también sus
+       subpáginas, para que /negocio/lo-que-sea deje "Beneficios" encendido. */
+    const activo = destino === '/'
+      ? aqui === '/'
+      : (aqui === destino || aqui.indexOf(destino + '/') === 0);
+    a.classList.toggle('activo', activo);
+  });
+}
+
+(function engancharNavActivo(){
+  const pushOriginal = history.pushState;
+  history.pushState = function(){
+    const r = pushOriginal.apply(this, arguments);
+    try{ marcarNavActivo(); }catch(e){}
+    return r;
+  };
+  window.addEventListener('popstate', marcarNavActivo);
+  /* app.js se carga al final del body, así que el DOM ya puede estar listo. */
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', marcarNavActivo);
+  }else{
+    marcarNavActivo();
+  }
+})();
+
 function renderDropdowns(){
   const ddMascota = document.getElementById('ddMascotaList');
   const ddDueno = document.getElementById('ddDuenoList');
@@ -1517,7 +1560,13 @@ function renderFanCarousel(){
 
    Para cambiar las frases o los tiempos, todo está aquí abajo.
    ============================================================ */
-const HERO_FRASES = ['para tu mascota', 'para ti como dueño de mascota'];
+/* La segunda frase decía "para ti como dueño de mascota", del concepto viejo.
+   Se cambió el 25 de septiembre de 2026: el club es full mascotas, así que el
+   titular habla de la mascota y del ahorro, no de beneficios para el dueño
+   fuera del rubro. Si cambias estas frases, actualiza también el span
+   "hero-rota__fantasma" de index.html, que lleva la MÁS LARGA y es el que
+   reserva el espacio para que el buscador no salte. */
+const HERO_FRASES = ['para tu mascota', 'y ahorra donde ya gastas'];
 const HERO_TIEMPOS = {
   escribir: 65,    // ms por letra al escribir
   borrar:   32,    // ms por letra al borrar (más rápido, se siente natural)
@@ -3898,12 +3947,54 @@ async function cargarPanelSocio(){
       ].filter(Boolean).join(' · ');
 
     renderTabsSocio();
+    renderExtrasSocio();
     socioSeleccionar((socActual && socMascotas.some(m => m.codigo === socActual.codigo)) ? socActual.codigo : primero.codigo);
     cargarHistorialSocio();
   }catch(e){
     console.error(e);
     toast('No pudimos cargar tu perfil. Inténtalo de nuevo en un momento.');
   }
+}
+
+/* ---------------- El grupo del club y el pase de fundador ----------------
+   Dos cosas que solo ve un socio con su sesión iniciada. El enlace del grupo
+   NO va en el sitio público: esa es justamente la forma de que al grupo solo
+   llegue gente inscrita, sin tener que revisar a mano quién es quién.
+   Si el socio ya es fundador, en vez de ofrecerle el pase se le muestra su
+   número, que es lo que pagó. */
+const GRUPO_WHATSAPP = 'https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb';
+
+function renderExtrasSocio(){
+  const cont = document.getElementById('socExtras');
+  if(!cont) return;
+
+  const bloqueFundador = socFundador
+    ? `<div class="soc-extra soc-extra--fundador">
+         <div class="soc-extra__ic">★</div>
+         <div class="soc-extra__txt">
+           <b>Eres Socio Fundador #${String(socFundador).padStart(3, '0')}</b>
+           <span>Tu número es tuyo para siempre y aparece en el carnet de tus mascotas.</span>
+         </div>
+       </div>`
+    : `<div class="soc-extra">
+         <div class="soc-extra__ic">★</div>
+         <div class="soc-extra__txt">
+           <b>Hazte Socio Fundador</b>
+           <span>Son 100 cupos. Tu número en el carnet, voto para elegir los negocios del club y precio congelado de por vida.</span>
+         </div>
+         <a class="btn btn-sm btn-primary" href="/quienes-somos#fundador">Quiero mi número</a>
+       </div>`;
+
+  cont.innerHTML = `
+    <div class="soc-extra">
+      <div class="soc-extra__ic">💬</div>
+      <div class="soc-extra__txt">
+        <b>El grupo del club</b>
+        <span>Solo para socios. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos.</span>
+      </div>
+      <a class="btn btn-sm btn-brass" href="${GRUPO_WHATSAPP}" target="_blank" rel="noopener">Unirme al grupo</a>
+    </div>
+    ${bloqueFundador}`;
 }
 
 function renderTabsSocio(){

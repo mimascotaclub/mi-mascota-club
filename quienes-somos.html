@@ -174,9 +174,7 @@
             <a class="dd-item" href="/directorio/cafe">☕ Café</a>
             <a class="dd-item" href="/directorio/restaurante">🍽️ Restaurante</a>
             <a class="dd-item" href="/directorio/hotel">🏨 Hotel</a>
-            <a class="dd-item" href="/directorio/deporte">🏓 Deporte</a>
-            <a class="dd-item" href="/directorio/barberia">💈 Barbería</a>
-            <a class="dd-item" href="/directorio/belleza">💅 Belleza</a>
+            <a class="dd-item" href="/directorio/parques-y-piscinas">🏞️ Parques y piscinas</a>
             <a class="dd-item" href="/directorio/tienda">🛍️ Tienda</a>
             <a class="dd-item" href="/directorio/otro">🎁 Otro</a>
           </div>
@@ -184,7 +182,10 @@
       </div>
       <a href="/beneficios">Beneficios</a>
       <a href="/mi-mascota">Mi Mascota ID</a>
-      <a href="/quienes-somos">Quiénes somos</a>
+      <!-- Esta es la página actual, así que la clase "activo" va puesta a mano.
+           En la home la pone sola marcarNavActivo() de js/app.js, que acá no
+           se carga. -->
+      <a href="/quienes-somos" class="activo">Quiénes somos</a>
     </div>
     <a href="/registro" class="btn btn-nav-join btn-sm">Quiero unirme al club</a>
 
@@ -204,7 +205,7 @@
       </span>
     </a>
     <a href="/beneficios">Beneficios</a>
-    <a href="/quienes-somos">Quiénes somos</a>
+    <a href="/quienes-somos" class="activo">Quiénes somos</a>
     <a href="/sugerencias">Sugerencias</a>
     <a href="/registro" class="btn btn-primary menu-movil__cta">Quiero unirme al club</a>
   </div>
@@ -328,7 +329,10 @@
       lo conoce todavía, entra con la etiqueta <b>Nuevo en el club</b> y se gana su lugar
       con las visitas.
     </p>
-    <a href="/registro" class="btn btn-brass btn-grande">Quiero recomendar un negocio</a>
+    <!-- Va al buzón de sugerencias, que ya existe y funciona. El sistema de votos
+         con contador queda para cuando haya créditos de despliegue; mientras tanto
+         la promesa de la landing tiene dónde ocurrir de verdad. -->
+    <a href="/sugerencias" class="btn btn-brass btn-grande">Recomendar un negocio</a>
   </div>
 </section>
 

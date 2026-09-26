@@ -87,14 +87,16 @@ const TIPOS_NEGOCIO = [
     ]
   },
   {
-    grupo: 'Para el dueño (lifestyle)',
+    /* El grupo "Para el dueño (lifestyle)" se eliminó el 25 de septiembre de 2026.
+       Tenía barbería, salón de belleza, uñas, gimnasio y tienda de ropa: negocios
+       sin relación con mascotas, heredados del concepto anterior. Desde el 18 de
+       septiembre el club es FULL MASCOTAS y un negocio entra solo si es
+       pet-friendly o tiene una especialidad de mascotas (ver MARCA.md).
+       Un tatuador, por ejemplo, entra únicamente si hace retratos de mascotas, y
+       en ese caso se inscribe como "Otro" y lo revisamos a mano. */
+    grupo: 'Otro',
     items: [
-      { id: 'barberia',        nombre: 'Barbería',                        local: true },
-      { id: 'peluqueria',      nombre: 'Peluquería y salón de belleza',   local: true },
-      { id: 'unas_estetica',   nombre: 'Uñas y estética',                 local: true },
-      { id: 'gimnasio',        nombre: 'Gimnasio o centro deportivo',     local: true },
-      { id: 'tienda_ropa',     nombre: 'Tienda de ropa',                  local: true },
-      { id: 'otro',            nombre: 'Otro (lo revisamos contigo)',     local: true }
+      { id: 'otro', nombre: 'Otro (lo revisamos contigo)', local: true }
     ]
   }
 ];
@@ -152,14 +154,15 @@ const MAPA_DIRECTORIO = {
   bar_pet_friendly: { tipo: 'dueno', cat: 'Restaurante', especialista: false },
   heladeria_pet_friendly: { tipo: 'dueno', cat: 'Café', especialista: false },
   hotel_pet_friendly: { tipo: 'dueno', cat: 'Hotel', especialista: false },
-  cancha_perros: { tipo: 'dueno', cat: 'Deporte', especialista: false },
-  piscina_perros: { tipo: 'dueno', cat: 'Deporte', especialista: false },
+  /* Canchas y piscinas PARA PERROS sí son espacios pet-friendly, así que se
+     quedan. Lo que cambió es la categoría: antes caían en "Deporte", que era la
+     del gimnasio del dueño. Ahora van a "Parques y piscinas", que dice lo que
+     realmente son. */
+  cancha_perros: { tipo: 'dueno', cat: 'Parques y piscinas', especialista: false },
+  piscina_perros: { tipo: 'dueno', cat: 'Parques y piscinas', especialista: false },
   coworking_pet_friendly: { tipo: 'dueno', cat: 'Otro', especialista: false },
-  barberia: { tipo: 'dueno', cat: 'Barbería', especialista: false },
-  peluqueria: { tipo: 'dueno', cat: 'Belleza', especialista: false },
-  unas_estetica: { tipo: 'dueno', cat: 'Belleza', especialista: false },
-  gimnasio: { tipo: 'dueno', cat: 'Deporte', especialista: false },
-  tienda_ropa: { tipo: 'dueno', cat: 'Tienda', especialista: false },
+  /* barberia, peluqueria, unas_estetica, gimnasio y tienda_ropa salieron el 25 de
+     septiembre de 2026 junto con su grupo del catálogo: el club es full mascotas. */
   otro: { tipo: 'dueno', cat: 'Otro', especialista: false },
 };
 

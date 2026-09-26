@@ -80,8 +80,24 @@ más va a cambiar durante el lanzamiento y así nada de lo que se toque ahí pue
 - **Pase de Socio Fundador** (23 de septiembre): $9.990 pago único, 100 cupos, sin kit
   físico por ahora. Ver el bloque de abajo.
 
+- **El grupo del club y el pase de fundador dentro de `/mi-mascota`** (25 de septiembre):
+  dos tarjetas que solo ve un socio con sesión iniciada. El enlace del grupo **no existe
+  en el sitio público**: esa es la forma de que al grupo solo llegue gente inscrita, sin
+  revisar a mano quién es quién. Al que ya es fundador se le muestra su número en vez de
+  la oferta.
+- **El grupo y el pase también al final del registro y en el correo de bienvenida**
+  (25 de septiembre). En la pantalla final van *después* del carnet y de la verificación:
+  la inscripción ya terminó y nada de eso puede entorpecerla. En el correo viajan como
+  texto dentro de `mensaje_extra`, no como variables nuevas, para no tener que editar la
+  plantilla de EmailJS.
+
 Base limpia de datos de prueba desde el 13 de septiembre. **3 socios reales** al 17 de
 septiembre.
+
+**Segunda limpieza (25 de septiembre):** se borraron las 6 mascotas de prueba
+(MMC00004 a MMC00009) y los 7 canjes contra negocios de demostración. Quedan los tres
+socios reales: Max, Emma y Lana. Los códigos MMC00004 en adelante vuelven a estar libres.
+Se conservó a propósito el **fundador #001** (Jaime) para seguir probando.
 
 ---
 
@@ -225,17 +241,16 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 **El flujo del dueño está cerrado**, y desde el 23 de septiembre el del pase fundador
 también. Lo que queda abajo es otra cosa.
 
-### Antes de cobrarle a alguien (bloqueantes)
+### Antes de cobrarle a alguien
 
-0. **Consultar al contador**: si se puede emitir boleta por las membresías con el inicio de
-   actividades actual, o si hay que agregar un giro. Jaime es persona natural, sin empresa.
-   Mercado Pago **no** emite boletas del SII: entrega un comprobante de pago, que no es un
-   documento tributario. **No publicar el pase hasta resolverlo.**
-0b. **Cambiar el nombre del negocio en Mercado Pago**, hoy "Jaime Florian Design". Ojo: es
-   una cuenta por RUT, así que el nombre que quede lo verán también los clientes de
-   Valorgic. Después revisar el link en incógnito para confirmar cómo se ve.
-0c. **Borrar el fundador de prueba #001** desde `/mi-panel` para partir desde cero. Con la
+0. **Borrar el fundador de prueba #001** desde `/mi-panel` para partir desde cero. Con la
    tabla vacía el próximo vuelve a ser #001.
+
+**Formalización: decidido el 25 de septiembre que NO es bloqueante.** Jaime parte sin
+formalizar y valida primero; si el pase de fundador se llena, con esa plata paga la
+formalización. No volver a plantearlo como impedimento para lanzar. Queda anotado en
+`LANZAMIENTO.md` para cuando haya volumen — y ojo, no hace falta crear una empresa: el
+inicio de actividades como persona natural es online y gratis.
 
 ### Para poner el club en marcha (no es construir, es decidir)
 
@@ -254,16 +269,20 @@ también. Lo que queda abajo es otra cosa.
 5. **Contenido y tips para dueños.** La estrategia del 10 de septiembre era captar dueños
    gratis dándoles valor desde ya, mientras hay pocos negocios. Ese valor todavía no existe.
 
-### Menú y navegación (pendiente del 23 de septiembre)
+### Menú y navegación — RESUELTO el 25 de septiembre
 
-5a1. **Revisar el menú superior en TODAS las páginas del sitio.** `/quienes-somos` tenía
-   uno distinto hasta que se igualó; hay que confirmar una por una que la barra sea la
-   misma en la home, el directorio, las fichas, los formularios, las legales y los paneles.
-5a2. **Marcar en el menú la página en la que estás**, en negrita y con color. Hoy todos los
-   enlaces se ven iguales y no hay ninguna señal de dónde está parada la persona.
-   Ojo: el menú de la home lo pinta `js/app.js` y el de `/quienes-somos` está escrito a
-   mano en su HTML, así que el estado activo hay que resolverlo en los dos lados.
-   Lo mismo vale al agregar o sacar una categoría del desplegable.
+- ✅ **La página activa se marca sola** en negrita, en celeste y con una línea debajo. Lo
+  hace `marcarNavActivo()` en `js/app.js`, que compara la URL con el `href` de cada enlace.
+  Como el sitio navega con `history.pushState`, esa función se envuelve una sola vez en
+  vez de tocar las veinte funciones `irA...()`: menos invasivo y menos riesgo.
+- ✅ En `/quienes-somos`, que no carga `app.js`, la clase `activo` va escrita a mano.
+- ➖ Los formularios de registro y de negocio **no llevan barra a propósito**: son
+  pantallas de una sola tarea y un menú ahí solo invita a abandonarlas.
+- ⬜ Queda revisar a ojo el resto de las vistas (directorio, fichas, legales, paneles)
+  para confirmar que la barra se ve igual en todas.
+
+**Si agregas o sacas una categoría del desplegable, hay que tocarla en los dos lados:**
+`CATS_MASCOTA` / `CATS_DUENO` en `js/app.js` y el HTML de `quienes-somos.html`.
 
 ### Del lanzamiento, lo que falta construir
 

@@ -43,6 +43,15 @@ nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.92); back
 .navlinks{ display:flex; align-items:center; gap:24px; font-size:14px; font-weight:700; height:40px; }
 .navlinks a{ text-decoration:none; opacity:0.75; transition:opacity .15s; line-height:1; display:flex; align-items:center; height:100%; }
 
+/* La página en la que estás: en negrita, en el celeste de la marca y con una
+   línea debajo. Se marca sola (ver marcarNavActivo en js/app.js) y en las
+   páginas sueltas se pone la clase a mano en el HTML. */
+.navlinks a.activo{
+  opacity:1; font-weight:900; color:var(--teal-dark);
+  box-shadow:inset 0 -3px 0 var(--teal-dark);
+}
+.menu-movil a.activo{ color:var(--teal-dark); font-weight:900; }
+
 .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:999px; font-weight:800; font-size:14.5px; border:2px solid transparent; cursor:pointer; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease; }
 
 .btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
@@ -1298,6 +1307,34 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
 /* Eliminar una mascota es reversible en la práctica (se vuelve a inscribir);
    borrar la cuenta no. Por eso este bloque no lleva el rojo del otro. */
 .soc-borrar--suave{ border-color:var(--line); }
+
+/* ======================================================================
+   EL GRUPO DEL CLUB Y EL PASE DE FUNDADOR, DENTRO DE /mi-mascota
+   ----------------------------------------------------------------------
+   Dos tarjetas horizontales que en el teléfono se apilan. El botón ocupa
+   todo el ancho abajo de 560px para que se pueda tocar sin apuntar.
+   ====================================================================== */
+.soc-extras{ display:grid; gap:12px; margin:0 0 22px; }
+.soc-extra{
+  display:flex; align-items:center; gap:14px;
+  background:#fff; border:2px solid var(--line); border-radius:16px; padding:16px 18px;
+}
+.soc-extra--fundador{ background:var(--paper-tint-yellow); border-color:var(--yellow); }
+.soc-extra__ic{
+  flex-shrink:0; width:42px; height:42px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  background:var(--paper-tint-teal);
+}
+.soc-extra--fundador .soc-extra__ic{ background:var(--yellow); }
+.soc-extra__txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.soc-extra__txt b{ font-size:15.5px; }
+.soc-extra__txt span{ font-size:13.5px; color:#4a4a4a; line-height:1.45; font-weight:500; }
+.soc-extra .btn{ flex-shrink:0; }
+
+@media (max-width:560px){
+  .soc-extra{ flex-wrap:wrap; }
+  .soc-extra .btn{ width:100%; justify-content:center; }
+}
 
 /* ======================================================================
    SOCIOS FUNDADORES EN /mi-panel
