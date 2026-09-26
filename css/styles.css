@@ -529,7 +529,8 @@ body.pagina-directorio #directorio{
   display:block;
   min-height:calc(100vh - 140px);
 }
-body.pagina-directorio .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 
 /* ======================= Ficha de negocio/especialista como página propia (/negocio/...) =======================
    Misma idea que el directorio: por defecto oculta, y se muestra a pantalla completa
@@ -549,7 +550,8 @@ body.pagina-ficha #fichaNegocio{
   display:block;
   min-height:calc(100vh - 140px);
 }
-body.pagina-ficha .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 
 /* ======================= Planes como página propia (/planes) =======================
    Igual que el directorio y la ficha: #planes deja de ser una sección del home (antes
@@ -570,7 +572,8 @@ body.pagina-planes #planes{
   display:block;
   min-height:calc(100vh - 140px);
 }
-body.pagina-planes .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 
 /* ======================= Banner de página (5 slides, degradados) =======================
    Se usa arriba del directorio, de especialistas y de la ficha de cada negocio.
@@ -812,7 +815,8 @@ body.pagina-negocio #validar,
 body.pagina-negocio #planes,
 body.pagina-negocio #panel{ display:none !important; }
 body.pagina-negocio #panelNegocio{ display:block; min-height:calc(100vh - 140px); }
-body.pagina-negocio .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 
 .neg-cab{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
 .neg-sub{ font-size:13px; color:var(--gray); margin-top:4px; font-weight:600; }
@@ -863,7 +867,8 @@ body.pagina-socio #planes,
 body.pagina-socio #panelNegocio,
 body.pagina-socio #panel{ display:none !important; }
 body.pagina-socio #panelSocio{ display:block; min-height:calc(100vh - 140px); }
-body.pagina-socio .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 
 /* ---- Acceso ---- */
 .soc-enviado{ font-size:13px; color:var(--gray); line-height:1.5; margin:0 0 16px; }
@@ -994,6 +999,8 @@ body.pagina-validar #panelNegocio,
 body.pagina-validar #panelSocio,
 body.pagina-validar #panel{ display:none !important; }
 body.pagina-validar #validar{ display:block !important; min-height:calc(100vh - 200px); }
+/* En /validar el negocio está confirmando una visita con el socio al frente:
+   un aviso promocional ahí es ruido. Se queda oculta a propósito. */
 body.pagina-validar .announce-bar{ display:none; }
 
 /* ======================================================================
@@ -1012,6 +1019,7 @@ body.pagina-admin #planes,
 body.pagina-admin #panelNegocio,
 body.pagina-admin #panelSocio{ display:none !important; }
 body.pagina-admin #panel{ display:block !important; min-height:calc(100vh - 140px); }
+/* /mi-panel es el panel de administración de Jaime, no una página pública. */
 body.pagina-admin .announce-bar{ display:none; }
 
 /* La tabla de canjes tiene 7 columnas y no cabe en un teléfono:
@@ -1037,7 +1045,8 @@ body.pagina-legal #panelNegocio,
 body.pagina-legal #panelSocio,
 body.pagina-legal #panel{ display:none !important; }
 body.pagina-legal #paginaLegal{ display:block; min-height:calc(100vh - 140px); }
-body.pagina-legal .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 #paginaLegal{ display:none; }
 
 .wrap-legal{ max-width:760px; }
@@ -1091,7 +1100,8 @@ body.pagina-sugerencias #panelSocio,
 body.pagina-sugerencias #paginaLegal,
 body.pagina-sugerencias #panel{ display:none !important; }
 body.pagina-sugerencias #paginaSugerencias{ display:block; min-height:calc(100vh - 140px); }
-body.pagina-sugerencias .announce-bar{ display:none; }
+/* La barra de avisos vuelve a mostrarse acá (26 sep 2026): el sitio se veía
+   distinto de una página a otra. Sigue oculta solo en /mi-panel y /validar. */
 #paginaSugerencias{ display:none; }
 body.pagina-legal #paginaSugerencias,
 body.pagina-negocio #paginaSugerencias,

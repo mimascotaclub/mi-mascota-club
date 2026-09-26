@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gracias — Mi Mascota Club</title>
+
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#FFCE00">
+
+<!-- Esta página se llega solo volviendo del pago. No tiene por qué aparecer en
+     Google ni tiene sentido compartirla. -->
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style>
+/* ======================================================================
+   GRACIAS — la pantalla después de pagar el Pase de Socio Fundador
+   ----------------------------------------------------------------------
+   Existe porque antes el pago devolvía a /quienes-somos, que es la página
+   de venta: pagabas y aterrizabas en el mismo lugar donde te habían
+   vendido, sin que pasara nada. Acá el pago se celebra y el paso que falta
+   es lo único que se ve.
+   REGLA: nunca width:100vw, siempre width:100%.
+   ====================================================================== */
+.gr-wrap{ max-width:620px; margin:0 auto; padding:0 16px; }
+
+.gr-top{ background:var(--paper-tint-yellow); padding:56px 0 48px; text-align:center; }
+
+.gr-check{
+  width:78px; height:78px; margin:0 auto 22px; border-radius:50%;
+  background:var(--yellow); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 0 var(--yellow-dark);
+  animation:grEntra .5s cubic-bezier(.2,.9,.3,1.4) both;
+}
+.gr-check svg{ width:38px; height:38px; }
+@keyframes grEntra{ from{ transform:scale(.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
+
+.gr-top h1{ font-size:clamp(32px, 9vw, 46px); line-height:1.08; margin:0 0 14px; letter-spacing:-0.02em; }
+.gr-top p{ font-size:17px; line-height:1.55; color:#3a3a3a; margin:0 auto; max-width:440px; font-weight:600; }
+
+.gr-cupos{
+  display:inline-flex; align-items:center; gap:9px; margin-top:22px;
+  background:#fff; border:2px solid var(--ink); border-radius:999px;
+  padding:9px 18px; font-weight:800; font-size:14px;
+}
+.gr-cupos .punto{ width:9px; height:9px; border-radius:50%; background:var(--sage); }
+
+/* --- El paso que falta --- */
+.gr-paso{
+  background:var(--black); color:#fff; padding:44px 0;
+}
+.gr-paso h2{ font-size:clamp(24px, 6.5vw, 30px); margin:0 0 12px; color:#fff; }
+.gr-paso p{ font-size:16px; line-height:1.6; color:#d2d2d2; margin:0 0 8px; }
+.gr-paso .gr-tiempo{
+  display:inline-block; background:rgba(255,206,0,0.15); color:var(--yellow);
+  font-size:12.5px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;
+  padding:6px 13px; border-radius:999px; margin-bottom:14px;
+}
+.gr-btn-wa{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; margin-top:22px; padding:18px 20px; border-radius:16px;
+  background:#25D366; color:#0b2e17; text-decoration:none;
+  font-weight:900; font-size:17px; transition:transform .18s;
+}
+.gr-btn-wa:hover{ transform:translateY(-2px); }
+.gr-btn-wa svg{ width:22px; height:22px; flex-shrink:0; }
+.gr-alt{ font-size:13.5px; color:#9a9a9a; margin:14px 0 0; text-align:center; }
+.gr-alt a{ color:#d8d8d8; font-weight:800; }
+
+/* --- Lo que sigue --- */
+.gr-sigue{ padding:44px 0; }
+.gr-sigue h2{ font-size:clamp(22px, 6vw, 28px); margin:0 0 20px; }
+.gr-item{
+  display:flex; gap:14px; align-items:flex-start;
+  padding:16px 0; border-bottom:1px solid var(--line);
+}
+.gr-item:last-child{ border-bottom:none; }
+.gr-item__n{
+  flex-shrink:0; width:30px; height:30px; border-radius:50%;
+  background:var(--paper-tint-teal); color:var(--teal-dark);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:900; font-size:14px;
+}
+.gr-item__txt b{ display:block; font-size:16px; margin-bottom:3px; }
+.gr-item__txt span{ font-size:14.5px; color:#4a4a4a; line-height:1.5; }
+.gr-item__txt a{ color:var(--teal-dark); font-weight:800; }
+
+.gr-cierre{ text-align:center; padding:0 0 56px; }
+.gr-cierre .btn{ width:100%; justify-content:center; max-width:340px; }
+</style>
+</head>
+<body>
+
+<div class="announce-bar">🎉 Cada semana sumamos nuevos negocios y beneficios.</div>
+
+<nav>
+  <div class="navbar">
+    <a href="/" class="logo"><img src="/assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
+    <div class="navlinks">
+      <a href="/beneficios">Beneficios</a>
+      <a href="/mi-mascota">Mi Mascota ID</a>
+      <a href="/quienes-somos">Quiénes somos</a>
+    </div>
+    <a href="/mi-mascota" class="btn btn-nav-join btn-sm">Ver mi carnet</a>
+  </div>
+</nav>
+
+<!-- 1 · La celebración -->
+<header class="gr-top">
+  <div class="gr-wrap">
+    <div class="gr-check">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#151515" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1>Listo. Eres Socio Fundador.</h1>
+    <p>Gracias de verdad. Los primeros 100 son los que hacen posible lo que viene, y tú eres uno de ellos.</p>
+    <div class="gr-cupos"><span class="punto"></span> <span id="grCupos">Quedan cupos de los 100</span></div>
+  </div>
+</header>
+
+<!-- 2 · El paso que falta -->
+<section class="gr-paso">
+  <div class="gr-wrap">
+    <span class="gr-tiempo">Falta un paso · 20 segundos</span>
+    <h2>Mándanos el código de tu mascota</h2>
+    <p>
+      Tu pago llegó, pero Mercado Pago no nos dice a qué mascota corresponde. Con tu código
+      activamos tu número de fundador y te lo dejamos visible en el carnet.
+    </p>
+    <p>
+      El código sale en tu carnet y se ve así: <b class="mono" style="color:#fff;">MMC00042</b>.
+    </p>
+
+    <a class="gr-btn-wa" target="_blank" rel="noopener"
+       href="https://wa.me/56997132591?text=Hola%2C%20acabo%20de%20pagar%20el%20Pase%20de%20Socio%20Fundador.%0A%0AC%C3%B3digo%20de%20mi%20mascota%3A%20MMC000__%0ANombre%20de%20mi%20mascota%3A%20%0ACorreo%20con%20el%20que%20me%20inscrib%C3%AD%3A%20">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.6-.8-2.7-1.5-3.8-3.3-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.4 1.9.8 2.6.9 3.5.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.3Z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg>
+      Avisar mi código por WhatsApp
+    </a>
+    <p class="gr-alt">
+      ¿Prefieres correo? Escríbenos a
+      <a href="mailto:holamimascotaclub@gmail.com?subject=Ya%20pagu%C3%A9%20mi%20Pase%20Fundador&amp;body=Hola%2C%20acabo%20de%20pagar%20el%20Pase%20de%20Socio%20Fundador.%0A%0AC%C3%B3digo%20de%20mi%20mascota%3A%20MMC000__%0ANombre%20de%20mi%20mascota%3A%20%0ACorreo%20con%20el%20que%20me%20inscrib%C3%AD%3A%20%0A%0A%C2%A1Gracias!">holamimascotaclub@gmail.com</a>
+    </p>
+  </div>
+</section>
+
+<!-- 3 · Qué pasa ahora -->
+<section class="gr-sigue">
+  <div class="gr-wrap">
+    <h2>Qué pasa ahora</h2>
+
+    <div class="gr-item">
+      <div class="gr-item__n">1</div>
+      <div class="gr-item__txt">
+        <b>Activamos tu número</b>
+        <span>Apenas recibimos tu código te asignamos el tuyo, del #001 al #100, y aparece en el carnet de tu mascota. Es tuyo para siempre.</span>
+      </div>
+    </div>
+
+    <div class="gr-item">
+      <div class="gr-item__n">2</div>
+      <div class="gr-item__txt">
+        <b>Entras al grupo del club</b>
+        <span>Solo para socios. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos.
+          <a href="https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb" target="_blank" rel="noopener">Unirme al grupo →</a></span>
+      </div>
+    </div>
+
+    <div class="gr-item">
+      <div class="gr-item__n">3</div>
+      <div class="gr-item__txt">
+        <b>Tus recomendaciones van primero</b>
+        <span>Los negocios que nos recomiendes son los que vamos a visitar antes que nadie.
+          <a href="/sugerencias">Recomendar un negocio →</a></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gr-cierre">
+  <div class="gr-wrap">
+    <a href="/mi-mascota" class="btn btn-primary btn-grande">Ver el carnet de mi mascota</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div class="foot-marca">
+      <img src="/assets/logo-blanco.svg" alt="Mi Mascota Club" class="foot-logo">
+      <p class="foot-lema">
+        Amamos a las mascotas, por eso decidimos crear el mejor club de mascotas,
+        con beneficios para nuestras mascotas y para los dueños.
+      </p>
+    </div>
+    <div class="foot-col">
+      <h4 class="foot-t">Club</h4>
+      <a href="/">Inicio</a>
+      <a href="/quienes-somos">Quiénes somos</a>
+      <a href="/sugerencias">Sugerencias</a>
+      <h4 class="foot-t foot-t--2">Legal</h4>
+      <a href="/terminos">Términos y condiciones</a>
+      <a href="/privacidad">Política de privacidad</a>
+    </div>
+    <div class="foot-col">
+      <h4 class="foot-t">Beneficios</h4>
+      <span class="foot-pronto">Para tu mascota <em>Próximamente</em></span>
+      <span class="foot-pronto">Para ti como dueño de mascota <em>Próximamente</em></span>
+    </div>
+    <div class="foot-col">
+      <h4 class="foot-t">Contacto</h4>
+      <a class="foot-dato" href="mailto:holamimascotaclub@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6.5 9 6.5 9-6.5"/></svg>
+        holamimascotaclub@gmail.com
+      </a>
+      <span class="foot-dato">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5c0 5.4-8 11.5-8 11.5s-8-6.1-8-11.5a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10.3" r="2.9"/></svg>
+        Santiago, Chile
+      </span>
+    </div>
+  </div>
+  <div class="wrap foot-bajo">
+    <div class="foot-copy">© 2026 Mi Mascota Club. Todos los derechos reservados.</div>
+  </div>
+</footer>
+
+<script>
+/* Los cupos que quedan, leídos de la base. Es el mismo número que muestra la
+   landing. Si falla, la píldora se queda con su texto genérico y no pasa nada:
+   esta página tiene un solo trabajo y es el botón de WhatsApp. */
+(async function cupos(){
+  try{
+    const sb = window.supabase.createClient(
+      'https://mzsqyjxqnomsbqzhygkx.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16c3F5anhxbm9tc2Jxemh5Z2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTA0NDAsImV4cCI6MjEwMzY4NjQ0MH0.v5MASfYE83x1Lr_p1Q4MlHtyqpJlopBbjUqhB2suTEc'
+    );
+    const { data, error } = await sb.rpc('contar_fundadores');
+    if(error) throw error;
+    const tomados = Math.max(0, Math.min(Number(data) || 0, 100));
+    document.getElementById('grCupos').textContent =
+      'Eres uno de los ' + Math.max(1, tomados) + ' primeros · quedan ' + (100 - tomados) + ' cupos';
+  }catch(e){
+    console.warn('No se pudo leer el contador de fundadores:', e);
+  }
+})();
+</script>
+
+</body>
+</html>

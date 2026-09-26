@@ -21,18 +21,21 @@
      OJO: el sitio es de una sola página, así que estas etiquetas son las
      mismas para todas las rutas (/beneficios, /sugerencias, etc.). WhatsApp
      no ejecuta JavaScript, así que no se pueden cambiar por ruta. -->
-<meta name="description" content="El club de mascotas de Santiago. Inscribe a tu mascota gratis y accede a beneficios en veterinarias, peluquerías, cafés y más — para tu mascota y para ti como dueño.">
+<!-- Esta descripción es la que se ve en la previsualización cuando alguien
+     comparte el enlace por WhatsApp. Es lo primero que lee la gente, antes de
+     abrir nada, así que tiene que decir el concepto actual del club. -->
+<meta name="description" content="El club de quienes los quieren como familia. Inscribe a tu mascota gratis y ahorra donde ya gastas: veterinarias, peluquerías, comida y más en Santiago.">
 <link rel="canonical" href="https://mimascotaclub.cl/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Mi Mascota Club">
 <meta property="og:locale" content="es_CL">
 <meta property="og:url" content="https://mimascotaclub.cl/">
-<meta property="og:title" content="Mi Mascota Club — Beneficios para tu mascota y para ti">
-<meta property="og:description" content="Inscribe a tu mascota gratis y accede a beneficios en negocios de Santiago. Cada semana sumamos negocios nuevos.">
+<meta property="og:title" content="Mi Mascota Club — Porque son familia">
+<meta property="og:description" content="El club de quienes los quieren como familia. Inscribe a tu mascota gratis y ahorra donde ya gastas: veterinarias, peluquerías y comida en Santiago.">
 <meta property="og:image" content="https://mimascotaclub.cl/assets/images/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Mi Mascota Club — beneficios reales para tu mascota y para ti como dueño">
+<meta property="og:image:alt" content="Mi Mascota Club — el club de quienes los quieren como familia">
 <meta name="twitter:card" content="summary_large_image">
 
 <!-- TIPOGRAFÍA: si cambias las fuentes en css/styles.css, actualiza también este link -->
@@ -197,9 +200,10 @@
       <div class="ben-aviso__ic">🐾</div>
       <div class="ben-aviso__txt">
         <b>Cada semana se suman negocios nuevos.</b>
-        <p>Aquí vas a encontrar los negocios adheridos al club con beneficios para tu mascota
-        y para ti como dueño. La lista crece todas las semanas, así que vuelve a mirar seguido.
-        ¿Conoces un negocio que debería estar acá? Cuéntanos y lo vamos a buscar.</p>
+        <p>Aquí vas a encontrar los negocios del club, con beneficios permanentes para tu
+        mascota. La lista crece todas las semanas, así que vuelve a mirar seguido.
+        ¿Conoces un negocio que debería estar acá? Cuéntanos y lo vamos a buscar: los que
+        nos recomiendan los socios son los primeros que visitamos.</p>
       </div>
       <a class="btn btn-sm btn-primary ben-aviso__cta" href="/sugerencias"
          onclick="event.preventDefault(); irASugerencias();">Recomendar un negocio</a>
@@ -640,18 +644,19 @@
   <div class="wrap wrap-legal">
     <div class="section-head" style="margin-bottom:26px;">
       <span class="eyebrow">Construyámoslo juntos</span>
-      <h2>¿Cómo lo hacemos mejor?</h2>
-      <p>Estamos creando Mi Mascota Club para mejorarle la vida a las mascotas y a quienes las
-      cuidan. Si se te ocurre algo, si algo no funciona o si echas de menos un negocio en el
-      directorio, cuéntanos. Leemos todo.</p>
+      <h2>¿Qué negocio debería estar en el club?</h2>
+      <p>Los negocios del club los eligen los socios: <b>cada semana visitamos al más
+      recomendado</b> para invitarlo a entrar. Cuéntanos el nombre y la comuna del lugar
+      donde de verdad llevas a tu mascota. Y si se te ocurre cualquier otra cosa, o algo
+      no funciona, escríbelo acá igual. Leemos todo.</p>
     </div>
 
     <div class="panel full" style="max-width:560px;" id="sugCaja">
       <form id="sugForm">
         <div class="field">
-          <label for="sugTexto">Tu idea o comentario</label>
+          <label for="sugTexto">Tu recomendación o comentario</label>
           <textarea id="sugTexto" rows="6" required maxlength="3000"
-            placeholder="Me gustaría que... / Sería útil si... / Encontré un problema en..."></textarea>
+            placeholder="Recomiendo la veterinaria... en la comuna de... / Me gustaría que... / Encontré un problema en..."></textarea>
           <p class="soc-nota" id="sugContador" style="margin-top:6px;">0 caracteres</p>
         </div>
 

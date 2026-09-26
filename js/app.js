@@ -3980,7 +3980,7 @@ function renderExtrasSocio(){
          <div class="soc-extra__ic">★</div>
          <div class="soc-extra__txt">
            <b>Hazte Socio Fundador</b>
-           <span>Son 100 cupos. Tu número en el carnet, voto para elegir los negocios del club y precio congelado de por vida.</span>
+           <span>Son 100 cupos. Tu número en el carnet, tus recomendaciones de negocios visitadas primero y precio congelado de por vida.</span>
          </div>
          <a class="btn btn-sm btn-primary" href="/quienes-somos#fundador">Quiero mi número</a>
        </div>`;

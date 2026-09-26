@@ -367,7 +367,7 @@
       <ul>
         <li><b>Tu número de fundador</b> del #001 al #100, visible en el carnet de tu mascota.</li>
         <li><b>Insignia de Socio Fundador</b> permanente. No se vuelve a entregar nunca.</li>
-        <li><b>Voto</b> para elegir qué negocios entran al club.</li>
+        <li><b>Tus recomendaciones primero.</b> Los negocios que nos recomiendes son los que vamos a visitar antes que nadie.</li>
         <li><b>Precio congelado de por vida.</b> Cuando el club suba de precio, tú no.</li>
         <li><b>12 meses de membresía completa</b> desde que se activen los beneficios.</li>
       </ul>
@@ -377,32 +377,11 @@
       <!-- Paso 2, y es obligatorio: el link de pago de Mercado Pago no sabe
            qué socio pagó. Sin este aviso no hay forma de saber a quién
            activarle el número de fundador. -->
-      <!-- Empieza oculto. Se muestra solo cuando la persona vuelve del pago
-           (la URL trae #ya-pague), cuando aprieta el botón de pagar, o cuando
-           toca el enlace de abajo. Si se mostrara siempre, cualquiera puede
-           mandar el WhatsApp sin haber pagado. -->
-      <div class="qs-despues" id="ya-pague" hidden>
-        <h3>Después de pagar, un paso más</h3>
-        <p>
-          El pago llega a Mercado Pago, pero ahí no aparece el código de tu mascota.
-          Mándanos un WhatsApp con tu código (el que sale en el carnet, tipo
-          <b class="mono">MMC00042</b>) y activamos tu número de fundador el mismo día.
-        </p>
-        <a class="btn btn-brass" id="qsAvisar" target="_blank" rel="noopener"
-           href="https://wa.me/56997132591?text=Hola%2C%20acabo%20de%20pagar%20el%20Pase%20de%20Socio%20Fundador.%0A%0AC%C3%B3digo%20de%20mi%20mascota%3A%20MMC000__%0ANombre%20de%20mi%20mascota%3A%20%0ACorreo%20con%20el%20que%20me%20inscrib%C3%AD%3A%20">
-          Ya pagué, avisar mi código por WhatsApp
-        </a>
-        <p class="qs-despues__alt">
-          ¿Prefieres correo? Escríbenos a
-          <a href="mailto:holamimascotaclub@gmail.com?subject=Ya%20pagu%C3%A9%20mi%20Pase%20Fundador&amp;body=Hola%2C%20acabo%20de%20pagar%20el%20Pase%20de%20Socio%20Fundador.%0A%0AC%C3%B3digo%20de%20mi%20mascota%3A%20MMC000__%0ANombre%20de%20mi%20mascota%3A%20%0ACorreo%20con%20el%20que%20me%20inscrib%C3%AD%3A%20%0A%0A%C2%A1Gracias!">holamimascotaclub@gmail.com</a>.
-        </p>
-      </div>
-
       <p class="qs-pase__letra">
         Para ser fundador primero tienes que estar inscrito, y la inscripción es gratis.
         Si todavía no lo estás, <a href="/registro" style="font-weight:800;">inscríbete acá</a> y vuelve a esta página.
         <br>
-        <a href="#ya-pague" id="qsYaPagueLink" style="font-weight:800;">¿Ya pagaste y no sabes cómo avisarnos?</a>
+        Al pagar te llevamos a una página con el último paso, que toma 20 segundos.
       </p>
     </div>
   </div>
@@ -509,6 +488,12 @@
 </footer>
 
 <script>
+/* El recuadro "ya pagué" vivía acá escondido y se mostraba con #ya-pague.
+   Se eliminó el 26 de septiembre: Mercado Pago pega sus parámetros DESPUÉS
+   del #, así que el ancla nunca calzaba y quien pagaba aterrizaba arriba de
+   esta misma página de venta. Ahora el retorno del pago va a /gracias, que
+   es una página hecha solo para eso. */
+
 /* El desplegable de Categorías: abre y cierra, y se cierra al tocar fuera.
    Misma lógica que en la home, en versión corta. */
 function alternarDropdownQS(){
@@ -575,9 +560,6 @@ function pintarPase(tomados){
     boton.href   = LINK_MERCADOPAGO;
     boton.target = '_blank';
     boton.rel    = 'noopener';
-    /* El pago abre en otra pestaña. Cuando la persona vuelva a esta, el
-       recuadro del WhatsApp ya va a estar visible esperándola. */
-    boton.addEventListener('click', mostrarYaPague);
   } else {
     boton.addEventListener('click', function(e){
       e.preventDefault();
@@ -592,26 +574,13 @@ function pintarPase(tomados){
    Esto NO es seguridad: el filtro de verdad es que Jaime confirma el pago en
    Mercado Pago antes de marcar a nadie. Es para no invitar a mandar el mensaje
    a quien todavía no ha pagado. */
-function mostrarYaPague(){
-  const bloque = document.getElementById('ya-pague');
-  if (bloque) bloque.hidden = false;
-}
-
-if (location.hash === '#ya-pague') mostrarYaPague();
-window.addEventListener('hashchange', function(){
-  if (location.hash === '#ya-pague') mostrarYaPague();
-});
-
-const enlaceYaPague = document.getElementById('qsYaPagueLink');
-if (enlaceYaPague){
-  enlaceYaPague.addEventListener('click', function(){
-    mostrarYaPague();
-    /* El navegador no baja a un bloque que estaba oculto hasta este instante,
-       así que lo llevamos nosotros. */
-    setTimeout(function(){
-      document.getElementById('ya-pague').scrollIntoView({ behavior:'smooth', block:'center' });
-    }, 30);
-  });
+/* Red de seguridad: si algún link de pago viejo todavía devuelve acá con el
+   ancla #ya-pague, mandamos a la persona a /gracias, que es donde está el
+   paso que le falta. El indexOf es a propósito: Mercado Pago agrega sus
+   parámetros después del #, así que el hash llega como "#ya-pague?collection_id=..."
+   y una comparación exacta nunca calzaría. */
+if (location.hash.indexOf('#ya-pague') === 0){
+  location.replace('/gracias');
 }
 
 pintarPase(0);

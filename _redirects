@@ -41,3 +41,13 @@
 # lanzamiento y nada de lo que se toque ahí puede romper la home.
 # ---------------------------------------------------------------------
 /quienes-somos       /quienes-somos.html                200
+
+# ---------------------------------------------------------------------
+# A /gracias llega la persona cuando Mercado Pago la devuelve después de
+# pagar el Pase de Socio Fundador. Es la URL de retorno configurada en el
+# link de pago. Antes el retorno era /quienes-somos#ya-pague, pero Mercado
+# Pago pega sus parámetros DESPUÉS del #, así que el ancla nunca calzaba y
+# la persona aterrizaba arriba de la página de venta, como si no hubiera
+# pasado nada.
+# ---------------------------------------------------------------------
+/gracias             /gracias.html                      200
