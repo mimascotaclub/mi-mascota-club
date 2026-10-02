@@ -1,12 +1,14 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 23 de septiembre de 2026**
+**Última actualización: 1 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
 **para qué existe** (el porqué, el lema, cómo se explica y las líneas de negocio).
 `LANZAMIENTO.md` dice **cómo se sale a buscar socios**: canales, calendario y el pase de
 Socio Fundador.
+`NEGOCIOS-CAPTACION.md` dice **cómo se reclutan negocios**: el modelo de cobro, a quién
+escribirle primero y los mensajes exactos que se mandan.
 `CONTEXTO-PROYECTO.md` es la bitácora histórica: tiene el detalle de cómo se construyó
 cada cosa y por qué, pero son más de 1.700 líneas y **no hay que leerlo entero** — se
 consulta por secciones cuando hace falta entender una pieza específica.
@@ -125,20 +127,65 @@ solo con el pase digital para no frenarse cotizando y despachando.
 Lo que incluye: número de fundador visible en el carnet, insignia permanente, voto para
 elegir qué negocios entran y precio congelado de por vida.
 
-**El circuito completo, y por qué tiene un paso manual:**
+**El circuito que está HOY en producción (con paso manual):**
 
 1. La persona paga en el link de Mercado Pago (`https://mpago.la/1gq8qDj`).
-2. Mercado Pago la devuelve a `/quienes-somos#ya-pague`, que muestra un recuadro con un
-   botón de WhatsApp al **+56 9 9713 2591**. **Ese recuadro está oculto por defecto** y solo
-   aparece al volver del pago, al apretar el botón de pagar, o desde el enlace "¿Ya pagaste
-   y no sabes cómo avisarnos?".
-3. La persona manda su código de mascota por WhatsApp.
+2. Mercado Pago la devuelve a `/gracias`, que muestra el check, el contador de cupos y un
+   botón de WhatsApp al **+56 9 9713 2591**.
+3. La persona avisa por WhatsApp.
 4. Jaime confirma el pago en Mercado Pago y la marca en `/mi-panel` → Socios Fundadores.
 
-**El paso manual es inevitable por ahora:** el link de pago no lleva el código de la
-mascota, así que Mercado Pago sabe que alguien pagó pero no quién. Automatizarlo necesita
-un webhook, y el webhook tampoco resolvería la identidad. Con 100 fundadores se marca a
-mano; el webhook recién vale la pena con cobro recurrente.
+### Fundador automático — DISEÑADO, falta construir (1 de octubre)
+
+**Decisión del 30 de septiembre: el paso de "avísame por WhatsApp" se elimina.** Es el
+peor momento posible para pedirle un trámite a alguien: acaba de pagar y está contento.
+Lo que se creía inevitable no lo era — el correo no hay que pedirlo *después* de pagar,
+hay que pedirlo *antes*, que es donde cualquier compra lo pide y nadie se molesta.
+
+**El flujo nuevo, en tres partes:**
+
+1. **En `/quienes-somos`, antes de ir a Mercado Pago.** El botón del pase ya no manda
+   directo a pagar. Abre un paso de una sola pregunta:
+   - Con sesión iniciada: no pide nada. Muestra *"Vas a activar tu pase como xxx@xxx"*
+     y el botón de pagar.
+   - Sin sesión: un campo de correo, validado contra `socios` con `socio_existe()`. Si no
+     existe, lo manda a registrarse. **Esto además cierra un agujero de hoy: que alguien
+     pague sin estar registrado y quede en tierra de nadie.**
+   - El correo se guarda en `localStorage` antes de salir a pagar.
+2. **Mercado Pago no se toca.** No se depende de que el pagador escriba nada ahí — el
+   correo de su cuenta de Mercado Pago casi nunca va a ser el del registro.
+3. **En `/gracias`, cero preguntas.** Lee `payment_id` / `collection_id` de la URL,
+   recupera el correo por sesión o por `localStorage`, llama a `activar_fundador()` y
+   muestra *"Listo. Eres el Socio Fundador #007"*. El grupo de WhatsApp queda como
+   invitación, no como obligación.
+   - **No se promete ningún plazo.** Se activa en dos segundos; decir "en 48 horas" sería
+     hacerse ver más chico de lo que se es.
+   - Plan B visible solo si falla: un campo *"Confirma el correo con el que te
+     registraste"*. No es el camino normal.
+   - Plan C invisible: si el correo no está en `socios` o no quedan cupos, el pago cae en
+     `fundadores_pendientes` con el id de la operación y Jaime lo ve en `/mi-panel`.
+     **Nadie que pagó queda en el aire.**
+
+**Riesgo asumido a conciencia:** `activar_fundador()` exige un `payment_id` de al menos 6
+dígitos, pero **no le pregunta a Mercado Pago si ese pago existe de verdad**. Alguien que
+entienda cómo funciona podría escribir la URL a mano y marcarse como fundador sin pagar.
+Se asume porque: hace falta buscarlo a propósito, Jaime ve todos los pagos reales en
+Mercado Pago, el id queda guardado para cruzar, y quitar a alguien es un botón en
+`/mi-panel`. **Se cierra cuando haya volumen o cuando suba el precio**, con una Netlify
+Function que consulte la API de Mercado Pago antes de activar (ver "Cuando haya volumen").
+
+| Pieza | Estado |
+|---|---|
+| `supabase-fundador-auto-v29.sql` escrito | ✅ En el repo |
+| Correrlo en Supabase | ⬜ **Gratis, se puede hacer en cualquier momento** |
+| Paso del correo antes de pagar en `quienes-somos.html` | ⬜ Falta |
+| Activación automática en `gracias.html` | ⬜ Falta |
+| Bloque de pagos pendientes en `/mi-panel` | ⬜ Falta |
+| Validar el pago contra la API de Mercado Pago | ⬜ A futuro, no urgente |
+
+El SQL agrega la tabla `fundadores_pendientes` y las funciones `socio_existe()`,
+`activar_fundador()`, `admin_fundadores_pendientes()` y `admin_resolver_pendiente()`.
+Todas `volatile` (ver la trampa más abajo). No borra ni modifica nada existente.
 
 | Pieza | Estado |
 |---|---|
@@ -148,9 +195,10 @@ mano; el webhook recién vale la pena con cobro recurrente.
 | Link de pago de Mercado Pago conectado | ✅ Conectado |
 | Bloque "Socios Fundadores" en `/mi-panel` | ✅ Construido y probado |
 | Insignia "★ Socio Fundador #001" en el carnet | ✅ Construido y probado |
-| Aviso por WhatsApp después de pagar | ✅ Construido |
+| Aviso por WhatsApp después de pagar | ✅ Construido — **se reemplaza por la activación automática** |
 | **Emitir boleta por las membresías** | ⬜ **Falta: consultar al contador antes de cobrarle al primer fundador** |
-| Cambiar el nombre del negocio en Mercado Pago | ⬜ Hoy el que paga ve "Jaime Florian Design" |
+| Cambiar el nombre del negocio en Mercado Pago | ✅ Cambiado |
+| URL de retorno apuntando a `/gracias` | ✅ Puesta |
 
 **La tabla `fundadores` tiene el correo como llave, no la mascota**, porque `socios` es una
 fila por mascota y el pase es de la persona. Quien tiene tres perros ve la misma insignia
@@ -166,6 +214,34 @@ en los tres carnets.
   se creó `stable` y la API respondía **405** a la llamada del navegador, así que la
   insignia nunca aparecía. `socio_perfil` y `socio_historial` son `volatile`: hay que
   seguir ese patrón.
+
+### El grupo de WhatsApp es SOLO DE FUNDADORES (decidido el 1 de octubre)
+
+Entró al grupo alguien que no había pagado el pase. No fue un error del sistema: el
+enlace se le mostraba a **todo socio registrado** desde `/mi-mascota`, en la pantalla
+final del registro y en el correo de bienvenida.
+
+**La decisión:** el grupo es la única cosa exclusiva que hoy se recibe por los $9.990. Si
+lo tiene cualquiera que se registra gratis, el pase no vende nada. Además un grupo chico
+de gente comprometida conversa, y uno grande de gente que entró gratis se muere en tres
+días.
+
+**Lo que se cambió (desplegado el 1 de octubre):**
+
+- `renderExtrasSocio()` en `js/app.js`: al que **no** es fundador se le ofrece el pase y
+  **no** ve el enlace del grupo. Al fundador se le muestran las dos tarjetas, y el grupo
+  pasó a llamarse "El grupo de los fundadores".
+- El bloque del grupo salió de la pantalla final del registro (`bloqueGrupo` quedó vacío,
+  con el comentario de por qué) y del `mensaje_extra` del correo de bienvenida.
+- Donde antes se ofrecía el pase, ahora **el grupo se nombra como parte de lo que
+  incluye**: "tu número en el carnet, el grupo privado de fundadores, …".
+
+**Queda un agujero conocido:** `/gracias` todavía muestra el botón del grupo y esa página
+se puede abrir sin haber pagado. Se cierra con la activación automática, que solo mostrará
+el botón si el pase se activó de verdad.
+
+Revisar también que "Aprobar nuevos miembros" siga activado en los ajustes del grupo.
+A quien ya entró sin pagar **no se le echa**: son conocidos y es una prueba cerrada.
 
 ---
 
@@ -250,6 +326,102 @@ update socios set verificacion = 'verificado', verificacion_en = now()
 - **Veterinarias como socias fundadoras** que registren el chip al momento de implantarlo.
 - **Alerta de mascota perdida** como gancho de registro real.
 
+### Asistente de triage con IA — evaluado el 30 de septiembre, fase 2
+
+La idea original era "un veterinario en línea". **No puede llamarse así ni comportarse
+así.** En Chile la medicina veterinaria es profesión regulada, Jaime trabaja como persona
+natural (sin empresa ni seguro de por medio), y hay errores que matan: paracetamol en
+gatos, ibuprofeno en perros, dosis mal calculadas. Un bot que diagnostica o receta es una
+exposición personal, no un feature.
+
+**Lo que sí se puede hacer, y es lo que la gente realmente necesita:** un triage. Se
+llamaría algo como *"¿Es urgencia?"* o *"Primera ayuda MMC"* y haría cinco cosas:
+decidir urgencia (anda ahora / hoy / mañana), preparar la visita al veterinario, explicar
+en simple lo que le dijeron, cuidado preventivo, y **derivar al negocio del club que
+corresponde por comuna**. Ese último punto es el que lo convierte en motor del modelo: el
+bot le lleva clientes a los negocios, y eso es lo que después justifica cobrarles.
+
+Reglas duras del prompt: nunca recetar medicamentos ni dosis, nunca decir "no es nada",
+y ante señales de alarma (no respira bien, convulsiona, sangra, no orina, comió algo
+tóxico, parto con problemas) cortar y mandar al veterinario. Más un aviso visible y
+aceptado antes de la primera consulta: *"orientación, no diagnóstico"*.
+
+**El costo no es el obstáculo.** Precios consultados el 30 de septiembre, por millón de
+tokens: Gemini 3.1 Flash-Lite US$0,25 entrada / US$1,50 salida; Gemini 3.8 Flash
+US$0,75 / US$3,75; Claude Haiku 4.5 US$1 / US$5. Una consulta de 5-6 mensajes sale entre
+**$4 y $15 pesos**. Con 120 consultas al mes son menos de $2.000 al mes — un solo pase de
+fundador paga el bot de todos. Gemini además tiene capa gratuita para probar.
+
+**Arquitectura prevista** (la misma de `aviso-canje.js`): una Netlify Function que valida
+el token de sesión y que el correo esté en `fundadores`, llama a la API y guarda en una
+tabla `consultas_ia` con tope de 20 consultas al mes por socio. **La clave de la API va en
+la función, nunca en el navegador.** Ojo: las invocaciones de función también consumen
+créditos de Netlify.
+
+**Antes de construirlo, validarlo gratis:** ofrecer en el grupo de fundadores que escriban
+sus dudas y contar cuántas llegan en tres semanas. Si llegan dos, no es el beneficio que
+la gente quiere. Si llegan cuarenta, es el producto — y además quedan las preguntas reales
+para escribir el prompt.
+
+**Orden acordado: negocios → registro de negocios → bot.** Sin negocios a los que derivar,
+el bot pierde la mitad de su gracia.
+
+---
+
+## Dónde quedó todo al 1 de octubre
+
+### Créditos de Netlify — los números reales (verificados el 1 de octubre)
+
+Mirado en app.netlify.com → equipo JFD → Usage & billing. **Esto ya no es estimación.**
+
+- **Plan Personal, US$9 al mes: 1.000 créditos mensuales.** No es el plan gratis.
+- **Un deploy de producción cuesta exactamente 15 créditos** (975 créditos ÷ 65 deploys
+  del ciclo de septiembre). O sea: **el presupuesto real son unos 66 deploys al mes,
+  unos 2 por día.**
+- **Los créditos NO se acumulan:** vencen al cerrar el ciclo. Lo que no se usa se pierde.
+- El ciclo va **del 3 de un mes al 2 del siguiente**, y los créditos nuevos se otorgan el
+  día 2. (Septiembre: otorgados el 2, vencen el 2 de octubre.)
+- **Auto recharge está DESACTIVADO** y así debe quedarse: es la protección contra una
+  cuenta sorpresa.
+
+**Todo lo demás es ruido.** Desglose del ciclo de septiembre: deploys 975 créditos
+(99,6%), peticiones web 2,5 (12.342 visitas), ancho de banda 1,5 (0,07 GB), funciones
+0,3. Total 979,2. **No hay nada que optimizar en imágenes, tráfico ni funciones** — una
+sospecha que se tuvo el 1 de octubre y los datos descartaron. El único gasto que existe
+es desplegar.
+
+**Las tres reglas que devuelven holgura, sin cambiar de plan:**
+
+1. **`[skip ci]` en todo commit que solo toque archivos `.md`.** No construye, no cuesta.
+2. **Juntar los cambios y subir una vez.** Un push con ocho archivos cuesta lo mismo que
+   uno con un archivo.
+3. **Probar en local antes de subir.** Los deploys que se van en nada son del tipo "me
+   faltó una coma", y son los que de verdad drenan el mes.
+
+Con eso, 66 deploys al mes sobran. Subir de plan solo tendría sentido después de aplicar
+las tres reglas y seguir quedando corto: hoy sería pagar por un problema de método.
+
+**Desplegado el 1 de octubre, con los últimos 15 créditos del ciclo** (vencían esa noche,
+así que o se usaban o se perdían):
+
+- ✅ **El chip como opción visible** en el registro: el "lo hago después" dejó de ser un
+  enlace gris al 42% de opacidad y pasó a ser un bloque propio con su botón **"Continuar
+  sin el chip"**. Solo CSS y texto; la lógica del registro no se tocó.
+- ✅ **El grupo de WhatsApp cerrado a fundadores** (ver la sección de arriba).
+
+**El próximo bloque de trabajo, todo en un solo push:**
+
+1. Correr `supabase-fundador-auto-v29.sql` en Supabase (gratis, se puede antes).
+2. Paso del correo antes de pagar en `quienes-somos.html`.
+3. Activación automática en `gracias.html`, mostrando el botón del grupo **solo** si el
+   pase quedó activado (así se cierra el último agujero del grupo).
+4. Bloque de pagos pendientes en `/mi-panel`.
+5. QA antes del push, y recién ahí `git add .` → `git commit` → `git push`.
+
+**La prueba cerrada va en curso** con conocidos (se bajó de 15 a 5 personas para partir).
+Después de eso: reiniciar contadores, encender el interruptor de verificación, volver a
+mostrar el botón de compartir y recién ahí abrir al público.
+
 ---
 
 ## Pendientes, en orden
@@ -276,6 +448,8 @@ inicio de actividades como persona natural es online y gratis.
 2. **Encender el interruptor** en `/mi-panel` → Ajustes del club.
 3. **Conseguir negocios.** Es el verdadero cuello de botella: un club de beneficios con
    cero beneficios no retiene a nadie, por muy bien construido que esté el registro.
+   **El modelo de cobro, el orden de a quién escribirle y los mensajes exactos están en
+   `NEGOCIOS-CAPTACION.md`** (30 de septiembre).
 
 ### Deuda real del flujo del dueño
 
@@ -338,6 +512,10 @@ inicio de actividades como persona natural es online y gratis.
 10. **Sacar los precios del formulario de registro** (Pro $2.990 / Premium $4.990). La
     página `/planes` se sacó del menú justo para no anclar precios: es incoherente.
 11. **Mercado Pago Preapproval + webhook** (cobro recurrente). Solo hay plan de pasos.
+11b. **Validar el pago contra la API de Mercado Pago** antes de activar un fundador. Hoy
+    `activar_fundador()` confía en el `payment_id` que viene en la URL. Se cierra con una
+    Netlify Function que consulte la operación con las credenciales de Mercado Pago. No
+    es urgente con 100 cupos y $9.990; sí lo es si sube el precio o crece el volumen.
 12. **Gamificación** (insignias, racha, referidos) — ver "Decidido pero sin construir".
 13. Login con Google (prioridad baja, el acceso por correo ya cubre el caso).
 14. `supabase-fix-foto.sql` sigue sin resolver (firma de función en conflicto).
@@ -405,11 +583,15 @@ Resueltos (verificado el 21 de septiembre):
 
 ---
 
-## Estrategia de lanzamiento vigente (10 de septiembre)
+## Estrategia de lanzamiento vigente (actualizada el 30 de septiembre)
 
 Captar **dueños primero, gratis**, dándoles contenido y beneficios desde ya. Después usar
-el número de dueños inscritos como argumento de venta ante los negocios, ofreciéndoles un
-monto mínimo los primeros tres meses. Los primeros 20-30 negocios entran gratis 2-3 meses
-como socios fundadores.
+el número de dueños inscritos como argumento de venta ante los negocios.
+
+**Lo que cambió respecto al 10 de septiembre:** ya no son "2-3 meses gratis para los
+primeros 20-30". El modelo acordado es **12 meses gratis para los primeros negocios, con
+el precio normal publicado desde el día uno y congelado para ellos**, más un nivel gratis
+permanente (estar listado en el directorio). Lo que se cobra es la visibilidad y los
+datos, no la existencia. Todo el detalle, con los mensajes, en `NEGOCIOS-CAPTACION.md`.
 
 Reparto de trabajo: **Jaime hace el QA de los flujos, la IA avanza en el desarrollo.**

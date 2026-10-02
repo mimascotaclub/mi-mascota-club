@@ -3978,40 +3978,51 @@ async function cargarPanelSocio(){
    NO va en el sitio público: esa es justamente la forma de que al grupo solo
    llegue gente inscrita, sin tener que revisar a mano quién es quién.
    Si el socio ya es fundador, en vez de ofrecerle el pase se le muestra su
-   número, que es lo que pagó. */
+   número, que es lo que pagó.
+
+   CAMBIO del 1 de octubre: el grupo es SOLO DE FUNDADORES. Antes la tarjeta
+   del grupo se le mostraba a cualquier socio registrado, y así entró al grupo
+   alguien que no había pagado el pase. El grupo es la única cosa exclusiva que
+   hoy se recibe por los $9.990: si lo tiene todo el mundo, el pase no vende
+   nada. Al que no es fundador se le ofrece el pase, y el grupo aparece recién
+   cuando lo tiene.
+   Ojo: el enlace también está en /gracias, que se puede abrir sin pagar. Eso
+   se cierra cuando se construya la activación automática del pase. */
 const GRUPO_WHATSAPP = 'https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb';
 
 function renderExtrasSocio(){
   const cont = document.getElementById('socExtras');
   if(!cont) return;
 
-  const bloqueFundador = socFundador
-    ? `<div class="soc-extra soc-extra--fundador">
-         <div class="soc-extra__ic">★</div>
-         <div class="soc-extra__txt">
-           <b>Eres Socio Fundador #${String(socFundador).padStart(3, '0')}</b>
-           <span>Tu número es tuyo para siempre y aparece en el carnet de tus mascotas.</span>
-         </div>
-       </div>`
-    : `<div class="soc-extra">
-         <div class="soc-extra__ic">★</div>
-         <div class="soc-extra__txt">
-           <b>Hazte Socio Fundador</b>
-           <span>Son 100 cupos. Tu número en el carnet, tus recomendaciones de negocios visitadas primero y precio congelado de por vida.</span>
-         </div>
-         <a class="btn btn-sm btn-primary" href="/quienes-somos#fundador">Quiero mi número</a>
-       </div>`;
+  if(socFundador){
+    cont.innerHTML = `
+      <div class="soc-extra soc-extra--fundador">
+        <div class="soc-extra__ic">★</div>
+        <div class="soc-extra__txt">
+          <b>Eres Socio Fundador #${String(socFundador).padStart(3, '0')}</b>
+          <span>Tu número es tuyo para siempre y aparece en el carnet de tus mascotas.</span>
+        </div>
+      </div>
+      <div class="soc-extra">
+        <div class="soc-extra__ic">💬</div>
+        <div class="soc-extra__txt">
+          <b>El grupo de los fundadores</b>
+          <span>Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos. Es tuyo por ser fundador.</span>
+        </div>
+        <a class="btn btn-sm btn-brass" href="${GRUPO_WHATSAPP}" target="_blank" rel="noopener">Entrar al grupo</a>
+      </div>`;
+    return;
+  }
 
   cont.innerHTML = `
     <div class="soc-extra">
-      <div class="soc-extra__ic">💬</div>
+      <div class="soc-extra__ic">★</div>
       <div class="soc-extra__txt">
-        <b>El grupo del club</b>
-        <span>Solo para socios. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos.</span>
+        <b>Hazte Socio Fundador</b>
+        <span>Son 100 cupos. Tu número en el carnet, el grupo privado de fundadores, tus recomendaciones de negocios visitadas primero y precio congelado de por vida.</span>
       </div>
-      <a class="btn btn-sm btn-brass" href="${GRUPO_WHATSAPP}" target="_blank" rel="noopener">Unirme al grupo</a>
-    </div>
-    ${bloqueFundador}`;
+      <a class="btn btn-sm btn-primary" href="/quienes-somos#fundador">Quiero mi número</a>
+    </div>`;
 }
 
 function renderTabsSocio(){

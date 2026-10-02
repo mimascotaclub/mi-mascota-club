@@ -397,12 +397,29 @@
   .verif-foto.cargada{ border-style:solid; border-color:var(--turquesa); color:var(--blanco); }
   .verif-foto.cargada img{ display:block; }
 
-  .verif-saltar{
-    background:none; border:none; color:rgba(255,255,255,0.42);
-    font-family:'Lato',sans-serif; font-size:14px; text-decoration:underline;
-    cursor:pointer; margin-top:16px; padding:4px;
+  /* El "lo hago después" era un enlace gris al 42% de opacidad: se leía como
+     letra chica, como una disculpa. Pasarlo a un bloque propio con su botón lo
+     convierte en lo que de verdad es: una opción legítima. Nada del chip puede
+     hacer fracasar una inscripción. */
+  .verif-saltar-wrap{
+    width:100%; margin-top:22px; padding-top:18px;
+    border-top:1px solid rgba(255,255,255,0.12);
   }
-  .verif-saltar:hover{ color:rgba(255,255,255,0.75); }
+  .verif-saltar-txt{
+    text-align:left; font-size:14px; line-height:1.6;
+    color:rgba(255,255,255,0.64); margin:0 0 12px;
+  }
+  .verif-saltar{
+    display:block; width:100%; margin:0; padding:14px 18px;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.28);
+    border-radius:14px; color:rgba(255,255,255,0.88);
+    font-family:'Lato',sans-serif; font-size:15px; font-weight:700;
+    text-decoration:none; cursor:pointer; transition:all .2s;
+  }
+  .verif-saltar:hover{
+    background:rgba(255,255,255,0.09); border-color:var(--amarillo);
+    color:var(--blanco);
+  }
 
   .verif-aviso{
     width:100%; text-align:left; margin:0 auto 14px;
@@ -738,7 +755,11 @@ function renderPaso(index, direccion){
         <button type="button" class="verif-mini" id="verifVerBtn">Ver la foto</button>
         <button type="button" class="verif-mini" id="verifCambiarBtn">Cambiar la foto</button>
       </div>
-      <div><button type="button" class="verif-saltar" id="verifSaltar">Lo hago después, desde Mi Mascota ID</button></div>
+      <div class="verif-saltar-wrap">
+        <p class="verif-saltar-txt">¿No tienes el número del chip a mano? Puedes agregarlo
+        después desde tu panel, cuando quieras.</p>
+        <button type="button" class="verif-saltar" id="verifSaltar">Continuar sin el chip</button>
+      </div>
     `;
   }
 
@@ -1179,10 +1200,7 @@ function renderPaso(index, direccion){
                 ? 'Estamos revisando la cartilla de ' + respuestas.mascota + ': dentro de 48 horas hábiles queda verificada y tu carnet empieza a canjear beneficios. Te avisamos por correo apenas esté listo.'
                 : 'Falta un paso para canjear beneficios: verificar que ' + respuestas.mascota + ' es tu mascota, con su número de chip y una foto de la cartilla veterinaria. Toma un minuto y se hace desde el mismo carnet, en Mi Mascota ID.')
               + '\n\n'
-              + 'El grupo del club, solo para socios: acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos. '
-              + 'https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb'
-              + '\n\n'
-              + '¿Quieres ser uno de los 100 Socios Fundadores? $9.990 por una vez: tu número del #001 al #100 en el carnet, tus recomendaciones de negocios visitadas primero y precio congelado de por vida. '
+              + '¿Quieres ser uno de los 100 Socios Fundadores? $9.990 por una vez: tu número del #001 al #100 en el carnet, el grupo privado de fundadores, tus recomendaciones de negocios visitadas primero y precio congelado de por vida. '
               + 'https://mimascotaclub.cl/quienes-somos#fundador'
           });
         } catch(emailErr){
@@ -1276,22 +1294,22 @@ function mostrarFinal(){
      la inscripción ya terminó y nada de esto puede entorpecerla. Son enlaces
      simples, sin lógica ni llamadas: aunque fallaran, el registro ya está
      guardado y el carnet ya existe.
-       · El grupo de WhatsApp es solo para socios, y por eso su enlace aparece
-         recién acá y en el correo — nunca en el sitio público.
        · El pase de fundador se ofrece en el mejor momento posible: cuando la
          persona acaba de decir que sí. Lleva a /quienes-somos y no directo al
-         pago, para que primero lea qué incluye. */
-  const bloqueGrupo = `
-      <div class="final-extra">
-        <div class="final-extra__t">💬 El grupo del club</div>
-        <p>Solo para socios. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos.</p>
-        <a href="https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb" target="_blank" rel="noopener" class="final-extra__btn">Unirme al grupo</a>
-      </div>`;
+         pago, para que primero lea qué incluye.
+
+     CAMBIO del 1 de octubre: el grupo de WhatsApp SALIÓ de acá y del correo de
+     bienvenida. El grupo es solo de fundadores, porque es lo único exclusivo que
+     se recibe por los $9.990; si lo ve todo el que se registra gratis, el pase
+     no vende nada. Ahora el grupo se nombra como parte de lo que incluye el
+     pase, y el enlace aparece recién en /mi-mascota cuando la persona ya es
+     fundadora. */
+  const bloqueGrupo = '';
 
   const bloqueFundador = `
       <div class="final-extra final-extra--fundador">
         <div class="final-extra__t">★ Sé uno de los 100 fundadores</div>
-        <p>$9.990 por una vez. Tu número del #001 al #100 en el carnet de ${mascotaNom}, tus recomendaciones de negocios visitadas primero y precio congelado de por vida.</p>
+        <p>$9.990 por una vez. Tu número del #001 al #100 en el carnet de ${mascotaNom}, el grupo privado de fundadores, tus recomendaciones de negocios visitadas primero y precio congelado de por vida.</p>
         <a href="/quienes-somos#fundador" class="final-extra__btn final-extra__btn--amarillo">Quiero mi número</a>
       </div>`;
 

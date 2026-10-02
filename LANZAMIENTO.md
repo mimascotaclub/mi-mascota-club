@@ -1,9 +1,10 @@
 # LANZAMIENTO — Mi Mascota Club
 
-**Última actualización: 23 de septiembre de 2026**
+**Última actualización: 1 de octubre de 2026**
 
 Cómo se lanza el club. `MARCA.md` dice para qué existe; este dice cómo se sale a
 buscar socios. `ESTADO.md` dice qué está construido.
+**La captación de negocios tiene archivo propio: `NEGOCIOS-CAPTACION.md`.**
 
 ---
 
@@ -116,7 +117,9 @@ social: *"Recomendado por 7 socios"*. El negocio recién llegado lleva **"Nuevo 
 club"** en vez de eso.
 
 **A los negocios se les cobra igual.** La recomendación cambia cómo llegan y lo fuerte
-que llega Jaime, no el modelo.
+que llega Jaime, no el modelo. **Pero no se les cobra todavía:** el modelo acordado el 30
+de septiembre es 12 meses gratis para los primeros, con el precio normal publicado desde
+el día uno y congelado para ellos. Todo el detalle en `NEGOCIOS-CAPTACION.md`.
 
 **Sin umbral fijo al principio.** 5 votos con 30 socios es imposible y una lista donde
 nunca pasa nada se ve muerta. Se comunica así: *"cada semana visitamos al negocio más
@@ -162,9 +165,9 @@ recomendado"*.
 
 - [x] Landing `/quienes-somos` con el pase fundador.
 - [x] Link de pago de Mercado Pago creado y conectado (`https://mpago.la/1gq8qDj`).
-- [x] URL de retorno del pago: `https://mimascotaclub.cl/quienes-somos#ya-pague`.
-- [ ] **Pegar esa URL de retorno en la configuración del link en Mercado Pago.**
-- [ ] Cambiar el nombre del negocio en Mercado Pago (hoy "Jaime Florian Design").
+- [x] URL de retorno del pago: ahora es `https://mimascotaclub.cl/gracias`, ya pegada en
+      la configuración del link en Mercado Pago.
+- [x] Cambiado el nombre del negocio en Mercado Pago (ya no dice "Jaime Florian Design").
 - [x] WhatsApp Business: perfil de empresa listo (nombre, logo, categoría, sitio,
       descripción, usuario `@mimascotaclub`) en el **+56 9 9713 2591**.
 - [x] Grupo de WhatsApp creado, con **aprobación de miembros activada** y los permisos
@@ -174,7 +177,13 @@ recomendado"*.
       *(Nota: WhatsApp Business no permite crear Comunidades — lo dice su propio artículo
       de ayuda. Por eso es un grupo normal. Un grupo se puede meter en una comunidad más
       adelante, así que no se pierde nada.)*
-- [ ] Textos de WhatsApp: bienvenida automática, mensaje de ausencia y respuestas rápidas.
+- [x] Textos de WhatsApp listos: mensaje de bienvenida (sirve igual para inscritos y no
+      inscritos, con menú numerado), respuestas rápidas y mensaje de ausencia. El horario
+      de atención quedó de **10:00 a 17:00 de lunes a viernes, sábado 11:00 a 14:00 y
+      domingo 12:00 a 14:00**. El mensaje de ausencia necesita ese horario configurado
+      para poder activarse.
+      *(Acordado: no decir "si es urgencia anda al veterinario" en el automático, y no
+      prometer respuesta inmediata.)*
 - [ ] Fotos para la landing: una de Jaime con Max, otra del carnet.
 
 **Construido el 23 de septiembre**
@@ -199,9 +208,22 @@ recomendado"*.
 - [x] Borrado el negocio de demostración: el directorio queda en cero antes de invitar
       gente real.
 
-**Plan acordado (26 de septiembre):** probar con **15 personas conocidas** primero,
-recoger el feedback, y recién después reiniciar los contadores y abrir al público. La
-prueba chica es para sacar los detalles que no se ven desde adentro.
+**Plan acordado (26 de septiembre):** probar con personas conocidas primero, recoger el
+feedback, y recién después reiniciar los contadores y abrir al público. La prueba chica
+es para sacar los detalles que no se ven desde adentro.
+**Corregido el 28 de septiembre: se parte con 5, no con 15.** Mandar 15 mensajes de una
+quema 15 oportunidades con la misma versión del flujo; con 5 se arregla lo que aparezca
+y los otros 10 reciben algo mejor.
+
+**Los mensajes para esas personas ya están escritos y aprobados** (dos versiones: para
+quienes conocen la historia de Max y para quienes no). Reglas que salieron de ahí y que
+valen para todo lo que se escriba: nada que suene a comercial, varios mensajes cortos en
+vez de un ladrillo, no hablar de decepción ni advertencias, y **no contar la historia de
+Max a quien no la conoce** — solo la familia sabe lo que pasó.
+
+**Pendiente del 30 de septiembre: el grupo de WhatsApp.** Entró alguien que no pagó el
+pase, porque hoy el enlace lo ve todo socio registrado. Hay que decidir si el grupo es de
+socios o de fundadores (el detalle y las dos opciones están en `ESTADO.md`).
 
 **Construido el 25 de septiembre**
 
@@ -215,8 +237,24 @@ prueba chica es para sacar los detalles que no se ven desde adentro.
 - [x] El titular de la home dejó de decir "para ti como dueño de mascota".
 - [x] El menú marca la página en la que estás.
 
+**Presupuesto de despliegue (verificado el 1 de octubre):** plan Personal de US$9 al mes
+con **1.000 créditos**, y **15 créditos por deploy** = unos 66 deploys al mes. Los
+créditos no se acumulan y el ciclo va del 3 al 2. El detalle y las tres reglas para que
+alcancen están en `ESTADO.md`.
+
 **Por construir, en orden de urgencia**
 
+- [ ] **Activación automática del pase de fundador** — el paso de "avísame por WhatsApp"
+      se elimina. El correo se pide *antes* de ir a pagar, y `/gracias` activa el pase
+      sola y muestra el número. El SQL (`supabase-fundador-auto-v29.sql`) ya está escrito
+      y se puede correr en Supabase sin gastar créditos. El diseño completo está en
+      `ESTADO.md`. **Es lo primero del próximo push.**
+- [x] **El chip como opción visible en el registro**, con su propio botón "Continuar sin
+      el chip" (desplegado el 1 de octubre).
+- [x] **El grupo de WhatsApp pasó a ser solo de fundadores** (1 de octubre). Salió de la
+      pantalla final del registro, del correo de bienvenida y del panel de los socios que
+      no pagaron; ahora se nombra como parte de lo que incluye el pase. El detalle y el
+      agujero que queda en `/gracias` están en `ESTADO.md`.
 - [ ] **Sistema de votos de "Recomienda un negocio"** — por ahora el botón lleva al buzón
       de sugerencias, que cumple la promesa de la landing con lo que ya existe. El
       contador de votos y las etiquetas "Recomendado por X socios" quedan para cuando
