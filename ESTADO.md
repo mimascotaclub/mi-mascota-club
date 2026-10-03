@@ -409,14 +409,59 @@ así que o se usaban o se perdían):
   sin el chip"**. Solo CSS y texto; la lógica del registro no se tocó.
 - ✅ **El grupo de WhatsApp cerrado a fundadores** (ver la sección de arriba).
 
-**El próximo bloque de trabajo, todo en un solo push:**
+### ⬜ QUEDÓ FUERA del 1 de octubre — es el PUSH 1 del ciclo de octubre
 
-1. Correr `supabase-fundador-auto-v29.sql` en Supabase (gratis, se puede antes).
-2. Paso del correo antes de pagar en `quienes-somos.html`.
-3. Activación automática en `gracias.html`, mostrando el botón del grupo **solo** si el
-   pase quedó activado (así se cierra el último agujero del grupo).
-4. Bloque de pagos pendientes en `/mi-panel`.
-5. QA antes del push, y recién ahí `git add .` → `git commit` → `git push`.
+Lo que estaba diseñado y **no se alcanzó a construir** esa noche, porque no quedaban
+créditos para corregir si algo salía mal. **Sigue siendo lo primero de la lista.** El
+diseño completo está más arriba, en "Fundador automático".
+
+1. ⬜ **Correr `supabase-fundador-auto-v29.sql` en Supabase.** Gratis, no gasta créditos
+   de Netlify, no toca el sitio. Se puede hacer antes que todo lo demás y conviene, para
+   que al llegar al código las funciones ya existan.
+2. ⬜ **Paso del correo antes de pagar, en `quienes-somos.html`.** Con sesión iniciada no
+   pide nada y muestra el correo; sin sesión, un campo validado con `socio_existe()` que
+   manda a registrarse si el correo no está. Guarda el correo en `localStorage` antes de
+   salir a Mercado Pago.
+3. ⬜ **`/gracias` automática, sin avisar por WhatsApp.** Lee `payment_id` de la URL,
+   recupera el correo por sesión o `localStorage`, llama a `activar_fundador()` y muestra
+   *"Listo. Eres el Socio Fundador #007"*. Sin prometer plazos. El botón del grupo se
+   muestra **solo si la activación resultó**, y con eso se cierra el último agujero del
+   grupo. Plan B: campo para confirmar el correo. Plan C: `fundadores_pendientes`.
+4. ⬜ **Bloque de pagos pendientes en `/mi-panel`**, leyendo
+   `admin_fundadores_pendientes()`.
+5. ⬜ **QA antes del push**, y recién ahí `git add .` → `git commit` → `git push`.
+
+Los cuatro cambios son **un solo push de 15 créditos**. Lo que no se hace es apurarlos:
+este push toca el flujo de pago y hay que dejar margen para un segundo deploy el mismo
+día si el QA saca algo.
+
+### El resto del ciclo de octubre, agrupado por push
+
+Cada push son 15 créditos. Con 1.000 al mes hay espacio para 66, así que **lo que se
+cuida no es el número de pushes: es no gastar cinco en una tarde corrigiendo.** Un push
+por bloque de trabajo, probado antes de subir.
+
+**PUSH 2 — el flujo de negocios.** Es lo que sigue después del fundador, porque el
+formulario de negocios es lo primero que ve un local cuando Jaime le manda el link y hoy
+se ve de otra época al lado del de dueños.
+
+- ⬜ Migrar `formulario-negocio-v3.html` al estilo del registro (OTP + mascota animada).
+- ⬜ Revisar que aprobar fichas desde el celular en `/mi-panel` siga cómodo.
+
+**PUSH 3 — "Recomienda un negocio".** Votos sobre el buzón de sugerencias y las
+etiquetas "Recomendado por X socios" / "Nuevo en el club". Tiene sentido cuando haya
+socios suficientes para que la lista no se vea muerta.
+
+**Gratis, sin tocar créditos, y es lo que de verdad mueve el proyecto este mes:**
+
+- ⬜ Correr el SQL v29 en Supabase.
+- ⬜ Escribirle a los primeros **5 negocios** (mensajes en `NEGOCIOS-CAPTACION.md`).
+- ⬜ Escribirle a las primeras **5 personas**.
+- ⬜ Borrar el fundador de prueba #001.
+- ⬜ Confirmar "Aprobar nuevos miembros" en el grupo de WhatsApp.
+- ⬜ Las dos fotos para la landing (Jaime con Max, el carnet).
+- ⬜ Preguntar en el grupo si quieren el asistente y contar cuántas dudas llegan en tres
+  semanas: así se valida el bot sin construirlo.
 
 **La prueba cerrada va en curso** con conocidos (se bajó de 15 a 5 personas para partir).
 Después de eso: reiniciar contadores, encender el interruptor de verificación, volver a

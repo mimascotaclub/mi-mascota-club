@@ -215,11 +215,19 @@ es para sacar los detalles que no se ven desde adentro.
 quema 15 oportunidades con la misma versión del flujo; con 5 se arregla lo que aparezca
 y los otros 10 reciben algo mejor.
 
-**Los mensajes para esas personas ya están escritos y aprobados** (dos versiones: para
-quienes conocen la historia de Max y para quienes no). Reglas que salieron de ahí y que
-valen para todo lo que se escriba: nada que suene a comercial, varios mensajes cortos en
-vez de un ladrillo, no hablar de decepción ni advertencias, y **no contar la historia de
-Max a quien no la conoce** — solo la familia sabe lo que pasó.
+**Los mensajes para esas personas se escribieron y se aprobaron** (dos versiones: para
+quienes conocen la historia de Max y para quienes no), pero **el texto no quedó guardado
+en el repo** — vive solo en el WhatsApp de Jaime, en los que ya mandó. Si hace falta
+volver a usarlos, copiarlos desde ahí y pegarlos acá.
+
+Las reglas que salieron de escribirlos, y que valen para todo lo que se redacte:
+
+- Nada que suene a comercial ni a folleto.
+- Varios mensajes cortos, nunca un ladrillo.
+- No hablar de decepción, advertencias ni presión.
+- **No contar la historia de Max a quien no la conoce.** Solo la familia sabe lo que
+  pasó, y meterlo en un mensaje a un conocido suena a argumento de venta.
+- Nada de frases que Jaime no diría ("ahí me cayó la teja" se descartó por eso).
 
 **Pendiente del 30 de septiembre: el grupo de WhatsApp.** Entró alguien que no pagó el
 pase, porque hoy el enlace lo ve todo socio registrado. Hay que decidir si el grupo es de
