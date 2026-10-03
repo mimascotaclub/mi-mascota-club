@@ -1,0 +1,250 @@
+/* ============================================================
+   Mi Mascota Club — Formulario de negocios, ESTILO OSCURO
+   (3 de octubre de 2026)
+   ------------------------------------------------------------
+   Se carga DESPUÉS de mmc-ficha.css y mmc-negocios.css.
+   Pone el formulario de negocios en la misma línea visual que el
+   registro de dueños (formulario-registro-demo-v3.html): fondo
+   negro, eyebrow turquesa, títulos blancos, botón amarillo,
+   barra de progreso amarilla arriba y la mascota en el código.
+
+   Truco: los colores de mmc-ficha.css son variables. Acá se
+   redefinen DENTRO de .form-shell (oscuro) y se vuelven a dejar
+   claras dentro de .preview-frame, para que la vista previa de la
+   ficha se vea igual que en el directorio.
+
+   REGLA DEL PROYECTO: nunca width:100vw, siempre width:100%.
+   ============================================================ */
+
+body.mmc { background: #151515; }
+
+.form-shell {
+  --mmc-ink:          #FFFFFF;
+  --mmc-ink-2:        rgba(255,255,255,.72);
+  --mmc-ink-3:        rgba(255,255,255,.45);
+  --mmc-bg:           #151515;
+  --mmc-surface:      rgba(255,255,255,.04);
+  --mmc-surface-2:    rgba(255,255,255,.08);
+  --mmc-surface-3:    rgba(255,255,255,.03);
+  --mmc-line:         rgba(255,255,255,.10);
+  --mmc-line-strong:  rgba(255,255,255,.18);
+  --mmc-err:          #FF7A7A;
+  --mmc-brand:        #FFCE00;
+  --mmc-brand-ink:    #151515;
+  background: #151515;
+  color: #fff;
+}
+
+/* La vista previa de la ficha vuelve a los colores claros del directorio */
+.form-shell .preview-frame {
+  --mmc-ink:          #151515;
+  --mmc-ink-2:        #5C5C5C;
+  --mmc-ink-3:        #8E8E8E;
+  --mmc-bg:           #FFFFFF;
+  --mmc-surface:      #FFFFFF;
+  --mmc-surface-2:    #F3F3F3;
+  --mmc-surface-3:    #FAFAFA;
+  --mmc-line:         rgba(21,21,21,.10);
+  --mmc-line-strong:  rgba(21,21,21,.16);
+  --mmc-brand:        #151515;
+  --mmc-brand-ink:    #FFFFFF;
+  color: #151515;
+  background: #fff;
+  border: 0;
+}
+
+/* ---------- Barra superior: igual que el registro de dueños ---------- */
+.form-top {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom: 0;
+  padding: 18px 24px 0;
+  position: relative;
+}
+.form-top__brand {
+  font-size: 13px; font-weight: 900; letter-spacing: .08em;
+  color: rgba(255,255,255,.55);
+}
+.form-top__step {
+  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  color: rgba(255,255,255,.55);
+}
+/* La barra de progreso va pegada arriba, de punta a punta, como en dueños */
+.progress {
+  position: fixed; top: 0; left: 0; right: 0;
+  max-width: none; margin: 0; height: 4px; border-radius: 0;
+  background: rgba(255,255,255,.08); z-index: 60;
+}
+.progress__bar { background: #FFCE00; border-radius: 0; }
+
+.form-main { padding-top: clamp(28px, 7vh, 72px); }
+
+/* ---------- Textos ---------- */
+.eyebrow {
+  color: #47C9C9; font-weight: 900; font-size: 13px;
+  letter-spacing: .12em; margin-bottom: 14px;
+}
+.step h2 {
+  text-transform: none;
+  font-size: clamp(28px, 4.6vw, 42px);
+  line-height: 1.12; letter-spacing: -.01em;
+  color: #fff; margin-bottom: 14px;
+}
+.step p.lead { color: rgba(255,255,255,.62); font-size: 16px; }
+.step p.lead strong { color: #fff; }
+
+/* ---------- Campos ---------- */
+.field > label, .field__label { color: rgba(255,255,255,.85); font-weight: 700; }
+.form-shell .input,
+.form-shell input[type=text], .form-shell input[type=email], .form-shell input[type=tel],
+.form-shell input[type=url], .form-shell input[type=number], .form-shell input[type=time],
+.form-shell select, .form-shell textarea {
+  width: 100%;
+  font: inherit; font-size: 17px; font-weight: 700;
+  color: #fff;
+  background-color: rgba(255,255,255,.04);   /* background-color y NO background: el atajo
+                                                borraba el no-repeat de la flecha del select */
+  border: 2px solid rgba(255,255,255,.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  outline: none;
+  color-scheme: dark;
+}
+.form-shell input::placeholder, .form-shell textarea::placeholder { color: rgba(255,255,255,.3); font-weight: 400; }
+.form-shell .input:focus, .form-shell input:focus,
+.form-shell select:focus, .form-shell textarea:focus {
+  border-color: #FFCE00;
+  box-shadow: none;
+}
+.form-shell select {
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%2347C9C9' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.form-shell select option, .form-shell select optgroup { background: #1E1E1E; color: #fff; }
+.field.has-error input, .field.has-error select, .field.has-error textarea { border-color: #FF7A7A; }
+
+.prefix__tag {
+  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.15); border-right: 0;
+  border-radius: 12px 0 0 12px;
+  color: rgba(255,255,255,.7); font-weight: 700;
+}
+.prefix input { border-radius: 0 12px 12px 0; }
+
+/* Lista de comunas de cobertura */
+#coberturaLista { border-color: rgba(255,255,255,.15) !important; border-radius: 12px !important; }
+#coberturaLista label { color: rgba(255,255,255,.85); }
+#coberturaLista input { accent-color: #FFCE00 !important; }
+
+/* ---------- Cascada del beneficio ---------- */
+.cascade__num { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
+.cascade__step.is-done .cascade__num { background: #47C9C9; color: #151515; }
+
+/* ---------- Imágenes ---------- */
+.drop { background: rgba(255,255,255,.03); border: 2px dashed rgba(255,255,255,.2); border-radius: 16px; }
+.drop:hover, .drop.is-over { border-color: #47C9C9; background: rgba(71,201,201,.06); }
+.drop__t { color: #fff; }
+.drop.has-file .drop__body { background: rgba(21,21,21,.85); color: #fff; }
+.drop.has-file .drop__body .drop__t { color: #fff; }
+
+/* ---------- Avisos ---------- */
+.note {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  color: rgba(255,255,255,.75);
+}
+.note strong { color: #fff; }
+
+/* ---------- Casillas de confirmación ---------- */
+.choice { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.16); border-radius: 14px; }
+.choice:hover { border-color: rgba(255,255,255,.3); }
+.choice__dot { border-color: rgba(255,255,255,.35); }
+.choice input:checked ~ .choice__dot { border-color: #FFCE00; background: #FFCE00; }
+.choice__dot::after { background: #151515; }
+.choice:has(input:checked) { border-color: #FFCE00; background: rgba(255,206,0,.07); }
+.choice__txt { color: rgba(255,255,255,.85); font-size: 14px; line-height: 1.55; }
+.choice__txt a { color: #FFCE00; font-weight: 700; }
+
+/* ---------- Navegación: botón amarillo como en dueños ---------- */
+.nav { border-top: 0; padding-top: 8px; }
+.btn { font-weight: 900; font-size: 16px; }
+.btn--primary {
+  background: #FFCE00; color: #151515;
+  padding: 16px 34px; border-radius: 100px;
+}
+.btn--primary:hover { box-shadow: 0 10px 24px rgba(255,206,0,.25); }
+.btn--ghost { color: rgba(255,255,255,.55); font-weight: 700; }
+.btn--ghost:hover { color: #fff; }
+.spinner { border-color: rgba(21,21,21,.25); border-top-color: #151515; }
+
+/* ---------- Vista previa ---------- */
+.form-main:has(.step[data-step="9"].is-active) .form-wrap { max-width: 1040px; }
+.form-main:has(.step[data-step="8"].is-active) .form-wrap { max-width: 760px; }
+.preview-tabs { background: rgba(255,255,255,.08); }
+.preview-tab { color: rgba(255,255,255,.6); }
+.preview-tab.is-active { background: #FFCE00; color: #151515; }
+.summary { border-color: rgba(255,255,255,.12); }
+.summary__row { border-color: rgba(255,255,255,.08); }
+.summary__row dt { color: rgba(255,255,255,.5); }
+.summary__row dd { color: #fff; }
+
+/* ---------- Pantalla final ---------- */
+.done__mark { background: #47C9C9; color: #151515; }
+
+/* ---------- Paso del código: mascota y casillas (igual que dueños) ---------- */
+.mascota-wrap { display: flex; justify-content: flex-start; margin: 0 0 6px; }
+.mascota-figura { position: relative; width: clamp(120px, 34vw, 168px); height: clamp(151px, 42vw, 211px); }
+.mascota-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  opacity: 0; transform: scale(1);
+  transition: opacity .35s ease-in-out, transform .35s cubic-bezier(.34,1.2,.64,1);
+}
+.mascota-frame.viendo { opacity: 1; }
+.mascota-figura.mascota-tapada .mascota-frame.viendo { opacity: 0; transform: scale(.96); }
+.mascota-figura.mascota-tapada .mascota-frame.tapada { opacity: 1; }
+.mascota-figura.mascota-tapada.mascota-espiando .mascota-frame.tapada { opacity: 0; }
+.mascota-figura.mascota-tapada.mascota-espiando .mascota-frame.espiando { opacity: 1; transform: scale(1.04); }
+
+.codigo-boxes { display: flex; gap: 10px; margin-top: 8px; }
+.form-shell .codigo-box {
+  width: 52px; height: 60px; padding: 0; text-align: center;
+  font-size: 26px; font-weight: 900; color: #fff;
+  background: rgba(255,255,255,.04); border: 2px solid rgba(255,255,255,.18);
+  border-radius: 10px; outline: none; transition: border-color .2s, transform .15s;
+}
+.form-shell .codigo-box:focus { border-color: #FFCE00; transform: translateY(-2px); }
+.form-shell .codigo-box.error { border-color: #FF5C5C; animation: shake .35s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (max-width: 380px) {
+  .codigo-boxes { gap: 7px; }
+  .form-shell .codigo-box { width: 44px; height: 54px; font-size: 22px; }
+}
+.codigo-estado { margin-top: 14px; font-size: 14px; min-height: 20px; color: rgba(255,255,255,.6); }
+.codigo-estado.ok { color: #47C9C9; }
+.codigo-estado.err { color: #FF7A7A; }
+.codigo-estado .spinner { border-color: rgba(255,255,255,.2); border-top-color: #FFCE00; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.codigo-acciones { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 12px; }
+.link-btn {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 700;
+  color: #47C9C9; text-decoration: underline;
+}
+.link-btn:disabled { color: rgba(255,255,255,.3); cursor: default; text-decoration: none; }
+
+/* Aviso de "seguimos donde quedaste" */
+.borrador {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  background: rgba(71,201,201,.08); border: 1px solid rgba(71,201,201,.35);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 24px;
+  font-size: 14px; color: rgba(255,255,255,.85);
+}
+.borrador[hidden] { display: none; }
+
+/* En teléfonos angostos la ficha necesita unos 345px: se le da más ancho al
+   marco de la vista previa para que no se corte por la derecha. */
+@media (max-width: 440px) {
+  .form-shell .preview-frame { padding: 6px; margin-left: -8px; margin-right: -8px; }
+}

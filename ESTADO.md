@@ -132,15 +132,20 @@ solo con el pase digital para no frenarse cotizando y despachando.
 Lo que incluye: número de fundador visible en el carnet, insignia permanente, voto para
 elegir qué negocios entran y precio congelado de por vida.
 
-**El circuito que está HOY en producción (con paso manual):**
+**El circuito que está HOY en producción (automático desde el 3 de octubre):**
 
-1. La persona paga en el link de Mercado Pago (hoy `https://mpago.la/1pwEBKm`; ver abajo).
-2. Mercado Pago la devuelve a `/gracias`, que muestra el check, el contador de cupos y un
-   botón de WhatsApp al **+56 9 9713 2591**.
-3. La persona avisa por WhatsApp.
-4. Jaime confirma el pago en Mercado Pago y la marca en `/mi-panel` → Socios Fundadores.
+1. En `/quienes-somos` la persona entra con el código a su correo (si no tenía sesión).
+2. Paga en el link de Mercado Pago `https://mpago.la/1pwEBKm`.
+3. Toca **"← Volver a Mi Mascota Club"** y llega a `/gracias`, que le pregunta a Mercado
+   Pago por el pago y activa el pase sola. A Jaime le llega un correo por cada fundador.
+4. Lo que no se activa solo queda en `/mi-panel` → "Pagos de fundador pendientes".
 
-### Fundador automático y VERIFICADO — CONSTRUIDO, falta activarlo (3 de octubre)
+**Boleta (decidido el 3 de octubre):** Jaime **empieza a cobrar a los fundadores así**,
+sin boleta, y consulta al contador después. Mercado Pago entrega un comprobante de pago,
+que no es un documento tributario. Va de la mano con la decisión del 25 de septiembre de
+no frenar el lanzamiento por la formalización.
+
+### Fundador automático y VERIFICADO — EN PRODUCCIÓN (3 de octubre)
 
 **Decisión del 30 de septiembre: el paso de "avísame por WhatsApp" se elimina.** Acaba
 de pagar y está contento: es el peor momento para pedirle un trámite.
@@ -207,7 +212,7 @@ con mala intención, no en un curioso.
 | Bloque de pagos pendientes en `/mi-panel` | ✅ En producción |
 | `supabase-cerrar-socio-existe-v31.sql` | ✅ Corrido después del push |
 | Link nuevo `1pwEBKm` en `quienes-somos.html` | ✅ Push del 3 de octubre (segundo) |
-| Desactivar el link viejo `1gq8qDj` en Mercado Pago | ⬜ Jaime, después del segundo push |
+| Link viejo `1gq8qDj` | ✅ Eliminado en Mercado Pago el 3 de octubre |
 
 ### QA del 3 de octubre (hecho)
 
@@ -331,7 +336,8 @@ días.
 **Agujero cerrado el 3 de octubre:** `/gracias` ya no tiene el enlace del grupo escrito;
 lo recibe del servidor solo si el pase se activó de verdad.
 
-Revisar también que "Aprobar nuevos miembros" siga activado en los ajustes del grupo.
+"Aprobar nuevos miembros" está activado en los ajustes del grupo (confirmado el 3 de
+octubre). Es la llave real del grupo: no apagarla nunca.
 A quien ya entró sin pagar **no se le echa**: son conocidos y es una prueba cerrada.
 
 ---
@@ -513,7 +519,7 @@ arriba. **El orden importa:**
 4. ✅ QA en mimascotaclub.cl (lista abajo; resultado más arriba).
 5. ✅ Correr `supabase-cerrar-socio-existe-v31.sql`. **Después** del push, nunca antes.
 6. ✅ Borrados los fundadores de prueba #001 y #002 (la tabla quedó vacía: el primero
-   real será el #001). ⬜ Confirmar "Aprobar nuevos miembros" en el grupo.
+   real será el #001). ✅ "Aprobar nuevos miembros" confirmado.
 
 **QA:**
 
@@ -543,8 +549,13 @@ por bloque de trabajo, probado antes de subir.
 formulario de negocios es lo primero que ve un local cuando Jaime le manda el link y hoy
 se ve de otra época al lado del de dueños.
 
-- ⬜ Migrar `formulario-negocio-v3.html` al estilo del registro (OTP + mascota animada).
+- 🟡 Migrar `formulario-negocio-v3.html` al estilo del registro (OTP + mascota animada).
+  **Construido el 3 de octubre, falta SQL v32 + push + QA** (ver "Formulario de negocios
+  nuevo" más abajo).
 - ⬜ Revisar que aprobar fichas desde el celular en `/mi-panel` siga cómodo.
+- **En paralelo, Jaime diseña el look and feel de cómo se ven los negocios** (tarjetas y
+  ficha). La IA trabaja el formulario y no toca el diseño de las fichas hasta que él lo
+  entregue.
 
 **PUSH 3 — "Recomienda un negocio".** Votos sobre el buzón de sugerencias y las
 etiquetas "Recomendado por X socios" / "Nuevo en el club". Tiene sentido cuando haya
@@ -553,8 +564,9 @@ socios suficientes para que la lista no se vea muerta.
 **Gratis, sin tocar créditos, y es lo que de verdad mueve el proyecto este mes:**
 
 - ⬜ Escribirle a los primeros **5 negocios** (mensajes en `NEGOCIOS-CAPTACION.md`).
+  **Espera al formulario de negocios terminado y probado** (decidido el 3 de octubre):
+  no se invita a nadie a un formulario que todavía no está listo.
 - ⬜ Escribirle a las primeras **5 personas**.
-- ⬜ Confirmar "Aprobar nuevos miembros" en el grupo de WhatsApp.
 - ⬜ Las dos fotos para la landing (Jaime con Max, el carnet).
 - ⬜ Preguntar en el grupo si quieren el asistente y contar cuántas dudas llegan en tres
   semanas: así se valida el bot sin construirlo.
@@ -565,10 +577,109 @@ mostrar el botón de compartir y recién ahí abrir al público.
 
 ---
 
+## Formulario de negocios nuevo — CONSTRUIDO (3 de octubre), falta activarlo
+
+Ruta pública: **`/formulario-negocio`** (sirve `formulario-negocio-v3.html`; el nombre del
+archivo no se cambió para no romper enlaces). Decisiones de Jaime del 3 de octubre:
+
+- **Preguntas agrupadas por tema (9 pantallas)**, no una por pantalla (serían ~25).
+- **El correo se confirma en la pantalla del responsable**, cerca del final, no al
+  principio: pedir un código antes de contar nada es una barrera.
+- **Mismo estilo que el registro de dueños** (fondo negro, eyebrow turquesa, botón
+  amarillo, barra de progreso arriba, la mascota en el código). Lo que Jaime diseña en
+  paralelo es cómo se ven los negocios **en el directorio y en su ficha**, no el
+  formulario.
+
+Lo construido:
+
+- `css/mmc-negocios-oscuro.css` (nuevo): el estilo oscuro. Redefine las variables de
+  color dentro de `.form-shell` y las vuelve a dejar claras dentro de `.preview-frame`,
+  así la vista previa de la ficha se ve como en el directorio.
+- **Paso 8 nuevo, "Confirma tu correo"**: el código se manda solo al llegar, la mascota
+  se tapa los ojos, y al acertar pasa sola a la vista previa. Si vuelve atrás a corregir
+  algo, no se le pide el código de nuevo, salvo que cambie el correo.
+- **Verificación en el servidor** (`supabase-negocio-correo-v32.sql`): al acertar el
+  código, `negocio_verificar_correo()` entrega un comprobante de 2 horas, y
+  `registrar_solicitud_negocio()` **rechaza la inscripción sin ese comprobante** o si es
+  de otro correo. El comprobante se gasta al inscribir. Usa los mismos límites del v30.
+  El registro de dueños **no** tiene esto todavía (allá se revisa en el navegador).
+- **Textos nuevos** según `NEGOCIOS-CAPTACION.md`: fuera "miles de dueños" y "clientes
+  que ya pagan una membresía"; ahora dice gratis el primer año, lo único que se pide es
+  un beneficio, y nada se publica sin que el negocio lo vea.
+- **Guarda el avance** en el navegador (`mmc_negocio_borrador`, 30 días). Al volver ve
+  "Seguir donde quedé / Empezar de cero". Las fotos y el correo confirmado no se guardan.
+- En el teléfono la vista previa parte en "Mobile", y el marco se ensanchó para que la
+  ficha no se corte (la ficha necesita ~345 px).
+
+**Para activarlo, en este orden:**
+1. ⬜ Correr `supabase-negocio-correo-v32.sql` en Supabase, **justo antes del push**
+   (desde ahí el formulario viejo ya no puede inscribir; hoy no hay negocios invitados).
+2. ⬜ Push.
+3. ⬜ QA en `mimascotaclub.cl/formulario-negocio`, con un negocio de prueba:
+   las 9 pantallas, un tipo con local y uno sin local, el código (uno malo y el bueno),
+   "Cambiar correo", cerrar a la mitad y "Seguir donde quedé", la vista previa en el
+   teléfono, enviar, y verla llegar a `/mi-panel` → Fichas por aprobar. Después,
+   rechazarla para dejar la cola limpia.
+
+### Los correos a los negocios (pendiente, conversado el 3 de octubre)
+
+EmailJS gratis da **2 plantillas** y están las dos ocupadas:
+
+- **La del código** (`EMAILJS_TEMPLATE_ID_OTP`) es 100% genérica ("Tu código de acceso…
+  escríbelo en la pantalla donde lo pediste"). **Sirve tal cual para negocios**, y ya la
+  usa `/mi-negocio`.
+- **La genérica de avisos** (`template_u9x5p1i`) **no sirve tal cual para negocios**:
+  trae fijos bloques pensados para el dueño ("Cómo se usa: llegas al negocio y muestras
+  tu carnet…", "Ayúdanos a hacer crecer el club", "puedes borrar tu cuenta desde tu
+  carnet"). Es el mismo problema que se vio en el aviso de fundador.
+
+**Hoy al negocio no le llega ningún correo** ni al inscribirse ni al aprobarse: el código
+de negocio (NEG…) y el enlace a `/mi-negocio` se los pasa Jaime a mano. **La solución
+propuesta:** sacar esos bloques fijos a una variable, para que la plantilla sea genérica
+de verdad, y armar los correos "Recibimos tu inscripción", "Tu ficha está publicada (tu
+código es NEG…)" y "Hay que ajustar algo". Para eso hace falta el HTML **actual** de la
+plantilla, copiado desde EmailJS (el `emailjs-template-bienvenida.html` del repo está
+desactualizado).
+
 ## Pendientes, en orden
 
-**El flujo del dueño está cerrado**, y desde el 23 de septiembre el del pase fundador
-también. Lo que queda abajo es otra cosa.
+**El flujo del dueño está cerrado, y desde el 3 de octubre el del pase fundador también
+(automático, verificado y probado con pagos reales).** Lo que queda abajo es otra cosa.
+
+### La lista corta (acordada el 3 de octubre, Jaime pide que se le recuerde cuando la pida)
+
+**Antes de seguir cobrando a escala**
+1. Consultar al contador por la boleta de las membresías (se cobra igual mientras tanto).
+
+**Negocios — lo que sigue**
+2. Formulario de negocios al estilo del registro de dueños (código por correo + mascota). *Construido el 3 de octubre: falta SQL v32, push y QA.*
+3. Revisar que aprobar fichas desde el celular en `/mi-panel` siga cómodo.
+4. Escribirles a los primeros 5 negocios — **recién con el formulario listo y probado.**
+5. Afiche imprimible con el QR para el mesón.
+6. Páginas por categoría (ej. `/veterinarias`) como material de venta.
+7. Aplicar el look and feel de tarjetas y fichas que diseña Jaime.
+
+**Lanzamiento — después de negocios**
+8. "Recomienda un negocio" con votos + etiquetas "Recomendado por X socios" / "Nuevo en el club".
+9. Volver a mostrar el botón "Compartir en historias".
+10. Ofrecer el pase al terminar el registro.
+11. Las dos fotos de la landing (Jaime con Max, el carnet).
+12. Preguntar en el grupo de fundadores si quieren el asistente "¿Es urgencia?".
+
+**Para abrir al público (decisiones)**
+13. Terminar la prueba cerrada con las 5 personas.
+14. Encender el interruptor de verificación, resolviendo antes a los socios en `registrado`.
+15. Moderación de las fotos que suben los dueños.
+
+**Mejoras chicas**
+- Opción B del pago (vuelta automática + webhook).
+- Sacar el bloque "Cómo se usa" de la plantilla genérica de EmailJS.
+- Revisar a ojo la barra de menú en todas las vistas.
+
+**Cuando haya volumen:** precios Pro/Premium fuera del registro, Preapproval, gamificación,
+login con Google, `supabase-fix-foto.sql`.
+
+El detalle de cada punto está en las secciones de abajo.
 
 ### Antes de cobrarle a alguien
 

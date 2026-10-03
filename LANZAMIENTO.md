@@ -157,7 +157,8 @@ recomendado"*.
 **Decisiones y trámites**
 
 - [ ] Preguntarle al contador si se puede emitir boleta por las membresías con el inicio
-      de actividades actual.
+      de actividades actual. **Decidido el 3 de octubre: se empieza a cobrar a los
+      fundadores sin esperar esta respuesta.**
 - [ ] Cotizar el kit (bandana, sticker de puerta o auto, placa QR) para decidir precio y
       entrega. Los despachos en Santiago se comen el margen: evaluar entrega en persona.
 
@@ -165,8 +166,7 @@ recomendado"*.
 
 - [x] Landing `/quienes-somos` con el pase fundador.
 - [x] Link de pago de Mercado Pago creado y conectado. Desde el 3 de octubre es
-      `https://mpago.la/1pwEBKm`; el viejo `1gq8qDj` no devolvía al sitio y hay que
-      desactivarlo.
+      `https://mpago.la/1pwEBKm`; el viejo `1gq8qDj` no devolvía al sitio y se eliminó.
 - [x] URL de retorno del pago: ahora es `https://mimascotaclub.cl/gracias`, ya pegada en
       la configuración del link en Mercado Pago.
 - [x] Cambiado el nombre del negocio en Mercado Pago (ya no dice "Jaime Florian Design").

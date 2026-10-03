@@ -11,12 +11,14 @@
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-<meta name="theme-color" content="#FFCE00">
+<meta name="theme-color" content="#151515">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/mmc-ficha.css">
 <link rel="stylesheet" href="css/mmc-negocios.css">
+<!-- Desde el 3 de octubre el formulario usa el estilo oscuro del registro de dueños. -->
+<link rel="stylesheet" href="css/mmc-negocios-oscuro.css">
 </head>
 <body class="mmc">
 
@@ -36,14 +38,28 @@
 
     <!-- ============ 0 · Intro ============ -->
     <section class="step is-active" data-step="0">
-      <p class="eyebrow">Inscripción de negocios</p>
-      <h2>Suma tu negocio<br>a la red</h2>
-      <p class="lead">Miles de dueños de mascotas en Santiago buscan dónde comprar, comer y atenderse. Publicamos tu ficha con el beneficio que ofreces y te llevamos clientes que ya pagan una membresía.</p>
+      <p class="eyebrow">Para negocios</p>
+      <h2>Suma tu negocio<br>a Mi Mascota Club</h2>
+      <!-- Textos del 3 de octubre, alineados con NEGOCIOS-CAPTACION.md: nada de
+           cifras infladas ("miles de dueños"), y lo que se ofrece es lo acordado:
+           gratis el primer año a cambio de un beneficio. -->
+      <p class="lead">Somos un club de dueños de mascotas en Santiago. Los socios encuentran acá veterinarias, peluquerías, tiendas y lugares pet-friendly, y tienen un beneficio en cada uno.</p>
+
+      <div class="borrador" id="borradorAviso" hidden>
+        <span>Tienes una inscripción a medio llenar en este navegador.</span>
+        <button type="button" class="btn btn--primary" id="btnSeguirBorrador" style="padding:11px 22px;font-size:14px">Seguir donde quedé</button>
+        <button type="button" class="link-btn" id="btnBorrarBorrador">Empezar de cero</button>
+      </div>
+
       <div class="note">
         <span class="note__ico">✱</span>
-        <div><strong>Un requisito:</strong> tu negocio tiene que entregar un beneficio real a los socios. Sin beneficio no aprobamos la ficha.</div>
+        <div><strong>Gratis el primer año.</strong> Lo único que te pedimos es un beneficio para los socios, el que tú elijas: un descuento, una primera consulta, un producto. Sin beneficio no podemos publicar la ficha.</div>
       </div>
-      <p class="lead" style="font-size:14px;margin-bottom:0">Toma unos 5 minutos. Ten a mano tu logo, una foto del local y el RUT de la empresa.</p>
+      <div class="note">
+        <span class="note__ico">✓</span>
+        <div>Revisamos cada ficha a mano antes de publicarla. <strong>Nada sale sin que lo veas.</strong></div>
+      </div>
+      <p class="lead" style="font-size:14px;margin-bottom:0">Toma unos 5 minutos y se guarda solo mientras avanzas. Ten a mano tu logo, una foto del local y el RUT de la empresa.</p>
       <div class="nav">
         <div class="spacer"></div>
         <button class="btn btn--primary" data-next>Empezar</button>
@@ -361,6 +377,7 @@
         <div class="field" id="f-responsable_email">
           <label for="responsable_email">Correo del responsable</label>
           <input type="email" id="responsable_email" placeholder="nombre@negocio.cl" autocomplete="email">
+          <div class="field__hint">Con este correo vas a entrar a tu panel de negocio. En el paso siguiente te mandamos un código para confirmarlo.</div>
           <div class="field__err">Ingresa un correo válido.</div>
         </div>
         <div class="field" id="f-responsable_telefono">
@@ -373,12 +390,50 @@
       <div class="nav">
         <button class="btn btn--ghost" data-prev>← Volver</button>
         <div class="spacer"></div>
-        <button class="btn btn--primary" data-next>Revisar mi ficha</button>
+        <button class="btn btn--primary" data-next>Continuar</button>
       </div>
     </section>
 
-    <!-- ============ 8 · Preview + envío ============ -->
+    <!-- ============ 8 · Confirmar el correo (3 de octubre) ============
+         Mismo patrón que el registro de dueños: código de 6 dígitos y la
+         mascota que se tapa los ojos mientras lo escriben. La diferencia es
+         que acá la base entrega un COMPROBANTE al confirmar el código, y la
+         inscripción no se acepta sin él (supabase-negocio-correo-v32.sql). -->
     <section class="step" data-step="8">
+      <p class="eyebrow">Paso 8 · Tu correo</p>
+      <h2>Confirma tu correo</h2>
+      <div class="mascota-wrap">
+        <div class="mascota-figura" id="mascotaFig">
+          <img class="mascota-frame viendo" src="img/mascota/mascota-viendo.webp" alt="" draggable="false">
+          <img class="mascota-frame tapada" src="img/mascota/mascota-tapada.webp" alt="" draggable="false">
+          <img class="mascota-frame espiando" src="img/mascota/mascota-espiando.webp" alt="" draggable="false">
+        </div>
+      </div>
+      <p class="lead">Te mandamos un código de 6 dígitos a <strong id="codigoEco"></strong>. Es el correo con el que vas a entrar a tu panel y confirmar las visitas de los socios.</p>
+
+      <div class="codigo-boxes" id="codigoBoxes">
+        <input maxlength="1" inputmode="numeric" class="codigo-box" autocomplete="one-time-code" aria-label="Dígito 1">
+        <input maxlength="1" inputmode="numeric" class="codigo-box" aria-label="Dígito 2">
+        <input maxlength="1" inputmode="numeric" class="codigo-box" aria-label="Dígito 3">
+        <input maxlength="1" inputmode="numeric" class="codigo-box" aria-label="Dígito 4">
+        <input maxlength="1" inputmode="numeric" class="codigo-box" aria-label="Dígito 5">
+        <input maxlength="1" inputmode="numeric" class="codigo-box" aria-label="Dígito 6">
+      </div>
+      <div class="codigo-estado" id="codigoEstado"></div>
+      <div class="codigo-acciones">
+        <button type="button" class="link-btn" id="btnReenviarCodigo">Reenviar código</button>
+        <button type="button" class="link-btn" id="btnCambiarCorreo">¿Correo equivocado? Cambiarlo</button>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn--ghost" data-prev>← Volver</button>
+        <div class="spacer"></div>
+        <button class="btn btn--primary" id="btnCodigoSeguir" disabled>Continuar</button>
+      </div>
+    </section>
+
+    <!-- ============ 9 · Preview + envío ============ -->
+    <section class="step" data-step="9">
       <p class="eyebrow">Último paso</p>
       <h2>Así se verá<br>tu ficha</h2>
       <p class="lead">Revisa que todo esté bien. Puedes volver atrás a corregir lo que quieras.</p>
@@ -420,8 +475,8 @@
       </div>
     </section>
 
-    <!-- ============ 9 · Listo ============ -->
-    <section class="step" data-step="9">
+    <!-- ============ 10 · Listo ============ -->
+    <section class="step" data-step="10">
       <div class="done">
         <div class="done__mark">✓</div>
         <h2 style="font-size:clamp(28px,5vw,44px)">Recibimos<br>tu inscripción</h2>
@@ -729,20 +784,232 @@ function validarPaso(n) {
 /* ============================================================
    Navegación
    ============================================================ */
+const PASO_CODIGO = 8, PASO_PREVIEW = 9, PASO_LISTO = 10;
+
 function irA(n) {
   PASOS.forEach(s => s.classList.toggle('is-active', +s.dataset.step === n));
   paso = n;
-  $('stepNow').textContent = Math.min(n + 1, TOTAL);
+  $('stepNow').textContent = Math.max(1, Math.min(n, TOTAL));
+  /* En la intro y en la pantalla final no se muestra "X / 9". */
+  document.querySelector('.form-top__step').style.visibility = (n === 0 || n === PASO_LISTO) ? 'hidden' : '';
   $('progressBar').style.width = Math.round((n / TOTAL) * 100) + '%';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (n === 8) pintarPreview();
+  if (n === PASO_CODIGO) prepararCodigo();
+  if (n === PASO_PREVIEW) pintarPreview();
+  guardarBorrador();
 }
 
 document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => {
-  if (validarPaso(paso)) irA(paso + 1);
+  if (!validarPaso(paso)) return;
+  /* Si el correo ya se confirmó (por ejemplo, volvió atrás a corregir algo),
+     no se le vuelve a pedir el código. */
+  if (paso === 7 && correoYaConfirmado()) { irA(PASO_PREVIEW); return; }
+  irA(paso + 1);
 }));
-document.querySelectorAll('[data-prev]').forEach(b => b.addEventListener('click', () => irA(Math.max(0, paso - 1))));
+document.querySelectorAll('[data-prev]').forEach(b => b.addEventListener('click', () => {
+  if (paso === PASO_PREVIEW) { irA(7); return; }   // el paso del código no tiene vuelta atrás útil
+  irA(Math.max(0, paso - 1));
+}));
 
+/* ============================================================
+   Confirmar el correo del responsable (3 de octubre)
+   ------------------------------------------------------------
+   1. Al llegar al paso se manda el código (enviar-codigo.js).
+   2. Al completar los 6 dígitos, negocio_verificar_correo() lo
+      revisa y devuelve un COMPROBANTE.
+   3. El comprobante viaja con la inscripción; sin él la base la
+      rechaza. Si el correo cambia, el comprobante deja de servir.
+   ============================================================ */
+const C = { email: '', comprobante: null, enviadoA: '' };
+const correoActual = () => val('responsable_email').toLowerCase();
+const correoYaConfirmado = () => !!C.comprobante && C.email === correoActual();
+
+const cajas = [...document.querySelectorAll('#codigoBoxes .codigo-box')];
+const mascota = $('mascotaFig');
+let espiando = null;
+
+function estadoCodigo(texto, tipo) {
+  const e = $('codigoEstado');
+  e.className = 'codigo-estado' + (tipo ? ' ' + tipo : '');
+  e.innerHTML = texto || '';
+}
+
+function actualizarMascota() {
+  const n = cajas.filter(b => b.value).length;
+  if (n === 0) {
+    mascota.classList.remove('mascota-tapada', 'mascota-espiando');
+    clearInterval(espiando); espiando = null;
+  } else {
+    mascota.classList.add('mascota-tapada');
+    if (!espiando) {
+      espiando = setInterval(() => {
+        mascota.classList.add('mascota-espiando');
+        setTimeout(() => mascota.classList.remove('mascota-espiando'), 400);
+      }, 2200);
+    }
+  }
+}
+
+async function enviarCodigo() {
+  const email = correoActual();
+  estadoCodigo('<span class="spinner"></span>Enviando el código…');
+  $('btnReenviarCodigo').disabled = true;
+  try {
+    const r = await fetch('/.netlify/functions/enviar-codigo', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (d.ok) {
+      C.enviadoA = email;
+      estadoCodigo('Código enviado. Revisa tu bandeja de entrada (y el spam, por si acaso).', 'ok');
+    } else {
+      estadoCodigo(d.mensaje || 'No pudimos enviar el código. Inténtalo de nuevo en un momento.', 'err');
+    }
+  } catch (e) {
+    estadoCodigo('Error de conexión. Revisa tu internet e inténtalo de nuevo.', 'err');
+  }
+  setTimeout(() => { $('btnReenviarCodigo').disabled = false; }, 20000);
+}
+
+function prepararCodigo() {
+  $('codigoEco').textContent = correoActual();
+  cajas.forEach(b => { b.value = ''; b.classList.remove('error'); });
+  actualizarMascota();
+  if (correoYaConfirmado()) {
+    estadoCodigo('¡Correo confirmado!', 'ok');
+    $('btnCodigoSeguir').disabled = false;
+    return;
+  }
+  $('btnCodigoSeguir').disabled = true;
+  if (C.enviadoA !== correoActual()) enviarCodigo();
+  else estadoCodigo('Ya te mandamos un código a este correo. Si no lo encuentras, pide otro.');
+  setTimeout(() => cajas[0].focus(), 300);
+}
+
+async function revisarCodigo() {
+  const codigo = cajas.map(b => b.value).join('');
+  if (codigo.length !== 6) return;
+  estadoCodigo('<span class="spinner"></span>Revisando…');
+  try {
+    if (!sb) throw new Error('sin conexión');
+    const { data, error } = await sb.rpc('negocio_verificar_correo', { p_email: correoActual(), p_codigo: codigo });
+    if (error) throw error;
+    if (!data || !data.ok) {
+      estadoCodigo((data && data.mensaje) || 'El código no es válido o ya venció.', 'err');
+      cajas.forEach(b => b.classList.add('error'));
+      setTimeout(() => cajas.forEach(b => b.classList.remove('error')), 400);
+      return;
+    }
+    C.email = correoActual();
+    C.comprobante = data.comprobante;
+    mascota.classList.remove('mascota-tapada', 'mascota-espiando');
+    clearInterval(espiando); espiando = null;
+    estadoCodigo('¡Correo confirmado!', 'ok');
+    $('btnCodigoSeguir').disabled = false;
+    setTimeout(() => { if (paso === PASO_CODIGO) irA(PASO_PREVIEW); }, 700);
+  } catch (e) {
+    estadoCodigo('No pudimos revisar el código. Revisa tu conexión e inténtalo de nuevo.', 'err');
+  }
+}
+
+cajas.forEach((box, i) => {
+  box.addEventListener('input', () => {
+    box.value = box.value.replace(/\D/g, '').slice(0, 1);
+    if (box.value && i < cajas.length - 1) cajas[i + 1].focus();
+    actualizarMascota();
+    revisarCodigo();
+  });
+  box.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !box.value && i > 0) cajas[i - 1].focus();
+  });
+  box.addEventListener('paste', e => {
+    e.preventDefault();
+    const t = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    t.split('').forEach((d, k) => { if (cajas[k]) cajas[k].value = d; });
+    (cajas[Math.min(t.length, 6) - 1] || cajas[0]).focus();
+    actualizarMascota();
+    revisarCodigo();
+  });
+});
+$('btnReenviarCodigo').addEventListener('click', enviarCodigo);
+$('btnCambiarCorreo').addEventListener('click', () => { irA(7); setTimeout(() => $('responsable_email').focus(), 350); });
+$('btnCodigoSeguir').addEventListener('click', () => { if (correoYaConfirmado()) irA(PASO_PREVIEW); });
+/* Si cambia el correo, el comprobante anterior ya no sirve. */
+$('responsable_email').addEventListener('input', () => {
+  if (C.comprobante && C.email !== correoActual()) C.comprobante = null;
+});
+
+/* ============================================================
+   Guardar el avance en el teléfono (3 de octubre)
+   ------------------------------------------------------------
+   Son unos 30 datos: si el dueño del local cierra la página a la
+   mitad, al volver lo encuentra donde quedó. Se guarda SOLO en su
+   navegador. Las imágenes y el correo confirmado NO se guardan:
+   las fotos pesan demasiado y el código vence.
+   ============================================================ */
+const LS_BORRADOR = 'mmc_negocio_borrador';
+const CAMPOS_BORRADOR = ['tipo_negocio','nombre','descripcion','region','comuna','direccion','google_maps_url',
+  'telefono_local','whatsapp','instagram','tiktok','facebook','sitio_web','horario_dias','hora_desde','hora_hasta',
+  'beneficio_valor','beneficio_sobre','beneficio_cuando','beneficio_monto_min','beneficio_detalle',
+  'rut_comercial','razon_social','responsable_nombre','responsable_rut','responsable_email','responsable_telefono'];
+let borradorActivo = true;
+
+function guardarBorrador() {
+  if (!borradorActivo || paso === 0 || paso === PASO_LISTO) return;
+  try {
+    const datos = {};
+    CAMPOS_BORRADOR.forEach(id => { datos[id] = val(id); });
+    datos._cobertura = [...$('coberturaLista').querySelectorAll('input:checked')].map(i => i.value);
+    datos._paso = Math.min(paso, 7);
+    datos._guardado = Date.now();
+    localStorage.setItem(LS_BORRADOR, JSON.stringify(datos));
+  } catch (e) { /* modo incógnito o sin espacio: se sigue sin guardar */ }
+}
+let tGuardar = null;
+document.querySelector('.form-wrap').addEventListener('input', () => { clearTimeout(tGuardar); tGuardar = setTimeout(guardarBorrador, 600); });
+document.querySelector('.form-wrap').addEventListener('change', () => { clearTimeout(tGuardar); tGuardar = setTimeout(guardarBorrador, 300); });
+
+function leerBorrador() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LS_BORRADOR) || 'null');
+    if (!d) return null;
+    if (Date.now() - (d._guardado || 0) > 30 * 24 * 3600 * 1000) return null;   // más de 30 días: se descarta
+    return d;
+  } catch (e) { return null; }
+}
+function borrarBorrador() { try { localStorage.removeItem(LS_BORRADOR); } catch (e) {} }
+
+function restaurarBorrador(d) {
+  const poner = id => { if ($(id) && d[id] != null) $(id).value = d[id]; };
+  poner('tipo_negocio'); $('tipo_negocio').dispatchEvent(new Event('change'));
+  poner('region'); cargarComunas(); poner('comuna');
+  (d._cobertura || []).forEach(c => {
+    const i = $('coberturaLista').querySelector('input[value="' + CSS.escape(c) + '"]');
+    if (i) i.checked = true;
+  });
+  CAMPOS_BORRADOR.forEach(id => { if (!['tipo_negocio','region','comuna'].includes(id)) poner(id); });
+  $('descCount').textContent = val('descripcion').length;
+  $('horarioPreview').textContent = 'Horario: ' + (horarioTexto() || '—');
+  actualizarCascada();
+  /* Las imágenes no se guardan, así que nunca se salta más allá de ese paso. */
+  irA(Math.max(1, Math.min(d._paso || 1, 6)));
+}
+
+(function ofrecerBorrador() {
+  const d = leerBorrador();
+  if (!d || !d.nombre) return;
+  $('borradorAviso').hidden = false;
+  $('btnSeguirBorrador').addEventListener('click', () => restaurarBorrador(d));
+  $('btnBorrarBorrador').addEventListener('click', () => { borrarBorrador(); $('borradorAviso').hidden = true; });
+})();
+
+/* En el teléfono la vista previa parte en "Mobile": la versión desktop no cabe
+   en una pantalla angosta y se veía cortada. */
+if (window.matchMedia('(max-width: 700px)').matches) {
+  document.querySelectorAll('.preview-tab').forEach(x => x.classList.toggle('is-active', x.dataset.view === 'mobile'));
+  $('previewStage').dataset.view = 'mobile';
+}
 document.querySelectorAll('.preview-tab').forEach(t => t.addEventListener('click', () => {
   document.querySelectorAll('.preview-tab').forEach(x => x.classList.remove('is-active'));
   t.classList.add('is-active');
@@ -863,18 +1130,28 @@ $('btnEnviar').addEventListener('click', async () => {
        se escribió este código: es el registro de a qué texto exactamente dijo
        que sí el negocio. Si se vuelven a editar los términos, se cambia acá y
        también en formulario-registro-demo-v3.html. */
-    const payload = { ...datosNegocio(), logo_url, foto_url, terminos_version: '2026-09-17' };
+    if (!correoYaConfirmado()) {
+      throw new Error('Tenemos que confirmar tu correo de nuevo. Vuelve al paso del código y pide uno nuevo.');
+    }
+    const payload = { ...datosNegocio(), logo_url, foto_url, terminos_version: '2026-09-17', comprobante_correo: C.comprobante };
     const { data, error } = await sb.rpc('registrar_solicitud_negocio', { p_datos: payload });
     if (error) throw error;
     const r = data && data[0];
     if (!r || !r.ok) throw new Error((r && r.mensaje) || 'No pudimos registrar tu inscripción.');
 
     $('mailConfirm').textContent = payload.responsable_email;
-    irA(9);
+    borradorActivo = false;
+    borrarBorrador();
+    C.comprobante = null;   // el comprobante se gastó en esta inscripción
+    irA(PASO_LISTO);
     $('progressBar').style.width = '100%';
   } catch (err) {
     console.error(err);
-    $('envioErrorTxt').textContent = (err && err.message) || 'No pudimos enviar tu inscripción. Intenta de nuevo en unos minutos.';
+    const msg = (err && err.message) || 'No pudimos enviar tu inscripción. Intenta de nuevo en unos minutos.';
+    /* Si la base dice que el correo no está confirmado (el comprobante venció o
+       se gastó), se olvida el comprobante para que al volver pida otro código. */
+    if (/confirmar tu correo/i.test(msg)) { C.comprobante = null; C.enviadoA = ''; }
+    $('envioErrorTxt').textContent = msg;
     $('envioError').hidden = false;
     btn.disabled = false;
     btn.textContent = textoOriginal;
