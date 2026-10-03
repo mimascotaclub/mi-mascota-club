@@ -1,6 +1,6 @@
 # LANZAMIENTO — Mi Mascota Club
 
-**Última actualización: 1 de octubre de 2026**
+**Última actualización: 3 de octubre de 2026**
 
 Cómo se lanza el club. `MARCA.md` dice para qué existe; este dice cómo se sale a
 buscar socios. `ESTADO.md` dice qué está construido.

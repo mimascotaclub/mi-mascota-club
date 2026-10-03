@@ -1,6 +1,6 @@
 # NEGOCIOS — Cómo se captan
 
-**Última actualización: 1 de octubre de 2026**
+**Última actualización: 3 de octubre de 2026**
 
 Cómo se recluta a los negocios del club: el modelo de cobro, a quién escribirle primero
 y los mensajes exactos. `LANZAMIENTO.md` cubre la captación de socios; este archivo es el

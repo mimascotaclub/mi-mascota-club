@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 1 de octubre de 2026**
+**Última actualización: 3 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -15,6 +15,11 @@ consulta por secciones cuando hace falta entender una pieza específica.
 
 La regla: **este archivo se actualiza en el mismo commit del trabajo, antes del push.**
 Si una sesión termina sin tocar este archivo, la siguiente empieza a ciegas.
+
+Y una regla chica que ya confundió una vez (3 de octubre): **al editar cualquiera de
+estos `.md` hay que cambiar también la línea "Última actualización" de arriba.** Una
+sesión nueva se fía de esa línea para saber qué tan al día está el documento, no de la
+fecha del archivo.
 
 ---
 
