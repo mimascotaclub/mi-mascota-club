@@ -164,7 +164,9 @@ recomendado"*.
 **Montaje**
 
 - [x] Landing `/quienes-somos` con el pase fundador.
-- [x] Link de pago de Mercado Pago creado y conectado (`https://mpago.la/1gq8qDj`).
+- [x] Link de pago de Mercado Pago creado y conectado. Desde el 3 de octubre es
+      `https://mpago.la/1pwEBKm`; el viejo `1gq8qDj` no devolvía al sitio y hay que
+      desactivarlo.
 - [x] URL de retorno del pago: ahora es `https://mimascotaclub.cl/gracias`, ya pegada en
       la configuración del link en Mercado Pago.
 - [x] Cambiado el nombre del negocio en Mercado Pago (ya no dice "Jaime Florian Design").
@@ -251,11 +253,11 @@ alcancen están en `ESTADO.md`.
 
 **Por construir, en orden de urgencia**
 
-- [ ] **Activación automática y verificada del pase de fundador** — **construida el 3 de
-      octubre**, falta activarla: Access Token de Mercado Pago en Netlify, correr el SQL
-      v30, push, QA con un pago real y correr el v31. Ya no se avisa por WhatsApp: antes de
-      pagar se entra con el código al correo, y `/gracias` le pregunta a Mercado Pago si el
-      pago existe antes de activar nada. Los pasos y el QA están en `ESTADO.md`.
+- [x] **Activación automática y verificada del pase de fundador** — en producción y
+      probada con dos pagos reales el 3 de octubre. Antes de pagar se entra con el código
+      al correo, y `/gracias` le pregunta a Mercado Pago si el pago existe antes de
+      activar nada. La persona tiene que tocar "Volver a Mi Mascota Club" al terminar de
+      pagar; el detalle y la mejora pendiente (que vuelva sola) están en `ESTADO.md`.
 - [x] **El chip como opción visible en el registro**, con su propio botón "Continuar sin
       el chip" (desplegado el 1 de octubre).
 - [x] **El grupo de WhatsApp pasó a ser solo de fundadores** (1 de octubre). Salió de la
@@ -278,7 +280,7 @@ alcancen están en `ESTADO.md`.
 
 **Antes de publicar el pase**
 
-- [ ] Borrar el fundador de prueba #001 para que el primero real sea el #001.
+- [x] Fundadores de prueba borrados (3 de octubre): el primero real será el #001.
 
 **Formalización — anotado, no urgente (decidido el 25 de septiembre)**
 

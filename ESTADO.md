@@ -134,7 +134,7 @@ elegir qué negocios entran y precio congelado de por vida.
 
 **El circuito que está HOY en producción (con paso manual):**
 
-1. La persona paga en el link de Mercado Pago (`https://mpago.la/1gq8qDj`).
+1. La persona paga en el link de Mercado Pago (hoy `https://mpago.la/1pwEBKm`; ver abajo).
 2. Mercado Pago la devuelve a `/gracias`, que muestra el check, el contador de cupos y un
    botón de WhatsApp al **+56 9 9713 2591**.
 3. La persona avisa por WhatsApp.
@@ -161,8 +161,9 @@ con mala intención, no en un curioso.
      octubre). Así el pase queda ligado al correo correcto y nadie puede usar la página
      para averiguar si un correo está inscrito.
    - Se le dice que puede pagar con cualquier cuenta de Mercado Pago y que **al terminar
-     toque "Volver al sitio"**.
-2. **Mercado Pago no se toca.** Mismo link `https://mpago.la/1gq8qDj`.
+     toque "Volver a Mi Mascota Club"**.
+2. **Link de pago `https://mpago.la/1pwEBKm`** (desde el 3 de octubre; el viejo
+   `1gq8qDj` se reemplazó porque no devolvía al sitio — ver "El link que no volvía").
 3. **En `/gracias`**: lee `payment_id` / `collection_id` de la dirección (de los dos
    lados del `#`), y si no hay sesión pide entrar con el código. Después llama a
    **`netlify/functions/activar-fundador.js`**, que:
@@ -187,7 +188,7 @@ con mala intención, no en un curioso.
 
 **Lo que queda abierto, a conciencia:**
 
-- **Si la persona cierra Mercado Pago sin tocar "Volver al sitio"**, el pago queda
+- **Si la persona cierra Mercado Pago sin tocar "Volver a Mi Mascota Club"**, el pago queda
   aprobado pero nadie llama a `/gracias`. Mercado Pago le avisa a Jaime de cada venta:
   si ve un pago sin fundador, lo marca a mano en `/mi-panel` (necesita el correo de la
   persona). Se cierra del todo con un webhook de Mercado Pago, que es trabajo de "Cuando
@@ -198,17 +199,53 @@ con mala intención, no en un curioso.
 
 | Pieza | Estado |
 |---|---|
-| `supabase-fundador-verificado-v30.sql` escrito y probado en una base local | ✅ En el repo |
+| `supabase-fundador-verificado-v30.sql` | ✅ Corrido en Supabase el 3 de octubre |
 | `supabase-fundador-auto-v29.sql` | ➖ **Reemplazado por el v30. NO CORRER.** |
-| Correr el v30 en Supabase (antes del push) | ⬜ Jaime |
-| `MP_ACCESS_TOKEN` en Netlify (antes del push) | ⬜ Jaime |
-| Paso del correo antes de pagar en `quienes-somos.html` | ✅ Construido |
-| Activación automática en `gracias.html` | ✅ Construido |
-| `netlify/functions/activar-fundador.js` | ✅ Construido |
-| Bloque de pagos pendientes en `/mi-panel` | ✅ Construido |
-| QA con un pago real | ⬜ Jaime |
-| Push | ⬜ |
-| Correr `supabase-cerrar-socio-existe-v31.sql` (DESPUÉS del push) | ⬜ Jaime |
+| `MP_ACCESS_TOKEN` en Netlify | ✅ Puesto el 3 de octubre (app "Mi Mascota Club" en Mercado Pago Developers, token renovado) |
+| Paso del correo antes de pagar en `quienes-somos.html` | ✅ En producción y probado |
+| Activación automática en `gracias.html` + `activar-fundador.js` | ✅ En producción y probada con un pago real |
+| Bloque de pagos pendientes en `/mi-panel` | ✅ En producción |
+| `supabase-cerrar-socio-existe-v31.sql` | ✅ Corrido después del push |
+| Link nuevo `1pwEBKm` en `quienes-somos.html` | ✅ Push del 3 de octubre (segundo) |
+| Desactivar el link viejo `1gq8qDj` en Mercado Pago | ⬜ Jaime, después del segundo push |
+
+### QA del 3 de octubre (hecho)
+
+- `/mi-mascota` con un correo inscrito y con uno inventado: mismo mensaje, solo llega
+  código al inscrito. ✅
+- `/gracias` abierta a mano, sin pago y con `payment_id` inventado: no activa nada ni
+  muestra el grupo ("No encontramos ese pago"). ✅ Eso además probó que el Access Token
+  funciona.
+- Límites de envío e intentos: probados directo en la base, sin gastar correos. ✅
+- `/quienes-somos`: con sesión, sin sesión, "¿No eres tú?" y siendo ya fundador. ✅
+- **Dos pagos reales de $9.990** (tarjeta Tenpo de Jaime, como invitado, sin iniciar
+  sesión en Mercado Pago): las dos veces se activó el #001, llegó el correo "Nuevo
+  Socio Fundador #001", y después se devolvió el pago y se quitó el fundador. ✅
+- Pagarse a uno mismo **sí funciona** si se paga como invitado con una tarjeta, sin
+  iniciar sesión en Mercado Pago.
+
+### El link que no volvía (3 de octubre)
+
+Con el link viejo `1gq8qDj`, después de pagar Mercado Pago mostraba la pantalla verde
+**sin ningún botón** para volver: la persona quedaba atascada y su pase no se activaba
+(se terminó a mano abriendo `/gracias?payment_id=…`). El "Sitio de redireccionamiento"
+de Mercado Pago (Link de pago → Configuraciones) es **para todos los links**, pero el
+del pase se había creado antes de guardarlo. **Con un link creado de nuevo apareció el
+botón "← Volver a Mi Mascota Club"**, que lleva a `/gracias` con el número de
+operación, y el pase se activó solo.
+
+**Ojo: no es automático.** La persona tiene que tocar ese botón. Si cierra la pestaña
+antes, el pago queda aprobado pero el pase no se activa: Jaime lo ve en el correo de
+venta de Mercado Pago y lo marca a mano en `/mi-panel`. **La solución de fondo (opción
+B, decidida para cuando haga falta):** que el sitio cree el cobro con la API de Mercado
+Pago (preferencia con `back_urls` + `auto_return` + `notification_url`), así vuelve
+solo y además Mercado Pago le avisa al servidor (webhook) aunque la persona cierre la
+ventana. Un push.
+
+**Pendiente menor:** el correo "Nuevo Socio Fundador" sale por la plantilla genérica de
+EmailJS (`template_u9x5p1i`), que trae fijo un bloque "Cómo se usa" (llegas al negocio,
+muestras tu carnet…) que no corresponde a ese aviso. Se arregla en EmailJS, no en el
+código.
 
 **Variables de entorno de Netlify:** `MP_ACCESS_TOKEN` (nueva y obligatoria: el Access
 Token de **producción**). Opcionales: `GRUPO_FUNDADORES_URL` (si se cambia el enlace del
@@ -463,19 +500,20 @@ así que o se usaban o se perdían):
   sin el chip"**. Solo CSS y texto; la lógica del registro no se tocó.
 - ✅ **El grupo de WhatsApp cerrado a fundadores** (ver la sección de arriba).
 
-### PUSH 1 del ciclo de octubre — CONSTRUIDO el 3 de octubre, falta activarlo
+### PUSH 1 del ciclo de octubre — ✅ HECHO Y PROBADO el 3 de octubre
 
 Fundador automático y verificado + límites del código por correo. El detalle está más
 arriba. **El orden importa:**
 
-1. ⬜ Sacar el Access Token de **producción** de Mercado Pago y pegarlo en Netlify como
+1. ✅ Sacar el Access Token de **producción** de Mercado Pago y pegarlo en Netlify como
    `MP_ACCESS_TOKEN` (Site configuration → Environment variables).
-2. ⬜ Correr `supabase-fundador-verificado-v30.sql` en Supabase (SQL Editor). Es
+2. ✅ Correr `supabase-fundador-verificado-v30.sql` en Supabase (SQL Editor). Es
    compatible con el sitio que está en línea: nada se rompe antes del push.
-3. ⬜ `git add .` → `git commit` → `git push` (15 créditos).
-4. ⬜ QA en mimascotaclub.cl (lista abajo).
-5. ⬜ Correr `supabase-cerrar-socio-existe-v31.sql`. **Después** del push, nunca antes.
-6. ⬜ Borrar el fundador de prueba #001 y confirmar "Aprobar nuevos miembros" en el grupo.
+3. ✅ `git add .` → `git commit` → `git push` (15 créditos).
+4. ✅ QA en mimascotaclub.cl (lista abajo; resultado más arriba).
+5. ✅ Correr `supabase-cerrar-socio-existe-v31.sql`. **Después** del push, nunca antes.
+6. ✅ Borrados los fundadores de prueba #001 y #002 (la tabla quedó vacía: el primero
+   real será el #001). ⬜ Confirmar "Aprobar nuevos miembros" en el grupo.
 
 **QA:**
 
@@ -490,7 +528,7 @@ arriba. **El orden importa:**
 - Abrir a mano `mimascotaclub.cl/gracias?payment_id=1234567890`: **no debe activar nada
   ni mostrar el grupo.**
 - Un pago real de $9.990 hecho por alguien de confianza (uno no se puede pagar a sí
-  mismo), tocar "Volver al sitio", ver el número, revisar que llegó el correo de aviso, y
+  mismo), tocar "Volver a Mi Mascota Club", ver el número, revisar que llegó el correo de aviso, y
   devolver el pago desde Mercado Pago. Después, quitar ese fundador de prueba en
   `/mi-panel`.
 
@@ -516,7 +554,6 @@ socios suficientes para que la lista no se vea muerta.
 
 - ⬜ Escribirle a los primeros **5 negocios** (mensajes en `NEGOCIOS-CAPTACION.md`).
 - ⬜ Escribirle a las primeras **5 personas**.
-- ⬜ Borrar el fundador de prueba #001.
 - ⬜ Confirmar "Aprobar nuevos miembros" en el grupo de WhatsApp.
 - ⬜ Las dos fotos para la landing (Jaime con Max, el carnet).
 - ⬜ Preguntar en el grupo si quieren el asistente y contar cuántas dudas llegan en tres
@@ -535,8 +572,8 @@ también. Lo que queda abajo es otra cosa.
 
 ### Antes de cobrarle a alguien
 
-0. **Borrar el fundador de prueba #001** desde `/mi-panel` para partir desde cero. Con la
-   tabla vacía el próximo vuelve a ser #001.
+0. ✅ **Fundadores de prueba borrados** (3 de octubre). La tabla está vacía y el primero
+   real será el #001.
 
 **Formalización: decidido el 25 de septiembre que NO es bloqueante.** Jaime parte sin
 formalizar y valida primero; si el pase de fundador se llena, con esa plata paga la

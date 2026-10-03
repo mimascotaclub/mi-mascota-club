@@ -545,7 +545,10 @@ function alternarMenuMovilQS(){
    contar_fundadores() del parche v28. Cada vez que marques a un fundador
    con admin_marcar_fundador(), el número de la landing cambia solo.
    ====================================================================== */
-const LINK_MERCADOPAGO = "https://mpago.la/1gq8qDj";
+/* Link nuevo desde el 3 de octubre. El viejo (1gq8qDj) no devolvía a la
+   persona al sitio después de pagar: se creó antes de guardar el "Sitio de
+   redireccionamiento" en Mercado Pago. Este sí muestra "Volver a Mi Mascota Club". */
+const LINK_MERCADOPAGO = "https://mpago.la/1pwEBKm";
 
 const CUPOS_TOTALES  = 100;
 const SUPABASE_URL   = 'https://mzsqyjxqnomsbqzhygkx.supabase.co';
@@ -614,7 +617,7 @@ async function abrirPasoPago(){
 
   caja.innerHTML = '<h3>Todo listo' + (yo.nombre ? ', ' + PF.esc(yo.nombre) : '') + '</h3>'
     + '<p class="qs-como">Vas a activar tu pase como <b>' + PF.esc(yo.email) + '</b></p>'
-    + '<p>Puedes pagar con cualquier cuenta de Mercado Pago, aunque no sea de este correo. <b>Cuando termines, toca «Volver al sitio»</b> en Mercado Pago: ahí tu número se activa solo.</p>'
+    + '<p>Puedes pagar con cualquier cuenta de Mercado Pago, aunque no sea de este correo. <b>Cuando termines, toca «Volver a Mi Mascota Club»</b> en Mercado Pago: ahí tu número se activa solo.</p>'
     + '<a href="' + LINK_MERCADOPAGO + '" class="btn btn-primary pf-btn" id="qsIrPagar">Pagar $9.990 en Mercado Pago</a>'
     + '<button type="button" class="soc-link" id="qsOtroCorreo">¿No eres tú? Usar otro correo</button>';
 

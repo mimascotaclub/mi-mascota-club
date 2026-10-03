@@ -3002,7 +3002,7 @@ async function marcarFundador(){
 
 async function quitarFundador(email, numero){
   const num = '#' + String(numero).padStart(3, '0');
-  if(!confirm('¿Quitar el Socio Fundador ' + num + ' (' + email + ')?\n\nEl número no se reutiliza: el próximo fundador seguirá con el siguiente.')) return;
+  if(!confirm('¿Quitar el Socio Fundador ' + num + ' (' + email + ')?\n\nEl próximo fundador recibe el número más alto que quede, más uno. Si quitas a todos, se vuelve a partir del #001.')) return;
   try{
     const { error } = await supabase.rpc('admin_quitar_fundador', { p_email: email });
     if(error) throw error;

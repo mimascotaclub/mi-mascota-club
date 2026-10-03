@@ -276,7 +276,7 @@ function pedirAcceso(){
   pintar({
     icono: 'espera',
     titulo: 'Un último paso',
-    texto: 'Recibimos tu pago. Confirma tu correo para activar tu número de fundador.',
+    texto: 'Confirma tu correo para activar tu número de fundador.',
     caja: '<h2>Confirma que eres tú</h2><p>Te mandamos un código al correo con el que inscribiste a tu mascota. Con eso tu pase se activa al tiro.</p><div id="grAcceso"></div>'
   });
   window.PaseFundador.montarAcceso(document.getElementById('grAcceso'), activar);
@@ -304,7 +304,7 @@ async function activar(){
       icono: 'ok', exito: true, cupos: true,
       titulo: 'Listo. Eres el Socio Fundador ' + num + '.',
       texto: r.ya_era
-        ? 'Tu pase ya estaba activo. Tu número aparece en el carnet de tu mascota.'
+        ? 'Tu pase está activo. Tu número aparece en el carnet de tu mascota.'
         : 'Gracias de verdad. Los primeros 100 son los que hacen posible lo que viene, y tú eres uno de ellos.'
     });
     cargarCupos();
