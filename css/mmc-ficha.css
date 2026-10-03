@@ -70,10 +70,16 @@
   display: block;
 }
 
-.mmcf__grid { --gap: 14px; display: grid; gap: var(--gap); }
+.mmcf__grid { --gap: 14px; display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+/* min-width:0 en todos los hijos (3 de octubre). Sin esto, en una columna de
+   menos de ~345px (el teléfono, o la ficha dentro de la cola de /mi-panel) el
+   texto largo —el tipo de negocio, que no se corta de línea, o un nombre
+   largo— empujaba la ficha hacia la derecha y se cortaba todo. Un hijo de
+   grid o flex por defecto no se encoge por debajo de su contenido. */
+.mmcf__grid > *, .mmcf__head > *, .mmcf__beneficio > * { min-width: 0; }
 
 /* ---- Encabezado ---- */
-.mmcf__head { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.mmcf__head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; }
 
 .mmcf__logo {
   width: 76px; height: 76px;
@@ -242,6 +248,18 @@
   .mmcf__beneficio { grid-area: benef; align-self: start; }
   .mmcf__cta { grid-area: cta; align-self: start; width: auto; justify-self: start; padding: 18px 44px; }
   .mmcf__foto { grid-area: foto; aspect-ratio: auto; height: 100%; min-height: 340px; }
+}
+
+/* Muy angosto: el logo se achica y los dos datos del beneficio van uno bajo el
+   otro, para que nada quede apretado. */
+@container (max-width: 360px) {
+  .mmcf__logo { width: 64px; height: 64px; }
+  .mmcf__head { gap: 12px; }
+  .mmcf__ben-meta { grid-auto-flow: row !important; }
+  .mmcf__beneficio { padding: 6px; }
+  /* min-height:200px + aspect-ratio 16/10 obligaba a 320px de ancho */
+  .mmcf__foto { min-height: 0; aspect-ratio: 4 / 3; }
+  .mmcf__red { width: 34px; height: 34px; }
 }
 
 @container (max-width: 520px) {

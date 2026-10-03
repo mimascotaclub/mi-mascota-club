@@ -62,6 +62,8 @@ async function avisarAJaime({ asunto, titulo, intro, cajaTitulo, cajaDato, nota 
         template_params: {
           to_email: process.env.AVISO_CANJE_EMAIL || CORREO_JAIME,
           to_name: 'Jaime',
+          // Esconde los bloques de socio de la plantilla ("Cómo se usa", etc.)
+          ocultar_socio: 'si',
           asunto,
           eyebrow: 'Socios Fundadores',
           titulo,

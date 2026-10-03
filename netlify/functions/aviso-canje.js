@@ -158,6 +158,8 @@ export async function handler(event) {
         template_params: {
           to_email: process.env.AVISO_CANJE_EMAIL || CORREO_POR_DEFECTO,
           to_name: 'Jaime',
+          // Esconde los bloques de socio de la plantilla ("Cómo se usa", etc.)
+          ocultar_socio: 'si',
           mascota: mascota,
           codigo: c.socio_codigo || '',
           asunto: asunto,

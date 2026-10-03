@@ -310,7 +310,7 @@
             <div class="drop__body">
               <div class="drop__ico">◻︎</div>
               <div class="drop__t">Sube tu logo</div>
-              <div class="drop__s">PNG con fondo transparente · máx. 2 MB</div>
+              <div class="drop__s">PNG con fondo transparente · máx. 5 MB</div>
             </div>
           </label>
           <div class="field__err">Falta el logo.</div>
@@ -323,7 +323,7 @@
             <div class="drop__body">
               <div class="drop__ico">▣</div>
               <div class="drop__t">Sube la foto</div>
-              <div class="drop__s">Horizontal, mín. 1200px · máx. 5 MB</div>
+              <div class="drop__s">Horizontal, mín. 1200px · máx. 15 MB</div>
             </div>
           </label>
           <div class="field__err">Falta la foto del negocio.</div>
@@ -495,6 +495,8 @@
 <script src="js/catalogos-negocio.js"></script>
 <script src="js/ficha-negocio.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- EmailJS: el correo "Recibimos tu inscripción" al negocio y el aviso a Jaime (3 de octubre). -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 /* ============================================================
    CONFIGURACIÓN — reemplazar por las credenciales del proyecto
@@ -644,7 +646,9 @@ function actualizarCascada() {
    ============================================================ */
 function conectarDrop(dropId, inputId, key) {
   const drop = $(dropId), input = $(inputId);
-  const max = key === 'logo' ? 2 : 5;
+  /* La foto se achica antes de subirla, así que acá se acepta más grande que
+     el tope del almacenamiento (5 MB): una foto de celular suele pesar 3-8 MB. */
+  const max = key === 'logo' ? 5 : 15;
 
   input.addEventListener('change', () => {
     const f = input.files[0];
@@ -653,6 +657,7 @@ function conectarDrop(dropId, inputId, key) {
     const r = new FileReader();
     r.onload = e => {
       D[key + 'File'] = f;
+      D[key + 'Url'] = null;   // imagen nueva: hay que subirla de nuevo
       D[key + 'DataUrl'] = e.target.result;
       drop.classList.add('has-file');
       let img = drop.querySelector('img.preview');
@@ -1086,6 +1091,42 @@ function pintarPreview() {
 /* ============================================================
    Envío
    ============================================================ */
+/* Achica la imagen antes de subirla (3 de octubre). Una foto de celular pesa
+   1-5 MB; para la ficha alcanza con 1600 px de ancho. Sube más rápido, falla
+   menos (el 3 de octubre un PNG de 1,4 MB falló con un error 520 de Supabase)
+   y ocupa menos espacio. El logo se mantiene en PNG para no perder la
+   transparencia; la foto pasa a JPG. Si algo falla al achicar, se sube la
+   original tal cual. */
+function achicarImagen(file, maxLado, comoJpg) {
+  return new Promise(resolve => {
+    try {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
+        if (escala === 1 && file.size < 600 * 1024) { resolve(file); return; }
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * escala);
+        c.height = Math.round(img.height * escala);
+        const ctx = c.getContext('2d');
+        if (comoJpg) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        const tipo = comoJpg ? 'image/jpeg' : 'image/png';
+        c.toBlob(blob => {
+          if (!blob || blob.size >= file.size) { resolve(file); return; }
+          const nombre = file.name.replace(/\.[^.]+$/, '') + (comoJpg ? '.jpg' : '.png');
+          resolve(new File([blob], nombre, { type: tipo }));
+        }, tipo, 0.85);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    } catch (e) { resolve(file); }
+  });
+}
+
+const esperar = ms => new Promise(r => setTimeout(r, ms));
+
 async function subirImagen(file, carpeta) {
   if (!sb || !file) return null;
 
@@ -1094,15 +1135,71 @@ async function subirImagen(file, carpeta) {
   if (!['image/png', 'image/jpeg'].includes(file.type)) {
     throw new Error('La imagen "' + file.name + '" no es PNG ni JPG. Conviértela y vuelve a intentarlo.');
   }
-  if (file.size > 5 * 1024 * 1024) {
+
+  const esLogo = carpeta === 'logos';
+  const archivo = await achicarImagen(file, esLogo ? 800 : 1600, !esLogo);
+
+  if (archivo.size > 5 * 1024 * 1024) {
     throw new Error('La imagen "' + file.name + '" pesa más de 5 MB. Usa una más liviana.');
   }
 
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-  const path = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await sb.storage.from(MMC_CONFIG.BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
-  if (error) throw error;
-  return sb.storage.from(MMC_CONFIG.BUCKET).getPublicUrl(path).data.publicUrl;
+  const ext = archivo.type === 'image/png' ? 'png' : 'jpg';
+  /* Hasta 3 intentos: los errores 5xx de Supabase (como el 520) suelen ser
+     momentáneos y el segundo intento pasa. */
+  let ultimoError = null;
+  for (let intento = 1; intento <= 3; intento++) {
+    const path = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    try {
+      const { error } = await sb.storage.from(MMC_CONFIG.BUCKET).upload(path, archivo, { cacheControl: '3600', upsert: false, contentType: archivo.type });
+      if (!error) return sb.storage.from(MMC_CONFIG.BUCKET).getPublicUrl(path).data.publicUrl;
+      ultimoError = error;
+    } catch (e) { ultimoError = e; }
+    if (intento < 3) await esperar(1200 * intento);
+  }
+  console.error('No se pudo subir la imagen:', ultimoError);
+  const e = new Error('Tuvimos un problema subiendo las imágenes. Vuelve a apretar «Enviar inscripción»: tus datos no se perdieron.');
+  e.esImagen = true;
+  throw e;
+}
+
+/* Correos después de inscribir (3 de octubre). Si fallan, la inscripción
+   igual quedó guardada: nunca se muestra un error por esto. */
+const EMAILJS = { publicKey: '9eL8mW9_T5HjOEAYe', service: 'service_ch7ncxl', template: 'template_u9x5p1i' };
+async function avisarInscripcion(d) {
+  if (!window.emailjs) return;
+  try {
+    emailjs.init({ publicKey: EMAILJS.publicKey });
+    const comun = { ocultar_socio: 'si', boton_url: 'https://mimascotaclub.cl/quienes-somos' };
+    await emailjs.send(EMAILJS.service, EMAILJS.template, Object.assign({}, comun, {
+      to_email: d.responsable_email,
+      to_name: (d.responsable_nombre || '').split(' ')[0] || d.nombre,
+      asunto: 'Recibimos la inscripción de ' + d.nombre,
+      eyebrow: 'Negocios',
+      titulo: 'Recibimos tu inscripción',
+      intro: 'Gracias por sumar ' + d.nombre + ' a Mi Mascota Club. Revisamos cada ficha a mano antes de publicarla, '
+           + 'y te escribimos a este correo con la aprobación o con lo que haya que ajustar.',
+      caja_titulo: 'Tu ficha',
+      caja_dato: 'EN REVISIÓN',
+      boton_texto: 'Conocer el club →',
+      caja_nota: 'Nada se publica sin que lo veas.',
+      mensaje_extra: 'Si quieres cambiar algo de lo que enviaste, responde este correo.'
+    }));
+    await emailjs.send(EMAILJS.service, EMAILJS.template, Object.assign({}, comun, {
+      to_email: 'holamimascotaclub@gmail.com',
+      to_name: 'Jaime',
+      asunto: 'Nueva ficha por aprobar — ' + d.nombre,
+      eyebrow: 'Negocios',
+      titulo: 'Nueva inscripción: ' + d.nombre,
+      intro: d.nombre + ' (' + (d.dir_cat || d.tipo_negocio) + ', ' + d.comuna + ') se inscribió. Beneficio: '
+           + (d.beneficio_label || '—') + '. Responsable: ' + d.responsable_nombre + ' · ' + d.responsable_email + '.',
+      caja_titulo: 'Estado',
+      caja_dato: 'POR APROBAR',
+      boton_texto: 'Revisar en mi panel →',
+      boton_url: 'https://mimascotaclub.cl/mi-panel',
+      caja_nota: 'Está en Fichas por aprobar.',
+      mensaje_extra: ''
+    }));
+  } catch (e) { console.warn('No se pudo mandar un correo de la inscripción:', e); }
 }
 
 $('btnEnviar').addEventListener('click', async () => {
@@ -1117,10 +1214,11 @@ $('btnEnviar').addEventListener('click', async () => {
   try {
     if (!sb) throw new Error('Falta configurar las credenciales de Supabase en MMC_CONFIG.');
 
-    const [logo_url, foto_url] = await Promise.all([
-      subirImagen(D.logoFile, 'logos'),
-      subirImagen(D.fotoFile, 'fotos')
-    ]);
+    /* Si un intento anterior ya subió alguna imagen, no se vuelve a subir
+       (así un segundo "Enviar" no deja archivos repetidos en el almacenamiento). */
+    if (!D.logoUrl) D.logoUrl = await subirImagen(D.logoFile, 'logos');
+    if (!D.fotoUrl) D.fotoUrl = await subirImagen(D.fotoFile, 'fotos');
+    const logo_url = D.logoUrl, foto_url = D.fotoUrl;
 
     /* Antes esto insertaba directo en la tabla. Ahora pasa por una función que
        valida en el servidor: obliga el consentimiento, revisa los campos que no
@@ -1142,12 +1240,18 @@ $('btnEnviar').addEventListener('click', async () => {
     $('mailConfirm').textContent = payload.responsable_email;
     borradorActivo = false;
     borrarBorrador();
+    avisarInscripcion(payload);   // sin await: la pantalla final no espera a los correos
     C.comprobante = null;   // el comprobante se gastó en esta inscripción
     irA(PASO_LISTO);
     $('progressBar').style.width = '100%';
   } catch (err) {
     console.error(err);
-    const msg = (err && err.message) || 'No pudimos enviar tu inscripción. Intenta de nuevo en unos minutos.';
+    let msg = (err && err.message) || 'No pudimos enviar tu inscripción. Intenta de nuevo en unos minutos.';
+    /* Los errores técnicos ("HTTP 520 error", "Failed to fetch") no se le
+       muestran tal cual a un dueño de local. */
+    if (/^HTTP \d+|failed to fetch|network|load failed/i.test(msg)) {
+      msg = 'Tuvimos un problema de conexión con el servidor. Vuelve a apretar «Enviar inscripción»: tus datos no se perdieron.';
+    }
     /* Si la base dice que el correo no está confirmado (el comprobante venció o
        se gastó), se olvida el comprobante para que al volver pida otro código. */
     if (/confirmar tu correo/i.test(msg)) { C.comprobante = null; C.enviadoA = ''; }

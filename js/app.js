@@ -102,6 +102,51 @@ function avisoVerificacion(s, decision, nota){
   });
 }
 
+/* ---------------- Avisos a los NEGOCIOS (3 de octubre) ----------------
+   Usan la misma plantilla genérica (template_u9x5p1i) con ocultar_socio: 'si',
+   que esconde los bloques pensados para el dueño de mascota ("Cómo se usa",
+   "Ayúdanos a hacer crecer el club" y el pie de "te registraste… borrar tu
+   cuenta"). Ver emailjs-template-avisos.html.
+     'aprobada' → la ficha se publicó: va su código NEG y el enlace a /mi-negocio
+     'ajustar'  → Jaime la rechazó con un motivo: puede volver a inscribirse */
+function avisoNegocio(sol, tipo, extra){
+  extra = extra || {};
+  const base = {
+    to_email: sol.responsable_email,
+    to_name: (sol.responsable_nombre || '').split(' ')[0] || sol.nombre || 'Hola',
+    ocultar_socio: 'si'
+  };
+  if(tipo === 'aprobada'){
+    return Object.assign(base, {
+      asunto: 'Tu ficha ya está publicada en Mi Mascota Club',
+      eyebrow: 'Negocios',
+      titulo: '¡' + (sol.nombre || 'Tu negocio') + ' ya es parte del club!',
+      intro: 'Revisamos tu ficha y ya aparece en el directorio. Los socios pueden encontrarte y usar tu beneficio. '
+           + 'Guarda este correo: abajo está tu código de negocio.',
+      caja_titulo: 'Tu código de negocio',
+      caja_dato: extra.codigo || '',
+      boton_texto: 'Entrar a mi panel →',
+      boton_url: location.origin + '/mi-negocio',
+      caja_nota: 'En tu panel entras con este código y un código de 6 dígitos que te llega a este correo. Ahí confirmas las visitas de los socios.',
+      mensaje_extra: 'Cuando llegue un socio: pídele su carnet o su código MMC, y confirma la visita desde tu panel (o escaneando el QR de su carnet con la cámara). '
+                   + 'Si quieres cambiar algo de tu ficha o tu beneficio, responde este correo.'
+    });
+  }
+  return Object.assign(base, {
+    asunto: 'Hay que ajustar algo de tu ficha',
+    eyebrow: 'Negocios',
+    titulo: 'Nos falta un detalle',
+    intro: 'Revisamos la ficha de ' + (sol.nombre || 'tu negocio') + ' y antes de publicarla hay que ajustar algo: '
+         + '«' + (extra.motivo || '') + '».',
+    caja_titulo: 'Estado de tu ficha',
+    caja_dato: 'POR AJUSTAR',
+    boton_texto: 'Volver a inscribir mi negocio →',
+    boton_url: location.origin + '/formulario-negocio',
+    caja_nota: 'Toma unos minutos. Si tienes dudas, responde este correo.',
+    mensaje_extra: 'Gracias por querer ser parte del club. Queremos que tu ficha se vea tan bien como tu negocio.'
+  });
+}
+
 /* Negocios de ejemplo del directorio.
    Vaciado el 13 de septiembre de 2026, antes de abrir el club a socios reales.
    Eran nueve negocios inventados (Veterinaria Los Robles, Café Con Patas,
@@ -3669,8 +3714,16 @@ async function aprobarFicha(id){
   try{
     const { data, error } = await supabase.rpc('aprobar_solicitud_negocio', { p_id: id });
     if(error) throw error;
-    colaMsg(id, `Publicada como ${data}. Ya está en el directorio.`, true);
-    setTimeout(() => { cargarColaFichas(); loadData(); }, 900);
+    colaMsg(id, `Publicada como ${data}. Ya está en el directorio. Avisando al negocio…`, true);
+    /* El correo al negocio con su código. Si falla, la ficha igual queda
+       publicada: el aviso es para que Jaime le escriba a mano. */
+    let avisado = true;
+    try{ await enviarAvisoSocio(avisoNegocio(sol, 'aprobada', { codigo: data })); }
+    catch(eMail){ console.error(eMail); avisado = false; }
+    colaMsg(id, avisado
+      ? `Publicada como ${data}. Le llegó un correo al negocio con su código.`
+      : `Publicada como ${data}, pero el correo al negocio NO salió: pásale su código a mano.`, avisado);
+    setTimeout(() => { cargarColaFichas(); loadData(); }, avisado ? 1600 : 6000);
   }catch(e){
     console.error(e);
     colaBloquear(id, false);
@@ -3687,8 +3740,14 @@ async function rechazarFicha(id){
   try{
     const { error } = await supabase.rpc('rechazar_solicitud_negocio', { p_id: id, p_motivo: motivo.trim() });
     if(error) throw error;
-    colaMsg(id, 'Ficha rechazada.', true);
-    setTimeout(cargarColaFichas, 800);
+    const sol = colaFichasCache.find(x => x.id === id);
+    let avisado = true;
+    try{ if(sol) await enviarAvisoSocio(avisoNegocio(sol, 'ajustar', { motivo: motivo.trim() })); else avisado = false; }
+    catch(eMail){ console.error(eMail); avisado = false; }
+    colaMsg(id, avisado
+      ? 'Ficha rechazada. Le llegó un correo al negocio con tu motivo.'
+      : 'Ficha rechazada, pero el correo al negocio NO salió: escríbele a mano.', avisado);
+    setTimeout(cargarColaFichas, avisado ? 1600 : 6000);
   }catch(e){
     console.error(e);
     colaBloquear(id, false);

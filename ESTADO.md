@@ -621,6 +621,42 @@ Lo construido:
    teléfono, enviar, y verla llegar a `/mi-panel` → Fichas por aprobar. Después,
    rechazarla para dejar la cola limpia.
 
+### QA del 3 de octubre y lo que trae el push siguiente
+
+**Lo que salió del QA (con un negocio de prueba real, "Gloria Pet Salon Rojas"):**
+
+- El formulario, el código, la vista previa y el envío funcionaron. La verificación del
+  correo funcionó de punta a punta en el servidor.
+- **Error "HTTP 520" al enviar:** los registros de Supabase muestran que el logo subió
+  bien y la **foto (PNG de 1,4 MB) falló con un 520 de Supabase Storage**, una falla
+  momentánea del servidor. Al apretar Enviar otra vez pasó. Quedó un logo suelto del
+  primer intento en el bucket `negocios` (limpiar junto con los archivos de prueba).
+- **En /mi-panel, en el teléfono, la ficha se cortaba por la derecha.** Causa: el
+  componente `.mmc-ficha` no se encogía bajo ~345 px (hijos de grid/flex sin
+  `min-width:0`, el tipo de negocio sin corte de línea y la foto con `min-height:200px`
+  + `aspect-ratio 16/10`, que obligaba a 320 px). Afectaba también a `/negocio/<slug>` y
+  a la vista previa del formulario en teléfonos angostos.
+- La solicitud de prueba **se deja en la cola a propósito** para seguir probando (Jaime).
+
+**Push siguiente (construido el 3 de octubre, un solo push):**
+
+1. `css/mmc-ficha.css`: la ficha se encoge bien hasta 290 px (probado en 290, 320, 350
+   y 700). Es un arreglo de base; el rediseño de la ficha lo hace Jaime aparte.
+2. Formulario: las imágenes se **achican antes de subir** (foto a JPG de 1600 px, logo a
+   PNG de 800 px), **se reintenta hasta 3 veces** si Supabase falla, no se vuelven a
+   subir si ya subieron en un intento anterior, y los errores técnicos se muestran como
+   "Tuvimos un problema… vuelve a apretar Enviar: tus datos no se perdieron". La foto
+   ahora acepta hasta 15 MB antes de achicarla.
+3. Correos de negocios con la plantilla genérica y `ocultar_socio: 'si'`:
+   - **"Recibimos la inscripción de …"** al negocio, al enviar el formulario;
+   - **"Nueva ficha por aprobar — …"** a Jaime, al enviar el formulario;
+   - **"Tu ficha ya está publicada"** al aprobar en `/mi-panel`, con el **código NEG** y
+     el enlace a `/mi-negocio` (función `avisoNegocio()` en `js/app.js`);
+   - **"Hay que ajustar algo de tu ficha"** al rechazar, con el motivo.
+   Si un correo falla, `/mi-panel` lo dice ("pásale su código a mano").
+4. `ocultar_socio: 'si'` en los avisos a Jaime (`activar-fundador.js` y
+   `aviso-canje.js`): se acabó el "Cómo se usa" en esos correos.
+
 ### Los correos a los negocios (pendiente, conversado el 3 de octubre)
 
 EmailJS gratis da **2 plantillas** y están las dos ocupadas:
@@ -632,6 +668,15 @@ EmailJS gratis da **2 plantillas** y están las dos ocupadas:
   trae fijos bloques pensados para el dueño ("Cómo se usa: llegas al negocio y muestras
   tu carnet…", "Ayúdanos a hacer crecer el club", "puedes borrar tu cuenta desde tu
   carnet"). Es el mismo problema que se vio en el aviso de fundador.
+
+**Plantilla genérica de verdad — HECHO el 3 de octubre.** La plantilla `template_u9x5p1i`
+en EmailJS ya tiene la variable `ocultar_socio` (archivo de respaldo:
+`emailjs-template-avisos.html`). Usa las "secciones" de EmailJS: los 4 bloques de socio
+van entre `{{^ocultar_socio}}` y `{{/ocultar_socio}}`, siempre **dentro** de un `<td>`.
+Sin la variable, el correo sale igual que antes; con `ocultar_socio: 'si'` salen sin
+"Cómo se usa", sin "Ayúdanos a hacer crecer el club" y el pie solo con los términos.
+Probado con "Test It" en los dos casos. (Un primer intento poniendo la variable dentro de
+los `style` no funcionó: no usar ese método.)
 
 **Hoy al negocio no le llega ningún correo** ni al inscribirse ni al aprobarse: el código
 de negocio (NEG…) y el enlace a `/mi-negocio` se los pasa Jaime a mano. **La solución
