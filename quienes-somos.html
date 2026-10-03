@@ -29,6 +29,8 @@
 
 <!-- Cliente de Supabase: solo para leer cuántos fundadores van. Nada más. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- El acceso con código antes de pagar el pase (3 de octubre). -->
+<script src="/js/pase-fundador.js" defer></script>
 
 <style>
 /* ======================================================================
@@ -106,6 +108,16 @@
 .qs-despues__alt a{ font-weight:800; }
 #ya-pague:target{ animation:qsResalta 1.6s ease; }
 @keyframes qsResalta{ 0%,100%{ box-shadow:none; } 25%,60%{ box-shadow:0 0 0 6px rgba(71,201,201,0.35); } }
+/* --- El paso antes de pagar (3 de octubre) --- */
+.qs-paso-pago{ margin-top:18px; padding:20px 18px; border-radius:16px; background:var(--paper-tint-yellow); border:2px solid var(--ink); }
+.qs-paso-pago[hidden]{ display:none; }
+.qs-paso-pago h3{ font-size:18px; margin:0 0 6px; }
+.qs-paso-pago > p{ font-size:14.5px; line-height:1.5; margin:0 0 16px; color:#3a3a3a; }
+.qs-paso-pago .qs-como{ font-size:15px; font-weight:700; margin:0 0 14px; overflow-wrap:anywhere; }
+.qs-paso-pago .pf-btn{ text-align:center; }
+.qs-paso-pago .soc-link{ display:block; margin:14px auto 0; }
+.qs-paso-pago .pf-nota, .qs-paso-pago .soc-enviado{ font-size:13.5px; line-height:1.5; }
+.qs-paso-pago .soc-reenvio .soc-link{ display:inline; margin:0; }
 .qs-despues h3{ font-size:17px; margin:0 0 8px; }
 .qs-despues p{ font-size:14.5px; line-height:1.5; margin:0 0 14px; color:#3a3a3a; }
 .qs-despues .btn{ width:100%; justify-content:center; }
@@ -374,14 +386,17 @@
 
       <a href="#" id="qsPagar" class="btn btn-primary btn-grande">Quiero ser Socio Fundador</a>
 
-      <!-- Paso 2, y es obligatorio: el link de pago de Mercado Pago no sabe
-           qué socio pagó. Sin este aviso no hay forma de saber a quién
-           activarle el número de fundador. -->
-      <p class="qs-pase__letra">
+      <!-- El paso de ANTES de pagar (3 de octubre). El link de Mercado Pago no
+           sabe qué socio pagó, así que primero se confirma el correo con un
+           código. Al volver del pago, /gracias activa el pase sola: ya no hay
+           que avisar por WhatsApp. -->
+      <div id="qsPaso" class="qs-paso-pago" hidden></div>
+
+      <p class="qs-pase__letra" id="qsLetra">
         Para ser fundador primero tienes que estar inscrito, y la inscripción es gratis.
         Si todavía no lo estás, <a href="/registro" style="font-weight:800;">inscríbete acá</a> y vuelve a esta página.
         <br>
-        Al pagar te llevamos a una página con el último paso, que toma 20 segundos.
+        Después de pagar, tu número de fundador se activa solo.
       </p>
     </div>
   </div>
@@ -556,31 +571,69 @@ function pintarPase(tomados){
     return;
   }
 
-  if (LINK_MERCADOPAGO){
-    boton.href   = LINK_MERCADOPAGO;
-    boton.target = '_blank';
-    boton.rel    = 'noopener';
-  } else {
-    boton.addEventListener('click', function(e){
-      e.preventDefault();
-      alert('El pago se abre en unos días. Inscríbete gratis mientras tanto y te avisamos por correo apenas esté listo.');
-    });
-  }
+  /* El botón ya NO lleva directo a Mercado Pago: primero abre el paso de
+     confirmar el correo (abrirPasoPago). El onclick se pone una sola vez,
+     aunque pintarPase se llame dos veces. */
+  boton.href = '#fundador';
+  boton.onclick = function(e){ e.preventDefault(); abrirPasoPago(); };
 }
 
-/* Muestra el recuadro de "ya pagué". Se llama desde tres lados: al volver del
-   pago (#ya-pague en la URL), al apretar el botón de pagar, y desde el enlace
-   chico de abajo para quien perdió el hilo.
-   Esto NO es seguridad: el filtro de verdad es que Jaime confirma el pago en
-   Mercado Pago antes de marcar a nadie. Es para no invitar a mandar el mensaje
-   a quien todavía no ha pagado. */
+/* ---------------- El paso de ANTES de pagar ----------------
+   Con sesión iniciada (la misma de /mi-mascota): muestra con qué correo se
+   va a activar el pase y el botón de pagar. Sin sesión: pide el correo y el
+   código que le llega. Si ya es fundador, se lo dice y no lo manda a pagar. */
+async function abrirPasoPago(){
+  const caja  = document.getElementById('qsPaso');
+  const boton = document.getElementById('qsPagar');
+  const letra = document.getElementById('qsLetra');
+  if (!caja || !window.PaseFundador) return;
+  const PF = window.PaseFundador;
+
+  caja.hidden = false;
+  boton.style.display = 'none';
+  if (letra) letra.style.display = 'none';
+  caja.innerHTML = '<p><span class="spinner"></span>Un segundo…</p>';
+
+  const yo = await PF.quienSoy();
+
+  if (!yo){
+    caja.innerHTML = '<h3>Primero, confirma que eres tú</h3>'
+      + '<p>Te mandamos un código al correo con el que inscribiste a tu mascota. Así tu número de fundador se activa solo después de pagar, sin que tengas que avisarnos nada.</p>'
+      + '<div id="qsAcceso"></div>';
+    PF.montarAcceso(document.getElementById('qsAcceso'), abrirPasoPago);
+    return;
+  }
+
+  if (yo.fundador){
+    const num = '#' + String(yo.fundador).padStart(3, '0');
+    caja.innerHTML = '<h3>Ya eres Socio Fundador ' + num + ' ★</h3>'
+      + '<p>Tu pase está activo y tu número aparece en el carnet de tu mascota. ¡Gracias por estar desde el principio!</p>'
+      + '<a href="/mi-mascota" class="btn btn-primary pf-btn">Ver mi carnet</a>';
+    return;
+  }
+
+  caja.innerHTML = '<h3>Todo listo' + (yo.nombre ? ', ' + PF.esc(yo.nombre) : '') + '</h3>'
+    + '<p class="qs-como">Vas a activar tu pase como <b>' + PF.esc(yo.email) + '</b></p>'
+    + '<p>Puedes pagar con cualquier cuenta de Mercado Pago, aunque no sea de este correo. <b>Cuando termines, toca «Volver al sitio»</b> en Mercado Pago: ahí tu número se activa solo.</p>'
+    + '<a href="' + LINK_MERCADOPAGO + '" class="btn btn-primary pf-btn" id="qsIrPagar">Pagar $9.990 en Mercado Pago</a>'
+    + '<button type="button" class="soc-link" id="qsOtroCorreo">¿No eres tú? Usar otro correo</button>';
+
+  document.getElementById('qsOtroCorreo').onclick = function(){
+    PF.borrarToken();
+    abrirPasoPago();
+  };
+}
+
 /* Red de seguridad: si algún link de pago viejo todavía devuelve acá con el
    ancla #ya-pague, mandamos a la persona a /gracias, que es donde está el
    paso que le falta. El indexOf es a propósito: Mercado Pago agrega sus
    parámetros después del #, así que el hash llega como "#ya-pague?collection_id=..."
    y una comparación exacta nunca calzaría. */
 if (location.hash.indexOf('#ya-pague') === 0){
-  location.replace('/gracias');
+  /* Se llevan los datos del pago (lo que viene después del "?"), porque
+     /gracias los necesita para activar el pase. */
+  const datosPago = location.hash.split('?')[1];
+  location.replace('/gracias' + (datosPago ? '?' + datosPago : ''));
 }
 
 pintarPase(0);

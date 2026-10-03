@@ -944,7 +944,8 @@
 
         <!-- Paso 2: código -->
         <form id="socCodigoForm" class="soc-paso" style="display:none;">
-          <p class="soc-enviado">Te enviamos un código de 6 dígitos a <b id="socEmailEco"></b>. Llega en menos de un minuto — si no lo ves, revisa el spam.</p>
+          <p class="soc-enviado">Si <b id="socEmailEco"></b> está inscrito, te llegará un código de 6 dígitos en menos de un minuto — si no lo ves, revisa el spam.
+            ¿No te llega? Puede que tu mascota esté inscrita con otro correo, o que todavía no la inscribas: <a href="/registro" style="color:var(--teal-dark);font-weight:800;">inscríbela gratis</a>.</p>
           <div class="field">
             <label for="socCodigo">Código de 6 dígitos</label>
             <input id="socCodigo" inputmode="numeric" maxlength="6" required placeholder="123456" class="soc-otp" autocomplete="one-time-code">
@@ -1334,11 +1335,24 @@
         </div>
       </div>
 
+      <!-- ===== Pagos de fundador pendientes (3 de octubre) =====
+           El pase se activa solo cuando Mercado Pago confirma el pago. Acá cae
+           lo que no se pudo activar solo: pagos en proceso, montos que no
+           calzan o pagos sin cupo. Nadie que pagó queda en el aire. -->
+      <div class="admin-table" id="fundPendWrap">
+        <h4>Pagos de fundador pendientes <span id="fundPendCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarPendientesFundador()">↻ Actualizar</button>
+        </h4>
+        <div id="fundPendLista" class="cola-lista">
+          <div class="cola-vacia">Cargando…</div>
+        </div>
+      </div>
+
       <!-- ===== Socios Fundadores =====
-           El pago llega a Mercado Pago sin el código de la mascota, así que el
-           socio avisa por WhatsApp y Jaime lo marca acá. El número de fundador
-           lo asigna la base (admin_marcar_fundador, parche v28): nunca se
-           escribe a mano ni se repite. -->
+           Desde el 3 de octubre el pase se activa solo después de pagar. Este
+           bloque queda para ver y quitar fundadores, y para marcar a mano algún
+           caso especial. El número lo asigna la base (admin_marcar_fundador,
+           parche v28): nunca se escribe a mano ni se repite. -->
       <div class="admin-table" id="fundWrap">
         <h4>Socios Fundadores <span id="fundCount" class="cola-count">0</span>
           <button class="refresh-btn" onclick="cargarFundadores()">↻ Actualizar</button>

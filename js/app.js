@@ -2703,6 +2703,7 @@ async function tryUnlock(){
     cargarAjustesAdmin();
     cargarSugerencias();
     cargarFundadores();
+    cargarPendientesFundador();
   }catch(e){
     err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
     err.style.display='block';
@@ -2891,6 +2892,7 @@ function mostrarPaginaAdmin(){
       cargarAjustesAdmin();
       cargarSugerencias();
       cargarFundadores();
+      cargarPendientesFundador();
     }
   }).catch(() => {});
 }
@@ -2904,8 +2906,9 @@ async function salirAdmin(){
 }
 
 /* ================= Socios Fundadores en /mi-panel =====================
-   El pase se paga por un link de Mercado Pago, y ese link no sabe qué socio
-   pagó. El socio avisa su código por WhatsApp y acá se marca.
+   Desde el 3 de octubre el pase se activa solo después de pagar (ver
+   activar-fundador.js). Este bloque queda para marcar a mano casos
+   especiales, y para ver y quitar fundadores.
 
    El número de fundador NO se escribe a mano: lo asigna la base con
    admin_marcar_fundador() (parche v28), que además comprueba que el correo
@@ -3008,6 +3011,90 @@ async function quitarFundador(email, numero){
   }catch(e){
     console.error(e);
     fundMsg('No se pudo quitar.', false);
+  }
+}
+
+/* ============ Pagos de fundador pendientes en /mi-panel ===============
+   Desde el 3 de octubre el pase se activa solo (activar-fundador.js, después
+   de que Mercado Pago confirma el pago). Lo que NO se pudo activar solo cae
+   acá: pagos en efectivo o transferencia que todavía no se acreditan, pagos
+   que no calzan con el monto del pase, o pagos que llegaron sin cupo.
+
+   "Activar" usa admin_marcar_fundador() con el n° de operación: hazlo SOLO
+   después de revisar en Mercado Pago que el pago está aprobado.
+   ====================================================================== */
+const MOTIVOS_PENDIENTE = {
+  pago_en_proceso: 'Pago en proceso (efectivo o transferencia)',
+  monto_distinto:  'El monto no calza con el pase',
+  sin_cupo:        'Pagó sin cupo disponible',
+};
+
+async function cargarPendientesFundador(){
+  const cont = document.getElementById('fundPendLista');
+  const cnt  = document.getElementById('fundPendCount');
+  if(!cont) return;
+  cont.innerHTML = '<div class="cola-vacia">Cargando…</div>';
+  try{
+    const { data, error } = await supabase.rpc('admin_fundadores_pendientes');
+    if(error) throw error;
+    const filas = data || [];
+    if(cnt){ cnt.textContent = filas.length; cnt.dataset.cero = filas.length ? '0' : '1'; }
+
+    if(!filas.length){
+      cont.innerHTML = '<div class="cola-vacia">Nada pendiente. Todos los pagos se activaron solos.</div>';
+      return;
+    }
+
+    cont.innerHTML = filas.map(p => {
+      const d = p.creado_en ? new Date(p.creado_en) : null;
+      const cuando = d ? d.toLocaleString('es-CL',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}) : '';
+      return `<div class="fund-item fund-item--pend">
+        <div class="fund-item__datos">
+          <b>${colaEsc(p.mascotas || '(sin mascotas inscritas)')}</b>
+          <a href="mailto:${colaEsc(p.email)}">${colaEsc(p.email)}</a>
+          <small>${colaEsc(MOTIVOS_PENDIENTE[p.motivo] || p.motivo)}${p.estado_pago ? ' · MP: ' + colaEsc(p.estado_pago) : ''}</small>
+          <small>${cuando}${p.monto ? ' · $' + Number(p.monto).toLocaleString('es-CL') : ''} · op. ${colaEsc(p.referencia)}</small>
+          <div class="fund-pend__acciones">
+            <button type="button" class="btn btn-primary btn-sm"
+                    onclick="activarPendienteFundador('${colaEsc(p.id)}','${colaEsc(p.email)}','${colaEsc(p.referencia)}')">Activar como fundador</button>
+            <button type="button" class="fund-item__quitar"
+                    onclick="resolverPendienteFundador('${colaEsc(p.id)}')">Descartar</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<div class="cola-vacia">No pudimos cargar los pendientes.</div>';
+  }
+}
+
+async function activarPendienteFundador(id, email, referencia){
+  if(!confirm('¿Ya revisaste en Mercado Pago que la operación ' + referencia + ' está APROBADA?\n\nSi es así, ' + email + ' queda como Socio Fundador.')) return;
+  try{
+    const { data, error } = await supabase.rpc('admin_marcar_fundador', {
+      p_email: email, p_referencia: referencia, p_monto: 9990
+    });
+    if(error) throw error;
+    await supabase.rpc('admin_resolver_pendiente', { p_id: id });
+    fundMsg('Listo: ' + email + ' quedó como Socio Fundador #' + String(data).padStart(3, '0') + '.', true);
+    cargarPendientesFundador();
+    cargarFundadores();
+  }catch(e){
+    console.error(e);
+    fundMsg(e.message || 'No se pudo activar.', false);
+  }
+}
+
+async function resolverPendienteFundador(id){
+  if(!confirm('¿Descartar este pago pendiente?\n\nÚsalo cuando ya lo resolviste por otro lado (por ejemplo, devolviste el pago).')) return;
+  try{
+    const { error } = await supabase.rpc('admin_resolver_pendiente', { p_id: id });
+    if(error) throw error;
+    cargarPendientesFundador();
+  }catch(e){
+    console.error(e);
+    fundMsg('No se pudo descartar.', false);
   }
 }
 
@@ -3739,6 +3826,9 @@ window.marcarSugerencia = marcarSugerencia;
 window.cargarFundadores = cargarFundadores;
 window.marcarFundador = marcarFundador;
 window.quitarFundador = quitarFundador;
+window.cargarPendientesFundador = cargarPendientesFundador;
+window.activarPendienteFundador = activarPendienteFundador;
+window.resolverPendienteFundador = resolverPendienteFundador;
 window.aprobarFicha = aprobarFicha;
 window.rechazarFicha = rechazarFicha;
 window.editarFicha = editarFicha;
@@ -3845,25 +3935,14 @@ async function socioPedirCodigo(email, btn, textoBtn){
   socError('');
   if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...'; }
   try{
-    /* Primero preguntamos si ese correo tiene mascotas inscritas. Así no le
-       mandamos un correo a alguien que no está en el club y le podemos ofrecer
-       registrarse en vez de dejarlo esperando un código que no le va a servir. */
-    const { data, error } = await supabase.rpc('socio_existe', { p_email: email });
-    if(error) throw error;
-    const info = data && data[0];
-    if(!info || !info.existe){
-      socError('No encontramos mascotas inscritas con ese correo. ¿Todavía no te registras?');
-      const box = document.getElementById('socLoginError');
-      if(box){
-        box.innerHTML += ' <a href="#" onclick="event.preventDefault(); mostrarFormulario(\'dueno\');" style="color:var(--teal-dark);font-weight:800;">Inscribir mi mascota gratis →</a>';
-      }
-      return false;
-    }
-
+    /* Desde el 3 de octubre ya NO se pregunta antes si el correo está
+       inscrito (socio_existe): eso le permitía a cualquiera averiguar quién es
+       socio. Ahora la función revisa por dentro y responde lo mismo esté o no
+       inscrito; si no lo está, simplemente no llega ningún correo. */
     const res = await fetch('/.netlify/functions/enviar-codigo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, acceso: true })
     });
     const r = await res.json().catch(() => ({}));
     if(!res.ok || !r.ok){

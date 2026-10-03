@@ -18,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/pase-fundador.js"></script>
 
 <style>
 /* ======================================================================
@@ -52,27 +53,18 @@
 }
 .gr-cupos .punto{ width:9px; height:9px; border-radius:50%; background:var(--sage); }
 
-/* --- El paso que falta --- */
-.gr-paso{
-  background:var(--black); color:#fff; padding:44px 0;
-}
-.gr-paso h2{ font-size:clamp(24px, 6.5vw, 30px); margin:0 0 12px; color:#fff; }
-.gr-paso p{ font-size:16px; line-height:1.6; color:#d2d2d2; margin:0 0 8px; }
-.gr-paso .gr-tiempo{
-  display:inline-block; background:rgba(255,206,0,0.15); color:var(--yellow);
-  font-size:12.5px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;
-  padding:6px 13px; border-radius:999px; margin-bottom:14px;
-}
-.gr-btn-wa{
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  width:100%; margin-top:22px; padding:18px 20px; border-radius:16px;
-  background:#25D366; color:#0b2e17; text-decoration:none;
-  font-weight:900; font-size:17px; transition:transform .18s;
-}
-.gr-btn-wa:hover{ transform:translateY(-2px); }
-.gr-btn-wa svg{ width:22px; height:22px; flex-shrink:0; }
-.gr-alt{ font-size:13.5px; color:#9a9a9a; margin:14px 0 0; text-align:center; }
-.gr-alt a{ color:#d8d8d8; font-weight:800; }
+/* --- Lo que hay que hacer (acceso, reintentar, contacto) --- */
+.gr-accion{ padding:36px 0 8px; }
+.gr-accion[hidden], .gr-sigue[hidden], .gr-cierre[hidden], .gr-cupos[hidden]{ display:none; }
+.gr-caja{ background:#fff; border:2px solid var(--ink); border-radius:18px; padding:22px 18px; }
+.gr-caja h2{ font-size:clamp(21px, 5.6vw, 25px); margin:0 0 8px; }
+.gr-caja > p{ font-size:15px; line-height:1.55; color:#3a3a3a; margin:0 0 16px; }
+.gr-caja .btn{ width:100%; justify-content:center; }
+.gr-caja .gr-alt{ font-size:13.5px; color:var(--gray); margin:14px 0 0; text-align:center; font-weight:600; }
+.gr-caja .gr-alt a{ color:var(--teal-dark); font-weight:800; }
+.gr-check--espera{ background:var(--paper-tint-teal); box-shadow:0 8px 0 var(--teal-dark); }
+.gr-check--alerta{ background:#FDEDE8; box-shadow:0 8px 0 #c95a3a; }
+.gr-check .spinner{ width:30px; height:30px; border-width:3px; margin:0; }
 
 /* --- Lo que sigue --- */
 .gr-sigue{ padding:44px 0; }
@@ -93,6 +85,7 @@
 .gr-item__txt a{ color:var(--teal-dark); font-weight:800; }
 
 .gr-cierre{ text-align:center; padding:0 0 56px; }
+.gr-cierre p{ font-size:14px; color:var(--gray); margin:14px 0 0; font-weight:600; }
 .gr-cierre .btn{ width:100%; justify-content:center; max-width:340px; }
 </style>
 </head>
@@ -112,62 +105,48 @@
   </div>
 </nav>
 
-<!-- 1 · La celebración -->
+<!-- ======================================================================
+     Desde el 3 de octubre esta página ACTIVA el pase sola: lee el número de
+     operación que Mercado Pago pone en la dirección, y la Netlify Function
+     activar-fundador.js le pregunta a Mercado Pago si ese pago existe de
+     verdad antes de activar nada. Ya no se le pide a nadie avisar por
+     WhatsApp. El grupo de fundadores aparece SOLO si el pase se activó.
+     ====================================================================== -->
+
+<!-- 1 · El estado (se reescribe según lo que responda el servidor) -->
 <header class="gr-top">
   <div class="gr-wrap">
-    <div class="gr-check">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#151515" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <h1>Listo. Eres Socio Fundador.</h1>
-    <p>Gracias de verdad. Los primeros 100 son los que hacen posible lo que viene, y tú eres uno de ellos.</p>
-    <div class="gr-cupos"><span class="punto"></span> <span id="grCupos">Quedan cupos de los 100</span></div>
+    <div class="gr-check gr-check--espera" id="grIcono"><span class="spinner"></span></div>
+    <h1 id="grTitulo">Confirmando tu pago…</h1>
+    <p id="grTexto">Estamos verificando tu pago con Mercado Pago. Toma unos segundos.</p>
+    <div class="gr-cupos" id="grCuposPill" hidden><span class="punto"></span> <span id="grCupos">Quedan cupos de los 100</span></div>
   </div>
 </header>
 
-<!-- 2 · El paso que falta -->
-<section class="gr-paso">
-  <div class="gr-wrap">
-    <span class="gr-tiempo">Falta un paso · 20 segundos</span>
-    <h2>Mándanos el código de tu mascota</h2>
-    <p>
-      Tu pago llegó, pero Mercado Pago no nos dice a qué mascota corresponde. Con tu código
-      activamos tu número de fundador y te lo dejamos visible en el carnet.
-    </p>
-    <p>
-      El código sale en tu carnet y se ve así: <b class="mono" style="color:#fff;">MMC00042</b>.
-    </p>
-
-    <a class="gr-btn-wa" target="_blank" rel="noopener"
-       href="https://wa.me/56997132591?text=Hola%2C%20acabo%20de%20pagar%20el%20Pase%20de%20Socio%20Fundador.%0A%0AC%C3%B3digo%20de%20mi%20mascota%3A%20MMC000__%0ANombre%20de%20mi%20mascota%3A%20%0ACorreo%20con%20el%20que%20me%20inscrib%C3%AD%3A%20">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.6-.8-2.7-1.5-3.8-3.3-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.4 1.9.8 2.6.9 3.5.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.3Z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg>
-      Avisar mi código por WhatsApp
-    </a>
-    <p class="gr-alt">
-      ¿Prefieres correo? Escríbenos a
-      <a href="mailto:holamimascotaclub@gmail.com?subject=Ya%20pagu%C3%A9%20mi%20Pase%20Fundador&amp;body=Hola%2C%20acabo%20de%20pagar%20el%20Pase%20de%20Socio%20Fundador.%0A%0AC%C3%B3digo%20de%20mi%20mascota%3A%20MMC000__%0ANombre%20de%20mi%20mascota%3A%20%0ACorreo%20con%20el%20que%20me%20inscrib%C3%AD%3A%20%0A%0A%C2%A1Gracias!">holamimascotaclub@gmail.com</a>
-    </p>
-  </div>
+<!-- 2 · Lo que haga falta: confirmar el correo, reintentar o escribirnos -->
+<section class="gr-accion" id="grAccion" hidden>
+  <div class="gr-wrap"><div class="gr-caja" id="grCaja"></div></div>
 </section>
 
-<!-- 3 · Qué pasa ahora -->
-<section class="gr-sigue">
+<!-- 3 · Qué pasa ahora (solo si el pase quedó activo) -->
+<section class="gr-sigue" id="grSigue" hidden>
   <div class="gr-wrap">
     <h2>Qué pasa ahora</h2>
 
     <div class="gr-item">
       <div class="gr-item__n">1</div>
       <div class="gr-item__txt">
-        <b>Activamos tu número</b>
-        <span>Apenas recibimos tu código te asignamos el tuyo, del #001 al #100, y aparece en el carnet de tu mascota. Es tuyo para siempre.</span>
+        <b>Tu número ya está en el carnet</b>
+        <span>Aparece en el carnet de tu mascota, con la insignia de Socio Fundador. Es tuyo para siempre.</span>
       </div>
     </div>
 
     <div class="gr-item">
       <div class="gr-item__n">2</div>
       <div class="gr-item__txt">
-        <b>Entras al grupo del club</b>
-        <span>Solo para socios. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos.
-          <a href="https://chat.whatsapp.com/FMw6QHmwkSnFXIYbX5Cosb" target="_blank" rel="noopener">Unirme al grupo →</a></span>
+        <b>Entra al grupo de los fundadores</b>
+        <span>Solo para fundadores. Acá nos recomendamos veterinarias, peluquerías y todo lo que necesitamos para ellos.
+          <a id="grGrupo" href="#" target="_blank" rel="noopener">Unirme al grupo →</a></span>
       </div>
     </div>
 
@@ -182,7 +161,7 @@
   </div>
 </section>
 
-<section class="gr-cierre">
+<section class="gr-cierre" id="grCierre" hidden>
   <div class="gr-wrap">
     <a href="/mi-mascota" class="btn btn-primary btn-grande">Ver el carnet de mi mascota</a>
   </div>
@@ -229,22 +208,186 @@
 </footer>
 
 <script>
-/* Los cupos que quedan, leídos de la base. Es el mismo número que muestra la
-   landing. Si falla, la píldora se queda con su texto genérico y no pasa nada:
-   esta página tiene un solo trabajo y es el botón de WhatsApp. */
-(async function cupos(){
+/* ======================================================================
+   ACTIVACIÓN AUTOMÁTICA DEL PASE
+   ----------------------------------------------------------------------
+   1. Lee el n° de operación de la dirección (Mercado Pago lo manda como
+      payment_id o collection_id; a veces después del #, por eso se miran
+      los dos lados).
+   2. Si no hay sesión de socio, pide confirmar el correo con un código.
+   3. Le pide a activar-fundador.js que verifique el pago con Mercado Pago
+      y active el pase. El navegador no decide nada.
+   ====================================================================== */
+/* El enlace del grupo NO está escrito en esta página: lo entrega
+   activar-fundador.js solo cuando el pase se activó de verdad. */
+let enlaceGrupo = '#';
+const WHATSAPP_CLUB = '56997132591';
+
+function leerPago(){
+  const buscar = function(texto){
+    const q = new URLSearchParams(texto || '');
+    const v = q.get('payment_id') || q.get('collection_id') || '';
+    return /^[0-9]{6,20}$/.test(v) ? v : '';
+  };
+  return buscar(location.search) || buscar((location.hash.split('?')[1]) || '');
+}
+const PAGO = leerPago();
+
+function enlaceWhatsApp(motivo){
+  const txt = 'Hola, pagué el Pase de Socio Fundador y ' + motivo + '.'
+            + (PAGO ? '\n\nN° de operación de Mercado Pago: ' + PAGO : '');
+  return 'https://wa.me/' + WHATSAPP_CLUB + '?text=' + encodeURIComponent(txt);
+}
+
+const ICONOS = {
+  ok:     '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#151515" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  espera: '<svg viewBox="0 0 24 24" fill="none" stroke="#1b6b6b" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  alerta: '<svg viewBox="0 0 24 24" fill="none" stroke="#9c3a20" stroke-width="2.8" stroke-linecap="round"><path d="M12 7v6"/><path d="M12 17h.01"/></svg>',
+  carga:  '<span class="spinner"></span>'
+};
+
+function pintar(o){
+  const icono = document.getElementById('grIcono');
+  icono.className = 'gr-check' + (o.icono === 'ok' ? '' : (o.icono === 'alerta' ? ' gr-check--alerta' : ' gr-check--espera'));
+  icono.innerHTML = ICONOS[o.icono] || ICONOS.carga;
+  document.getElementById('grTitulo').textContent = o.titulo;
+  document.getElementById('grTexto').innerHTML = o.texto || '';
+  document.getElementById('grCuposPill').hidden = !o.cupos;
+
+  const accion = document.getElementById('grAccion');
+  const caja = document.getElementById('grCaja');
+  accion.hidden = !o.caja;
+  if (o.caja) caja.innerHTML = o.caja;
+
+  document.getElementById('grSigue').hidden = !o.exito;
+  document.getElementById('grCierre').hidden = !o.exito;
+  /* El enlace del grupo existe en la página SOLO cuando el pase se activó. */
+  document.getElementById('grGrupo').href = o.exito ? enlaceGrupo : '#';
+}
+
+function cajaContacto(titulo, texto, motivoWsp, conReintento){
+  return '<h2>' + titulo + '</h2><p>' + texto + '</p>'
+    + (conReintento ? '<button type="button" class="btn btn-primary" onclick="activar()">Intentar de nuevo</button>' : '')
+    + '<p class="gr-alt">¿Necesitas ayuda? <a href="' + enlaceWhatsApp(motivoWsp) + '" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>'
+    + ' o a <a href="mailto:holamimascotaclub@gmail.com">holamimascotaclub@gmail.com</a></p>';
+}
+
+function pedirAcceso(){
+  pintar({
+    icono: 'espera',
+    titulo: 'Un último paso',
+    texto: 'Recibimos tu pago. Confirma tu correo para activar tu número de fundador.',
+    caja: '<h2>Confirma que eres tú</h2><p>Te mandamos un código al correo con el que inscribiste a tu mascota. Con eso tu pase se activa al tiro.</p><div id="grAcceso"></div>'
+  });
+  window.PaseFundador.montarAcceso(document.getElementById('grAcceso'), activar);
+}
+
+async function activar(){
+  pintar({ icono: 'carga', titulo: 'Confirmando tu pago…', texto: 'Estamos verificando tu pago con Mercado Pago. Toma unos segundos.' });
+
+  let r = {};
   try{
-    const sb = window.supabase.createClient(
-      'https://mzsqyjxqnomsbqzhygkx.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16c3F5anhxbm9tc2Jxemh5Z2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTA0NDAsImV4cCI6MjEwMzY4NjQ0MH0.v5MASfYE83x1Lr_p1Q4MlHtyqpJlopBbjUqhB2suTEc'
-    );
-    const { data, error } = await sb.rpc('contar_fundadores');
+    const res = await fetch('/.netlify/functions/activar-fundador', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: window.PaseFundador.token(), payment_id: PAGO })
+    });
+    r = await res.json().catch(function(){ return {}; });
+  }catch(e){
+    r = { ok:false, motivo:'red' };
+  }
+
+  if (r.ok){
+    enlaceGrupo = r.grupo || '#';
+    const num = '#' + String(r.numero).padStart(3, '0');
+    pintar({
+      icono: 'ok', exito: true, cupos: true,
+      titulo: 'Listo. Eres el Socio Fundador ' + num + '.',
+      texto: r.ya_era
+        ? 'Tu pase ya estaba activo. Tu número aparece en el carnet de tu mascota.'
+        : 'Gracias de verdad. Los primeros 100 son los que hacen posible lo que viene, y tú eres uno de ellos.'
+    });
+    cargarCupos();
+    return;
+  }
+
+  switch (r.motivo){
+    case 'sin_sesion':
+      window.PaseFundador.borrarToken();
+      pedirAcceso();
+      return;
+
+    case 'en_proceso':
+      pintar({ icono: 'espera', titulo: 'Tu pago está en proceso',
+        texto: 'Mercado Pago todavía no lo acredita. Pasa con pagos en efectivo o por transferencia.',
+        caja: cajaContacto('Apenas se acredite, activamos tu pase',
+          'Ya quedó registrado a tu nombre, no tienes que hacer nada más. Cuando Mercado Pago lo apruebe, tu número de fundador va a aparecer en el carnet de tu mascota.',
+          'mi pago quedó en proceso', false) });
+      return;
+
+    case 'no_aprobado':
+      pintar({ icono: 'alerta', titulo: 'El pago no se completó',
+        texto: 'Mercado Pago no aprobó este pago, así que no se hizo ningún cobro por el pase.',
+        caja: '<h2>Puedes intentarlo de nuevo</h2><p>Vuelve a la página del pase y paga otra vez, con la misma u otra tarjeta.</p><a href="/quienes-somos#fundador" class="btn btn-primary">Volver a intentar</a>' });
+      return;
+
+    case 'revision':
+      pintar({ icono: 'espera', titulo: 'Estamos revisando tu pago',
+        texto: 'Tu pago llegó, pero no calza con el valor del pase, así que lo revisamos a mano.',
+        caja: cajaContacto('Ya nos llegó el aviso', 'Quedó registrado a tu nombre y te escribimos apenas lo revisemos.', 'mi pago quedó en revisión', false) });
+      return;
+
+    case 'referencia_usada':
+      pintar({ icono: 'alerta', titulo: 'Este pago ya activó un pase',
+        texto: 'El número de operación de este pago ya se usó para activar el pase de otra cuenta.',
+        caja: cajaContacto('¿Crees que es un error?', 'Escríbenos con el comprobante de Mercado Pago y lo revisamos.', 'me dice que el pago ya activó otro pase', false) });
+      return;
+
+    case 'sin_cupo':
+      pintar({ icono: 'alerta', titulo: 'Se completaron los 100 cupos',
+        texto: 'Tu pago llegó justo cuando se tomó el último cupo de fundador.',
+        caja: cajaContacto('Nos ponemos en contacto contigo', 'Ya nos llegó el aviso con tu pago. Te escribimos para resolverlo, ya sea devolviéndote el pago o de otra forma que te acomode.', 'me dice que no quedaban cupos', false) });
+      return;
+
+    case 'no_registrado':
+      pintar({ icono: 'alerta', titulo: 'Falta inscribir a tu mascota',
+        texto: 'El correo con el que entraste no tiene mascotas inscritas.',
+        caja: cajaContacto('Inscríbela y vuelve a esta página', 'La inscripción es gratis y toma un par de minutos. Tu pago no se pierde: guarda esta página y vuelve a abrirla cuando termines. <br><br><a href="/registro" style="font-weight:800;">Inscribir a mi mascota →</a>', 'me dice que mi correo no está inscrito', true) });
+      return;
+
+    case 'pago_no_encontrado':
+      pintar({ icono: 'alerta', titulo: 'No encontramos ese pago',
+        texto: 'Mercado Pago no tiene registrado un pago con ese número de operación.',
+        caja: cajaContacto('¿Pagaste de verdad?', 'Si tienes el comprobante de Mercado Pago, escríbenos y lo activamos a mano.', 'no se activó', true) });
+      return;
+
+    default:
+      pintar({ icono: 'alerta', titulo: 'No pudimos confirmar tu pago todavía',
+        texto: 'Fue un problema de conexión de nuestro lado, no de tu pago.',
+        caja: cajaContacto('Inténtalo de nuevo en un momento', 'Tu pago no se pierde. Si sigue sin funcionar, escríbenos y lo activamos a mano.', 'no se activó', true) });
+  }
+}
+
+/* Sin número de operación: alguien abrió /gracias sin venir de Mercado Pago,
+   o volvió sin terminar de pagar. No se activa nada y no se muestra el grupo. */
+function sinPago(){
+  pintar({ icono: 'alerta', titulo: 'No encontramos un pago',
+    texto: 'Esta página se abre sola después de pagar el Pase de Socio Fundador en Mercado Pago.',
+    caja: '<h2>¿Quieres ser Socio Fundador?</h2><p>Son 100 cupos, con tu número en el carnet y el grupo privado de fundadores.</p>'
+      + '<a href="/quienes-somos#fundador" class="btn btn-primary">Ver el pase</a>'
+      + '<p class="gr-alt">¿Ya pagaste y llegaste acá? <a href="' + enlaceWhatsApp('no se activó') + '" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></p>' });
+}
+
+/* Los cupos que quedan, leídos de la base. Si falla, la píldora se queda con
+   su texto genérico y no pasa nada. */
+async function cargarCupos(){
+  try{
+    const { data, error } = await window.PaseFundador.sb().rpc('contar_fundadores');
     if(error) throw error;
     const tomados = Math.max(0, Math.min(Number(data) || 0, 100));
     const quedan  = 100 - tomados;
-    /* Ojo con la redacción: la primera versión decía "eres uno de los N
-       primeros", y con un solo fundador quedaba "uno de los 1 primeros".
-       Esta forma se lee bien con cualquier número, incluido el cero. */
+    /* Ojo con la redacción: con un solo fundador "uno de los 1 primeros" se
+       leía mal. Esta forma se lee bien con cualquier número, incluido el cero. */
     document.getElementById('grCupos').textContent = quedan === 0
       ? 'Los 100 cupos de fundador están completos'
       : (quedan === 1
@@ -253,7 +396,11 @@
   }catch(e){
     console.warn('No se pudo leer el contador de fundadores:', e);
   }
-})();
+}
+
+if (!PAGO) sinPago();
+else if (!window.PaseFundador.token()) pedirAcceso();
+else activar();
 </script>
 
 </body>

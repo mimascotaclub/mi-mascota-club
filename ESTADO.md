@@ -140,74 +140,124 @@ elegir qué negocios entran y precio congelado de por vida.
 3. La persona avisa por WhatsApp.
 4. Jaime confirma el pago en Mercado Pago y la marca en `/mi-panel` → Socios Fundadores.
 
-### Fundador automático — DISEÑADO, falta construir (1 de octubre)
+### Fundador automático y VERIFICADO — CONSTRUIDO, falta activarlo (3 de octubre)
 
-**Decisión del 30 de septiembre: el paso de "avísame por WhatsApp" se elimina.** Es el
-peor momento posible para pedirle un trámite a alguien: acaba de pagar y está contento.
-Lo que se creía inevitable no lo era — el correo no hay que pedirlo *después* de pagar,
-hay que pedirlo *antes*, que es donde cualquier compra lo pide y nadie se molesta.
+**Decisión del 30 de septiembre: el paso de "avísame por WhatsApp" se elimina.** Acaba
+de pagar y está contento: es el peor momento para pedirle un trámite.
 
-**El flujo nuevo, en tres partes:**
+**Decisión del 3 de octubre: se hace bien de una vez.** El diseño del 1 de octubre
+confiaba en el número de operación que viene en la dirección de `/gracias`, y esa
+dirección la puede escribir cualquiera a mano. Ahora **se le pregunta a Mercado Pago**
+antes de activar nada. Jaime lo pidió explícitamente pensando en una futura competencia
+con mala intención, no en un curioso.
 
-1. **En `/quienes-somos`, antes de ir a Mercado Pago.** El botón del pase ya no manda
-   directo a pagar. Abre un paso de una sola pregunta:
-   - Con sesión iniciada: no pide nada. Muestra *"Vas a activar tu pase como xxx@xxx"*
-     y el botón de pagar.
-   - Sin sesión: un campo de correo, validado contra `socios` con `socio_existe()`. Si no
-     existe, lo manda a registrarse. **Esto además cierra un agujero de hoy: que alguien
-     pague sin estar registrado y quede en tierra de nadie.**
-   - El correo se guarda en `localStorage` antes de salir a pagar.
-2. **Mercado Pago no se toca.** No se depende de que el pagador escriba nada ahí — el
-   correo de su cuenta de Mercado Pago casi nunca va a ser el del registro.
-3. **En `/gracias`, cero preguntas.** Lee `payment_id` / `collection_id` de la URL,
-   recupera el correo por sesión o por `localStorage`, llama a `activar_fundador()` y
-   muestra *"Listo. Eres el Socio Fundador #007"*. El grupo de WhatsApp queda como
-   invitación, no como obligación.
-   - **No se promete ningún plazo.** Se activa en dos segundos; decir "en 48 horas" sería
-     hacerse ver más chico de lo que se es.
-   - Plan B visible solo si falla: un campo *"Confirma el correo con el que te
-     registraste"*. No es el camino normal.
-   - Plan C invisible: si el correo no está en `socios` o no quedan cupos, el pago cae en
-     `fundadores_pendientes` con el id de la operación y Jaime lo ve en `/mi-panel`.
-     **Nadie que pagó queda en el aire.**
+**El flujo construido:**
 
-**Riesgo asumido a conciencia:** `activar_fundador()` exige un `payment_id` de al menos 6
-dígitos, pero **no le pregunta a Mercado Pago si ese pago existe de verdad**. Alguien que
-entienda cómo funciona podría escribir la URL a mano y marcarse como fundador sin pagar.
-Se asume porque: hace falta buscarlo a propósito, Jaime ve todos los pagos reales en
-Mercado Pago, el id queda guardado para cruzar, y quitar a alguien es un botón en
-`/mi-panel`. **Se cierra cuando haya volumen o cuando suba el precio**, con una Netlify
-Function que consulte la API de Mercado Pago antes de activar (ver "Cuando haya volumen").
+1. **En `/quienes-somos`, antes de pagar** (`js/pase-fundador.js`): el botón ya no va
+   directo a Mercado Pago.
+   - Con sesión iniciada (la misma de `/mi-mascota`): *"Vas a activar tu pase como
+     xxx@"* y el botón de pagar. Si ya es fundador, se lo dice y no lo manda a pagar.
+   - Sin sesión: **entra con el código al correo** (opción A, decidida el 3 de
+     octubre). Así el pase queda ligado al correo correcto y nadie puede usar la página
+     para averiguar si un correo está inscrito.
+   - Se le dice que puede pagar con cualquier cuenta de Mercado Pago y que **al terminar
+     toque "Volver al sitio"**.
+2. **Mercado Pago no se toca.** Mismo link `https://mpago.la/1gq8qDj`.
+3. **En `/gracias`**: lee `payment_id` / `collection_id` de la dirección (de los dos
+   lados del `#`), y si no hay sesión pide entrar con el código. Después llama a
+   **`netlify/functions/activar-fundador.js`**, que:
+   - saca el correo **del token de sesión**, nunca del navegador;
+   - le pregunta a Mercado Pago por el pago (`GET /v1/payments/{id}` con
+     `MP_ACCESS_TOKEN`) y exige: **aprobado, en CLP, $9.990 exactos y posterior al 23 de
+     septiembre** (la cuenta de Mercado Pago es anterior al club);
+   - recién ahí llama a `activar_fundador()`, que **solo puede llamar el servidor**;
+   - cada número de operación sirve **una sola vez** (índice único en `fundadores`);
+   - le manda a Jaime un correo por cada fundador nuevo;
+   - entrega el enlace del grupo **solo si el pase se activó**: ya no está escrito en
+     `gracias.html`.
+4. **Lo que no se activa solo cae en "Pagos de fundador pendientes" en `/mi-panel`**,
+   con aviso a Jaime por correo (uno por pago, no uno por recarga):
+   - pago en efectivo o transferencia todavía no acreditado (`pago_en_proceso`). La
+     persona ve *"Tu pago está en proceso"*. Cuando Mercado Pago lo apruebe, Jaime lo
+     activa desde ese bloque;
+   - pago que no calza con el monto o la fecha (`monto_distinto`);
+   - pago aprobado sin cupo (`sin_cupo`).
+   El botón "Activar como fundador" de ese bloque es manual: **revisar antes en Mercado
+   Pago que la operación esté aprobada.**
+
+**Lo que queda abierto, a conciencia:**
+
+- **Si la persona cierra Mercado Pago sin tocar "Volver al sitio"**, el pago queda
+  aprobado pero nadie llama a `/gracias`. Mercado Pago le avisa a Jaime de cada venta:
+  si ve un pago sin fundador, lo marca a mano en `/mi-panel` (necesita el correo de la
+  persona). Se cierra del todo con un webhook de Mercado Pago, que es trabajo de "Cuando
+  haya volumen".
+- **El enlace del grupo sigue escrito en `js/app.js`** (`renderExtrasSocio`, para mostrárselo
+  al fundador en `/mi-mascota`), y `app.js` es público. La llave real del grupo es
+  **"Aprobar nuevos miembros"** en WhatsApp: tiene que seguir activada siempre.
 
 | Pieza | Estado |
 |---|---|
-| `supabase-fundador-auto-v29.sql` escrito | ✅ En el repo |
-| Correrlo en Supabase | ⬜ **Gratis, se puede hacer en cualquier momento** |
-| Paso del correo antes de pagar en `quienes-somos.html` | ⬜ Falta |
-| Activación automática en `gracias.html` | ⬜ Falta |
-| Bloque de pagos pendientes en `/mi-panel` | ⬜ Falta |
-| Validar el pago contra la API de Mercado Pago | ⬜ A futuro, no urgente |
+| `supabase-fundador-verificado-v30.sql` escrito y probado en una base local | ✅ En el repo |
+| `supabase-fundador-auto-v29.sql` | ➖ **Reemplazado por el v30. NO CORRER.** |
+| Correr el v30 en Supabase (antes del push) | ⬜ Jaime |
+| `MP_ACCESS_TOKEN` en Netlify (antes del push) | ⬜ Jaime |
+| Paso del correo antes de pagar en `quienes-somos.html` | ✅ Construido |
+| Activación automática en `gracias.html` | ✅ Construido |
+| `netlify/functions/activar-fundador.js` | ✅ Construido |
+| Bloque de pagos pendientes en `/mi-panel` | ✅ Construido |
+| QA con un pago real | ⬜ Jaime |
+| Push | ⬜ |
+| Correr `supabase-cerrar-socio-existe-v31.sql` (DESPUÉS del push) | ⬜ Jaime |
 
-El SQL agrega la tabla `fundadores_pendientes` y las funciones `socio_existe()`,
-`activar_fundador()`, `admin_fundadores_pendientes()` y `admin_resolver_pendiente()`.
-Todas `volatile` (ver la trampa más abajo). No borra ni modifica nada existente.
+**Variables de entorno de Netlify:** `MP_ACCESS_TOKEN` (nueva y obligatoria: el Access
+Token de **producción**). Opcionales: `GRUPO_FUNDADORES_URL` (si se cambia el enlace del
+grupo) y `OTP_SALT` (la sal con que se cifra la IP). La clave de Mercado Pago **nunca** va
+en el código, en un `.md` ni en un chat.
 
-| Pieza | Estado |
+## Límites del código por correo (OTP) — CONSTRUIDO (3 de octubre)
+
+El 3 de octubre se revisó y **no existía ningún límite**: ni de envíos ni de intentos.
+Tres agujeros reales:
+
+1. Un programa podía pedir 200 códigos en un minuto y **gastar el mes entero de EmailJS**:
+   desde ahí nadie podía registrarse, entrar a `/mi-mascota` ni validar un canje.
+2. **El código se podía adivinar**: intentos ilimitados y varios códigos vigentes a la vez.
+   Era el más grave, porque permitía entrar a una cuenta ajena.
+3. **El acceso decía si un correo estaba inscrito** ("No encontramos mascotas…") y
+   `socio_existe()` respondía lo mismo a cualquiera.
+
+Lo construido (`supabase-fundador-verificado-v30.sql` + `enviar-codigo.js`):
+
+| Límite | Valor |
 |---|---|
-| Parche `supabase-fundadores-v28.sql` | ✅ Aplicado |
-| Landing `/quienes-somos` con el pase | ✅ Construido y probado |
-| Contador "quedan X de 100" leyendo la base | ✅ Construido y probado |
-| Link de pago de Mercado Pago conectado | ✅ Conectado |
-| Bloque "Socios Fundadores" en `/mi-panel` | ✅ Construido y probado |
-| Insignia "★ Socio Fundador #001" en el carnet | ✅ Construido y probado |
-| Aviso por WhatsApp después de pagar | ✅ Construido — **se reemplaza por la activación automática** |
-| **Emitir boleta por las membresías** | ⬜ **Falta: consultar al contador antes de cobrarle al primer fundador** |
-| Cambiar el nombre del negocio en Mercado Pago | ✅ Cambiado |
-| URL de retorno apuntando a `/gracias` | ✅ Puesta |
+| Códigos por correo | 5 cada 15 minutos |
+| Códigos por conexión (IP, guardada cifrada) | 10 por hora |
+| Códigos en todo el sitio | 40 por hora |
+| Códigos vigentes por correo | 1 (pedir otro anula el anterior) |
+| Intentos por código | 5 (al quinto error se anula) |
 
-**La tabla `fundadores` tiene el correo como llave, no la mascota**, porque `socios` es una
-fila por mascota y el pase es de la persona. Quien tiene tres perros ve la misma insignia
-en los tres carnets.
+- `otp_registrar()` revisa los límites y guarda el código; solo la llama
+  `enviar-codigo.js`. `otp_consumir()` revisa lo que escribe la persona y la usan por
+  dentro `socio_login`, `negocio_login` y `verificar_codigo_email`.
+- **El acceso a `/mi-mascota` y al pase ya no dice si un correo está inscrito:** responde
+  *"Si ese correo está inscrito, te llegará un código"* y, si no lo está, no se manda
+  nada. `enviar-codigo.js` recibe `acceso: true` para eso; el registro sigue mandando a
+  cualquier correo, porque es alguien inscribiéndose.
+- `socio_existe()` se cierra al navegador con `supabase-cerrar-socio-existe-v31.sql`,
+  **después** del push (antes rompería el sitio viejo).
+- Los límites se cambian en las constantes de `otp_registrar()`.
+
+**Lo que no se cubre:** alguien con muchas conexiones distintas puede gastar hasta 40
+códigos por hora. Ya no es un minuto para vaciar el mes, pero sí unas horas. Si pasa, se
+nota en EmailJS y se cambia a Brevo o Resend (ver CONTEXTO, sección 30.5).
+
+Y aparte del correo: llamar miles de veces a cualquier función gasta invocaciones de
+Netlify aunque no se mande nada. En septiembre todas las funciones juntas costaron 0,3
+créditos de 1.000, así que haría falta un ataque enorme y sostenido. Si pasa, se ve en
+Usage & billing; con la recarga automática apagada, lo peor es que el sitio se pause
+hasta el ciclo siguiente.
+
 
 ### Dos trampas que ya costaron tiempo (23 de septiembre)
 
@@ -241,9 +291,8 @@ días.
 - Donde antes se ofrecía el pase, ahora **el grupo se nombra como parte de lo que
   incluye**: "tu número en el carnet, el grupo privado de fundadores, …".
 
-**Queda un agujero conocido:** `/gracias` todavía muestra el botón del grupo y esa página
-se puede abrir sin haber pagado. Se cierra con la activación automática, que solo mostrará
-el botón si el pase se activó de verdad.
+**Agujero cerrado el 3 de octubre:** `/gracias` ya no tiene el enlace del grupo escrito;
+lo recibe del servidor solo si el pase se activó de verdad.
 
 Revisar también que "Aprobar nuevos miembros" siga activado en los ajustes del grupo.
 A quien ya entró sin pagar **no se le echa**: son conocidos y es una prueba cerrada.
@@ -414,31 +463,37 @@ así que o se usaban o se perdían):
   sin el chip"**. Solo CSS y texto; la lógica del registro no se tocó.
 - ✅ **El grupo de WhatsApp cerrado a fundadores** (ver la sección de arriba).
 
-### ⬜ QUEDÓ FUERA del 1 de octubre — es el PUSH 1 del ciclo de octubre
+### PUSH 1 del ciclo de octubre — CONSTRUIDO el 3 de octubre, falta activarlo
 
-Lo que estaba diseñado y **no se alcanzó a construir** esa noche, porque no quedaban
-créditos para corregir si algo salía mal. **Sigue siendo lo primero de la lista.** El
-diseño completo está más arriba, en "Fundador automático".
+Fundador automático y verificado + límites del código por correo. El detalle está más
+arriba. **El orden importa:**
 
-1. ⬜ **Correr `supabase-fundador-auto-v29.sql` en Supabase.** Gratis, no gasta créditos
-   de Netlify, no toca el sitio. Se puede hacer antes que todo lo demás y conviene, para
-   que al llegar al código las funciones ya existan.
-2. ⬜ **Paso del correo antes de pagar, en `quienes-somos.html`.** Con sesión iniciada no
-   pide nada y muestra el correo; sin sesión, un campo validado con `socio_existe()` que
-   manda a registrarse si el correo no está. Guarda el correo en `localStorage` antes de
-   salir a Mercado Pago.
-3. ⬜ **`/gracias` automática, sin avisar por WhatsApp.** Lee `payment_id` de la URL,
-   recupera el correo por sesión o `localStorage`, llama a `activar_fundador()` y muestra
-   *"Listo. Eres el Socio Fundador #007"*. Sin prometer plazos. El botón del grupo se
-   muestra **solo si la activación resultó**, y con eso se cierra el último agujero del
-   grupo. Plan B: campo para confirmar el correo. Plan C: `fundadores_pendientes`.
-4. ⬜ **Bloque de pagos pendientes en `/mi-panel`**, leyendo
-   `admin_fundadores_pendientes()`.
-5. ⬜ **QA antes del push**, y recién ahí `git add .` → `git commit` → `git push`.
+1. ⬜ Sacar el Access Token de **producción** de Mercado Pago y pegarlo en Netlify como
+   `MP_ACCESS_TOKEN` (Site configuration → Environment variables).
+2. ⬜ Correr `supabase-fundador-verificado-v30.sql` en Supabase (SQL Editor). Es
+   compatible con el sitio que está en línea: nada se rompe antes del push.
+3. ⬜ `git add .` → `git commit` → `git push` (15 créditos).
+4. ⬜ QA en mimascotaclub.cl (lista abajo).
+5. ⬜ Correr `supabase-cerrar-socio-existe-v31.sql`. **Después** del push, nunca antes.
+6. ⬜ Borrar el fundador de prueba #001 y confirmar "Aprobar nuevos miembros" en el grupo.
 
-Los cuatro cambios son **un solo push de 15 créditos**. Lo que no se hace es apurarlos:
-este push toca el flujo de pago y hay que dejar margen para un segundo deploy el mismo
-día si el QA saca algo.
+**QA:**
+
+- `/mi-mascota`: entrar con un correo inscrito (llega el código) y con uno que no (mismo
+  mensaje, no llega nada).
+- Escribir mal el código 5 veces: el quinto anula el código y hay que pedir otro.
+- Pedir 6 códigos seguidos al mismo correo: el sexto dice que esperes 15 minutos.
+- Registro nuevo de punta a punta (el código del registro también pasa por los límites).
+- Entrar a `/mi-negocio` con el código de un negocio.
+- `/quienes-somos` → "Quiero ser Socio Fundador": con sesión, sin sesión y siendo ya
+  fundador.
+- Abrir a mano `mimascotaclub.cl/gracias?payment_id=1234567890`: **no debe activar nada
+  ni mostrar el grupo.**
+- Un pago real de $9.990 hecho por alguien de confianza (uno no se puede pagar a sí
+  mismo), tocar "Volver al sitio", ver el número, revisar que llegó el correo de aviso, y
+  devolver el pago desde Mercado Pago. Después, quitar ese fundador de prueba en
+  `/mi-panel`.
+
 
 ### El resto del ciclo de octubre, agrupado por push
 
@@ -459,7 +514,6 @@ socios suficientes para que la lista no se vea muerta.
 
 **Gratis, sin tocar créditos, y es lo que de verdad mueve el proyecto este mes:**
 
-- ⬜ Correr el SQL v29 en Supabase.
 - ⬜ Escribirle a los primeros **5 negocios** (mensajes en `NEGOCIOS-CAPTACION.md`).
 - ⬜ Escribirle a las primeras **5 personas**.
 - ⬜ Borrar el fundador de prueba #001.
@@ -562,10 +616,9 @@ inicio de actividades como persona natural es online y gratis.
 10. **Sacar los precios del formulario de registro** (Pro $2.990 / Premium $4.990). La
     página `/planes` se sacó del menú justo para no anclar precios: es incoherente.
 11. **Mercado Pago Preapproval + webhook** (cobro recurrente). Solo hay plan de pasos.
-11b. **Validar el pago contra la API de Mercado Pago** antes de activar un fundador. Hoy
-    `activar_fundador()` confía en el `payment_id` que viene en la URL. Se cierra con una
-    Netlify Function que consulte la operación con las credenciales de Mercado Pago. No
-    es urgente con 100 cupos y $9.990; sí lo es si sube el precio o crece el volumen.
+11b. ✅ **Validar el pago contra la API de Mercado Pago** — hecho el 3 de octubre
+    (`activar-fundador.js`). Lo que queda para cuando haya volumen es el **webhook** de
+    Mercado Pago, para activar también a quien cierra Mercado Pago sin volver al sitio.
 12. **Gamificación** (insignias, racha, referidos) — ver "Decidido pero sin construir".
 13. Login con Google (prioridad baja, el acceso por correo ya cubre el caso).
 14. `supabase-fix-foto.sql` sigue sin resolver (firma de función en conflicto).

@@ -1383,3 +1383,7 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
   font-family:var(--font-body); font-size:13px; font-weight:800; color:var(--rust);
   padding:6px 4px;
 }
+
+/* Pagos de fundador pendientes en /mi-panel (3 de octubre) */
+.fund-pend__acciones{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:10px; }
+.fund-pend__acciones .btn{ justify-content:center; }

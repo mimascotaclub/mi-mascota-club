@@ -229,9 +229,8 @@ Las reglas que salieron de escribirlos, y que valen para todo lo que se redacte:
   pasó, y meterlo en un mensaje a un conocido suena a argumento de venta.
 - Nada de frases que Jaime no diría ("ahí me cayó la teja" se descartó por eso).
 
-**Pendiente del 30 de septiembre: el grupo de WhatsApp.** Entró alguien que no pagó el
-pase, porque hoy el enlace lo ve todo socio registrado. Hay que decidir si el grupo es de
-socios o de fundadores (el detalle y las dos opciones están en `ESTADO.md`).
+**Resuelto el 1 de octubre: el grupo de WhatsApp es solo de fundadores.** Desde el 3 de
+octubre `/gracias` recibe el enlace del servidor solo si el pase se activó.
 
 **Construido el 25 de septiembre**
 
@@ -252,11 +251,11 @@ alcancen están en `ESTADO.md`.
 
 **Por construir, en orden de urgencia**
 
-- [ ] **Activación automática del pase de fundador** — el paso de "avísame por WhatsApp"
-      se elimina. El correo se pide *antes* de ir a pagar, y `/gracias` activa el pase
-      sola y muestra el número. El SQL (`supabase-fundador-auto-v29.sql`) ya está escrito
-      y se puede correr en Supabase sin gastar créditos. El diseño completo está en
-      `ESTADO.md`. **Es lo primero del próximo push.**
+- [ ] **Activación automática y verificada del pase de fundador** — **construida el 3 de
+      octubre**, falta activarla: Access Token de Mercado Pago en Netlify, correr el SQL
+      v30, push, QA con un pago real y correr el v31. Ya no se avisa por WhatsApp: antes de
+      pagar se entra con el código al correo, y `/gracias` le pregunta a Mercado Pago si el
+      pago existe antes de activar nada. Los pasos y el QA están en `ESTADO.md`.
 - [x] **El chip como opción visible en el registro**, con su propio botón "Continuar sin
       el chip" (desplegado el 1 de octubre).
 - [x] **El grupo de WhatsApp pasó a ser solo de fundadores** (1 de octubre). Salió de la
