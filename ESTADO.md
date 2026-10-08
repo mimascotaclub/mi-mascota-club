@@ -726,17 +726,27 @@ desactualizado).
 4. Escribirles a los primeros 5 negocios — **recién con el formulario listo y probado.**
 5. Afiche imprimible con el QR para el mesón.
 6. Páginas por categoría (ej. `/veterinarias`) como material de venta.
-7. **Ficha nueva — EN EL PUSH DEL 7 DE OCTUBRE** (falta probarla en producción):
+7. ✅ **Ficha nueva — EN PRODUCCIÓN Y PROBADA (push del 7 de octubre; Jaime: "se ve perfecto")**:
    banner con el patrón negro al 30% (`assets/images/patron-negocios.svg`, sin el logo
    estirado), encabezado compacto (logo grande; al lado tipo + sello Verificado, estrellas
    y dirección; el nombre abajo en UNA línea, se achica solo), sello y estrellas
    preparados (aparecen solo si el negocio tiene `verificado = true`; las estrellas de
    arriba además necesitan calificaciones reales), y la **ficha de ejemplo para vender:
-   `mimascotaclub.cl/ejemplo-ficha`** (Gloria, con franja "Ficha de ejemplo", 4.9 ★ de
-   muestra, no indexada, no enlazada). Sus datos están escritos en `FICHA_EJEMPLO`
+   `mimascotaclub.cl/ejemplo-ficha`** (Gloria, 4.9 ★ de muestra, no indexada, no enlazada). Sus datos están escritos en `FICHA_EJEMPLO`
    (js/app.js) y la foto en `assets/images/ejemplo/`; el logo todavía es el de Storage:
    **no borrar ese logo al limpiar los datos de prueba** (o pasarlo a `assets/`).
-   Pendiente del diseño: miga de pan, banner propio por negocio (campo nuevo), tarjeta.
+   La foto de Gloria (NEG0002) en el directorio real ya es la del letrero
+   (`foto` = `/assets/images/ejemplo/gloria-letrero.jpg`, cambiada en Supabase el 7 de octubre).
+   **Push siguiente (7 de octubre, decidido por Jaime):** se saca el banner grande de la
+   ficha (repetía el nombre). En su lugar va una franja delgada con el patrón y la **miga
+   de pan** "Directorio › Peluquería › Nombre" (`renderFichaFranja` en js/app.js). El
+   banner grande con slides sigue en el directorio y demás páginas, para promos.
+   Ajuste de Jaime (mismo día): la franja va **negra lisa, sin patrón**, y la ficha de
+   ejemplo va **sin la franja amarilla "Ficha de ejemplo"** (eso lo explica él en persona).
+   El patrón queda en `assets/images/patron-negocios.svg` por si se usa en otro lado.
+   **Sigue mañana:** banner propio por negocio queda descartado en la ficha; revisar la
+   tarjeta del directorio con el diseño de Jaime; después borrar datos de prueba
+   (sin tocar el logo de Gloria) y reiniciar `negocio_seq`.
    Anotado para ese diseño (3 de octubre): (a) el banner de arriba de `/negocio/<slug>`
    usa el **logo estirado** y se ve pixelado (con Gloria Pet Salon se nota mucho): usar la
    foto del local, o un fondo de color; (b) sumar una **miga de pan** en la ficha

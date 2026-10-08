@@ -1135,7 +1135,7 @@ function negocioSlug(n){ return slugify(n.nombre) || 'negocio'; }
 /* ---------------- Ficha de ejemplo (/ejemplo-ficha) ----------------
    Para mostrarle a un negocio cómo se va a ver su ficha, con TODO lo de la
    ficha pagada: sello Verificado y valoración. Las estrellas son de ejemplo:
-   la página lo dice en una franja amarilla, no aparece en el directorio ni en
+   Jaime lo explica en persona; la página no aparece en el directorio ni en
    el menú, y le pide a Google que no la indexe. Los datos van escritos acá
    para que la página siga funcionando aunque se borren los datos de prueba. */
 const FICHA_EJEMPLO = {
@@ -1155,13 +1155,37 @@ const FICHA_EJEMPLO = {
   verificado: true,
   valoracion: { promedio: 4.9, total: 23 }
 };
+/* Arriba de la ficha ya no va el banner grande con el nombre (se repetía con el
+   nombre de la ficha). Va una franja delgada negra con la miga de pan:
+   Directorio › Peluquería › Nombre. El banner grande sigue en el directorio. */
+function renderFichaFranja(n){
+  const el = document.getElementById('fichaBanner');
+  if(!el) return;
+  clearInterval(pageBannerTimers['fichaBanner']);
+  el.className = 'ficha-franja';
+  const raiz = n.esEspecialista
+    ? { txt: 'Especialistas', go: "irAEspecialistas({})" }
+    : { txt: 'Directorio', go: "irADirectorio({})" };
+  const catGo = n.cat
+    ? (n.esEspecialista ? `irAEspecialistas({cat:${JSON.stringify(n.cat)},tipo:${JSON.stringify(n.tipo||'')}})`
+                        : `irADirectorio({cat:${JSON.stringify(n.cat)},tipo:${JSON.stringify(n.tipo||'')}})`)
+    : '';
+  const sep = '<span class="ficha-miga__sep" aria-hidden="true">›</span>';
+  el.innerHTML = `
+    <div class="wrap ficha-franja__in">
+      <div class="ficha-miga" role="navigation" aria-label="Estás en">
+        <a href="#" onclick='event.preventDefault(); ${raiz.go}'>${raiz.txt}</a>
+        ${n.cat ? `${sep}<a href="#" onclick='event.preventDefault(); ${catGo}'>${colaEsc(n.cat)}</a>` : ''}
+        ${sep}<span class="ficha-miga__aqui">${colaEsc(n.nombre || '')}</span>
+      </div>
+    </div>`;
+}
 function mostrarFichaEjemplo(){ mostrarPaginaFicha(FICHA_EJEMPLO); }
 function marcarFichaEjemplo(activo){
   const sec = document.getElementById('fichaNegocio');
-  let franja = document.getElementById('fichaEjemploFranja');
-  if(activo && !franja && sec){
-    sec.insertAdjacentHTML('afterbegin', `<div class="ficha-ejemplo-franja" id="fichaEjemploFranja">Ficha de ejemplo · <span>así se verá tu negocio en Mi Mascota Club</span></div>`);
-  } else if(!activo && franja){ franja.remove(); }
+  /* Sin franja "Ficha de ejemplo": eso lo explica Jaime en persona. */
+  const franja = document.getElementById('fichaEjemploFranja');
+  if(franja) franja.remove();
   let robots = document.querySelector('meta[name="robots"]');
   if(activo){
     if(!robots){ robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots); }
@@ -1282,7 +1306,7 @@ function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-legal');
   document.body.classList.remove('pagina-sugerencias');
   document.body.classList.add('pagina-ficha');
-  renderPageBanner('fichaBanner', [{ cat: n.nombre, patron: true }]);
+  renderFichaFranja(n);
   marcarFichaEjemplo(!!n.ejemplo);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
   const cajaFicha = document.getElementById('fichaMMC');
