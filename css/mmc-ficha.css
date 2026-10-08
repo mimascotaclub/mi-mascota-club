@@ -79,10 +79,37 @@
 .mmcf__grid > *, .mmcf__head > *, .mmcf__beneficio > * { min-width: 0; }
 
 /* ---- Encabezado ---- */
-.mmcf__head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; }
+/* Logo a la izquierda; a su lado, de arriba abajo: tipo + sello, estrellas y
+   dirección (el borde de arriba del logo calza con las píldoras y el de abajo
+   con la dirección). El nombre va abajo, a todo el ancho y en una línea
+   (ajustarNombreFicha en js/ficha-negocio.js lo achica si no entra). */
+.mmcf__head { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; row-gap: 14px; align-items: stretch; }
+.mmcf__lado { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-width: 0; }
+.mmcf__pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.mmcf__head .mmcf__nombre { grid-column: 1 / -1; }
+
+/* Sello Verificado (ficha y tarjeta) */
+.mmc-verif {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px 5px 7px; border-radius: var(--mmc-r-pill);
+  background: var(--mmc-turquesa); color: #fff;
+  font-family: var(--mmc-font-body); font-weight: 900; font-size: 11px; line-height: 1.2;
+  letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+.mmc-verif svg { width: 15px; height: 15px; flex: none; display: block; }
+
+/* Valoración estilo Uber: 4.9 ★★★★★ (23 reseñas) */
+.mmc-rating { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-family: var(--mmc-font-body); }
+.mmc-rating b { font-size: 17px; font-weight: 900; color: var(--mmc-ink); line-height: 1; }
+.mmc-stars { display: inline-flex; gap: 1px; }
+.mmc-star { position: relative; width: 17px; height: 17px; display: inline-block; }
+.mmc-star svg { width: 17px; height: 17px; display: block; fill: #E8E8E8; }
+.mmc-star__lleno { position: absolute; inset: 0 auto 0 0; overflow: hidden; }
+.mmc-star__lleno svg { fill: var(--mmc-amarillo); stroke: #E0B400; stroke-width: 1; }
+.mmc-rating__n { font-size: 13px; color: var(--mmc-ink-2); }
 
 .mmcf__logo {
-  width: 76px; height: 76px;
+  width: 84px; height: 84px;
   border-radius: var(--mmc-r-md);
   background: var(--mmc-surface);
   border: 1px solid var(--mmc-line);
@@ -106,7 +133,6 @@
   font-size: 11px; font-weight: 700;
   letter-spacing: .06em; text-transform: uppercase;
   color: var(--mmc-ink-2);
-  margin-bottom: 8px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 
@@ -114,15 +140,17 @@
   font-family: var(--mmc-font-display);
   font-weight: 900;
   text-transform: uppercase;
-  font-size: clamp(24px, 5.6cqw, 42px);
-  line-height: .98;
+  font-size: clamp(24px, 8cqw, 30px);
+  line-height: 1;
   letter-spacing: -.015em;
   margin: 0;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
 }
+.mmcf__nombre--dos { white-space: normal; overflow: visible; overflow-wrap: anywhere; text-wrap: balance; }
 
 .mmcf__comuna {
-  margin: 6px 0 0;
+  margin: 0;
   font-size: 13px; color: var(--mmc-ink-2);
   display: flex; align-items: center; gap: 6px;
 }
@@ -238,13 +266,15 @@
 /* ---- Dos columnas cuando hay ancho ---- */
 @container (min-width: 640px) {
   .mmcf__grid {
-    grid-template-columns: minmax(290px, .8fr) 1.2fr;
+    grid-template-columns: minmax(290px, 1fr) minmax(0, 1.05fr);
     grid-template-areas: "head foto" "benef foto" "cta foto";
     align-content: start;
     gap: 18px 34px;
   }
-  .mmcf__head { grid-area: head; grid-template-columns: 1fr; gap: 0; align-items: start; }
-  .mmcf__head .mmcf__logo { margin-bottom: 18px; width: 88px; height: 88px; }
+  .mmcf__head { grid-area: head; column-gap: 20px; row-gap: 22px; }
+  .mmcf__head .mmcf__logo { width: 96px; height: 96px; }
+  .mmcf__nombre { font-size: 40px; }
+  .mmcf__nombre--dos { font-size: 34px !important; }
   .mmcf__beneficio { grid-area: benef; align-self: start; }
   .mmcf__cta { grid-area: cta; align-self: start; width: auto; justify-self: start; padding: 18px 44px; }
   .mmcf__foto { grid-area: foto; aspect-ratio: auto; height: 100%; min-height: 340px; }
@@ -253,13 +283,17 @@
 /* Muy angosto: el logo se achica y los dos datos del beneficio van uno bajo el
    otro, para que nada quede apretado. */
 @container (max-width: 360px) {
-  .mmcf__logo { width: 64px; height: 64px; }
-  .mmcf__head { gap: 12px; }
+  .mmcf__logo { width: 72px; height: 72px; }
+  .mmcf__head { column-gap: 12px; }
   .mmcf__ben-meta { grid-auto-flow: row !important; }
   .mmcf__beneficio { padding: 6px; }
   /* min-height:200px + aspect-ratio 16/10 obligaba a 320px de ancho */
   .mmcf__foto { min-height: 0; aspect-ratio: 4 / 3; }
   .mmcf__red { width: 34px; height: 34px; }
+}
+
+@container (max-width: 300px) {
+  .mmc-rating__n { display: none; }
 }
 
 @container (max-width: 520px) {
@@ -297,6 +331,10 @@
 /* ---- Cabecera: logo + tipo + nombre + comuna ---- */
 .mmcard__head { display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: center; }
 .mmcard__ident { min-width: 0; }
+.mmcard__pills { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-bottom: 4px; }
+.mmcard__pills .mmcard__tipo { margin-bottom: 0; }
+.mmcard .mmc-verif { padding: 3px 8px 3px 5px; font-size: 9.5px; gap: 4px; }
+.mmcard .mmc-verif svg { width: 12px; height: 12px; }
 
 .mmcard__logo {
   width: 48px; height: 48px; flex: none;

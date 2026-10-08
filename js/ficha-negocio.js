@@ -18,6 +18,8 @@ const MMC_ICONOS = {
   tiktok:    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.29a4.29 4.29 0 0 1-3.24-1.47Z"/></svg>',
   whatsapp:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.6 2 2.18 6.42 2.18 11.86c0 1.74.46 3.44 1.32 4.94L2.1 22l5.34-1.38a9.83 9.83 0 0 0 4.6 1.16h.01c5.43 0 9.85-4.42 9.85-9.86C21.9 6.42 17.47 2 12.04 2Zm5.75 14.04c-.24.68-1.4 1.3-1.94 1.34-.5.04-.98.22-3.3-.7-2.78-1.1-4.55-3.95-4.69-4.14-.14-.18-1.12-1.49-1.12-2.85s.71-2.02.97-2.3c.25-.27.55-.34.73-.34.18 0 .37 0 .53.01.17.01.4-.06.62.48.24.57.8 1.98.87 2.12.07.14.12.31.02.5-.09.18-.14.29-.28.45-.14.16-.3.36-.42.48-.14.14-.29.29-.13.57.16.28.72 1.18 1.54 1.91 1.06.94 1.95 1.24 2.23 1.38.28.14.44.12.6-.07.17-.2.7-.81.88-1.09.19-.28.37-.23.63-.14.25.09 1.63.77 1.9.91.29.14.47.21.54.32.07.12.07.66-.17 1.34Z"/></svg>',
   mapa:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5c0 5.4-8 11.5-8 11.5s-8-6.1-8-11.5a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10.3" r="2.9"/></svg>',
+  verificado:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 1l2.6 2.2 3.4-.4.9 3.3 3 1.7-1.2 3.2 1.2 3.2-3 1.7-.9 3.3-3.4-.4L12 23l-2.6-2.2-3.4.4-.9-3.3-3-1.7L3.3 13 2.1 9.8l3-1.7.9-3.3 3.4.4z"/><path fill="none" stroke="#47C9C9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M7.5 12.3l3 3 6-6.2"/></svg>',
+  estrella:  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
   pin:       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5c0 5.4-8 11.5-8 11.5s-8-6.1-8-11.5a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10.3" r="2.9"/></svg>'
 };
 
@@ -105,11 +107,15 @@ function renderFicha(el, d, opts) {
    <div class="mmcf__grid">
     <div class="mmcf__head">
       <div class="mmcf__logo">${logoHTML}</div>
-      <div class="mmcf__ident">
-        ${tipoLabel ? `<span class="mmcf__tipo">${_esc(tipoLabel)}</span>` : ''}
-        <h1 class="mmcf__nombre">${_esc(d.nombre || 'Nombre negocio')}</h1>
+      <div class="mmcf__lado">
+        <div class="mmcf__pills">
+          ${tipoLabel ? `<span class="mmcf__tipo">${_esc(tipoLabel)}</span>` : ''}
+          ${d.verificado ? _selloVerificado() : ''}
+        </div>
+        ${_valoracion(d.valoracion)}
         ${ubicacion ? `<p class="mmcf__comuna">${MMC_ICONOS.pin} ${ubicacion}</p>` : ''}
       </div>
+      <h1 class="mmcf__nombre">${_esc(d.nombre || 'Nombre negocio')}</h1>
     </div>
 
     ${ben && ben.principal ? `
@@ -136,7 +142,52 @@ function renderFicha(el, d, opts) {
     ${ben && ben.principal ? `<button class="mmcf__cta" type="button" ${vivo ? 'onclick="window.abrirBeneficio && abrirBeneficio()"' : 'disabled'}>Obtener beneficio</button>` : ''}
    </div>
   `;
+  ajustarNombreFicha(el);
   return el;
+}
+
+/* Sello "Verificado": lo activa Jaime a mano (campo `verificado` del negocio). */
+function _selloVerificado() {
+  return `<span class="mmc-verif" title="Negocio verificado por Mi Mascota Club">${MMC_ICONOS.verificado}Verificado</span>`;
+}
+
+/* Valoración estilo Uber: 4.9 + 5 estrellas (la última se llena en parte).
+   v = { promedio: 4.9, total: 23 }. Sin datos, no se muestra nada. */
+function _valoracion(v) {
+  if (!v || !(v.promedio > 0)) return '';
+  const prom = Math.max(0, Math.min(5, Number(v.promedio)));
+  const estrellas = [0, 1, 2, 3, 4].map(i => {
+    const lleno = Math.max(0, Math.min(1, prom - i)) * 100;
+    return `<span class="mmc-star"><span class="mmc-star__lleno" style="width:${lleno.toFixed(0)}%">${MMC_ICONOS.estrella}</span>${MMC_ICONOS.estrella}</span>`;
+  }).join('');
+  const total = v.total ? `<span class="mmc-rating__n">(${v.total} reseña${v.total === 1 ? '' : 's'})</span>` : '';
+  return `<div class="mmc-rating" title="Valoración de los socios, de 1 a 5"><b>${prom.toFixed(1)}</b><span class="mmc-stars" aria-label="${prom.toFixed(1)} de 5 estrellas">${estrellas}</span>${total}</div>`;
+}
+
+/* El nombre va en UNA línea: se achica hasta que entre (mínimo 20px en
+   celular, 28px en desktop). Si un nombre es demasiado largo ni así, se
+   parte en dos líneas parejas. */
+function ajustarNombreFicha(raiz) {
+  const fichas = raiz && raiz.querySelectorAll ? [raiz] : [];
+  fichas.forEach(f => {
+    const h = f.querySelector('.mmcf__nombre');
+    if (!h || !h.isConnected) return;
+    h.classList.remove('mmcf__nombre--dos');
+    h.style.fontSize = '';
+    const ancho = h.clientWidth;
+    if (!ancho) return;
+    let tam = parseFloat(getComputedStyle(h).fontSize) || 32;
+    const minimo = ancho >= 400 ? 28 : 20;
+    while (h.scrollWidth > ancho + 1 && tam > minimo) { tam -= 1; h.style.fontSize = tam + 'px'; }
+    if (h.scrollWidth > ancho + 1) h.classList.add('mmcf__nombre--dos');
+  });
+}
+if (typeof window !== 'undefined') {
+  let _tAjuste;
+  window.addEventListener('resize', () => {
+    clearTimeout(_tAjuste);
+    _tAjuste = setTimeout(() => document.querySelectorAll('.mmc-ficha').forEach(ajustarNombreFicha), 150);
+  });
 }
 
 /**
@@ -186,7 +237,7 @@ function cardNegocioHTML(d, badge, extra) {
       <div class="mmcard__head">
         <div class="mmcard__logo">${logo}</div>
         <div class="mmcard__ident">
-          ${catLabel ? `<span class="mmcard__tipo">${_esc(catLabel)}</span>` : ''}
+          ${(catLabel || d.verificado) ? `<div class="mmcard__pills">${catLabel ? `<span class="mmcard__tipo">${_esc(catLabel)}</span>` : ''}${d.verificado ? _selloVerificado() : ''}</div>` : ''}
           <h3 class="mmcard__nombre">${_esc(d.nombre)}</h3>
           ${d.comuna ? `<div class="mmcard__comuna">${MMC_ICONOS.pin} ${_esc(d.comuna)}</div>` : ''}
         </div>
@@ -241,7 +292,9 @@ function fichaDesdeNegocio(n) {
     beneficio_label: n.beneficioTipo,
     beneficio_condicion: n.beneficioDetalle,
     meta: n.meta,
-    emoji: n.emoji
+    emoji: n.emoji,
+    verificado: !!n.verificado,
+    valoracion: n.valoracion || null
   };
 }
 
@@ -280,6 +333,8 @@ if (typeof window !== 'undefined') {
   window.fichaDesdeNegocio = fichaDesdeNegocio;
   window.fichaDesdeSolicitud = fichaDesdeSolicitud;
   window.MMC_ICONOS = MMC_ICONOS;
+  window.ajustarNombreFicha = ajustarNombreFicha;
+  window.valoracionHTML = _valoracion;
 }
 
 if (typeof module !== 'undefined') {

@@ -1,6 +1,6 @@
 # MARCA — Mi Mascota Club
 
-**Última actualización: 18 de septiembre de 2026**
+**Última actualización: 4 de octubre de 2026**
 
 Este archivo es el porqué del proyecto: para qué existe, cómo se explica y de dónde
 sale la plata. `ESTADO.md` dice qué está construido; este dice para qué.
@@ -160,6 +160,9 @@ que no tiene mascota debería pensar "si tuviera, me gustaría estar en ese club
 ---
 
 ## 6. Las líneas de negocio
+
+> **Regla de confianza (4 de octubre):** un negocio puede pagar para mostrarse más y
+> mejor, nunca para tener mejor calificación. **Las estrellas se ganan, no se compran.**
 
 ### La cuenta que hay que mirar de frente
 

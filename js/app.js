@@ -323,6 +323,10 @@ const PAGE_BANNER_GRADIENTS = [
   'linear-gradient(135deg,#3FAE7A,#47C9C9)',
   'linear-gradient(135deg,#151515,#D65A3A)'
 ];
+/* Fondo del banner de la ficha de cada negocio: negro con el patrón de la
+   casita-huella, huellas, huesos y corazones al 30% (assets/images/patron-negocios.svg).
+   Reemplaza al logo estirado, que se veía pixelado. */
+const PAGE_BANNER_PATRON = "#151515 url('/assets/images/patron-negocios.svg') center/180px repeat";
 const BANNER_DIRECTORIO = [
   { cat: 'Veterinarias y salud' },
   { cat: 'Peluquería y estética' },
@@ -353,7 +357,7 @@ function renderPageBanner(containerId, slides){
   clearInterval(pageBannerTimers[containerId]);
   slides = slides && slides.length ? slides : [{ cat: 'Mi Mascota Club' }];
   el.innerHTML = slides.map((s,i) => `
-    <div class="page-banner-slide ${i===0?'active':''}" style="background:${s.img ? `url('${s.img}') center/cover no-repeat` : PAGE_BANNER_GRADIENTS[i % PAGE_BANNER_GRADIENTS.length]};">
+    <div class="page-banner-slide ${i===0?'active':''}" style="background:${s.img ? `url('${s.img}') center/cover no-repeat` : (s.patron ? PAGE_BANNER_PATRON : PAGE_BANNER_GRADIENTS[i % PAGE_BANNER_GRADIENTS.length])};">
       <div class="page-banner-overlay"></div>
       <div class="page-banner-text">
         <span class="page-banner-eyebrow">Mi Mascota Club</span>
@@ -514,6 +518,8 @@ function manejarRutaActual(){
     mostrarPaginaPlanes();
   } else if(parts[0] === 'negocio' && parts[1]){
     mostrarPaginaFichaPorSlug(parts[1]);
+  } else if(parts[0] === 'ejemplo-ficha'){
+    mostrarFichaEjemplo();
   } else if(parts[0] === 'mi-negocio'){
     mostrarPaginaNegocio();
   } else if(parts[0] === 'mi-mascota'){
@@ -1125,6 +1131,43 @@ function renderFeaturedStrip(){
    igual de cuidada que el directorio — los datos siguen siendo exactamente los mismos
    que ya se guardaban en Supabase, solo cambia cómo se muestran. */
 function negocioSlug(n){ return slugify(n.nombre) || 'negocio'; }
+
+/* ---------------- Ficha de ejemplo (/ejemplo-ficha) ----------------
+   Para mostrarle a un negocio cómo se va a ver su ficha, con TODO lo de la
+   ficha pagada: sello Verificado y valoración. Las estrellas son de ejemplo:
+   la página lo dice en una franja amarilla, no aparece en el directorio ni en
+   el menú, y le pide a Google que no la indexe. Los datos van escritos acá
+   para que la página siga funcionando aunque se borren los datos de prueba. */
+const FICHA_EJEMPLO = {
+  ejemplo: true, demo: true,
+  nombre: 'GLORIA PET SALON ROJAS',
+  cat: 'Peluquería', tipo: 'mascota', tipoNegocio: 'peluqueria_canina',
+  comuna: 'Providencia', direccion: 'Elvira Garcés 1904',
+  whatsapp: '+56937806836', instagram: 'gloriarojas.pc', facebook: 'gloriarojas.pc', tiktok: 'gloriarojas.pc',
+  googleMapsUrl: 'https://maps.app.goo.gl/RT31Bdv9usuZHwh19',
+  horario: '8:30 AM - 6:30 PM', horarioDias: 'Lunes a viernes',
+  logo: 'https://mzsqyjxqnomsbqzhygkx.supabase.co/storage/v1/object/public/negocios/logos/1791063608004-o9hgrd.jpg',
+  foto: '/assets/images/ejemplo/gloria-letrero.jpg',
+  beneficioTipo: '10% de descuento',
+  beneficioDetalle: 'En un servicio específico sobre $30.000 · No acumulable con otras promociones. · De lunes a viernes',
+  descripcion: 'En Pet Salon Gloria Rojas, amamos lo que hacemos y nos especializamos en ofrecer una atención de alta calidad sin estrés.',
+  servicios: 'Peluquería canina',
+  verificado: true,
+  valoracion: { promedio: 4.9, total: 23 }
+};
+function mostrarFichaEjemplo(){ mostrarPaginaFicha(FICHA_EJEMPLO); }
+function marcarFichaEjemplo(activo){
+  const sec = document.getElementById('fichaNegocio');
+  let franja = document.getElementById('fichaEjemploFranja');
+  if(activo && !franja && sec){
+    sec.insertAdjacentHTML('afterbegin', `<div class="ficha-ejemplo-franja" id="fichaEjemploFranja">Ficha de ejemplo · <span>así se verá tu negocio en Mi Mascota Club</span></div>`);
+  } else if(!activo && franja){ franja.remove(); }
+  let robots = document.querySelector('meta[name="robots"]');
+  if(activo){
+    if(!robots){ robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots); }
+    robots.content = 'noindex, nofollow';
+  } else if(robots && robots.content === 'noindex, nofollow'){ robots.remove(); }
+}
 /* Nota/limitación conocida (igual que con las categorías): si algún día dos negocios
    tienen el mismo nombre exacto, esta búsqueda por slug encuentra el primero. No afecta
    la navegación normal del sitio (siempre se hace clic en la tarjeta correcta). */
@@ -1161,6 +1204,16 @@ function guardarCodigoSocio(codigo){
 function abrirBeneficio(){
   const n = negocioActual;
   if(!n) return;
+  if(n.ejemplo){
+    openModal(`
+      <div style="font-family:var(--font-display);font-weight:900;font-size:20px;line-height:1.15;">Así lo usa el socio</div>
+      <div style="font-size:14px;color:#5C5C5C;margin-top:10px;line-height:1.6;">
+        En la ficha real, el socio toca este botón, escribe su código y muestra su carnet en tu mesón.
+        Tú confirmas la visita desde tu panel y queda registrada.
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:18px;" onclick="closeModal()">Entendido</button>`);
+    return;
+  }
   const guardado = codigoSocioGuardado();
   openModal(`
     <div style="font-family:var(--font-display);font-weight:900;font-size:20px;line-height:1.15;">Obtener el beneficio</div>
@@ -1229,13 +1282,17 @@ function mostrarPaginaFicha(n){
   document.body.classList.remove('pagina-legal');
   document.body.classList.remove('pagina-sugerencias');
   document.body.classList.add('pagina-ficha');
-  renderPageBanner('fichaBanner', [{ cat: n.nombre, img: n.logo || null }]);
+  renderPageBanner('fichaBanner', [{ cat: n.nombre, patron: true }]);
+  marcarFichaEjemplo(!!n.ejemplo);
   document.getElementById('fichaContent').innerHTML = renderFichaContenido(n);
   const cajaFicha = document.getElementById('fichaMMC');
   if(cajaFicha){
     const datos = fichaDesdeNegocio(n);
     datos.tipo_label = n.esEspecialista ? `${n.cat} · Especialista` : n.cat;
     renderFicha(cajaFicha, datos);
+    /* El nombre se ajusta a una línea cuando la ficha ya se ve y la letra cargó. */
+    requestAnimationFrame(() => ajustarNombreFicha(cajaFicha));
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => ajustarNombreFicha(cajaFicha));
   }
   window.scrollTo({ top:0, behavior:'instant' in window.scrollTo ? 'instant' : 'auto' });
   if(!n.demo && n.codigo) cargarReputacionNegocio(n);
@@ -2689,6 +2746,12 @@ async function cargarReputacionNegocio(n){
     if(!r.mostrar_promedio){
       box.innerHTML = `<div class="rep-empty">${r.total_visitas} visita${r.total_visitas===1?'':'s'} validada${r.total_visitas===1?'':'s'} · aún no hay suficientes calificaciones para mostrar un promedio.</div>`;
       return;
+    }
+    /* Regla de reputación: las estrellas arriba, junto al nombre, solo para
+       negocios verificados (los que pagan o son fundadores). */
+    if(n.verificado && typeof valoracionHTML === 'function'){
+      const lado = document.querySelector('#fichaMMC .mmcf__pills');
+      if(lado && !document.querySelector('#fichaMMC .mmc-rating')) lado.insertAdjacentHTML('afterend', valoracionHTML({ promedio: r.promedio, total: r.total_validado }));
     }
     const llenas = Math.round(r.promedio);
     box.innerHTML = `

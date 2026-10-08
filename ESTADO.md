@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 3 de octubre de 2026**
+**Última actualización: 7 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -657,6 +657,30 @@ Lo construido:
 4. `ocultar_socio: 'si'` en los avisos a Jaime (`activar-fundador.js` y
    `aviso-canje.js`): se acabó el "Cómo se usa" en esos correos.
 
+**QA del push (3 de octubre, noche) — TODO OK:** la ficha ya no se corta en /mi-panel en
+el celular; inscripción con foto de celular sin errores; llegaron "Recibimos la
+inscripción" y "Nueva ficha por aprobar" sin bloques de socio; al rechazar llegó "Hay que
+ajustar algo" con el motivo; al aprobar llegó "Tu ficha ya está publicada" con el código;
+el negocio entró a `/mi-negocio`, confirmó una visita de Max (folio C-2UPC, compra
+$35.000) y a Jaime le llegó el aviso de canje sin "Cómo se usa".
+
+### ⚠️ Datos de prueba que se dejan A PROPÓSITO (decidido el 3 de octubre)
+
+Jaime los deja para ver cómo queda la **nueva visualización de los negocios** (directorio
+y ficha) con datos reales. **Se borran después de afinar ese diseño**, todo junto:
+
+- Negocio **NEG0002 "GLORIA PET SALON ROJAS"**, publicado en el directorio (fundador #002).
+- Sus 2 solicitudes (una aprobada, una rechazada "v2").
+- El canje de prueba **C-2UPC** (Max en Gloria Pet Salon).
+- Las imágenes de prueba en Storage → `negocios` (incluido el logo suelto del error 520).
+
+**Al limpiar, reiniciar el contador de negocios.** El código NEG y el número de "negocio
+fundador" salen de la secuencia `negocio_seq` (en `aprobar_solicitud_negocio`), que nunca
+retrocede: el NEG0001 se lo llevó el negocio de demostración borrado el 26 de septiembre,
+y por eso el de prueba salió NEG0002 / fundador #002. Con la tabla `negocios` vacía:
+`select setval('negocio_seq', 1, false);` → el primer negocio real será **NEG0001 y
+fundador #001**.
+
 ### Los correos a los negocios (pendiente, conversado el 3 de octubre)
 
 EmailJS gratis da **2 plantillas** y están las dos ocupadas:
@@ -697,12 +721,42 @@ desactualizado).
 1. Consultar al contador por la boleta de las membresías (se cobra igual mientras tanto).
 
 **Negocios — lo que sigue**
-2. Formulario de negocios al estilo del registro de dueños (código por correo + mascota). *Construido el 3 de octubre: falta SQL v32, push y QA.*
-3. Revisar que aprobar fichas desde el celular en `/mi-panel` siga cómodo.
+2. ✅ Formulario de negocios al estilo del registro de dueños (código por correo + mascota), con correos a negocios. *En producción y probado el 3 de octubre.*
+3. ✅ Aprobar fichas desde el celular en `/mi-panel` (la ficha ya no se corta; probado el 3 de octubre).
 4. Escribirles a los primeros 5 negocios — **recién con el formulario listo y probado.**
 5. Afiche imprimible con el QR para el mesón.
 6. Páginas por categoría (ej. `/veterinarias`) como material de venta.
-7. Aplicar el look and feel de tarjetas y fichas que diseña Jaime.
+7. **Ficha nueva — EN EL PUSH DEL 7 DE OCTUBRE** (falta probarla en producción):
+   banner con el patrón negro al 30% (`assets/images/patron-negocios.svg`, sin el logo
+   estirado), encabezado compacto (logo grande; al lado tipo + sello Verificado, estrellas
+   y dirección; el nombre abajo en UNA línea, se achica solo), sello y estrellas
+   preparados (aparecen solo si el negocio tiene `verificado = true`; las estrellas de
+   arriba además necesitan calificaciones reales), y la **ficha de ejemplo para vender:
+   `mimascotaclub.cl/ejemplo-ficha`** (Gloria, con franja "Ficha de ejemplo", 4.9 ★ de
+   muestra, no indexada, no enlazada). Sus datos están escritos en `FICHA_EJEMPLO`
+   (js/app.js) y la foto en `assets/images/ejemplo/`; el logo todavía es el de Storage:
+   **no borrar ese logo al limpiar los datos de prueba** (o pasarlo a `assets/`).
+   Pendiente del diseño: miga de pan, banner propio por negocio (campo nuevo), tarjeta.
+   Anotado para ese diseño (3 de octubre): (a) el banner de arriba de `/negocio/<slug>`
+   usa el **logo estirado** y se ve pixelado (con Gloria Pet Salon se nota mucho): usar la
+   foto del local, o un fondo de color; (b) sumar una **miga de pan** en la ficha
+   ("Directorio › Peluquería › Gloria Pet Salon") con "← Volver a Peluquería", en vez de
+   cambiar la URL (ver "Las URL de los negocios" en las reglas). Después: borrar los datos de prueba y reiniciar `negocio_seq` (ver "Datos de prueba que se dejan a propósito").
+
+**Negocios — confianza y ficha pagada (conversado el 4 de octubre, después del diseño)**
+7a. **Estrellas 1-5 y reseñas en las dos direcciones, estilo Uber.** La base ya existe;
+    falta mostrarlas en tarjetas y ficha, y sumar reseñas escritas.
+7b. **Regla de reputación:** los socios califican SIEMPRE a todos los negocios, pero las
+    estrellas y reseñas se muestran solo si el negocio paga. Ver "Regla de confianza" en MARCA.md.
+7c. **Mapa "abierto y cerca de mí"** con Leaflet + OpenStreetMap. Necesita coordenadas y
+    horario estructurado (día / abre / cierra), no solo texto.
+7d. **Sello "Verificado"** para negocios: un campo en Supabase + insignia, que se activa a
+    mano desde `/mi-panel` cuando el negocio paga.
+7e. **Ficha gratis vs. pagada.** Gratis: solo foto de portada, sin sello, sin estrellas ni
+    reseñas visibles. Pagada: galería, sello Verificado, estrellas y reseñas.
+7f. **Los 100 negocios fundadores** tienen todo lo pagado, gratis durante su año.
+7g. **Servicio de fotografía con Valorgic** para los negocios que pagan.
+7h. **Por definir:** el resto de la oferta gratis vs. pagada (referencia: Yelp).
 
 **Lanzamiento — después de negocios**
 8. "Recomienda un negocio" con votos + etiquetas "Recomendado por X socios" / "Nuevo en el club".
@@ -846,7 +900,12 @@ Resueltos (verificado el 21 de septiembre):
   por la que el correo del negocio se pide recién al confirmar la primera visita.
 - **El canje lo confirma el negocio, no el socio.** El negocio es el que regala el
   descuento y no tiene incentivo para inventar visitas.
-- **Una sola plantilla de ficha** (`/negocio/<slug>`). Las categorías son páginas curadas
+- **Una sola plantilla de ficha** (`/negocio/<slug>`). **Las URL de los negocios
+  (conversado el 3 de octubre):** la dirección de un negocio es siempre
+  `/negocio/<nombre>`, sin la categoría adentro (no `/directorio/peluqueria/<nombre>`),
+  porque un negocio puede estar en varias categorías o cambiar de categoría, y su enlace
+  (el que comparte en Instagram, el del afiche con QR) no debe cambiar ni duplicarse
+  nunca. El orden visual se da con la miga de pan dentro de la ficha. Las categorías son páginas curadas
   que apuntan a ella, no rutas nuevas.
 - **Un solo campo de estado de verificación** en la base. Cada panel muestra solo lo que
   le corresponde: el negocio ve si el socio puede canjear, nunca el chip ni la cartilla.
