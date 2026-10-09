@@ -744,3 +744,137 @@
   position: fixed; bottom: 16px; left: 0; right: 0; text-align: center;
   color: rgba(255,255,255,.7); font-size: 12.5px; pointer-events: none;
 }
+
+
+/* ============================================================
+   FICHA DE ESPECIALISTA  (.mmce) — una persona, con su foto
+   sobre un degradado desenfocado celeste o amarillo.
+   Celular: foto arriba, datos abajo. Desktop (≥760px de ficha):
+   foto a la izquierda, datos a la derecha.
+   ============================================================ */
+.mmce { --t-p:#EAF8F8; --t-m:#A8E3E3; --t-s:#47C9C9; display:grid; gap:14px; }
+.mmce--amarillo { --t-p:#FFF9E3; --t-m:#FFE58A; --t-s:#FFCE00; }
+.mmce * { min-width:0; }
+
+.mmce__hero {
+  position:relative; overflow:hidden; isolation:isolate;
+  border-radius: var(--mmc-r-xl);
+  height: 470px;
+  background: linear-gradient(165deg, var(--t-p) 0%, var(--t-m) 70%, var(--t-s) 130%);
+}
+.mmce__blob { position:absolute; border-radius:50%; filter:blur(40px); z-index:-1; }
+.mmce__blob--1 { width:260px; height:260px; background:#fff; opacity:.85; left:-60px; top:-50px; }
+.mmce__blob--2 { width:300px; height:300px; background:var(--t-s); opacity:.45; right:-90px; top:120px; }
+.mmce__blob--3 { width:240px; height:240px; background:var(--t-m); opacity:.9; left:30px; bottom:-80px; }
+
+/* Foto con fondo (lo normal): ocupa el recuadro y se funde con el degradado
+   por la izquierda, donde va el nombre. Foto recortada (.mmce--recorte): la
+   persona queda parada sobre el degradado, como en el diseño de referencia. */
+.mmce__foto {
+  position:absolute; right:0; top:0; bottom:0; width:72%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, rgba(0,0,0,.35) 22%, #000 48%);
+          mask-image: linear-gradient(90deg, transparent 0, rgba(0,0,0,.35) 22%, #000 48%);
+}
+.mmce--recorte .mmce__foto {
+  top:auto; right:-4%; width:66%; height:94%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 22%);
+}
+.mmce__foto img { width:100%; height:100%; object-fit:cover; object-position:50% 0; display:block; }
+.mmce__foto--vacia { display:grid; place-items:center; -webkit-mask-image:none; mask-image:none; }
+.mmce__foto--vacia span { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(21,21,21,.35); }
+
+.mmce__nota {
+  position:absolute; top:18px; left:18px; z-index:2;
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,.72); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  border-radius:var(--mmc-r-pill); padding:6px 11px; font-weight:900; font-size:14px;
+}
+.mmce__nota svg { width:14px; height:14px; fill:var(--mmc-ink); }
+
+.mmce__hero-txt { position:absolute; left:22px; top:84px; width:50%; z-index:2; }
+.mmce__hero-nombre { font-family:var(--mmc-font-display); font-weight:400; font-size:clamp(30px, 10cqw, 42px); line-height:1.04; letter-spacing:-.01em; color:var(--mmc-ink); overflow-wrap:anywhere; }
+.mmce__hero-tit { margin:12px 0 0; font-size:12.5px; line-height:1.45; color:#3a4446; }
+
+.mmce__vidrio {
+  position:absolute; left:12px; right:12px; bottom:12px; z-index:2;
+  border-radius:26px; padding:10px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:rgba(255,255,255,.42); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.6);
+}
+.mmce__det {
+  display:inline-flex; align-items:center; gap:8px; border:0; cursor:pointer;
+  background:rgba(255,255,255,.8); border-radius:var(--mmc-r-pill); padding:13px 18px;
+  font:700 14px var(--mmc-font-body); color:var(--mmc-ink); white-space:nowrap;
+}
+.mmce__det svg { width:18px; height:18px; }
+.mmce__redes { display:flex; gap:8px; flex-wrap:wrap; }
+.mmce__red {
+  width:46px; height:46px; border-radius:50%; display:grid; place-items:center; flex:none;
+  background:#fff; color:var(--mmc-ink); box-shadow:0 4px 14px rgba(0,0,0,.06);
+}
+.mmce__red svg { width:20px; height:20px; }
+.mmce__red--linea { box-shadow:none; border:1px solid var(--mmc-line-strong); }
+
+/* En celular la info de abajo no repite el nombre (ya está sobre la foto). */
+.mmce__info { display:grid; gap:14px; }
+.mmce__nombre, .mmce__sub, .mmce__info > .mmc-rating, .mmce__redes--info { display:none; }
+.mmce__pills { display:flex; flex-wrap:wrap; gap:6px; align-items:center; order:1; }
+.mmce__stats { order:0; }
+.mmce__info > .mmcf__beneficio { order:2; }
+.mmce__accion { order:3; }
+.mmce__datos { order:4; }
+.mmce__desc { order:5; }
+
+.mmce__stats {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(90px, 1fr)); gap:6px;
+  background:#fff; border:1px solid var(--mmc-line); border-radius:24px; padding:14px 10px;
+}
+.mmce__st { display:flex; align-items:center; gap:8px; justify-content:center; }
+.mmce__st-i { width:30px; height:30px; border-radius:50%; display:grid; place-items:center; border:1.5px solid var(--mmc-ink); flex:none; }
+.mmce__st-i svg { width:16px; height:16px; }
+.mmce__st b { display:block; font-size:17px; font-weight:900; line-height:1.1; }
+.mmce__st small { font-size:11px; color:var(--mmc-ink-2); }
+
+.mmce__cta {
+  width:100%; border:0; cursor:pointer; background:var(--mmc-ink); color:#fff;
+  border-radius:var(--mmc-r-pill); padding:18px 24px;
+  font:900 16px var(--mmc-font-display); text-transform:uppercase; letter-spacing:.01em;
+}
+.mmce__datos { display:grid; gap:9px; }
+.mmce__dato { display:flex; gap:8px; align-items:flex-start; font-size:13.5px; color:var(--mmc-ink-2); line-height:1.45; }
+.mmce__dato svg { margin-top:2px; flex:none; }
+.mmce__dato b { color:var(--mmc-ink); }
+.mmce__desc { margin:0; font-size:14.5px; line-height:1.6; color:var(--mmc-ink-2); }
+
+@container (max-width: 360px) {
+  .mmce__hero { height:420px; }
+  .mmce__det { padding:11px 13px; font-size:13px; }
+  .mmce__red { width:40px; height:40px; }
+  .mmce__vidrio .mmce__red:nth-child(n+3) { display:none; }
+}
+
+/* ---- Desktop ---- */
+@container (min-width: 760px) {
+  .mmce { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap:44px; align-items:start; }
+  .mmce__hero { height:auto; min-height:560px; align-self:stretch; }
+  .mmce__foto { width:100%; right:0; -webkit-mask-image:none; mask-image:none; }
+  .mmce--recorte .mmce__foto { width:94%; right:3%; -webkit-mask-image:none; mask-image:none; }
+  /* Con fondo: un velo del color de la marca abajo, para que no se vea como un recuadro pegado. */
+  .mmce:not(.mmce--recorte) .mmce__hero::after { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(0deg, color-mix(in srgb, var(--t-s) 35%, transparent) 0%, transparent 35%); }
+  .mmce__hero-txt, .mmce__vidrio { display:none; }
+  .mmce__info { gap:16px; padding-top:4px; }
+  .mmce__nombre { display:block; margin:0; font-family:var(--mmc-font-display); font-weight:400; font-size:44px; line-height:1.05; letter-spacing:-.01em; }
+  .mmce__sub { display:block; margin:-8px 0 0; font-size:15px; color:var(--mmc-ink-2); }
+  .mmce__info > .mmc-rating { display:flex; }
+  .mmce__pills, .mmce__stats, .mmce__info > .mmcf__beneficio, .mmce__accion, .mmce__datos, .mmce__desc { order:0; }
+  .mmce__accion { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .mmce__cta { width:auto; padding:18px 44px; }
+  .mmce__redes--info { display:flex; }
+  .mmce__info .mmc-rating b { font-size:20px; }
+  .mmce__info .mmc-star, .mmce__info .mmc-star svg { width:19px; height:19px; }
+}
+/* La ficha de negocio ubica .mmcf__beneficio en un área con nombre ("benef");
+   dentro de la ficha de especialista va en el flujo normal. */
+.mmce .mmcf__beneficio { grid-area: auto; align-self: auto; }

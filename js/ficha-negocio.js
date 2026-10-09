@@ -79,6 +79,7 @@ function _redes(d, comoLinks) {
 function renderFicha(el, d, opts) {
   opts = opts || {};
   const vivo = opts.interactivo !== false;
+  if (d.es_especialista) return renderFichaEspecialista(el, d, opts);
 
   const tipo = typeof tipoNegocioPorId === 'function' ? tipoNegocioPorId(d.tipo_negocio) : null;
   const tipoLabel = d.tipo_label || (tipo ? tipo.nombre : (d.cat || ''));
@@ -190,6 +191,110 @@ if (typeof window !== 'undefined') {
   });
 }
 
+/* ============================================================
+   FICHA DE ESPECIALISTA (una persona: veterinario a domicilio,
+   etólogo, entrenador…). Mismos datos que un negocio, pero la
+   imagen principal es la FOTO DE LA PERSONA sobre un degradado
+   desenfocado de la marca: celeste (salud) o amarillo (educación,
+   paseos, cuidado). Diseño de Jaime, 9 de octubre de 2026.
+   ============================================================ */
+const MMC_TONO_AMARILLO = ['entrenador_canino', 'paseador', 'cuidador_domicilio', 'grooming_domicilio', 'fotografia_mascotas'];
+function _tonoEspecialista(d) {
+  if (d.tono === 'amarillo' || d.tono === 'celeste') return d.tono;
+  return MMC_TONO_AMARILLO.includes(d.tipo_negocio) ? 'amarillo' : 'celeste';
+}
+const MMC_ICONOS_ESP = {
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  resena: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
+  visita: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  casa: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9H3z"/></svg>',
+  reloj: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  estrellaRelleno: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>'
+};
+
+function renderFichaEspecialista(el, d, opts) {
+  opts = opts || {};
+  const vivo = opts.interactivo !== false;
+  const tono = _tonoEspecialista(d);
+  const tipo = typeof tipoNegocioPorId === 'function' ? tipoNegocioPorId(d.tipo_negocio) : null;
+  /* Especialidad: la que escribió la persona; si no, el nombre del tipo del
+     catálogo (ej. "Etólogo / Especialista en conducta"). */
+  const especialidad = d.especialidad || (tipo ? tipo.nombre : (d.tipo_label || d.cat || ''));
+  /* Foto recortada (PNG/WebP sin fondo): la persona va sobre el degradado.
+     Foto con fondo (JPG, que es lo que guarda el formulario): llena el
+     recuadro y se funde con el degradado por la izquierda. */
+  const recorte = /\.(png|webp)(\?|$)/i.test(d.foto_url || '');
+  const ben = _beneficio(d);
+  const redes = _redes(d);
+  const v = d.valoracion && d.valoracion.promedio > 0 ? d.valoracion : null;
+
+  /* Nombre en dos líneas sobre la foto: la primera palabra arriba, el resto abajo. */
+  const nombre = _esc(d.nombre || 'Nombre especialista');
+  const partes = (d.nombre || '').trim().split(/\s+/);
+  const nombreHero = partes.length > 1 ? `${_esc(partes[0])}<br>${_esc(partes.slice(1).join(' '))}` : nombre;
+
+  const cobertura = d.comunas_cobertura && d.comunas_cobertura.length
+    ? (d.comunas_cobertura.length > 3
+        ? `${d.comunas_cobertura.slice(0, 3).map(_esc).join(', ')} y más`
+        : d.comunas_cobertura.map(_esc).join(', ').replace(/, ([^,]*)$/, ' y $1'))
+    : _esc(d.comuna || '');
+  const modalidad = d.modalidad || (d.tiene_local === false ? 'A domicilio' : (d.direccion ? 'En consulta' : ''));
+
+  const stats = [];
+  if (v && v.total) stats.push({ i: MMC_ICONOS_ESP.resena, n: v.total, t: 'Reseñas' });
+  if (d.visitas) stats.push({ i: MMC_ICONOS_ESP.visita, n: d.visitas, t: 'Visitas del club' });
+  if (d.comunas_cobertura && d.comunas_cobertura.length) stats.push({ i: MMC_ICONOS.mapa, n: d.comunas_cobertura.length, t: d.comunas_cobertura.length === 1 ? 'Comuna' : 'Comunas' });
+
+  const redBtn = (r, cls) => `<a class="${cls}" ${vivo ? `href="${_esc(r.href)}" target="_blank" rel="noopener"` : 'href="#" onclick="return false"'} aria-label="${_esc(r.label)}" title="${_esc(r.label)}">${MMC_ICONOS[r.k]}</a>`;
+  const redesSinMapa = redes.filter(r => r.k !== 'mapa');
+  const cta = ben && ben.principal ? `<button class="mmce__cta" type="button" ${vivo ? 'onclick="window.abrirBeneficio && abrirBeneficio()"' : 'disabled'}>Obtener beneficio</button>` : '';
+
+  el.innerHTML = `
+   <div class="mmce mmce--${tono}${recorte ? ' mmce--recorte' : ''}">
+    <div class="mmce__hero">
+      <div class="mmce__blob mmce__blob--1"></div><div class="mmce__blob mmce__blob--2"></div><div class="mmce__blob mmce__blob--3"></div>
+      ${d.foto_url ? `<div class="mmce__foto"><img src="${_esc(d.foto_url)}" alt="${nombre}"></div>` : `<div class="mmce__foto mmce__foto--vacia"><span>Foto del especialista</span></div>`}
+      ${v ? `<span class="mmce__nota">${MMC_ICONOS_ESP.estrellaRelleno}${Number(v.promedio).toFixed(1)}</span>` : ''}
+      <div class="mmce__hero-txt">
+        <div class="mmce__hero-nombre">${nombreHero}</div>
+        ${d.profesion || especialidad ? `<p class="mmce__hero-tit">${d.profesion ? `<b>${_esc(d.profesion)}</b><br>` : ''}${_esc(especialidad)}</p>` : ''}
+      </div>
+      <div class="mmce__vidrio">
+        ${ben && ben.principal ? `<button class="mmce__det" type="button" ${vivo ? 'onclick="window.abrirBeneficio && abrirBeneficio()"' : 'disabled'}>${MMC_ICONOS_ESP.info} Ver beneficio</button>` : '<span></span>'}
+        <div class="mmce__redes">${redesSinMapa.slice(0, 3).map(r => redBtn(r, 'mmce__red')).join('')}</div>
+      </div>
+    </div>
+
+    <div class="mmce__info">
+      <div class="mmce__pills">
+        ${especialidad ? `<span class="mmcf__tipo">${_esc(especialidad)}</span>` : ''}
+        ${d.verificado ? _selloVerificado() : ''}
+      </div>
+      <h1 class="mmce__nombre">${nombre}</h1>
+      ${d.profesion ? `<p class="mmce__sub">${_esc(d.profesion)} · ${_esc(especialidad)}</p>` : ''}
+      ${_valoracion(v)}
+      ${stats.length ? `<div class="mmce__stats">${stats.map(st => `
+        <div class="mmce__st"><span class="mmce__st-i">${st.i}</span><div><b>${_esc(String(st.n))}</b><small>${st.t}</small></div></div>`).join('')}</div>` : ''}
+      ${ben && ben.principal ? `
+      <div class="mmcf__beneficio">
+        <div class="mmcf__ben-valor">${_esc(ben.principal)}</div>
+        <div class="mmcf__ben-meta">
+          ${ben.cuando ? `<div class="mmcf__chip">${_esc(ben.cuando)}</div>` : ''}
+          ${ben.condicion ? `<div class="mmcf__chip">${_esc(ben.condicion)}</div>` : ''}
+        </div>
+      </div>` : ''}
+      <div class="mmce__accion">${cta}<div class="mmce__redes mmce__redes--info">${redesSinMapa.map(r => redBtn(r, 'mmce__red mmce__red--linea')).join('')}</div></div>
+      <div class="mmce__datos">
+        ${cobertura ? `<div class="mmce__dato">${MMC_ICONOS.pin}<span><b>Atiende en</b> ${cobertura}</span></div>` : ''}
+        ${modalidad ? `<div class="mmce__dato">${MMC_ICONOS_ESP.casa}<span><b>Modalidad</b> ${_esc(modalidad)}</span></div>` : ''}
+        ${d.horario_texto ? `<div class="mmce__dato">${MMC_ICONOS_ESP.reloj}<span><b>Horario</b> ${_esc(d.horario_texto)}</span></div>` : ''}
+      </div>
+      ${d.descripcion ? `<p class="mmce__desc">${_esc(d.descripcion)}</p>` : ''}
+    </div>
+   </div>`;
+  return el;
+}
+
 /**
  * Tarjeta del directorio: la misma ficha en versión compacta.
  * Devuelve solo el contenido interior — va dentro del .biz-card que ya existe.
@@ -294,7 +399,14 @@ function fichaDesdeNegocio(n) {
     meta: n.meta,
     emoji: n.emoji,
     verificado: !!n.verificado,
-    valoracion: n.valoracion || null
+    valoracion: n.valoracion || null,
+    es_especialista: !!n.esEspecialista,
+    descripcion: n.descripcion || null,
+    profesion: n.profesion || null,
+    especialidad: n.especialidad || null,
+    modalidad: n.modalidad || null,
+    visitas: n.visitas || null,
+    tono: n.tono || null
   };
 }
 
@@ -323,7 +435,9 @@ function fichaDesdeSolicitud(s) {
     beneficio_monto_min: s.beneficio_monto_min,
     beneficio_detalle: s.beneficio_detalle,
     beneficio_label: s.beneficio_label,
-    beneficio_condicion: s.beneficio_condicion
+    beneficio_condicion: s.beneficio_condicion,
+    es_especialista: !!s.es_especialista,
+    descripcion: s.descripcion || null
   };
 }
 

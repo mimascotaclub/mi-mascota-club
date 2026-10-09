@@ -519,7 +519,8 @@ function manejarRutaActual(){
   } else if(parts[0] === 'negocio' && parts[1]){
     mostrarPaginaFichaPorSlug(parts[1]);
   } else if(parts[0] === 'ejemplo-ficha'){
-    mostrarFichaEjemplo();
+    const esp = parts[1] && FICHAS_EJEMPLO_ESP[parts[1]];
+    if(esp) mostrarPaginaFicha(esp); else mostrarFichaEjemplo();
   } else if(parts[0] === 'mi-negocio'){
     mostrarPaginaNegocio();
   } else if(parts[0] === 'mi-mascota'){
@@ -1180,6 +1181,47 @@ function renderFichaFranja(n){
       </div>
     </div>`;
 }
+/* Fichas de ejemplo de ESPECIALISTAS (/ejemplo-ficha/veterinaria, /etologo,
+   /educador): para mostrarle a un especialista cómo se vería su ficha. Las
+   personas, nombres y números son de ejemplo (fotos de banco). */
+const FICHAS_EJEMPLO_ESP = {
+  veterinaria: {
+    ejemplo: true, demo: true, esEspecialista: true,
+    nombre: 'Camila Ibáñez', profesion: 'Médica veterinaria',
+    cat: 'Veterinaria', tipo: 'mascota', tipoNegocio: 'veterinario_domicilio', servicios: 'Veterinaria a domicilio',
+    comuna: 'Ñuñoa', tieneLocal: false, comunasCobertura: ['Ñuñoa', 'Providencia', 'La Reina', 'Macul'],
+    modalidad: 'A domicilio', horario: 'Lun a sáb · 9:00 - 20:00', horarioDias: 'Lunes a sábado',
+    whatsapp: '+56900000000', instagram: 'mimascotaclub', tiktok: 'mimascotaclub',
+    foto: '/assets/images/ejemplo/esp-veterinaria.webp', especialidad: 'Veterinaria a domicilio',
+    beneficioTipo: '15% de descuento', beneficioDetalle: 'En consultas a domicilio · De lunes a sábado',
+    descripcion: 'Atiendo a perros y gatos en la tranquilidad de su casa: controles, vacunas, desparasitación y seguimiento de enfermedades crónicas. Sin traslados ni salas de espera, ideal para mascotas mayores o nerviosas.',
+    verificado: true, valoracion: { promedio: 4.9, total: 31 }, visitas: '140+'
+  },
+  etologo: {
+    ejemplo: true, demo: true, esEspecialista: true,
+    nombre: 'Martín Valdés', profesion: 'Médico veterinario etólogo',
+    cat: 'Adiestramiento', tipo: 'mascota', tipoNegocio: 'etologo', servicios: 'Etología y conducta',
+    comuna: 'Las Condes', tieneLocal: false, comunasCobertura: ['Las Condes', 'Vitacura', 'Lo Barnechea', 'Providencia'],
+    modalidad: 'A domicilio y online', horario: 'Lun a vie · 10:00 - 19:00', horarioDias: 'Lunes a viernes',
+    whatsapp: '+56900000000', instagram: 'mimascotaclub', facebook: 'mimascotaclub',
+    foto: '/assets/images/ejemplo/esp-etologo.webp', especialidad: 'Etología y conducta',
+    beneficioTipo: '20% de descuento', beneficioDetalle: 'En la primera evaluación conductual · No acumulable con otras promociones',
+    descripcion: 'Ayudo a perros y gatos con ansiedad por separación, miedos, reactividad y agresividad. Primero entiendo por qué pasa, después armamos juntos un plan simple para la casa, sin castigos.',
+    verificado: true, valoracion: { promedio: 4.8, total: 23 }, visitas: '85+'
+  },
+  educador: {
+    ejemplo: true, demo: true, esEspecialista: true,
+    nombre: 'Diego Paredes', profesion: 'Educador canino certificado',
+    cat: 'Adiestramiento', tipo: 'mascota', tipoNegocio: 'entrenador_canino', servicios: 'Educación canina',
+    comuna: 'Santiago', tieneLocal: false, comunasCobertura: ['Santiago', 'Ñuñoa', 'San Miguel'],
+    modalidad: 'A domicilio y en parques', horario: 'Lun a dom · 8:00 - 18:00', horarioDias: 'Todos los días',
+    whatsapp: '+56900000000', instagram: 'mimascotaclub', tiktok: 'mimascotaclub',
+    foto: '/assets/images/ejemplo/esp-educador.jpg', especialidad: 'Educación canina',
+    beneficioTipo: 'Clase de evaluación gratis', beneficioDetalle: 'Al contratar un plan de 4 clases · Cachorros y adultos',
+    descripcion: 'Enseño a tu perro a caminar sin tirar, venir cuando lo llamas y convivir tranquilo en casa, con refuerzo positivo. Clases cortas, a tu ritmo y con tareas fáciles para practicar entre sesiones.',
+    verificado: true, valoracion: { promedio: 5.0, total: 17 }, visitas: '60+'
+  }
+};
 function mostrarFichaEjemplo(){ mostrarPaginaFicha(FICHA_EJEMPLO); }
 function marcarFichaEjemplo(activo){
   const sec = document.getElementById('fichaNegocio');
@@ -1326,7 +1368,7 @@ function renderFichaContenido(n){
   return `
     <div class="mmc-ficha-wrap">
       <div class="mmc-ficha" id="fichaMMC"></div>
-      ${n.descripcion ? `<p class="mmc-ficha-desc">${n.descripcion}</p>` : ''}
+      ${n.descripcion && !n.esEspecialista ? `<p class="mmc-ficha-desc">${n.descripcion}</p>` : ''}
       ${!n.demo && n.codigo ? `<div id="repSummaryBox" class="rep-empty" style="margin-top:18px;">Cargando reputación…</div>` : ''}
     </div>
     <div class="mmc-datos">

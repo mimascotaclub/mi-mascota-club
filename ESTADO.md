@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 7 de octubre de 2026**
+**Última actualización: 9 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -767,6 +767,27 @@ desactualizado).
 7f. **Los 100 negocios fundadores** tienen todo lo pagado, gratis durante su año.
 7g. **Servicio de fotografía con Valorgic** para los negocios que pagan.
 7h. **Por definir:** el resto de la oferta gratis vs. pagada (referencia: Yelp).
+7i. ✅ **Ficha de especialista CONSTRUIDA (9 de octubre, falta push y probar)**: diseño de
+    Jaime (referencia tipo app médica): foto de la persona sobre degradado desenfocado
+    **celeste** (salud: veterinario, etólogo…) o **amarillo** (entrenador, paseador,
+    cuidador, grooming, fotografía), nombre grande, nota ★, barra de vidrio con "Ver
+    beneficio" y redes; abajo franja Reseñas · Visitas del club · Comunas, beneficio,
+    botón, Atiende en / Modalidad / Horario y descripción. Desktop: foto a la izquierda,
+    datos a la derecha. Se activa sola cuando `es_especialista = true`
+    (`renderFichaEspecialista` en js/ficha-negocio.js, estilos `.mmce` en css/mmc-ficha.css).
+    Foto JPG (lo que guarda el formulario) = llena el recuadro y se funde; foto PNG/WebP
+    recortada sin fondo = la persona parada sobre el degradado.
+    **Fichas de ejemplo para vender** (fotos de banco, datos inventados, no indexadas):
+    `/ejemplo-ficha/veterinaria`, `/ejemplo-ficha/etologo`, `/ejemplo-ficha/educador`
+    (`FICHAS_EJEMPLO_ESP` en js/app.js, fotos en `assets/images/ejemplo/`).
+    Falta: campos nuevos `profesion`, `especialidad` y `modalidad` en Supabase + formulario
+    (hoy solo las fichas de ejemplo los traen); tarjeta del directorio para especialistas.
+    Pedido original (9 de octubre):
+    una versión de la ficha pensada para una persona, no un local (ej. veterinario a
+    domicilio, etólogo, adiestrador). Por definir con el diseño de Jaime: foto de la
+    persona en vez del logo/fachada, profesión y especialidad, comunas que cubre en vez
+    de dirección, y si atiende a domicilio u online. Los datos base ya existen
+    (`es_especialista`, `tiene_local`, `comunas_cobertura`).
 
 **Lanzamiento — después de negocios**
 8. "Recomienda un negocio" con votos + etiquetas "Recomendado por X socios" / "Nuevo en el club".
@@ -779,6 +800,15 @@ desactualizado).
 13. Terminar la prueba cerrada con las 5 personas.
 14. Encender el interruptor de verificación, resolviendo antes a los socios en `registrado`.
 15. Moderación de las fotos que suben los dueños.
+
+**App en el celular (después de negocios, conversado el 7 y 9 de octubre)**
+- **PWA:** el sitio se instala como app con su ícono y manda **notificaciones push**.
+  Gratis, sin Google Play ni App Store. Los cambios llegan solos con cada `git push`
+  (con un aviso "Hay una versión nueva · Actualizar" para que nadie quede con una copia
+  vieja). En iPhone hay que instalarla desde Safari (*Compartir → Agregar a pantalla de
+  inicio*) para recibir avisos. Trabajo estimado: ~1 push. Incluye botón "Activar avisos",
+  guardar suscripciones en Supabase y enviar avisos desde `/mi-panel`. Las tiendas
+  (Apple USD 99/año, Google USD 25 una vez) quedan para más adelante, usando la PWA de base.
 
 **Mejoras chicas**
 - Opción B del pago (vuelta automática + webhook).
