@@ -191,6 +191,14 @@ if (typeof window !== 'undefined') {
   });
 }
 
+/* Color de cada negocio en el estilo "vidrio" (decidido por Jaime el 10 de
+   octubre: por rubro, como los especialistas). Celeste = salud; amarillo = el resto. */
+const MMC_CATS_CELESTE = ['Veterinaria', 'Salud'];
+function tonoNegocio(n) {
+  const cat = (n && (n.cat || n.dir_cat)) || '';
+  return MMC_CATS_CELESTE.includes(cat) ? 'celeste' : 'amarillo';
+}
+
 /* ============================================================
    FICHA DE ESPECIALISTA (una persona: veterinario a domicilio,
    etólogo, entrenador…). Mismos datos que un negocio, pero la
@@ -448,6 +456,7 @@ if (typeof window !== 'undefined') {
   window.fichaDesdeSolicitud = fichaDesdeSolicitud;
   window.MMC_ICONOS = MMC_ICONOS;
   window.ajustarNombreFicha = ajustarNombreFicha;
+  window.tonoNegocio = tonoNegocio;
   window.valoracionHTML = _valoracion;
 }
 

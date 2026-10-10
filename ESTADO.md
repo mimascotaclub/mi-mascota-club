@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 9 de octubre de 2026**
+**Última actualización: 10 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -800,6 +800,32 @@ desactualizado).
 13. Terminar la prueba cerrada con las 5 personas.
 14. Encender el interruptor de verificación, resolviendo antes a los socios en `registrado`.
 15. Moderación de las fotos que suben los dueños.
+
+**Estilo "vidrio" en negocios + historia nueva (10 de octubre, falta push y probar)**
+- Fichas y tarjetas de **negocio** con el mismo concepto que las de especialista:
+  degradado desenfocado + paneles translúcidos (logo, categoría, beneficio, horario,
+  redes). Misma foto, mismas posiciones, mismos datos. **Color por rubro** (decisión de
+  Jaime): celeste = Veterinaria y Salud; amarillo = todo lo demás (`tonoNegocio()` en
+  js/ficha-negocio.js; estilos "ESTILO VIDRIO" al final de css/mmc-ficha.css).
+- **Historia de Instagram de la mascota** rediseñada (`generateShareCardBlob` en
+  js/app.js): amarillo si es Socio Fundador (píldora "★ Socio Fundador #00X"), celeste
+  si no; foto grande en marco de vidrio, nombre grande, Comuna · Especie · Miembro.
+  **Corrección de Jaime:** la comparte cada dueño desde su Instagram PERSONAL, así que
+  NO dice "link en bio" ni "¿Y tu mascota?": dice solo **"Únete gratis"** +
+  **mimascotaclub.cl**. Foto: si viene sin fondo (PNG) se ve entera; si es una foto normal
+  llena el marco y, si hay que recortar, se recorta más abajo que arriba para no cortar la cara.
+  Sin código ni QR. Se volvió a mostrar el botón "Compartir en Instagram" en /mi-mascota.
+  Las fotos de Supabase ahora se cargan con permiso de otro dominio (crossOrigin) para
+  que el navegador deje generar la imagen.
+
+**Avatar de la mascota (idea del 10 de octubre — evaluar después)**
+- Al subir la foto, ofrecer crear un avatar 3D estilo Disney de la mascota, con
+  movimientos leves (rascándose, riéndose, invitando a jugar, acostándose), para
+  historias y para la app. Dificultad estimada: avatar quieto 4/10, con movimiento 7/10.
+  Se hace con servicios de IA de imagen y de video (función de Netlify con clave
+  secreta); costo por imagen bajo y por clip mayor, así que conviene limitarlo
+  (ej. 1 avatar para Fundadores, animaciones como beneficio Premium). Pedir 2 fotos
+  (cara de frente y cuerpo entero). Primera prueba sugerida: con la foto de Max.
 
 **App en el celular (después de negocios, conversado el 7 y 9 de octubre)**
 - **PWA:** el sitio se instala como app con su ícono y manda **notificaciones push**.

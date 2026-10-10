@@ -1099,7 +1099,7 @@ function renderDirectory(){
   const ordenSel = document.getElementById('dirOrden');
   dirOrdenar(filtered, ordenSel ? ordenSel.value : 'recomendados').forEach(n=>{
     const el = document.createElement('div');
-    el.className='biz-card';
+    el.className='biz-card mmc-vidrio mmc-tono--' + tonoNegocio(n);
     el.innerHTML = bizCardInnerHTML(n, false);
     el.addEventListener('click', ()=>irANegocio(n));
     grid.appendChild(el);
@@ -1119,7 +1119,7 @@ function renderFeaturedStrip(){
   track.innerHTML = '';
   destacados.forEach(n=>{
     const el = document.createElement('div');
-    el.className='biz-card';
+    el.className='biz-card mmc-vidrio mmc-tono--' + tonoNegocio(n);
     el.innerHTML = bizCardInnerHTML(n, true);
     el.addEventListener('click', ()=>irANegocio(n));
     track.appendChild(el);
@@ -1366,7 +1366,7 @@ function mostrarPaginaFicha(n){
 function renderFichaContenido(n){
   const dato = (label, valor) => valor ? `<div class="mmc-datos__row"><span>${label}</span><b>${valor}</b></div>` : '';
   return `
-    <div class="mmc-ficha-wrap">
+    <div class="mmc-ficha-wrap${n.esEspecialista ? '' : ' mmc-vidrio mmc-tono--' + tonoNegocio(n)}">
       <div class="mmc-ficha" id="fichaMMC"></div>
       ${n.descripcion && !n.esEspecialista ? `<p class="mmc-ficha-desc">${n.descripcion}</p>` : ''}
       ${!n.demo && n.codigo ? `<div id="repSummaryBox" class="rep-empty" style="margin-top:18px;">Cargando reputación…</div>` : ''}
@@ -1428,6 +1428,9 @@ function roundRect(ctx, x, y, w, h, r){
 function loadImage(src){
   return new Promise((resolve, reject) => {
     const img = new Image();
+    /* Las fotos vienen de Supabase (otro dominio): sin esto el navegador no
+       deja exportar el canvas como imagen. */
+    if(/^https?:/i.test(src) && !src.startsWith(location.origin)) img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
     img.src = src;
@@ -1448,69 +1451,158 @@ function drawPawIcon(ctx, cx, cy, size, color){
   });
   ctx.beginPath(); ctx.ellipse(cx, cy + 0.08*size, size*0.28, size*0.22, 0, 0, Math.PI*2); ctx.fill();
 }
+/* Historia de Instagram de la mascota (1080×1920), estilo "vidrio" igual que
+   las fichas (diseño del 10 de octubre de 2026): degradado desenfocado de la
+   marca —amarillo si el dueño es Socio Fundador, celeste si no—, foto grande
+   en un marco de vidrio, nombre grande, datos y una invitación al club.
+   La comparte CADA DUEÑO desde su Instagram personal: por eso dice
+   "mimascotaclub.cl" y no "link en bio". No lleva código ni QR. */
+function _historiaBrillo(ctx, x, y, r, color, alpha){
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.globalAlpha = alpha; ctx.fillStyle = g;
+  ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  ctx.globalAlpha = 1;
+}
+function _historiaVidrio(ctx, x, y, w, h, r, alpha){
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fillStyle = `rgba(255,255,255,${alpha})`; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.stroke();
+}
+function _historiaPildora(ctx, txt, cx, cy, fondo, color, font){
+  ctx.font = font;
+  const w = ctx.measureText(txt).width + 72, h = 80;
+  ctx.fillStyle = fondo; roundRect(ctx, cx - w/2, cy - h/2, w, h, h/2); ctx.fill();
+  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, cx, cy + 2);
+  ctx.textBaseline = 'alphabetic';
+}
+/* ¿La foto viene recortada, sin fondo? Mira si las esquinas son transparentes. */
+function _fotoSinFondo(img){
+  try{
+    const c = document.createElement('canvas'); c.width = 24; c.height = 24;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0, 24, 24);
+    const d = x.getImageData(0, 0, 24, 24).data;
+    const a = i => d[i * 4 + 3];
+    return a(0) < 20 && a(23) < 20 && a(24 * 23) < 20 && a(24 * 24 - 1) < 128;
+  }catch(e){ return false; }
+}
+/* Como drawImageCover, pero si hay que recortar alto, deja más espacio arriba. */
+function _dibujarFotoArriba(ctx, img, x, y, w, h){
+  const ir = img.width / img.height, tr = w / h;
+  let sx, sy, sw, sh;
+  if(ir > tr){ sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; }
+  else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh) * 0.25; }
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
 async function generateShareCardBlob(record){
   try{
     if(document.fonts && document.fonts.load){
-      await Promise.all([document.fonts.load('900 84px Lato'), document.fonts.load('900 52px Lato'),
-        document.fonts.load('700 40px Lato'), document.fonts.load('600 34px Lato')]);
+      await Promise.all([document.fonts.load('400 150px Lato'), document.fonts.load('900 40px Lato'),
+        document.fonts.load('700 34px Lato')]);
     }
   }catch(e){}
   const W = 1080, H = 1920;
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0, '#1E1E1E'); grad.addColorStop(1, '#111111');
-  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
-  ctx.globalAlpha = 0.07;
-  for(let i=0;i<12;i++){ drawPawIcon(ctx, Math.random()*W, Math.random()*H, 60+Math.random()*70, '#FFCE00'); }
-  ctx.globalAlpha = 1;
-  const pad = 64;
-  ctx.fillStyle = '#FFFFFF';
-  roundRect(ctx, pad, 230, W-pad*2, 1260, 52); ctx.fill();
-  const photoSize = 420, photoY = 320;
-  ctx.save();
-  ctx.beginPath(); ctx.arc(W/2, photoY+photoSize/2, photoSize/2, 0, Math.PI*2); ctx.closePath(); ctx.clip();
-  if(record.foto){
-    try{ const img = await loadImage(record.foto); drawImageCover(ctx, img, W/2-photoSize/2, photoY, photoSize, photoSize); }
-    catch(e){ ctx.fillStyle = '#47C9C9'; ctx.fillRect(W/2-photoSize/2, photoY, photoSize, photoSize); }
-  } else { ctx.fillStyle = '#47C9C9'; ctx.fillRect(W/2-photoSize/2, photoY, photoSize, photoSize); }
-  ctx.restore();
-  ctx.beginPath(); ctx.arc(W/2, photoY+photoSize/2, photoSize/2, 0, Math.PI*2);
-  ctx.lineWidth = 14; ctx.strokeStyle = '#FFCE00'; ctx.stroke();
-  if(!record.foto){ drawPawIcon(ctx, W/2, photoY+photoSize/2, photoSize*0.45, '#FFFFFF'); }
-  ctx.textAlign = 'center'; ctx.fillStyle = '#151515';
-  ctx.font = '900 84px Lato, sans-serif';
-  ctx.fillText(record.pet || 'Mi mascota', W/2, photoY+photoSize+110);
-  ctx.font = '700 38px Lato, sans-serif'; ctx.fillStyle = '#6B7280';
-  const sub = record.breed ? `${record.species} · ${record.breed}` : (record.species || '');
-  ctx.fillText(sub, W/2, photoY+photoSize+170);
-  /* La franja bajo el nombre. Si el dueño es Socio Fundador, acá va su número
-     dentro de una píldora amarilla, porque es lo que pagó y es justo lo que va
-     a querer mostrar. Si no lo es, se mantiene la etiqueta del plan como
-     siempre. socFundador lo deja cargado el panel del socio; cuando la imagen
-     se genera recién terminado el registro todavía es null, y ahí cae solo en
-     la etiqueta del plan. */
-  const lineaY = photoY + photoSize + 250;
-  ctx.font = '900 36px Lato, sans-serif';
-  if(socFundador){
-    const txtF = '★ SOCIO FUNDADOR #' + String(socFundador).padStart(3, '0');
-    const anchoF = ctx.measureText(txtF).width + 64;
-    ctx.fillStyle = '#FFCE00';
-    roundRect(ctx, W/2 - anchoF/2, lineaY - 46, anchoF, 66, 33); ctx.fill();
-    ctx.fillStyle = '#151515';
-    ctx.fillText(txtF, W/2, lineaY);
-  }else{
-    ctx.fillStyle = '#2FA8A8';
-    ctx.fillText('🐾  ' + planLabel(record.plan).toUpperCase(), W/2, lineaY);
+  const fundador = !!socFundador;
+  const T = fundador
+    ? { p:'#FFF9E3', m:'#FFE58A', s:'#FFCE00' }
+    : { p:'#EAF8F8', m:'#A8E3E3', s:'#47C9C9' };
+
+  /* Fondo: degradado + brillos suaves (círculos difuminados) */
+  const grad = ctx.createLinearGradient(0, 0, W * 0.55, H);
+  grad.addColorStop(0, T.p); grad.addColorStop(0.68, T.m); grad.addColorStop(1, T.s);
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  _historiaBrillo(ctx, 120, 140, 620, '#FFFFFF', 0.95);
+  _historiaBrillo(ctx, W - 40, 1050, 640, T.s, 0.55);
+  _historiaBrillo(ctx, 240, H - 140, 560, T.m, 0.9);
+
+  /* Logo arriba */
+  try{
+    const logo = await loadImage('/assets/logo.svg');
+    const lh = 74, lw = lh * (logo.width && logo.height ? logo.width / logo.height : 4.77);
+    ctx.drawImage(logo, W/2 - lw/2, 150, lw, lh);
+  }catch(e){
+    ctx.textAlign = 'center'; ctx.fillStyle = '#151515'; ctx.font = '900 56px Lato, sans-serif';
+    ctx.fillText('Mi Mascota Club', W/2, 205);
   }
-  ctx.font = '600 32px Lato, sans-serif'; ctx.fillStyle = '#1A1A1A';
-  ctx.fillText(record.comuna || '', W/2, photoY+photoSize+305);
-  drawPawIcon(ctx, W/2-150, H-150, 56, '#FFCE00');
-  ctx.textAlign = 'left'; ctx.font = '900 50px Lato, sans-serif'; ctx.fillStyle = '#FFFFFF';
-  ctx.fillText('Mi Mascota Club', W/2-95, H-130);
-  ctx.textAlign = 'center'; ctx.font = '600 28px Lato, sans-serif'; ctx.fillStyle = '#B0B0B0';
-  ctx.fillText('Únete gratis · link en bio', W/2, H-70);
+
+  /* Foto en marco de vidrio */
+  const fx = 90, fy = 270, fw = W - 180, fh = 870;
+  ctx.save(); ctx.shadowColor = 'rgba(21,21,21,.12)'; ctx.shadowBlur = 80; ctx.shadowOffsetY = 36;
+  _historiaVidrio(ctx, fx, fy, fw, fh, 64, 0.42); ctx.restore();
+  _historiaVidrio(ctx, fx, fy, fw, fh, 64, 0.0);
+  const ix = fx + 16, iy = fy + 16, iw = fw - 32, ih = fh - 32;
+  ctx.save(); roundRect(ctx, ix, iy, iw, ih, 50); ctx.clip();
+  const fondoFoto = ctx.createLinearGradient(0, iy, 0, iy + ih);
+  fondoFoto.addColorStop(0, 'rgba(255,255,255,.9)'); fondoFoto.addColorStop(1, 'rgba(255,255,255,.25)');
+  ctx.fillStyle = fondoFoto; ctx.fillRect(ix, iy, iw, ih);
+  let hayFoto = false;
+  if(record.foto){
+    try{
+      const img = await loadImage(record.foto);
+      if(_fotoSinFondo(img)){
+        /* Foto recortada (PNG sin fondo): la mascota entera, parada abajo. */
+        const k = Math.min(iw / img.width, (ih - 40) / img.height);
+        const w2 = img.width * k, h2 = img.height * k;
+        ctx.drawImage(img, ix + (iw - w2) / 2, iy + ih - h2, w2, h2);
+      }else{
+        /* Foto normal: llena el marco. Si sobra alto, se recorta más abajo que
+           arriba (la cara casi siempre está en la parte de arriba). */
+        _dibujarFotoArriba(ctx, img, ix, iy, iw, ih);
+      }
+      hayFoto = true;
+    }catch(e){}
+  }
+  ctx.restore();
+  if(!hayFoto) drawPawIcon(ctx, W/2, fy + fh/2 - 40, 300, T.s);
+
+  /* Barra de vidrio sobre la foto con la píldora del plan */
+  _historiaVidrio(ctx, fx + 40, fy + fh - 150, fw - 80, 110, 44, 0.5);
+  if(fundador){
+    _historiaPildora(ctx, '★ Socio Fundador #' + String(socFundador).padStart(3, '0'), W/2, fy + fh - 95, '#151515', '#FFCE00', '900 36px Lato, sans-serif');
+  }else{
+    _historiaPildora(ctx, '🐾 Miembro ' + planLabel(record.plan).replace(/^Miembro\s+/i, ''), W/2, fy + fh - 95, 'rgba(255,255,255,.9)', '#151515', '900 34px Lato, sans-serif');
+  }
+
+  /* Nombre y raza */
+  ctx.textAlign = 'center'; ctx.fillStyle = '#151515';
+  let tam = 150; ctx.font = `400 ${tam}px Lato, sans-serif`;
+  const nombre = record.pet || 'Mi mascota';
+  while(ctx.measureText(nombre).width > W - 160 && tam > 80){ tam -= 6; ctx.font = `400 ${tam}px Lato, sans-serif`; }
+  ctx.fillText(nombre, W/2, 1300);
+  ctx.font = '400 40px Lato, sans-serif'; ctx.fillStyle = '#3a4446';
+  const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
+  const sub = record.breed ? cap(record.breed) : cap(record.species || '');
+  if(sub) ctx.fillText(sub, W/2, 1372);
+
+  /* Panel de datos */
+  const dy = 1420, dh = 150;
+  _historiaVidrio(ctx, 90, dy, W - 180, dh, 44, 0.5);
+  const cols = [
+    ['Comuna', record.comuna || '—'],
+    ['Especie', record.species ? record.species.charAt(0).toUpperCase() + record.species.slice(1) : '—'],
+    ['Miembro', fundador ? 'Fundador' : planLabel(record.plan).replace(/^Miembro\s+/i, '')]
+  ];
+  const cw = (W - 180) / 3;
+  cols.forEach(([t, v], i) => {
+    const cx = 90 + cw * i + cw / 2;
+    if(i){ ctx.fillStyle = 'rgba(21,21,21,.08)'; ctx.fillRect(90 + cw * i, dy + 30, 2, dh - 60); }
+    ctx.textAlign = 'center';
+    ctx.font = '400 26px Lato, sans-serif'; ctx.fillStyle = '#5c5c5c'; ctx.fillText(t, cx, dy + 60);
+    ctx.font = '900 36px Lato, sans-serif'; ctx.fillStyle = '#151515';
+    let vv = v; while(ctx.measureText(vv).width > cw - 30 && vv.length > 4){ vv = vv.slice(0, -2) + '…'; }
+    ctx.fillText(vv, cx, dy + 108);
+  });
+
+  /* Invitación: la comparte el dueño desde su cuenta (no hay "link en bio").
+     Texto decidido por Jaime: solo "Únete gratis" + la dirección del club. */
+  ctx.textAlign = 'center'; ctx.font = '700 36px Lato, sans-serif'; ctx.fillStyle = '#151515';
+  ctx.fillText('Únete gratis', W/2, 1632);
+  _historiaPildora(ctx, 'mimascotaclub.cl', W/2, 1700, '#151515', '#FFFFFF', '900 40px Lato, sans-serif');
+
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
 }
 async function compartirCarne(record){
@@ -4315,6 +4407,10 @@ function socioSeleccionar(codigo){
   });
 
   renderCarnetSocio(m);
+  /* "Compartir en Instagram" vuelve a mostrarse (10 de octubre): la imagen
+     nueva no lleva código ni QR. */
+  const btnHistoria = document.getElementById('socShareBtn');
+  if(btnHistoria) btnHistoria.style.display = '';
   renderVerifSocio(m);
   renderCompletitudSocio(m);
   renderBorrarMascota(m);

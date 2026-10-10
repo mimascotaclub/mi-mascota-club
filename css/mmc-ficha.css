@@ -878,3 +878,69 @@
 /* La ficha de negocio ubica .mmcf__beneficio en un área con nombre ("benef");
    dentro de la ficha de especialista va en el flujo normal. */
 .mmce .mmcf__beneficio { grid-area: auto; align-self: auto; }
+
+/* ============================================================
+   ESTILO "VIDRIO" para fichas y tarjetas de NEGOCIO (10 de octubre),
+   igual que la ficha de especialista: degradado desenfocado + paneles
+   translúcidos. Solo estilo: misma foto, mismas posiciones, mismos datos.
+   El color sale de tonoNegocio() en js/ficha-negocio.js.
+   ============================================================ */
+.mmc-tono--celeste  { --t-p:#EAF8F8; --t-m:#A8E3E3; --t-s:#47C9C9; }
+.mmc-tono--amarillo { --t-p:#FFF9E3; --t-m:#FFE58A; --t-s:#FFCE00; }
+
+/* ---------- Ficha ---------- */
+.mmc-ficha-wrap.mmc-vidrio {
+  position: relative; overflow: hidden; isolation: isolate;
+  border: 1px solid rgba(255,255,255,.7);
+  background: linear-gradient(165deg, var(--t-p) 0%, var(--t-m) 72%, var(--t-s) 135%);
+}
+.mmc-vidrio::before, .mmc-vidrio::after {
+  content: ''; position: absolute; z-index: -1; border-radius: 50%; filter: blur(60px); pointer-events: none;
+}
+.mmc-vidrio::before { width: 420px; height: 420px; left: -120px; top: -140px; background: #fff; opacity: .85; }
+.mmc-vidrio::after  { width: 520px; height: 520px; right: -180px; bottom: -220px; background: var(--t-s); opacity: .45; }
+
+.mmc-vidrio .mmcf__logo { background: rgba(255,255,255,.8) !important; }
+.mmc-vidrio .mmcf__logo,
+.mmc-vidrio .mmcf__tipo {
+  background: rgba(255,255,255,.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.75); box-shadow: 0 6px 20px rgba(21,21,21,.05);
+}
+.mmc-vidrio .mmcf__logo img { mix-blend-mode: multiply; }
+.mmc-vidrio .mmcf__beneficio {
+  background: rgba(255,255,255,.35); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.7);
+}
+.mmc-vidrio .mmcf__ben-valor, .mmc-vidrio .mmcf__chip { background: rgba(255,255,255,.78); box-shadow: none; }
+.mmc-vidrio .mmcf__foto { border: 1px solid rgba(255,255,255,.7); box-shadow: 0 14px 40px rgba(21,21,21,.10); }
+.mmc-vidrio .mmcf__horario, .mmc-vidrio .mmcf__red {
+  background: rgba(255,255,255,.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.8);
+}
+.mmc-vidrio .mmcf__comuna, .mmc-vidrio .mmc-ficha-desc, .mmc-vidrio .mmc-rating__n { color: #3a4446; }
+
+/* ---------- Tarjeta del directorio ---------- */
+.biz-card.mmc-vidrio {
+  isolation: isolate; border: 1px solid rgba(255,255,255,.7);
+  background: linear-gradient(165deg, var(--t-p) 0%, var(--t-m) 72%, var(--t-s) 135%);
+}
+.biz-card.mmc-vidrio::before { width: 240px; height: 240px; left: -80px; top: -90px; filter: blur(40px); }
+.biz-card.mmc-vidrio::after  { width: 300px; height: 300px; right: -120px; bottom: -140px; filter: blur(40px); }
+.mmc-vidrio .mmcard__logo { background: rgba(255,255,255,.8); box-shadow: 0 6px 18px rgba(21,21,21,.07); }
+.mmc-vidrio .mmcard__logo, .mmc-vidrio .mmcard__tipo {
+  background-color: rgba(255,255,255,.62); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.75);
+}
+.mmc-vidrio .mmcard__logo img { mix-blend-mode: multiply; }
+.mmc-vidrio .mmcard__ben {
+  background: rgba(255,255,255,.35); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.7);
+}
+.mmc-vidrio .mmcard__ben b, .mmc-vidrio .mmcard__chip { background: rgba(255,255,255,.78); box-shadow: none; }
+.mmc-vidrio .mmcard__foto { border: 1px solid rgba(255,255,255,.7); }
+.mmc-vidrio .mmcard__foto-bar { background: none; }
+.mmc-vidrio .mmcard__horario, .mmc-vidrio .mmcard__red {
+  background: rgba(255,255,255,.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.8);
+}
+.mmc-vidrio .mmcard__comuna, .mmc-vidrio .mmcard__meta { color: #3a4446; }
