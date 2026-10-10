@@ -734,6 +734,11 @@ historia propia diciendo que el club está comenzando.
   `/mi-mascota` aparece el botón **"📲 Instalar la app en mi celular"**: en Android abre el
   instalador; en iPhone muestra los 3 pasos (Safari → Compartir → Agregar a pantalla de
   inicio). Probado: Chrome la reconoce como instalable, sin errores.
+  **Ajuste (11 oct, prueba de Jaime en iPhone con Chrome):** el aviso simple no servía
+  ("8 de cada 10 no lo lograrían"). Ahora abre una **guía visual** con los pasos exactos
+  según el navegador: Safari (Compartir abajo), Chrome de iPhone (Compartir arriba junto
+  a la dirección, flecha amarilla) o navegador de Instagram/WhatsApp (abrir primero en el
+  navegador). En iPhone Apple no permite instalar con un solo botón; en Android sí.
   **Falta (siguiente etapa):** notificaciones push (llaves, tabla en Supabase, botón
   "Activar avisos" y envío desde /mi-panel).
 
