@@ -12,6 +12,12 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
 <meta name="theme-color" content="#FFCE00">
+<!-- Se puede instalar como app (11 de octubre): ver manifest.webmanifest, sw.js y js/instalar-app.js -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Mascota">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <!-- Vista previa del enlace de registro: este es EL enlace que se reparte por
      WhatsApp e Instagram, así que el título y la descripción están escritos
@@ -495,6 +501,7 @@
     .verif-cta{ transition:none !important; }
   }
 </style>
+<script src="/js/instalar-app.js" defer></script>
 </head>
 <body>
 

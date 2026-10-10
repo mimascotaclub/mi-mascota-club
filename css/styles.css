@@ -1449,3 +1449,11 @@ body.pagina-admin #paginaSugerencias{ display:none !important; }
 .credv__datos > div + div{ border-left:1px solid rgba(21,21,21,.08); }
 .credv__datos small{ display:block; font-size:11px; color:#5c5c5c; }
 .credv__datos b{ display:block; font-size:13.5px; font-weight:900; margin-top:2px; overflow-wrap:anywhere; }
+
+/* Directorio sin negocios todavía (lanzamiento) */
+.dir-pronto{ text-align:center; padding:48px 24px; border-radius:30px; position:relative; overflow:hidden; isolation:isolate;
+  background:linear-gradient(165deg,#FFF9E3 0%,#FFE58A 72%,#FFCE00 135%); border:1px solid rgba(255,255,255,.75); }
+.dir-pronto::before{ content:""; position:absolute; width:320px; height:320px; left:-110px; top:-130px; border-radius:50%; background:#fff; opacity:.85; filter:blur(50px); z-index:-1; }
+.dir-pronto__t{ font-family:var(--font-display); font-weight:900; font-size:clamp(22px,4vw,30px); line-height:1.15; color:#151515; }
+.dir-pronto p{ margin:10px auto 20px; max-width:440px; font-size:15px; line-height:1.55; color:#3a4446; }
+.dir-pronto .btn{ background:#151515; color:#fff; box-shadow:none; border-color:#151515; }

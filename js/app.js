@@ -1090,6 +1090,17 @@ function renderDirectory(){
 
   /* ---- Grilla ---- */
   grid.innerHTML = '';
+  if(filtered.length===0 && !combinedNegocios().length){
+    /* Lanzamiento (11 de octubre): todavía no hay negocios publicados. En vez de
+       "no encontramos", se invita a recomendar uno en /sugerencias. */
+    grid.innerHTML = `
+      <div class="dir-pronto" style="grid-column:1/-1;">
+        <div class="dir-pronto__t">Próximamente aquí se agregarán negocios</div>
+        <p>Estamos sumando a los primeros negocios del club. ¿Tienes uno o conoces uno que te encante?</p>
+        <a href="/sugerencias" class="btn btn-primary" onclick="event.preventDefault(); irASugerencias();">Recomiéndalo aquí</a>
+      </div>`;
+    return;
+  }
   if(filtered.length===0){
     const msg = modoDirectorioBeneficios
       ? 'Todavía no hay beneficios cargados con esos filtros.'

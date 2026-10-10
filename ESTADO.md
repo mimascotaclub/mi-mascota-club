@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 10 de octubre de 2026**
+**Última actualización: 11 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -715,6 +715,39 @@ desactualizado).
 **El flujo del dueño está cerrado, y desde el 3 de octubre el del pase fundador también
 (automático, verificado y probado con pagos reales).** Lo que queda abajo es otra cosa.
 
+### 🚀 LANZAMIENTO — 11 de octubre de 2026 (decidido por Jaime)
+
+Jaime lanza **mañana con lo que hay**: invita a dueños y negocios a sumarse, con una
+historia propia diciendo que el club está comenzando.
+
+- **Directorio vacío a propósito.** Gloria (NEG0002, prueba) sale con
+  `supabase-limpiar-prueba-v33.sql` (borra canje C-2UPC, sus 2 solicitudes y el negocio,
+  y reinicia `negocio_seq` → el primer negocio real será **NEG0001 / fundador #001**).
+  Las imágenes de Storage NO se borran: el logo lo usa `/ejemplo-ficha`.
+- Con 0 negocios, el directorio muestra **"Próximamente aquí se agregarán negocios"** +
+  botón **"Recomiéndalo aquí"** → `/sugerencias` (bloque `.dir-pronto` en js/app.js).
+- Al 10 de octubre: 17 socios (14 sin verificar), 0 fundadores, 0 negocios reales.
+
+- **Se puede instalar como app (PWA), en el mismo push del lanzamiento.** Archivos:
+  `manifest.webmanifest` (nombre, colores, abre en `/mi-mascota`), `sw.js` (NO guarda copias:
+  cada push llega a todos), `js/instalar-app.js` y los íconos en `assets/app/`. En
+  `/mi-mascota` aparece el botón **"📲 Instalar la app en mi celular"**: en Android abre el
+  instalador; en iPhone muestra los 3 pasos (Safari → Compartir → Agregar a pantalla de
+  inicio). Probado: Chrome la reconoce como instalable, sin errores.
+  **Falta (siguiente etapa):** notificaciones push (llaves, tabla en Supabase, botón
+  "Activar avisos" y envío desde /mi-panel).
+
+**Después del lanzamiento, en este orden:**
+1. Escribirles a los primeros 5 negocios (formulario listo) y mostrarles `/ejemplo-ficha`
+   y las fichas de especialista de ejemplo.
+2. Revisar las recomendaciones que lleguen a `/sugerencias` y contactar esos negocios.
+3. Resolver a los 14 socios sin verificar y decidir el interruptor de verificación.
+4. Consultar al contador por la boleta de las membresías.
+5. Campos `profesion` / `especialidad` / `modalidad` en el formulario (especialistas reales).
+6. Afiche con QR, páginas por categoría, "Recomienda un negocio".
+7. Ideas para después: dashboard en vivo, PWA con notificaciones, avatar de la mascota,
+   estrellas y reseñas reales, mapa.
+
 ### La lista corta (acordada el 3 de octubre, Jaime pide que se le recuerde cuando la pida)
 
 **Antes de seguir cobrando a escala**
@@ -801,7 +834,7 @@ desactualizado).
 14. Encender el interruptor de verificación, resolviendo antes a los socios en `registrado`.
 15. Moderación de las fotos que suben los dueños.
 
-**Estilo "vidrio" en negocios + historia nueva (10 de octubre, falta push y probar)**
+**Estilo "vidrio" en negocios + historia nueva (10 de octubre) — ✅ en producción y probado por Jaime (historia compartida en Instagram)**
 - Fichas y tarjetas de **negocio** con el mismo concepto que las de especialista:
   degradado desenfocado + paneles translúcidos (logo, categoría, beneficio, horario,
   redes). Misma foto, mismas posiciones, mismos datos. **Color por rubro** (decisión de
@@ -824,6 +857,13 @@ desactualizado).
   **"Mestizo"** en carnet, historia y panel (`razaVisible()`); en el formulario sigue la
   opción completa, para quien no sabe la raza.
 
+**Dashboard en vivo estilo Shopify (idea del 10 de octubre — después del lanzamiento)**
+- En `/mi-panel`: personas dentro del sitio ahora mismo, registros nuevos de hoy/semana,
+  fundadores, negocios inscritos, canjes, y un aviso en vivo cuando alguien se registra.
+  Dificultad: contadores y registros nuevos 3/10 (los datos ya están en Supabase);
+  "personas ahora mismo" 5/10 (Supabase Realtime con presencia, sin costo extra en el plan
+  actual, sin cookies de terceros). ~1 push.
+
 **Avatar de la mascota (idea del 10 de octubre — evaluar después)**
 - Al subir la foto, ofrecer crear un avatar 3D estilo Disney de la mascota, con
   movimientos leves (rascándose, riéndose, invitando a jugar, acostándose), para
@@ -834,7 +874,7 @@ desactualizado).
   (cara de frente y cuerpo entero). Primera prueba sugerida: con la foto de Max.
 
 **App en el celular (después de negocios, conversado el 7 y 9 de octubre)**
-- **PWA:** el sitio se instala como app con su ícono y manda **notificaciones push**.
+- **PWA:** ✅ instalable desde el 11 de octubre. Falta: **notificaciones push**.
   Gratis, sin Google Play ni App Store. Los cambios llegan solos con cada `git push`
   (con un aviso "Hay una versión nueva · Actualizar" para que nadie quede con una copia
   vieja). En iPhone hay que instalarla desde Safari (*Compartir → Agregar a pantalla de
