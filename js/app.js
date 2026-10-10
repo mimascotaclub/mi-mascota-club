@@ -233,6 +233,9 @@ function resetRegionComuna(prefix){
    a una pasarela de pago real y el plan se actualizará según el estado de la suscripción. */
 const PLAN_LABELS = { free: "Miembro Free", pro: "Miembro Pro", premium: "Miembro Premium" };
 function planLabel(plan){ return PLAN_LABELS[plan] || PLAN_LABELS.free; }
+/* En el formulario la opción dice "Mestizo/No sé" (ayuda a quien no sabe la
+   raza), pero en el carnet, la historia y el panel se muestra solo "Mestizo". */
+function razaVisible(r){ return /^mestizo\s*\/\s*no\s*s[eé]$/i.test((r || '').trim()) ? 'Mestizo' : (r || ''); }
 
 let bizTipoActual = 'mascota';
 let dirTipoFiltro = '';
@@ -1575,7 +1578,7 @@ async function generateShareCardBlob(record){
   ctx.fillText(nombre, W/2, 1300);
   ctx.font = '400 40px Lato, sans-serif'; ctx.fillStyle = '#3a4446';
   const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
-  const sub = record.breed ? cap(record.breed) : cap(record.species || '');
+  const sub = record.breed ? cap(razaVisible(record.breed)) : cap(record.species || '');
   if(sub) ctx.fillText(sub, W/2, 1372);
 
   /* Panel de datos */
@@ -3664,7 +3667,7 @@ function verifItemEl(s){
       <div class="verif-item__av">${s.foto ? `<img src="${s.foto}" alt="">` : '🐾'}</div>
       <div>
         <div class="verif-item__pet">${colaEsc(s.pet)}</div>
-        <div class="verif-item__sub">${colaEsc([s.species, s.breed].filter(Boolean).join(' · '))} · ${colaEsc(s.comuna || 'sin comuna')}</div>
+        <div class="verif-item__sub">${colaEsc([s.species, razaVisible(s.breed)].filter(Boolean).join(' · '))} · ${colaEsc(s.comuna || 'sin comuna')}</div>
         <div class="verif-item__cod mono">${colaEsc(s.codigo)}</div>
       </div>
     </div>
@@ -4432,21 +4435,27 @@ function renderCarnetSocio(m){
   const avatar = m.foto
     ? `<img src="${m.foto}" alt="${colaEsc(m.pet)}" style="width:100%;height:100%;object-fit:cover;">`
     : `<img src="/assets/favicon.svg" alt="">`;
+  const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
+  const raza = razaVisible(m.breed);
   cont.innerHTML = `
-    <div class="credencial">
-      <div class="cred-badge">${planLabel(m.plan)}</div>
-      <div class="cred-top">
-        <div class="cred-brand"><img src="/assets/favicon.svg" alt=""> MI MASCOTA CLUB</div>
-        <div class="cred-id">${colaEsc(m.codigo)}</div>
+    <div class="credencial credencial--vidrio ${fundador ? 'cred-tono--amarillo' : 'cred-tono--celeste'}">
+      <div class="credv__top">
+        <img class="credv__logo" src="/assets/logo.svg" alt="Mi Mascota Club">
+        <span class="credv__plan">${fundador ? 'Fundador' : planLabel(m.plan).replace(/^Miembro\s+/i, '')}</span>
       </div>
-      <div class="cred-photo" style="overflow:hidden;">${avatar}</div>
-      <div class="cred-name">${colaEsc(m.pet)}</div>
-      <div class="cred-breed">${colaEsc(m.breed ? m.species + ' · ' + m.breed : (m.species || ''))}</div>
-      ${fundador ? `<div class="cred-fundador">★ Socio Fundador ${fundador}</div>` : ''}
-      <div id="socCarnetQR" class="cred-qr"></div>
-      <div class="cred-row" style="margin-top:14px;">
-        <div>Comuna<b>${colaEsc(m.comuna || '—')}</b></div>
-        <div>Estado<b style="color:${et.color};">${et.txt}</b></div>
+      <div class="credv__id">
+        <div class="credv__foto">${avatar}</div>
+        <div class="credv__txt">
+          <div class="credv__nombre">${colaEsc(m.pet)}</div>
+          <div class="credv__raza">${colaEsc(raza ? cap(raza) : cap(m.species || ''))}</div>
+          ${fundador ? `<div class="credv__fundador">★ Socio Fundador ${fundador}</div>` : ''}
+        </div>
+      </div>
+      <div class="credv__qr"><div id="socCarnetQR" class="cred-qr"></div><div class="credv__codigo">${colaEsc(m.codigo)}</div></div>
+      <div class="credv__datos">
+        <div><small>Comuna</small><b>${colaEsc(m.comuna || '—')}</b></div>
+        <div><small>Especie</small><b>${colaEsc(cap(m.species || '—'))}</b></div>
+        <div><small>Estado</small><b style="color:${et.color};">${et.txt}</b></div>
       </div>
     </div>`;
   renderQR('socCarnetQR', urlCarnet(m.codigo));

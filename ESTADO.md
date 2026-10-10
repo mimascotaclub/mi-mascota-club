@@ -818,6 +818,12 @@ desactualizado).
   Las fotos de Supabase ahora se cargan con permiso de otro dominio (crossOrigin) para
   que el navegador deje generar la imagen.
 
+- **Carnet en /mi-mascota** también en estilo vidrio (amarillo si es Fundador, celeste si
+  no): logo, foto cuadrada con bordes redondos, nombre grande, QR en blanco puro con el
+  código debajo, y Comuna · Especie · Estado. La raza "Mestizo/No sé" se muestra como
+  **"Mestizo"** en carnet, historia y panel (`razaVisible()`); en el formulario sigue la
+  opción completa, para quien no sabe la raza.
+
 **Avatar de la mascota (idea del 10 de octubre — evaluar después)**
 - Al subir la foto, ofrecer crear un avatar 3D estilo Disney de la mascota, con
   movimientos leves (rascándose, riéndose, invitando a jugar, acostándose), para
