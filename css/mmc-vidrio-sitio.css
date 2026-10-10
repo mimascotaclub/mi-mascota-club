@@ -1,0 +1,103 @@
+/* ============================================================
+   MI MASCOTA CLUB — Estilo "vidrio" para TODO el sitio
+   (12 de octubre de 2026). Va DESPUÉS de css/styles.css y solo
+   cambia cómo se ve: nada de esta hoja toca el funcionamiento.
+   Concepto: negro de marca arriba (igual que el ícono de la app y
+   los perfiles de Instagram/TikTok), degradados desenfocados
+   amarillo/celeste y paneles translúcidos con borde blanco.
+   ============================================================ */
+:root{
+  --v-am-p:#FFF9E3; --v-am-m:#FFE58A; --v-am-s:#FFCE00;
+  --v-ce-p:#EAF8F8; --v-ce-m:#A8E3E3; --v-ce-s:#47C9C9;
+  --v-vidrio:rgba(255,255,255,.55);
+  --v-borde:rgba(255,255,255,.8);
+}
+
+/* ---------- Menú negro ---------- */
+nav{ background:rgba(21,21,21,.94); border-bottom:1px solid rgba(255,255,255,.08); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+.navlinks a, .nav-dropdown-btn{ color:#fff; opacity:.78; }
+.navlinks a:hover, .nav-dropdown-btn:hover{ opacity:1; }
+.navlinks a.activo{ color:var(--yellow); opacity:1; box-shadow:inset 0 -3px 0 var(--yellow); }
+.btn-nav-join{ background:var(--yellow); color:var(--black); box-shadow:none; }
+.btn-nav-join:hover, .btn-nav-join:focus-visible, .btn-nav-join:active{ background:#fff; color:var(--black); box-shadow:none; }
+.nav-dropdown-panel{ border:1px solid rgba(255,255,255,.9); border-radius:22px; background:rgba(255,255,255,.96); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+.nav-burger{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.25); }
+.nav-burger span{ background:#fff; }
+.nav-burger[aria-expanded="true"]{ background:var(--yellow); border-color:var(--yellow); }
+.nav-burger[aria-expanded="true"] span{ background:var(--black); }
+.menu-movil{ background:#151515; border-top:1px solid rgba(255,255,255,.08); }
+.menu-movil a{ color:#fff; border-bottom-color:rgba(255,255,255,.1); }
+.menu-movil a.activo{ color:var(--yellow); }
+.menu-movil__destacado{ background:linear-gradient(165deg,var(--v-am-p),var(--v-am-m) 75%,var(--v-am-s) 140%) !important; border:1px solid rgba(255,255,255,.7) !important; color:var(--black) !important; border-radius:20px; }
+.menu-movil__destacado small{ color:#3a4446; }
+
+/* ---------- Botones ---------- */
+.btn-primary{ box-shadow:0 8px 20px -10px rgba(224,180,0,.9); }
+.btn-outline{ background:rgba(255,255,255,.6); border:1px solid rgba(21,21,21,.18); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+
+/* ---------- Portada (hero) ---------- */
+/* Jaime (12 oct): el fondo del home queda como antes (amarillo claro plano) y el
+   título en negrita; el degradado sobre degradado era demasiado. */
+.hero-search-wrap{ background:rgba(255,255,255,.92); border:1px solid #fff; box-shadow:0 18px 40px -22px rgba(21,21,21,.35); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); padding:7px; }
+.hero-search-btn.btn-primary{ background:var(--black); color:#fff; box-shadow:none; }
+.hero-search-btn.btn-primary:hover{ background:var(--yellow); color:var(--black); box-shadow:none; }
+
+/* Tarjetas de categoría que giran */
+.fan-card{ position:relative; overflow:hidden; isolation:isolate; border-radius:30px; border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 22px 40px -22px rgba(21,21,21,.35); justify-content:flex-end; padding-bottom:14px; }
+.fan-card .fan-emoji{ font-size:50px; margin-bottom:auto; margin-top:34px; filter:drop-shadow(0 8px 10px rgba(0,0,0,.12)); }
+.fan-card .fan-label{ font-size:12.5px; line-height:1.15; background:rgba(255,255,255,.62); border:1px solid rgba(255,255,255,.85);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border-radius:16px; padding:8px 10px; margin:0 10px; width:calc(100% - 20px); box-sizing:border-box; }
+.nav-dropdown-panel{ background:#fff; }
+
+/* Botón del menú cuando ya hay sesión: "Mi Mascota" con la foto */
+.btn-sesion{ gap:8px; padding-left:6px !important; }
+.btn-sesion__av{ width:26px; height:26px; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:#fff; font-size:14px; flex:none; }
+.btn-sesion__foto{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ============================================================
+   COMPONENTES DE TODO EL SITIO (12 oct): Mi Mascota ID, directorio,
+   beneficios, panel de negocio, validar, sugerencias, modales.
+   Mismo lenguaje: tarjetas redondeadas con borde fino y sombra
+   suave, campos limpios, píldoras en vez de cajas con borde grueso.
+   Fondos negros siempre lisos.
+   ============================================================ */
+.eyebrow{ border:1px solid rgba(21,21,21,.14); background:rgba(255,255,255,.75); }
+.section-head h2, .panel h3{ letter-spacing:-.02em; }
+
+/* Paneles y tarjetas genéricas */
+.panel, .soc-comp, .soc-verif, .modal-box, .cat-tile{
+  border:1px solid rgba(21,21,21,.08); border-radius:26px; background:#fff;
+  box-shadow:0 18px 40px -28px rgba(21,21,21,.35);
+}
+.cat-tile{ border-radius:22px; }
+.modal-box{ border-radius:28px; }
+.modal-close{ background:#F2F2EE; }
+
+/* Campos de formulario */
+.field input, .field select, .field textarea, .dir-controls input, .dir-controls select{
+  border:1px solid rgba(21,21,21,.14); border-radius:14px; background:#FAFAF7;
+}
+.field input:focus, .field select:focus, .field textarea:focus, .dir-controls input:focus, .dir-controls select:focus{
+  outline:none; border-color:#151515; background:#fff; box-shadow:0 0 0 4px rgba(255,206,0,.35);
+}
+.soc-otp{ letter-spacing:.35em; }
+
+/* Mi Mascota ID */
+.soc-tab{ border-radius:999px !important; border:1px solid rgba(21,21,21,.12) !important; background:#fff !important; }
+.soc-tab.on{ background:#151515 !important; color:#fff !important; border-color:#151515 !important; }
+.soc-comp__bar{ background:rgba(21,21,21,.06); }
+.soc-comp__fill{ background:#151515; }
+.soc-comp__fill.lleno{ background:var(--teal); }
+
+/* Directorio y beneficios */
+.biz-card{ border:1px solid rgba(255,255,255,.75); border-radius:30px; box-shadow:0 20px 40px -28px rgba(21,21,21,.4); }
+.dir-filtros-btn{ border-radius:999px !important; }
+
+/* Mensaje flotante (toast) */
+.toast{ border-radius:999px; }
+
+/* Botones con hover claro en todo el sitio */
+.btn-primary:hover{ background:#151515; color:#fff; box-shadow:none; }
+.btn-outline:hover{ background:#151515; color:#fff; border-color:#151515; }
+.btn-navy:hover, .btn-brass:hover{ background:var(--yellow); color:#151515; }

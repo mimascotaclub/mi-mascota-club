@@ -4177,7 +4177,30 @@ function sesionSocio(){
 }
 function guardarSesionSocio(token){
   try{ localStorage.setItem(LS_SOC_SESION, token); }catch(e){ /* modo incógnito */ }
+  actualizarBotonesSesion();
 }
+/* Menú según la sesión (12 de octubre): si la persona ya entró a Mi Mascota ID,
+   "Quiero unirme al club" no tiene sentido. El botón pasa a decir "Mi Mascota"
+   (con la foto de su mascota si tiene) y lleva directo a su carnet. */
+function actualizarBotonesSesion(){
+  const conSesion = !!sesionSocio();
+  const m = (socMascotas && socMascotas[0]) || null;
+  const foto = m && m.foto ? `<img src="${colaEsc(m.foto)}" alt="" class="btn-sesion__foto">` : '🐾';
+  const txt = m && m.pet ? colaEsc(m.pet) : 'Mi Mascota';
+  const nav = document.getElementById('navJoinBtn');
+  const mov = document.getElementById('menuMovilCta');
+  if(nav){
+    nav.classList.toggle('btn-sesion', conSesion);
+    nav.innerHTML = conSesion ? `<span class="btn-sesion__av">${foto}</span>${txt}` : 'Quiero unirme al club';
+    nav.setAttribute('href', conSesion ? '/mi-mascota' : '#negocios');
+    nav.onclick = function(e){ e.preventDefault(); if(sesionSocio()){ irAMiMascota(); } else { abrirElegirCamino(); } };
+  }
+  if(mov){
+    mov.textContent = conSesion ? 'Ver mi carnet' : 'Quiero unirme al club';
+    mov.onclick = function(){ cerrarMenuMovil(); if(sesionSocio()){ irAMiMascota(); } else { abrirElegirCamino(); } };
+  }
+}
+document.addEventListener('DOMContentLoaded', actualizarBotonesSesion);
 
 function socError(texto){
   const box = document.getElementById('socLoginError');
@@ -4199,7 +4222,7 @@ async function salirPanelSocio(){
   if(token){
     try{ await supabase.rpc('socio_logout', { p_token: token }); }catch(e){ /* da igual: igual se borra local */ }
   }
-  try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
+  try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){} actualizarBotonesSesion();
   socMascotas = []; socActual = null; socFotoPendiente = null; socCartillaPendiente = null;
   const panel = document.getElementById('socPanelBox');
   const login = document.getElementById('socLoginBox');
@@ -4306,6 +4329,7 @@ async function cargarPanelSocio(){
     const { data, error } = await supabase.rpc('socio_perfil', { p_token: token });
     if(error) throw error;
     socMascotas = data || [];
+    actualizarBotonesSesion();
 
     /* Si esto falla, el panel se muestra igual sin la insignia: nadie se queda
        fuera de su carnet porque no pudimos leer un número decorativo. */
@@ -4317,7 +4341,7 @@ async function cargarPanelSocio(){
     }
     if(!socMascotas.length){
       /* El token venció o alguien borró la mascota: se vuelve al acceso. */
-      try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
+      try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){} actualizarBotonesSesion();
       document.getElementById('socPanelBox').style.display = 'none';
       document.getElementById('socLoginBox').style.display = '';
       socMostrarPaso('email');
@@ -4915,7 +4939,7 @@ async function socioBorrarCuenta(){
     if(error) throw error;
     const r = data && data[0];
     if(!r || !r.ok){ decir((r && r.mensaje) || 'No se pudo borrar la cuenta.', false); return; }
-    try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){}
+    try{ localStorage.removeItem(LS_SOC_SESION); }catch(e){} actualizarBotonesSesion();
     socMascotas = []; socActual = null;
     document.getElementById('socPanelBox').style.display = 'none';
     document.getElementById('socLoginBox').style.display = '';

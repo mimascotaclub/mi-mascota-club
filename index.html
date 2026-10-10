@@ -50,6 +50,7 @@
 
 <link rel="stylesheet" href="/css/styles.css">
 <link rel="stylesheet" href="/css/mmc-ficha.css">
+<link rel="stylesheet" href="/css/mmc-vidrio-sitio.css">
 
 <!-- Librería para generar los códigos QR del carnet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -68,7 +69,7 @@
 
 <nav>
   <div class="navbar">
-    <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="/assets/logo.svg" alt="Mi Mascota Club" style="height:38px;"></a>
+    <a href="/" class="logo" onclick="event.preventDefault(); volverAlInicio();"><img src="/assets/logo-blanco.svg" alt="Mi Mascota Club" style="height:38px;"></a>
     <div class="navlinks">
       <div class="nav-dropdown">
         <button class="nav-dropdown-btn" onclick="toggleDropdown('exploreDropdown')">Categorías <span class="caret">▾</span></button>
@@ -92,7 +93,7 @@
       <!-- "Planes" fuera del menú mientras no haya precios definitivos (13 sept 2026).
            La ruta /planes sigue funcionando: los avisos de plan Premium enlazan ahí. -->
     </div>
-    <a href="#negocios" class="btn btn-nav-join btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
+    <a href="#negocios" id="navJoinBtn" class="btn btn-nav-join btn-sm" onclick="event.preventDefault(); abrirElegirCamino();">Quiero unirme al club</a>
 
     <!-- Botón del menú de teléfono. Bajo 880px .navlinks se oculta, así que sin
          esto el sitio no tenía forma de llegar a Mi Mascota ID, Beneficios ni
@@ -121,7 +122,7 @@
     <a href="/quienes-somos">Quiénes somos</a>
     <a href="/sugerencias" onclick="event.preventDefault(); cerrarMenuMovil(); irASugerencias();">Sugerencias</a>
 
-    <button type="button" class="btn btn-primary menu-movil__cta"
+    <button type="button" id="menuMovilCta" class="btn btn-primary menu-movil__cta"
             onclick="cerrarMenuMovil(); abrirElegirCamino();">Quiero unirme al club</button>
   </div>
 </nav>

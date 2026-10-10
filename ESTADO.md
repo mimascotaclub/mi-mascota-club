@@ -742,6 +742,29 @@ historia propia diciendo que el club está comenzando.
   **Falta (siguiente etapa):** notificaciones push (llaves, tabla en Supabase, botón
   "Activar avisos" y envío desde /mi-panel).
 
+- ✅ Push del lanzamiento hecho y probado por Jaime (11 oct): app instalada en iPhone y
+  Android ("se ve increíble"), ícono negro estilo Spotify con borde 3D.
+
+**Próximos pushes (pedidos el 11 de octubre — Jaime los va pasando paso a paso, con imágenes):**
+✅ **Push del 12 de octubre (estilo nuevo en todo el sitio):** menú negro con logo blanco
+   en todas las páginas (botón amarillo, hover blanco), home con título en negrita y
+   buscador blanco con botón negro (fondo y tarjetas como antes), Quiénes somos con la
+   historia de Max en tarjetas deslizables estilo Apple (fotos en
+   `assets/images/max-historia-1..4.jpg`, patente y personas del fondo difuminadas) y el
+   resto de secciones en vidrio (fondos negros LISOS, sin brillos: decisión de Jaime),
+   y componentes de todo el sitio (paneles, campos, Mi Mascota ID, directorio, modales,
+   /gracias). Todo en `css/mmc-vidrio-sitio.css` (solo estilo). Incluye el punto A.
+A. ✅ **Menú según la sesión** (hecho el 12 oct, `actualizarBotonesSesion()` en js/app.js). Si la persona ya inició sesión en Mi Mascota ID, el botón
+   "Quiero unirme al club" cambia a **"Mi Mascota"** (con la foto chica de la mascota) y
+   lleva a su carnet; los otros "Únete" del inicio dicen "Ver mi carnet". Sin sesión, todo
+   igual. Se usa la sesión que ya guarda el sitio (`mmc_sesion_socio`). Dificultad 2/10.
+   Ojo iPhone: la app instalada y Safari guardan la sesión por separado (hay que entrar una
+   vez dentro de la app).
+B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desenfocados
+   amarillo/celeste, paneles translúcidos, tipografía liviana en títulos grandes, negro de
+   marca): botones, menú, inicio, directorio, formularios, Quiénes somos, Planes, paneles.
+   Jaime lo define pantalla por pantalla con imágenes. Juntar cambios para gastar pocos pushes.
+
 **Después del lanzamiento, en este orden:**
 1. Escribirles a los primeros 5 negocios (formulario listo) y mostrarles `/ejemplo-ficha`
    y las fichas de especialista de ejemplo.
