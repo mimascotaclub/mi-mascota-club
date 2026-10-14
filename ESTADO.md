@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 11 de octubre de 2026**
+**Última actualización: 13 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -9,6 +9,9 @@ Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con u
 Socio Fundador.
 `NEGOCIOS-CAPTACION.md` dice **cómo se reclutan negocios**: el modelo de cobro, a quién
 escribirle primero y los mensajes exactos que se mandan.
+`DIFUSION.md` es el **plan de acción para conseguir registros** después del lanzamiento:
+canales de Jaime, embajadores pagados con su tabla, carnet en el parque, paseadores, placa
+QR y "trae a tus amigos" (todo aprobado el 11 de octubre).
 `CONTEXTO-PROYECTO.md` es la bitácora histórica: tiene el detalle de cómo se construyó
 cada cosa y por qué, pero son más de 1.700 líneas y **no hay que leerlo entero** — se
 consulta por secciones cuando hace falta entender una pieza específica.
@@ -764,6 +767,26 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
    amarillo/celeste, paneles translúcidos, tipografía liviana en títulos grandes, negro de
    marca): botones, menú, inicio, directorio, formularios, Quiénes somos, Planes, paneles.
    Jaime lo define pantalla por pantalla con imágenes. Juntar cambios para gastar pocos pushes.
+
+**Difusión (11 de octubre):** plan completo en `DIFUSION.md`. Lo técnico que pide: el
+**enlace `?ref=`** para saber quién trajo a cada socio (embajadores, "trae a tus amigos" y
+el QR del letrero del parque, que ya apunta a `?ref=parque`). Un push, va antes de
+entregar enlaces a embajadores.
+
+✅ **Push del 13 de octubre — Bienvenida (onboarding) tipo app.** Carrusel de 4 láminas
+   que se muestra **una sola vez por dispositivo**, **solo en el inicio** y **solo a quien
+   no tiene sesión** (los socios actuales no lo ven). Explica el club porque lo primero que
+   se veía era un buscador sin negocios: 1) Bienvenido, 2) el carnet (el de Max muestra
+   "N° 121026", nunca el código real), 3) "Estamos comenzando" (invita a recomendar negocios), 4) "Sé de los
+   primeros socios" → `/registro`. Sin "Saltar" ni "Explorar primero" (decisión de Jaime): se avanza solo con Siguiente y la última lámina lleva al registro.
+   Archivos: `js/bienvenida.js`, `css/mmc-bienvenida.css`, `assets/bienvenida/` y dos líneas
+   en `index.html`. Guarda `mmc_bienvenida_v1` en el navegador. **Para volver a verla:
+   `mimascotaclub.cl/?bienvenida=1`** (y `&paso=3` para ir a una lámina). No toca datos.
+⬜ **Por decidir: abrir el registro de negocios.** `NEGOCIOS_ABIERTO = false` en js/app.js
+   (desde el 13 de septiembre): "Soy un negocio" dice "Próximamente" y solo se llega con el
+   enlace `/formulario-negocio`. Propuesta: pasarlo a `true` y sumar "¿Tienes un negocio o
+   eres especialista? Súmate aquí" en el directorio vacío (`.dir-pronto`). Antes, una
+   inscripción de prueba desde el celular.
 
 **Después del lanzamiento, en este orden:**
 1. Escribirles a los primeros 5 negocios (formulario listo) y mostrarles `/ejemplo-ficha`

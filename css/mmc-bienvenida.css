@@ -1,0 +1,122 @@
+/* =========================================================
+   BIENVENIDA (onboarding) — Mi Mascota Club
+   Se muestra UNA vez por dispositivo, solo en el inicio y
+   solo a quien no tiene sesión. Lógica en js/bienvenida.js.
+   ========================================================= */
+
+.mmcb,.mmcb *{box-sizing:border-box}
+.mmcb{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  font-family:'Lato',system-ui,sans-serif;color:#151515;opacity:0;transition:opacity .35s ease}
+.mmcb.is-on{opacity:1}
+.mmcb.is-off{opacity:0;pointer-events:none}
+
+/* La tarjeta: pantalla completa en celular, ventana centrada en computador */
+.mmcb__card{position:relative;width:100%;height:100%;overflow:hidden;isolation:isolate;
+  display:flex;flex-direction:column;background:#FFFBEF}
+
+/* Fondo vidrio: manchas desenfocadas que cambian de color según la lámina */
+.mmcb__bg{position:absolute;inset:0;z-index:-1;overflow:hidden;
+  background:linear-gradient(180deg,#FFFDF6 0%,#FFF6D6 100%);transition:background .5s ease}
+.mmcb__bg i{position:absolute;border-radius:50%;filter:blur(70px);transition:background .6s ease,opacity .6s ease}
+.mmcb__bg i:nth-child(1){width:120%;height:55%;left:-10%;top:-12%;background:#FFE58A;opacity:.85}
+.mmcb__bg i:nth-child(2){width:80%;height:45%;right:-30%;bottom:8%;background:#FFCE00;opacity:.35}
+.mmcb[data-paso="2"] .mmcb__bg{background:linear-gradient(180deg,#F6FCFC 0%,#E3F6F6 100%)}
+.mmcb[data-paso="2"] .mmcb__bg i:nth-child(1){background:#A8E3E3}
+.mmcb[data-paso="2"] .mmcb__bg i:nth-child(2){background:#47C9C9;opacity:.3}
+.mmcb[data-paso="4"] .mmcb__bg{background:linear-gradient(180deg,#F6FCFC 0%,#FFF6D6 100%)}
+.mmcb[data-paso="4"] .mmcb__bg i:nth-child(1){background:#A8E3E3}
+
+/* Cabecera */
+.mmcb__top{display:flex;align-items:center;justify-content:center;
+  padding:calc(18px + env(safe-area-inset-top)) 22px 0}
+.mmcb__logo{height:30px;display:block}
+.mmcb__saltar{border:0;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.95);
+  color:#151515;font:inherit;font-size:14px;font-weight:700;padding:8px 16px;border-radius:999px;cursor:pointer}
+
+/* Láminas deslizables */
+.mmcb__pista{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.mmcb__pista::-webkit-scrollbar{display:none}
+.mmcb__lamina{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;padding:0 28px;text-align:center}
+.mmcb__ilus{flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0;position:relative}
+.mmcb__titulo{margin:0;font-size:30px;line-height:1.08;font-weight:900;letter-spacing:-.02em;max-width:340px;text-wrap:balance}
+.mmcb__texto{margin:12px 0 0;font-size:17px;line-height:1.45;color:rgba(21,21,21,.72);max-width:330px;min-height:74px;text-wrap:balance}
+.mmcb__texto a{color:#151515;font-weight:700}
+
+/* Pie: puntos + botones */
+.mmcb__pie{padding:18px 24px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:16px}
+.mmcb__puntos{display:flex;gap:7px}
+.mmcb__puntos button{width:8px;height:8px;border-radius:999px;border:0;padding:0;background:rgba(21,21,21,.22);cursor:pointer;transition:width .3s ease,background .3s ease}
+.mmcb__puntos button.is-on{width:26px;background:#151515}
+.mmcb__btn{width:100%;max-width:360px;border:0;border-radius:999px;background:#151515;color:#fff;
+  font:inherit;font-size:18px;font-weight:900;padding:17px 24px;cursor:pointer;transition:transform .15s ease}
+.mmcb__btn:active{transform:scale(.98)}
+.mmcb:focus,.mmcb button:focus{outline:none}
+.mmcb button:focus-visible{outline:3px solid #47C9C9;outline-offset:3px}
+.mmcb__btn--si{background:#FFCE00;color:#151515;box-shadow:0 14px 30px -14px rgba(0,0,0,.35)}
+.mmcb__link{border:0;background:none;font:inherit;font-size:15px;font-weight:700;color:rgba(21,21,21,.65);
+  text-decoration:underline;cursor:pointer;padding:2px 8px;min-height:22px}
+.mmcb__link[hidden]{display:block;visibility:hidden}
+
+/* ---------- Ilustraciones ---------- */
+/* 1 · mascota 3D */
+.mmcb-i1{width:min(78%,300px);max-height:100%;object-fit:contain;filter:drop-shadow(0 24px 30px rgba(0,0,0,.18))}
+
+/* 2 · carnet */
+.mmcb-carnet{width:min(84%,300px);border-radius:26px;padding:16px;transform:rotate(-4deg);
+  background:linear-gradient(160deg,#EAF8F8,#A8E3E3 60%,#6fd3d3);border:1.5px solid rgba(255,255,255,.95);
+  box-shadow:0 30px 50px -26px rgba(0,0,0,.45);text-align:left}
+.mmcb-carnet__top{display:flex;justify-content:space-between;align-items:center}
+.mmcb-carnet__top img{height:20px}
+.mmcb-carnet__top span{background:rgba(255,255,255,.75);border-radius:999px;padding:4px 10px;font-size:10px;font-weight:900;letter-spacing:.08em}
+.mmcb-carnet__mid{display:flex;gap:12px;align-items:center;margin-top:12px}
+.mmcb-carnet__mid img{width:72px;height:72px;border-radius:16px;object-fit:cover;border:3px solid #fff}
+.mmcb-carnet__mid b{display:block;font-size:36px;line-height:1;font-weight:900}
+.mmcb-carnet__mid small{font-size:14px;color:#444}
+.mmcb-carnet__qr{margin-top:12px;background:#fff;border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center}
+.mmcb-carnet__qr img{width:76px;height:76px}
+.mmcb-carnet__qr div{font-size:12px;color:#555;line-height:1.5}
+.mmcb-carnet__qr b{color:#151515}
+.mmcb-carnet__qr .num{display:block;font-family:ui-monospace,Menlo,monospace;font-size:13px;font-weight:700;letter-spacing:.06em;color:#333}
+.mmcb-carnet__qr .ok{color:#2fa36b}
+
+/* 3 · negocios "pronto" */
+.mmcb-i3{position:relative;width:min(88%,320px);height:260px}
+.mmcb-i3 .casa{position:absolute;left:50%;top:50%;width:112px;height:112px;margin:-56px 0 0 -56px;border-radius:28px;
+  box-shadow:0 26px 40px -18px rgba(0,0,0,.5)}
+.mmcb-i3 .chip{position:absolute;display:flex;align-items:center;gap:8px;white-space:nowrap;
+  background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:999px;
+  padding:9px 14px;font-size:14px;font-weight:900;box-shadow:0 14px 26px -16px rgba(0,0,0,.3)}
+.mmcb-i3 .chip em{font-style:normal;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  background:#151515;color:#FFCE00;border-radius:999px;padding:3px 8px}
+.mmcb-i3 .c1{left:0;top:14px;transform:rotate(-4deg)}
+.mmcb-i3 .c2{right:0;top:58px;transform:rotate(3deg)}
+.mmcb-i3 .c3{left:4px;bottom:46px;transform:rotate(3deg)}
+.mmcb-i3 .c4{right:6px;bottom:6px;transform:rotate(-3deg)}
+
+/* 4 · ícono de la app */
+.mmcb-i4{position:relative;display:flex;flex-direction:column;align-items:center}
+.mmcb-i4 img{width:150px;height:150px;border-radius:36px;transform:rotate(-6deg);box-shadow:0 34px 50px -22px rgba(0,0,0,.55)}
+.mmcb-i4 span{margin-top:-14px;transform:rotate(3deg);background:#FFCE00;border-radius:999px;padding:8px 18px;
+  font-size:15px;font-weight:900;box-shadow:0 12px 24px -12px rgba(0,0,0,.35)}
+
+/* ---------- Computador: ventana centrada sobre el sitio ---------- */
+@media (min-width:700px){
+  .mmcb{background:rgba(21,21,21,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .mmcb__card{width:420px;height:min(760px,92vh);border-radius:34px;box-shadow:0 50px 100px -40px rgba(0,0,0,.6)}
+  .mmcb__top{padding-top:22px}
+}
+
+/* Pantallas bajitas (iPhone SE) */
+@media (max-height:680px){
+  .mmcb__titulo{font-size:26px}
+  .mmcb__texto{font-size:15px;min-height:64px}
+  .mmcb-i1{width:min(62%,230px)}
+  .mmcb-carnet{transform:rotate(-4deg) scale(.86)}
+  .mmcb-i3{transform:scale(.85)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mmcb,.mmcb__bg,.mmcb__bg i,.mmcb__puntos button{transition:none}
+}
