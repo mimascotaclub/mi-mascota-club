@@ -14,6 +14,9 @@
 const SUPABASE_URL = "https://mzsqyjxqnomsbqzhygkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_KdIYZfFtnfO2e7VaMMfWAA_GBT79hZ1";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* Este archivo vive dentro de una función, así que el cliente no se ve desde
+   otros archivos. js/avisos.js lo necesita para la sesión de /mi-panel. */
+window.mmcSupabase = supabase;
 
 /* ---------------- Correo de bienvenida (EmailJS) ----------------
    PASO PENDIENTE PARA TI: crea una cuenta gratis en emailjs.com, conecta tu Gmail,

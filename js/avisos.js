@@ -159,9 +159,10 @@
 
   /* ------------------------- 2) /mi-panel ------------------------- */
   function sesionAdmin() {
-    /* `supabase` es el cliente que crea js/app.js (con la sesión de /mi-panel). */
-    if (typeof supabase === 'undefined' || !supabase.auth) return Promise.resolve(null);
-    return supabase.auth.getSession().then(function (r) { return r.data && r.data.session; });
+    /* window.mmcSupabase es el cliente que crea js/app.js (con la sesión de /mi-panel). */
+    var sb = window.mmcSupabase;
+    if (!sb || !sb.auth) return Promise.resolve(null);
+    return sb.auth.getSession().then(function (r) { return r.data && r.data.session; });
   }
   function resultado(txt, ok) {
     var box = $('avisoResultado');
@@ -175,8 +176,9 @@
   window.mmcAvisosAdmin = {
     cargar: function () {
       var c = $('avisosCount');
-      if (!c || typeof supabase === 'undefined') return;
-      supabase.rpc('admin_push_resumen').then(function (r) {
+      var sb = window.mmcSupabase;
+      if (!c || !sb) return;
+      sb.rpc('admin_push_resumen').then(function (r) {
         var d0 = $('avisosDetalle');
         if (r.error) { if (d0) d0.textContent = 'No pudimos leer cuántos celulares hay. Toca ↻ Actualizar.'; return; }
         var f = r.data && r.data[0];
