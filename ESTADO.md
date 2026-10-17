@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 13 de octubre de 2026**
+**Última actualización: 17 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -772,6 +772,29 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
 **enlace `?ref=`** para saber quién trajo a cada socio (embajadores, "trae a tus amigos" y
 el QR del letrero del parque, que ya apunta a `?ref=parque`). Un push, va antes de
 entregar enlaces a embajadores.
+
+🟡 **Push del 17 de octubre — Seguimiento de QR (`?ref=`) + Avisos al celular.**
+   Construido y probado en local; falta correr `supabase-avisos-push-v35.sql` y probar en el celular.
+   - **Seguimiento:** `js/origen.js` (en inicio, registro, formulario de negocios y Quiénes
+     somos) lee `?ref=`, lo recuerda 30 días y anota una visita por sesión
+     (`registrar_visita_origen`, parche v34, ya aplicado). Al inscribirse, el socio queda con
+     `socios.origen` (`marcar_origen_socio`) y el negocio con `origen = 'ref:<código>'`.
+     Códigos en uso: folleto1, folleto2, jofre, lanyard, parque. La consulta de resultados está
+     en `supabase-origen-v34.sql`. Ojo: quedó una visita de prueba con ref `prueba-claude`;
+     se puede ignorar o borrar.
+   - **Avisos (push):** botón "🔔 Activar avisos en este celular" en Mi Mascota (bajo
+     "Instalar la app") y tarjeta **"Avisos al celular"** en /mi-panel (enviar prueba a un
+     correo o a todos, con confirmación de doble toque). Archivos: `js/avisos.js`, `sw.js`
+     (muestra el aviso y abre la página al tocarlo), `netlify/functions/enviar-aviso.js`
+     (cifrado y firma con el crypto de Node, sin librerías; verificado contra el ejemplo
+     oficial del RFC 8291) y `supabase-avisos-push-v35.sql` (tabla `push_suscripciones` sin
+     acceso desde el navegador + 3 RPC). Llaves en Netlify: `VAPID_PUBLIC_KEY` y
+     `VAPID_PRIVATE_KEY` (secreta, solo funciones). La pública también va en `js/avisos.js`
+     (no es secreta). **Si se cambian las llaves, todos los celulares tienen que volver a
+     activar los avisos.**
+   - iPhone: solo funciona con la app instalada desde Safari (iOS 16.4+); en el navegador el
+     botón explica eso y abre la guía de instalación. Android: funciona en Chrome.
+   - Celulares que ya no existen se borran solos al enviar (respuesta 404/410).
 
 ✅ **Push del 13 de octubre — Bienvenida (onboarding) tipo app.** Carrusel de 4 láminas
    que se muestra **una sola vez por dispositivo**, **solo en el inicio** y **solo a quien

@@ -63,6 +63,7 @@
 <!-- EmailJS: envía el correo de bienvenida al registrarse, sin backend propio -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="/js/instalar-app.js" defer></script>
+<script src="/js/origen.js" defer></script>
 <!-- Bienvenida (onboarding) una sola vez, solo en el inicio y sin sesión: js/bienvenida.js -->
 <script src="/js/bienvenida.js" defer></script>
 </head>
@@ -1015,6 +1016,10 @@
                de Socio Fundador, así que al reactivarlo funciona al tiro. -->
           <button type="button" id="socShareBtn" class="btn btn-primary" style="display:none;width:100%;justify-content:center;margin-top:16px;">📤 Compartir en Instagram</button>
           <button type="button" data-instalar-app class="btn btn-outline" style="display:none;width:100%;justify-content:center;margin-top:10px;">📲 Instalar la app en mi celular</button>
+          <!-- Avisos al celular (17 de octubre). Lo maneja js/avisos.js:
+               se muestra solo donde el celular puede recibir avisos. -->
+          <button type="button" id="socAvisosBtn" class="btn btn-outline" style="display:none;width:100%;justify-content:center;margin-top:10px;">🔔 Activar avisos en este celular</button>
+          <p id="socAvisosNota" class="soc-nota" style="display:none;margin-top:8px;"></p>
           <p class="soc-nota" style="display:none;">La imagen para compartir no incluye tu código ni tu QR — es segura de publicar.</p>
         </div>
 
@@ -1347,6 +1352,31 @@
         </div>
       </div>
 
+      <!-- ===== Avisos al celular (17 de octubre) =====
+           Llegan a los socios que tocaron "Activar avisos" en Mi Mascota.
+           Lo maneja js/avisos.js y los envía netlify/functions/enviar-aviso.js.
+           Siempre probar primero con el correo propio. -->
+      <div class="admin-table" id="avisosWrap">
+        <h4>Avisos al celular <span id="avisosCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="mmcAvisosAdmin.cargar()">↻ Actualizar</button>
+        </h4>
+        <div class="fund-alta">
+          <p id="avisosDetalle" class="soc-nota" style="margin:0;">Cargando…</p>
+          <input type="text" id="avisoTitulo" maxlength="60" value="Mi Mascota Club" placeholder="Título">
+          <textarea id="avisoMensaje" maxlength="180" rows="3" placeholder="Mensaje. Ej: Llegó un negocio nuevo con beneficio para socios 🐾"
+                    style="width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;font-family:var(--font-body);font-size:15px;font-weight:600;background:#fff;resize:vertical;"></textarea>
+          <select id="avisoUrl" style="width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;font-family:var(--font-body);font-size:15px;font-weight:600;background:#fff;">
+            <option value="/mi-mascota">Al tocarlo abre: Mi Mascota (carnet)</option>
+            <option value="/">Al tocarlo abre: Inicio</option>
+            <option value="/directorio">Al tocarlo abre: Directorio</option>
+          </select>
+          <input type="email" id="avisoEmail" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tu correo de socio (para la prueba)">
+          <button type="button" class="btn btn-brass" onclick="mmcAvisosAdmin.enviar(false)">Enviar prueba a ese correo</button>
+          <button type="button" class="btn btn-outline" id="avisoTodosBtn" onclick="mmcAvisosAdmin.enviar(true)">Enviar a todos</button>
+          <div id="avisoResultado" class="fund-msg" style="display:none;"></div>
+        </div>
+      </div>
+
       <!-- ===== Pagos de fundador pendientes (3 de octubre) =====
            El pase se activa solo cuando Mercado Pago confirma el pago. Acá cae
            lo que no se pudo activar solo: pagos en proceso, montos que no
@@ -1523,6 +1553,7 @@
 <script src="/js/catalogos-negocio.js"></script>
 <script src="/js/ficha-negocio.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/avisos.js"></script>
 <!-- Visor de la cartilla veterinaria. Vive suelto al final del documento a
      propósito: lo usan tanto /mi-panel (para revisar) como /mi-mascota (para
      que el dueño confirme que su foto se lee antes de mandarla), y si viviera

@@ -491,6 +491,7 @@
   </main>
 </div>
 
+<script src="/js/origen.js" defer></script>
 <script src="js/comunas-chile.js"></script>
 <script src="js/catalogos-negocio.js"></script>
 <script src="js/ficha-negocio.js"></script>
@@ -1232,6 +1233,9 @@ $('btnEnviar').addEventListener('click', async () => {
       throw new Error('Tenemos que confirmar tu correo de nuevo. Vuelve al paso del código y pide uno nuevo.');
     }
     const payload = { ...datosNegocio(), logo_url, foto_url, terminos_version: '2026-09-17', comprobante_correo: C.comprobante };
+    /* ¿Llegó por un folleto o un enlace con ?ref=? (js/origen.js) */
+    const refOrigen = window.mmcOrigen ? window.mmcOrigen() : '';
+    if (refOrigen) payload.origen = 'ref:' + refOrigen;
     const { data, error } = await sb.rpc('registrar_solicitud_negocio', { p_datos: payload });
     if (error) throw error;
     const r = data && data[0];

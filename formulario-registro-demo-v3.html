@@ -502,6 +502,7 @@
   }
 </style>
 <script src="/js/instalar-app.js" defer></script>
+<script src="/js/origen.js" defer></script>
 </head>
 <body>
 
@@ -1159,6 +1160,8 @@ function renderPaso(index, direccion){
           return;
         }
         respuestas.codigo_socio  = data[0].codigo;
+        /* ¿Llegó por un folleto o un enlace con ?ref=? (js/origen.js) */
+        if (window.mmcMarcarOrigenSocio) window.mmcMarcarOrigenSocio(respuestas.codigo_socio);
         respuestas.verificacion  = data[0].verificacion || 'registrado';
         respuestas.aviso_registro = data[0].aviso || null;
 

@@ -2087,6 +2087,7 @@ document.getElementById('ownerForm').addEventListener('submit', async function(e
     });
     if(error) throw error;
     const { codigo, socio_number } = data[0];
+    if(window.mmcMarcarOrigenSocio) window.mmcMarcarOrigenSocio(codigo); // ?ref= del folleto (js/origen.js)
     guardarCodigoSocio(codigo);
     sociosCount++;
     const record = { pet, species, breed, comuna, email, codigo, socioNumber: socio_number, foto, plan: 'free' };
@@ -2984,6 +2985,7 @@ async function tryUnlock(){
     cargarSugerencias();
     cargarFundadores();
     cargarPendientesFundador();
+    if(window.mmcAvisosAdmin) mmcAvisosAdmin.cargar();
   }catch(e){
     err.textContent = 'No se pudo iniciar sesión: revisa tu email y contraseña.';
     err.style.display='block';
@@ -3173,6 +3175,7 @@ function mostrarPaginaAdmin(){
       cargarSugerencias();
       cargarFundadores();
       cargarPendientesFundador();
+      if(window.mmcAvisosAdmin) mmcAvisosAdmin.cargar();
     }
   }).catch(() => {});
 }
