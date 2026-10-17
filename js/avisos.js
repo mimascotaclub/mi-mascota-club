@@ -177,6 +177,8 @@
       var c = $('avisosCount');
       if (!c || typeof supabase === 'undefined') return;
       supabase.rpc('admin_push_resumen').then(function (r) {
+        var d0 = $('avisosDetalle');
+        if (r.error) { if (d0) d0.textContent = 'No pudimos leer cuántos celulares hay. Toca ↻ Actualizar.'; return; }
         var f = r.data && r.data[0];
         c.textContent = f ? f.celulares : '0';
         var d = $('avisosDetalle');
@@ -223,6 +225,11 @@
   function iniciar() {
     var btn = $('socAvisosBtn');
     if (btn) { btn.addEventListener('click', alTocar); revisar(); }
+    /* /mi-panel: app.js puede abrir el panel antes de que este archivo cargue,
+       así que el número se pide también acá si ya hay sesión de Jaime. */
+    if ($('avisosCount')) {
+      sesionAdmin().then(function (s) { if (s) window.mmcAvisosAdmin.cargar(); }).catch(function () {});
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
   else iniciar();
