@@ -192,6 +192,7 @@
       var mensaje = ($('avisoMensaje').value || '').trim();
       var url = $('avisoUrl').value;
       var email = ($('avisoEmail').value || '').trim();
+      if (!titulo) { resultado('Escribe un título corto para el aviso.', false); return; }
       if (!mensaje) { resultado('Escribe el mensaje del aviso.', false); return; }
       if (!todos && !email) { resultado('Escribe tu correo de socio para la prueba.', false); return; }
       if (todos) {

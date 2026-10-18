@@ -773,8 +773,8 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
 el QR del letrero del parque, que ya apunta a `?ref=parque`). Un push, va antes de
 entregar enlaces a embajadores.
 
-🟡 **Push del 17 de octubre — Seguimiento de QR (`?ref=`) + Avisos al celular.**
-   Construido y probado en local; falta correr `supabase-avisos-push-v35.sql` y probar en el celular.
+✅ **Push del 17 de octubre — Seguimiento de QR (`?ref=`) + Avisos al celular.**
+   En producción y probado en iPhone y Android (parche v35 aplicado).
    - **Seguimiento:** `js/origen.js` (en inicio, registro, formulario de negocios y Quiénes
      somos) lee `?ref=`, lo recuerda 30 días y anota una visita por sesión
      (`registrar_visita_origen`, parche v34, ya aplicado). Al inscribirse, el socio queda con
@@ -795,6 +795,11 @@ entregar enlaces a embajadores.
    - iPhone: solo funciona con la app instalada desde Safari (iOS 16.4+); en el navegador el
      botón explica eso y abre la guía de instalación. Android: funciona en Chrome.
    - Celulares que ya no existen se borran solos al enviar (respuesta 404/410).
+   - Probado el 17 de octubre: llega en iPhone (app instalada) y en Android. En Android el
+     ícono chico de la barra de arriba es `assets/app/badge-96.png` (casita blanca sobre
+     transparente); con el ícono a color se veía un cuadro blanco.
+   - Costo: Apple y Google no cobran por entregar avisos; cada envío usa un poco la función
+     de Netlify, pero no es un push (no gasta los 15 créditos de publicar).
 
 ✅ **Push del 13 de octubre — Bienvenida (onboarding) tipo app.** Carrusel de 4 láminas
    que se muestra **una sola vez por dispositivo**, **solo en el inicio** y **solo a quien

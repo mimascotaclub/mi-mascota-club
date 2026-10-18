@@ -23,7 +23,10 @@ self.addEventListener('push', e => {
   e.waitUntil(self.registration.showNotification(titulo, {
     body: d.mensaje || '',
     icon: '/assets/app/icon-192.png',
-    badge: '/assets/app/icon-192.png',
+    /* Android pinta este ícono chico en la barra de arriba usando SOLO la
+       transparencia: tiene que ser blanco sobre fondo transparente. Con el
+       ícono a color se veía un cuadro blanco. */
+    badge: '/assets/app/badge-96.png',
     tag: d.tag || 'mmc',
     data: { url: d.url || '/mi-mascota' }
   }));
