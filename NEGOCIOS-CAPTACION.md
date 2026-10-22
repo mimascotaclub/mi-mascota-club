@@ -1,12 +1,86 @@
 # NEGOCIOS — Cómo se captan
 
-**Última actualización: 3 de octubre de 2026**
+**Última actualización: 22 de octubre de 2026**
 
 Cómo se recluta a los negocios del club: el modelo de cobro, a quién escribirle primero
 y los mensajes exactos. `LANZAMIENTO.md` cubre la captación de socios; este archivo es el
 otro lado. `ESTADO.md` dice qué está construido.
 
 Esto no se improvisa cada vez: los mensajes de abajo están aprobados y se copian tal cual.
+
+---
+
+## ⭐ Lo vigente al 22 de octubre (manda sobre lo de más abajo)
+
+**El modelo cambió el 14-15 de octubre.** Donde abajo dice "gratis 12 meses y después
+precio de fundador", vale esto:
+
+- **Plan básico gratis, siempre.** Aparecer en el directorio con su ficha y su beneficio
+  no se cobra nunca. En las piezas se dice "Plan básico gratis", nunca "sin contrato".
+- **Los primeros 100 negocios tienen el primer año todo incluido** (lo que después será
+  pagado). En los mensajes: *"Inscribirse es gratis, y el primer año tienen todo
+  incluido"*. Evitar "el primer año es gratis" a secas: suena a que después se cobra.
+- **Lo único que se pide: un beneficio para los socios o sus mascotas**, el que el negocio
+  elija. Más las condiciones de `condiciones-para-negocios.pdf` (folleto/QR en el local y
+  compartir el club en sus redes).
+- **Planes pagados opcionales, para cuando haya tráfico:** Destacado $14.990/mes y
+  Premium $29.990/mes. El sello "Verificado" no se vende.
+- **Sin exclusividad por rubro**, a nadie.
+
+**Negocios reales en el club:** el primero fue un **café pet friendly de açaí (Aloha
+Açaí)** y el segundo una **tienda de comida y accesorios para mascotas (Pet Family)**, los
+dos en la misma zona. Se nombran en los mensajes a negocios cercanos ("ya se sumaron…").
+Estrategia: llenar ese barrio primero (5 negocios) antes de abrir otro.
+
+**En curso (octubre):**
+- Café pet friendly a menos de 2 km del açaí: correo al dueño (el correo lo dio Camila,
+  que trabaja ahí). Falta el nombre del dueño y del café para personalizarlo.
+- **Mala Mía** (@malamia.rest, Av. Italia 825, Barrio Italia): restaurante grande (42 mil
+  seguidores) con **menú para perritos**. Se le escribe por Instagram pidiendo con quién
+  hablar; beneficio sugerido: un snack del menú perruno de regalo. Mejor aún: ir en
+  persona con Max.
+
+### Qué funciona mejor (aprendido en octubre)
+
+1. **Negocios chicos y nuevos primero** (paseadores, peluqueros a domicilio, veterinarios
+   independientes, emprendimientos): necesitan clientes y dicen que sí más rápido. Los
+   grandes y conocidos piden exclusividad o dicen que no.
+2. **Personalizar:** nombre del dueño y del negocio, y algo concreto de su perfil.
+3. **Pedir un sí, no un trabajo:** "respóndeme con el beneficio y yo armo tu ficha y te la
+   muestro antes de publicarla". El formulario queda como opción, no como requisito.
+4. **Nombrar a los negocios que ya están** (con su permiso): es la prueba que más convence.
+5. **Por Instagram, pedir a quién escribirle** ("¿me indican con quién conversarlo o un
+   correo?"): quien responde los mensajes casi nunca decide.
+6. **Un seguimiento a los 4-5 días y nada más.**
+
+### Correo tipo (versión del 21 de octubre)
+
+> **Asunto:** Camila me compartió tu correo: una invitación para [nombre del café] 🐾
+>
+> Hola, [nombre], ¿cómo estás?
+>
+> Soy Jaime, creador de Mi Mascota Club. Camila me compartió tu correo, y me gustaría
+> invitar a [nombre del café] a ser parte del club.
+>
+> Mi Mascota Club conecta a dueños de mascotas con negocios pet friendly donde reciben un
+> beneficio especial. Vamos comenzando, y cerca de ustedes ya se sumaron [Aloha Açaí] y
+> [Pet Family]. Nos encantaría que ustedes también estuvieran.
+>
+> Inscribirse es gratis, y el primer año tienen todo incluido. Solo les pedimos un
+> beneficio para los socios o sus mascotas, el que ustedes elijan.
+>
+> **Para que no les quite tiempo:** si les interesa, respóndeme este correo con el
+> beneficio que quieren dar, y yo armo la ficha de su café y se la muestro antes de
+> publicarla.
+>
+> Si prefieren inscribirse directamente: mimascotaclub.cl/formulario-negocio?ref=correo
+>
+> Muchas gracias, y feliz de pasar a conversarlo en persona.
+>
+> Saludos,
+> Jaime · Mi Mascota Club · @mimascotaclub.cl
+
+El `?ref=correo` hace que, si se inscribe, quede registrado que llegó por este correo.
 
 ---
 

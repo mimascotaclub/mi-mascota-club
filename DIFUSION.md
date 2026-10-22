@@ -1,6 +1,6 @@
 # DIFUSIÓN — Mi Mascota Club
 
-**Última actualización: 11 de octubre de 2026**
+**Última actualización: 22 de octubre de 2026**
 
 Cómo se consigue que la gente se registre **después del lanzamiento**: los canales que
 Jaime ya está usando, el programa de embajadores pagados y las ideas aprobadas el 11 de
@@ -46,12 +46,12 @@ aplican.**
 Cada embajador recibe **su propio enlace** (por ejemplo `mimascotaclub.cl/?ref=camila`).
 El sitio guarda quién lo invitó y Jaime ve cuántos registros trajo cada uno.
 
-> ⚠️ **El enlace con `?ref=` TODAVÍA NO ESTÁ CONSTRUIDO.** Hoy el sitio no sabe quién
-> invitó a quién. Es un cambio chico (una columna `ref` en la tabla de socios + leer el
-> enlace al entrar, guardarlo en el navegador y mandarlo con el registro) y va en **un solo
-> push**. Hay que hacerlo **antes** de entregar enlaces a los embajadores.
-> El letrero del parque ya trae `?ref=parque` en su QR: funciona igual hoy (abre el sitio
-> normal) y empieza a contarse solo cuando el código esté listo.
+> ✅ **El enlace con `?ref=` ESTÁ CONSTRUIDO (push del 17 de octubre).** El sitio guarda el
+> código 30 días en el celular, cuenta las visitas por código y marca de dónde llegó cada
+> socio y cada negocio. Códigos en uso: `folleto1`, `folleto2`, `jofre`, `lanyard`,
+> `parque`, `correo` (correos a negocios). La consulta de resultados está en
+> `supabase-origen-v34.sql`. Un código nuevo no requiere push: basta con inventarlo
+> (solo letras, números, guion) y usarlo en el enlace.
 
 ### La tabla (propuesta del 11 de octubre)
 
@@ -201,8 +201,7 @@ Jaime**. En Santiago Centro y Ñuñoa hay edificios con decenas de perros cada u
 
 ## Pendientes, en orden
 
-1. [ ] **Construir el enlace `?ref=`** (embajadores + "trae a tus amigos" + QR del parque).
-       Un push.
+1. [x] **Construir el enlace `?ref=`** — hecho el 17 de octubre.
 2. [ ] Imprimir el letrero y hacer la **primera jornada en el parque**.
 3. [ ] Hablar con **2 o 3 paseadores** y ofrecerles la tabla + su ficha gratis.
 4. [ ] Decidir el premio de "trae a tus amigos" (ver idea 4).
@@ -211,6 +210,22 @@ Jaime**. En Santiago Centro y Ñuñoa hay edificios con decenas de perros cada u
 7. [ ] Reel + anuncio pagado.
 
 ---
+
+## Lo aprendido al 22 de octubre
+
+- **Folletos:** se imprimieron 100 de 9 × 14 cm a una cara por $8.330 ($83 c/u), con QR
+  `?ref=folleto2`. A Jaime le cuesta entregarlos a desconocidos en la calle (en su
+  comunidad sí lo hace). Lo que mejor le acomoda: dejarlos en el **mesón de los negocios
+  del club**, que otros repartan (Jofre, embajadores, socios) y lo digital. Si practica la
+  calle: solo a gente detenida (plaza, esperando), empezar por el perro ("¡qué lindo! ¿cómo
+  se llama?") y llevar a Max.
+- **Avisos al celular (push) ya existen:** se envían desde /mi-panel → "Avisos al celular".
+  Primer uso pensado: anunciar los negocios nuevos y el "beneficio del mes".
+- **Estrategia completa de captación de socios** (Hormozi + "Roba como un artista" + plan
+  de 30 días): doc "Mi Mascota Club · Cómo conseguir socios",
+  https://claude.ai/artifact/Wnab9CSzqiechzTC4ZkJWS
+  Idea central: ofrecer "El carnet de tu mascota, gratis" + alerta si se pierde, llenar un
+  barrio a la vez, y medir costo por socio por código (repetir lo que salga bajo $500).
 
 ## Instagram: crecer en seguidores y socios (12 de octubre)
 

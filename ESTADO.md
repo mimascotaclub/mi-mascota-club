@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 17 de octubre de 2026**
+**Última actualización: 22 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -742,8 +742,7 @@ historia propia diciendo que el club está comenzando.
   según el navegador: Safari (Compartir abajo), Chrome de iPhone (Compartir arriba junto
   a la dirección, flecha amarilla) o navegador de Instagram/WhatsApp (abrir primero en el
   navegador). En iPhone Apple no permite instalar con un solo botón; en Android sí.
-  **Falta (siguiente etapa):** notificaciones push (llaves, tabla en Supabase, botón
-  "Activar avisos" y envío desde /mi-panel).
+  **Notificaciones push: hechas el 17 de octubre** (ver el push del 17 más abajo).
 
 - ✅ Push del lanzamiento hecho y probado por Jaime (11 oct): app instalada en iPhone y
   Android ("se ve increíble"), ícono negro estilo Spotify con borde 3D.
@@ -768,10 +767,53 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
    marca): botones, menú, inicio, directorio, formularios, Quiénes somos, Planes, paneles.
    Jaime lo define pantalla por pantalla con imágenes. Juntar cambios para gastar pocos pushes.
 
-**Difusión (11 de octubre):** plan completo en `DIFUSION.md`. Lo técnico que pide: el
-**enlace `?ref=`** para saber quién trajo a cada socio (embajadores, "trae a tus amigos" y
-el QR del letrero del parque, que ya apunta a `?ref=parque`). Un push, va antes de
-entregar enlaces a embajadores.
+## 👉 Dónde quedó todo al 22 de octubre (leer esto primero)
+
+**Negocios reales:** 2 — un café pet friendly de açaí (Aloha Açaí) y una tienda de comida
+y accesorios para mascotas (Pet Family), en la misma zona. Captación en curso y mensajes:
+`NEGOCIOS-CAPTACION.md` (sección "Lo vigente al 22 de octubre").
+
+**Lo último que se tocó en el código (avisos):**
+- `js/app.js` expone el cliente de Supabase como `window.mmcSupabase` (app.js vive dentro
+  de una función y `js/avisos.js` no lo veía: por eso la tarjeta de /mi-panel quedaba en
+  "Cargando…" y decía "sesión vencida"). Publicado y probado.
+- Las llaves VAPID están en Netlify (la privada como secreta, solo producción). La primera
+  vez no quedaron guardadas aunque Netlify dijo "ok": **siempre volver a leer las variables
+  después de guardarlas.** Cambiar variables exige volver a publicar (push vacío).
+- **Último cambio enviado al repo (verificar con `git status` si ya se publicó):** ícono
+  chico de Android `assets/app/badge-96.png` en `sw.js`, y en /mi-panel el título del aviso
+  pasa a ser obligatorio (sin "Mi Mascota Club" por defecto, porque el iPhone ya agrega
+  "from Mi Mascota Club" y salía repetido; esa línea del iPhone no se puede quitar).
+
+**Pendientes, en orden:**
+1. **Android sigue mostrando un cuadro blanco** en la barra de arriba. El sitio ya sirve
+   `badge-96.png` bien (verificado en vivo: solo pixeles blancos y transparentes). Probar:
+   cerrar y abrir la app 2 veces en ese Android y enviar otra prueba; si sigue, saber la
+   marca del celular y con qué navegador se instaló. No hacer push hasta saber la causa.
+2. Textos por los primeros negocios: post e historia "primer negocio del club", aviso a
+   los socios y mensaje a negocios cercanos (falta nombre, Instagram y beneficio exactos).
+3. Decidir **abrir el registro de negocios** (`NEGOCIOS_ABIERTO`, ver abajo).
+4. Sección "Condiciones para negocios" dentro de /terminos (con nueva `terminos_version`).
+5. Borrar la visita de prueba `prueba-claude` en `origen_visitas` (o ignorarla).
+6. Alerta de mascota perdida y cumpleaños de la mascota: juntar en un solo push cuando se
+   confirme que interesan (ver el doc de captación de socios).
+
+**Docs de trabajo (Claude Docs, fuera del repo):**
+- Costos y precios (costos mensuales reales con Claude US$20 y Adobe US$20, enfoque
+  "crecer primero, monetizar después"): https://claude.ai/code/artifact/fb615eaa-c73d-4f5a-b50a-4edc63b5e9b3
+- Cómo conseguir socios (Hormozi + Roba como un artista + plan de 30 días):
+  https://claude.ai/artifact/Wnab9CSzqiechzTC4ZkJWS
+
+**Reglas que Jaime pidió para trabajar (octubre):**
+- **Cada push le cuesta créditos de Netlify (dinero).** Antes de pasarle comandos de push:
+  leer el código que ya existe, probar en el sitio en vivo cuando dependa de lo publicado,
+  volver a leer lo que se configura (llaves, tablas), juntar todo en un solo push y decirle
+  en una línea qué se verificó y qué no se pudo probar.
+- Comandos de terminal: uno por bloque, siempre `git add .` → `git commit -m "..."` →
+  `git push`.
+
+**Difusión (11 de octubre):** plan completo en `DIFUSION.md`. El **enlace `?ref=`** ya
+está construido (push del 17 de octubre).
 
 ✅ **Push del 17 de octubre — Seguimiento de QR (`?ref=`) + Avisos al celular.**
    En producción y probado en iPhone y Android (parche v35 aplicado).
