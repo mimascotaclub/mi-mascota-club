@@ -52,6 +52,7 @@
 <link rel="stylesheet" href="/css/mmc-ficha.css">
 <link rel="stylesheet" href="/css/mmc-vidrio-sitio.css">
 <link rel="stylesheet" href="/css/mmc-bienvenida.css">
+<link rel="stylesheet" href="/css/mmc-panel.css">
 
 <!-- Librería para generar los códigos QR del carnet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -1327,31 +1328,159 @@
       </div>
     </div>
     <div id="adminPanel" style="display:none;">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button type="button" class="btn btn-sm btn-outline" onclick="salirAdmin()">Cerrar sesión</button>
-      </div>
+    <!-- ===== DASHBOARD de /mi-panel (24 de octubre de 2026) =====
+         Solo cambia cómo se ve el panel. Todos los bloques de antes siguen
+         abajo, con los mismos id, dentro de secciones plegables: las
+         funciones de js/app.js los llenan igual que siempre.
+         Los números nuevos los calcula js/panel-dashboard.js y el estilo
+         está en css/mmc-panel.css (todo con prefijo dsh-). -->
+    <div class="dsh">
+      <header class="dsh-cab">
+        <div class="dsh-cab__hola">
+          <h2 class="dsh-hola">Hola, Jaime</h2>
+          <div class="dsh-fecha" id="dshFecha">Panel privado</div>
+        </div>
+        <div class="dsh-metas" aria-label="Metas del mes">
+          <div class="dsh-meta"><div class="dsh-meta__l"><span>Socios</span><span id="dshMetaSociosL">meta</span></div>
+            <div class="dsh-meta__bar"><div class="dsh-meta__fill" id="dshMetaSocios">0</div></div></div>
+          <div class="dsh-meta"><div class="dsh-meta__l"><span>Fundadores</span><span id="dshMetaFundL">meta</span></div>
+            <div class="dsh-meta__bar"><div class="dsh-meta__fill am" id="dshMetaFund">0</div></div></div>
+          <div class="dsh-meta"><div class="dsh-meta__l"><span>Negocios</span><span id="dshMetaNegL">meta</span></div>
+            <div class="dsh-meta__bar"><div class="dsh-meta__fill ce" id="dshMetaNeg">0</div></div></div>
+        </div>
+        <button type="button" class="dsh-salir" onclick="salirAdmin()">Cerrar sesión</button>
+      </header>
 
-      <!-- ===== Interruptor del bloqueo de canje =====
-           Vive acá y no en una línea de SQL a propósito: si el bloqueo está
-           frenando las primeras visitas, hay que poder apagarlo desde el
-           teléfono y en el momento, no esperando a llegar al computador. -->
-      <div class="admin-table" id="ajustesWrap">
-        <h4>Ajustes del club
-          <button class="refresh-btn" onclick="cargarAjustesAdmin()">↻ Actualizar</button>
-        </h4>
-        <div class="adm-ajuste">
-          <div class="adm-ajuste__txt">
-            <b>Exigir mascota verificada para canjear</b>
-            <span id="ajusteVerifEstado" class="adm-ajuste__estado">Cargando…</span>
-            <p>Encendido, un socio que no haya acreditado el chip y la cartilla de su mascota
-               no puede canjear beneficios: el negocio ve el aviso al buscar su código, antes
-               de confirmar nada. Apágalo si ves que está frenando las primeras visitas.</p>
+      <section class="dsh-kpis" aria-label="Números del club">
+        <div class="dsh-kpi"><div class="n" id="statBiz">0</div><div class="l">Negocios inscritos</div><div class="d" id="dshDeltaBiz"></div></div>
+        <div class="dsh-kpi"><div class="n" id="statOwners">0</div><div class="l">Mascotas / dueños</div><div class="d" id="dshDeltaOwners"></div></div>
+        <div class="dsh-kpi"><div class="n" id="statClientes">0</div><div class="l">Clientes que compraron</div><div class="d"></div></div>
+        <div class="dsh-kpi"><div class="n" id="statGMV">$0</div><div class="l">Ventas generadas (GMV)</div><div class="d"></div></div>
+        <div class="dsh-kpi"><div class="n" id="statCanjes">0</div><div class="l">Visitas validadas</div><div class="d"></div></div>
+        <div class="dsh-kpi"><div class="n" id="statAhorro">$0</div><div class="l">Ahorro entregado a socios</div><div class="d"></div></div>
+      </section>
+
+      <section class="dsh-grid">
+        <article class="dsh-card dsh-card--am dsh-card--grafico">
+          <div class="dsh-card__top"><div><h3>Inscripciones</h3><div class="dsh-card__sub">Mascotas nuevas por semana</div></div><span class="dsh-ico" aria-hidden="true">↗</span></div>
+          <div class="dsh-big"><span id="dshSemana">0</span> <small id="dshSemanaTxt">esta semana</small></div>
+          <div class="dsh-barras" id="dshBarras"></div>
+        </article>
+
+        <article class="dsh-card dsh-card--ce">
+          <div class="dsh-card__top"><div><h3>Pase Fundador</h3><div class="dsh-card__sub">100 cupos · $9.990</div></div><span class="dsh-ico" aria-hidden="true">★</span></div>
+          <div class="dsh-anillo">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="12"/>
+              <circle id="dshFundRing" cx="60" cy="60" r="50" fill="none" stroke="#151515" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 314.16" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="dsh-anillo__c"><div class="dsh-anillo__n" id="dshFundN">0</div><div class="dsh-anillo__l">de 100</div></div>
           </div>
-          <button type="button" class="adm-switch" id="ajusteVerifBtn" aria-pressed="false"
-                  onclick="alternarAjusteVerif()"><span class="adm-switch__bola"></span></button>
+          <div class="dsh-fila2">
+            <div class="dsh-mini"><b id="dshFundPlata">$0</b><span>Recaudado</span></div>
+            <div class="dsh-mini"><b id="dshFundLibres">100</b><span>Cupos libres</span></div>
+          </div>
+        </article>
+
+        <article class="dsh-card dsh-card--ng dsh-card--tareas">
+          <div class="dsh-card__top"><div><h3>Por hacer</h3><div class="dsh-card__sub">Toca para abrir cada lista</div></div><span class="dsh-ico" aria-hidden="true">✓</span></div>
+          <ul class="dsh-tareas">
+            <li><button type="button" class="dsh-tarea" data-abrir="detVerif" data-fuente="verifCount"><span class="dsh-tarea__i" aria-hidden="true">🐾</span><span class="dsh-tarea__t">Verificaciones</span><span class="dsh-tarea__n">0</span></button></li>
+            <li><button type="button" class="dsh-tarea" data-abrir="detFichas" data-fuente="colaCount"><span class="dsh-tarea__i" aria-hidden="true">🏪</span><span class="dsh-tarea__t">Fichas por aprobar</span><span class="dsh-tarea__n">0</span></button></li>
+            <li><button type="button" class="dsh-tarea" data-abrir="detPagos" data-fuente="fundPendCount"><span class="dsh-tarea__i" aria-hidden="true">💳</span><span class="dsh-tarea__t">Pagos pendientes</span><span class="dsh-tarea__n">0</span></button></li>
+            <li><button type="button" class="dsh-tarea" data-abrir="detSug" data-fuente="sugCount"><span class="dsh-tarea__i" aria-hidden="true">💬</span><span class="dsh-tarea__t">Sugerencias nuevas</span><span class="dsh-tarea__n">0</span></button></li>
+          </ul>
+          <div class="dsh-aldia" id="dshAlDia"><b>Todo al día.</b> Cuando algo llegue, se pinta amarillo.</div>
+        </article>
+      </section>
+
+      <section class="dsh-grid2">
+        <article class="dsh-card">
+          <div class="dsh-card__top"><div><h3>¿De dónde llegan?</h3><div class="dsh-card__sub">Por código ?ref= · desde el inicio</div></div>
+            <button type="button" class="refresh-btn" onclick="mmcDash.cargar()">↻ Actualizar</button></div>
+          <div class="dsh-tabla-wrap"><table class="dsh-tabla">
+            <thead><tr><th>Código</th><th class="num">Visitas</th><th class="num">Socios</th><th class="num">Negocios</th><th class="col-res">Resultado</th></tr></thead>
+            <tbody id="dshOrigen"><tr><td colspan="5" class="dsh-vacio">Cargando…</td></tr></tbody>
+          </table></div>
+        </article>
+        <article class="dsh-card dsh-card--am">
+          <div class="dsh-card__top"><div><h3>Verificación</h3><div class="dsh-card__sub">Chip + cartilla acreditados</div></div><span class="dsh-ico" aria-hidden="true">🛡</span></div>
+          <div class="dsh-big"><span id="dshVerifPct">0%</span> <small>verificadas</small></div>
+          <div class="dsh-split"><span id="dshVerifBar" style="width:0%;background:#151515"></span></div>
+          <div class="dsh-ley">
+            <div><span><i style="background:#151515"></i>Verificadas</span><span id="dshVerifSi">0</span></div>
+            <div><span><i style="background:#fff;border:1px solid rgba(21,21,21,.2)"></i>Sin verificar o en revisión</span><span id="dshVerifNo">0</span></div>
+          </div>
+          <div class="dsh-mini dsh-mini--nota"><span>Antes de encender el bloqueo de canje, conviene que este número suba.</span></div>
+        </article>
+      </section>
+
+      <div class="dsh-sec">Pendientes</div>
+      <div class="dsh-acc">
+      <details class="dsh-det" id="detVerif">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🐾</span><span class="dsh-det__t">Verificaciones por revisar<small>Chip y cartilla que subieron los socios</small></span><span class="dsh-det__cnt" id="dshCntVerif">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <!-- ===== Verificaciones de mascota por revisar ===== -->
+      <div class="admin-table" id="verifWrap">
+        <h4>Verificaciones por revisar <span id="verifCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarColaVerificaciones()">↻ Actualizar</button>
+        </h4>
+        <div id="colaVerif" class="cola-lista">
+          <div class="cola-vacia">Cargando…</div>
         </div>
       </div>
+        </div>
+      </details>
+      <details class="dsh-det" id="detFichas">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🏪</span><span class="dsh-det__t">Fichas por aprobar<small>Negocios y especialistas nuevos</small></span><span class="dsh-det__cnt" id="dshCntFichas">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <!-- ===== Fichas de negocio por aprobar ===== -->
+      <div class="admin-table" id="colaWrap">
+        <h4>Fichas por aprobar <span id="colaCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarColaFichas()">↻ Actualizar</button>
+        </h4>
+        <div id="colaFichas" class="cola-lista">
+          <div class="cola-vacia">Cargando…</div>
+        </div>
+      </div>
+        </div>
+      </details>
+      <details class="dsh-det" id="detPagos">
+        <summary><span class="dsh-det__ic" aria-hidden="true">💳</span><span class="dsh-det__t">Pagos de fundador pendientes<small>Lo que Mercado Pago no activó solo</small></span><span class="dsh-det__cnt" id="dshCntPagos">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <!-- ===== Pagos de fundador pendientes (3 de octubre) =====
+           El pase se activa solo cuando Mercado Pago confirma el pago. Acá cae
+           lo que no se pudo activar solo: pagos en proceso, montos que no
+           calzan o pagos sin cupo. Nadie que pagó queda en el aire. -->
+      <div class="admin-table" id="fundPendWrap">
+        <h4>Pagos de fundador pendientes <span id="fundPendCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarPendientesFundador()">↻ Actualizar</button>
+        </h4>
+        <div id="fundPendLista" class="cola-lista">
+          <div class="cola-vacia">Cargando…</div>
+        </div>
+      </div>
+        </div>
+      </details>
+      <details class="dsh-det" id="detSug">
+        <summary><span class="dsh-det__ic" aria-hidden="true">💬</span><span class="dsh-det__t">Sugerencias<small>Lo que escriben en /sugerencias</small></span><span class="dsh-det__cnt" id="dshCntSug">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <!-- ===== Buzón de sugerencias ===== -->
+      <div class="admin-table" id="sugWrap">
+        <h4>Sugerencias <span id="sugCount" class="cola-count">0</span>
+          <button class="refresh-btn" onclick="cargarSugerencias()">↻ Actualizar</button>
+        </h4>
+        <div id="sugLista"><div class="cola-vacia">Cargando…</div></div>
+      </div>
+        </div>
+      </details>
+      </div>
 
+      <div class="dsh-sec">Herramientas y listas</div>
+      <div class="dsh-acc">
+      <details class="dsh-det" id="detAvisos">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🔔</span><span class="dsh-det__t">Avisos al celular<small>Enviar una prueba o un aviso a todos</small></span><span class="dsh-det__cnt" id="dshCntAvisos">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
       <!-- ===== Avisos al celular (17 de octubre) =====
            Llegan a los socios que tocaron "Activar avisos" en Mi Mascota.
            Lo maneja js/avisos.js y los envía netlify/functions/enviar-aviso.js.
@@ -1377,20 +1506,36 @@
           <div id="avisoResultado" class="fund-msg" style="display:none;"></div>
         </div>
       </div>
-
-      <!-- ===== Pagos de fundador pendientes (3 de octubre) =====
-           El pase se activa solo cuando Mercado Pago confirma el pago. Acá cae
-           lo que no se pudo activar solo: pagos en proceso, montos que no
-           calzan o pagos sin cupo. Nadie que pagó queda en el aire. -->
-      <div class="admin-table" id="fundPendWrap">
-        <h4>Pagos de fundador pendientes <span id="fundPendCount" class="cola-count">0</span>
-          <button class="refresh-btn" onclick="cargarPendientesFundador()">↻ Actualizar</button>
+        </div>
+      </details>
+      <details class="dsh-det" id="detAjustes">
+        <summary><span class="dsh-det__ic" aria-hidden="true">⚙️</span><span class="dsh-det__t">Ajustes del club<small>Exigir mascota verificada para canjear</small></span><span class="dsh-det__cnt" id="dshCntAjustes">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <!-- ===== Interruptor del bloqueo de canje =====
+           Vive acá y no en una línea de SQL a propósito: si el bloqueo está
+           frenando las primeras visitas, hay que poder apagarlo desde el
+           teléfono y en el momento, no esperando a llegar al computador. -->
+      <div class="admin-table" id="ajustesWrap">
+        <h4>Ajustes del club
+          <button class="refresh-btn" onclick="cargarAjustesAdmin()">↻ Actualizar</button>
         </h4>
-        <div id="fundPendLista" class="cola-lista">
-          <div class="cola-vacia">Cargando…</div>
+        <div class="adm-ajuste">
+          <div class="adm-ajuste__txt">
+            <b>Exigir mascota verificada para canjear</b>
+            <span id="ajusteVerifEstado" class="adm-ajuste__estado">Cargando…</span>
+            <p>Encendido, un socio que no haya acreditado el chip y la cartilla de su mascota
+               no puede canjear beneficios: el negocio ve el aviso al buscar su código, antes
+               de confirmar nada. Apágalo si ves que está frenando las primeras visitas.</p>
+          </div>
+          <button type="button" class="adm-switch" id="ajusteVerifBtn" aria-pressed="false"
+                  onclick="alternarAjusteVerif()"><span class="adm-switch__bola"></span></button>
         </div>
       </div>
-
+        </div>
+      </details>
+      <details class="dsh-det" id="detFund">
+        <summary><span class="dsh-det__ic" aria-hidden="true">★</span><span class="dsh-det__t">Socios Fundadores<small>Lista y alta manual</small></span><span class="dsh-det__cnt" id="dshCntFund">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
       <!-- ===== Socios Fundadores =====
            Desde el 3 de octubre el pase se activa solo después de pagar. Este
            bloque queda para ver y quitar fundadores, y para marcar a mano algún
@@ -1414,63 +1559,45 @@
           <div class="cola-vacia">Cargando…</div>
         </div>
       </div>
-
-      <!-- ===== Verificaciones de mascota por revisar ===== -->
-      <div class="admin-table" id="verifWrap">
-        <h4>Verificaciones por revisar <span id="verifCount" class="cola-count">0</span>
-          <button class="refresh-btn" onclick="cargarColaVerificaciones()">↻ Actualizar</button>
-        </h4>
-        <div id="colaVerif" class="cola-lista">
-          <div class="cola-vacia">Cargando…</div>
         </div>
-      </div>
-
-      <!-- ===== Buzón de sugerencias ===== -->
-      <div class="admin-table" id="sugWrap">
-        <h4>Sugerencias <span id="sugCount" class="cola-count">0</span>
-          <button class="refresh-btn" onclick="cargarSugerencias()">↻ Actualizar</button>
-        </h4>
-        <div id="sugLista"><div class="cola-vacia">Cargando…</div></div>
-      </div>
-
-      <!-- ===== Fichas de negocio por aprobar ===== -->
-      <div class="admin-table" id="colaWrap">
-        <h4>Fichas por aprobar <span id="colaCount" class="cola-count">0</span>
-          <button class="refresh-btn" onclick="cargarColaFichas()">↻ Actualizar</button>
-        </h4>
-        <div id="colaFichas" class="cola-lista">
-          <div class="cola-vacia">Cargando…</div>
-        </div>
-      </div>
-
-      <div class="stat-grid">
-        <div class="stat-card"><div class="n" id="statBiz">0</div><div class="l">Negocios inscritos</div></div>
-        <div class="stat-card"><div class="n" id="statOwners">0</div><div class="l">Mascotas / dueños</div></div>
-        <div class="stat-card"><div class="n" id="statClientes">0</div><div class="l">Clientes que compraron</div></div>
-        <div class="stat-card"><div class="n" id="statGMV">$0</div><div class="l">Ventas generadas (GMV)</div></div>
-        <div class="stat-card"><div class="n" id="statCanjes">0</div><div class="l">Visitas validadas</div></div>
-        <div class="stat-card"><div class="n" id="statAhorro">$0</div><div class="l">Ahorro entregado a socios</div></div>
-      </div>
+      </details>
+      <details class="dsh-det" id="detDuenos">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🐶</span><span class="dsh-det__t">Dueños y mascotas<small>Contacto y estado de cada socio</small></span><span class="dsh-det__cnt" id="dshCntDuenos">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
       <div class="admin-table">
-        <h4>Resumen por negocio (ROI) <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
-        <div class="table-row head"><span>Negocio</span><span>Visitas</span><span>Monto total</span><span>Ticket prom.</span></div>
-        <div id="adminRoiTable"></div>
+        <h4>Dueños y mascotas</h4>
+        <div class="table-row head"><span>Mascota</span><span>Dueño</span><span>Verificación</span><span>Contacto</span></div>
+        <div id="adminOwnerTable"></div>
       </div>
+        </div>
+      </details>
+      <details class="dsh-det" id="detNegocios">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🏬</span><span class="dsh-det__t">Negocios<small>Directorio en vivo</small></span><span class="dsh-det__cnt" id="dshCntNeg">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <div class="admin-table">
+        <h4>Negocios</h4>
+        <div class="table-row head"><span>Nombre</span><span>Categoría</span><span>Comuna</span><span>Contacto</span></div>
+        <div id="adminBizTable"></div>
+      </div>
+        </div>
+      </details>
+      <details class="dsh-det" id="detCanjes">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🧾</span><span class="dsh-det__t">Visitas validadas y resumen por negocio<small>Canjes, montos y ROI</small></span><span class="dsh-det__cnt" id="dshCntCanjes">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
       <div class="admin-table admin-table--canjes">
         <h4>Últimas visitas validadas <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
         <div class="table-row head"><span>Folio</span><span>Fecha</span><span>Negocio</span><span>Mascota</span><span>Dueño y contacto</span><span>Beneficio</span><span>Compra</span><span>Ahorro</span></div>
         <div id="adminCanjesTable"></div>
       </div>
       <div class="admin-table">
-        <h4>Negocios</h4>
-        <div class="table-row head"><span>Nombre</span><span>Categoría</span><span>Comuna</span><span>Contacto</span></div>
-        <div id="adminBizTable"></div>
+        <h4>Resumen por negocio (ROI) <button class="refresh-btn" onclick="refreshAdmin()">↻ Actualizar</button></h4>
+        <div class="table-row head"><span>Negocio</span><span>Visitas</span><span>Monto total</span><span>Ticket prom.</span></div>
+        <div id="adminRoiTable"></div>
       </div>
-      <div class="admin-table">
-        <h4>Dueños y mascotas</h4>
-        <div class="table-row head"><span>Mascota</span><span>Dueño</span><span>Verificación</span><span>Contacto</span></div>
-        <div id="adminOwnerTable"></div>
+        </div>
+      </details>
       </div>
+    </div>
     </div>
   </div>
 </section>
@@ -1555,6 +1682,7 @@
 <script src="/js/ficha-negocio.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/avisos.js"></script>
+<script src="/js/panel-dashboard.js"></script>
 <!-- Visor de la cartilla veterinaria. Vive suelto al final del documento a
      propósito: lo usan tanto /mi-panel (para revisar) como /mi-mascota (para
      que el dueño confirme que su foto se lee antes de mandarla), y si viviera

@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 22 de octubre de 2026**
+**Última actualización: 24 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -767,7 +767,33 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
    marca): botones, menú, inicio, directorio, formularios, Quiénes somos, Planes, paneles.
    Jaime lo define pantalla por pantalla con imágenes. Juntar cambios para gastar pocos pushes.
 
-## 👉 Dónde quedó todo al 22 de octubre (leer esto primero)
+## 👉 Lo nuevo del 24 de octubre (leer junto con la sección del 22)
+
+**Push del 24 de octubre — Dashboard de /mi-panel.** Solo cambia cómo se ve el panel
+privado; el resto del sitio no se toca.
+- Arriba: saludo, metas del mes (socios 150, fundadores 30, negocios 10; se cambian en
+  `METAS` al inicio de `js/panel-dashboard.js`), los 6 números de siempre (mismos id
+  `statBiz`, `statOwners`…), inscripciones por semana, Pase Fundador, "Por hacer",
+  "¿De dónde llegan?" y verificación.
+- Todos los bloques de antes siguen abajo, **con los mismos id**, dentro de secciones
+  plegables (`<details class="dsh-det">`). `js/app.js` no se modificó.
+- Archivos: `css/mmc-panel.css` (todo con prefijo `#panel`/`.dsh-`), `js/panel-dashboard.js`
+  (se activa solo cuando `#adminPanel` se muestra; solo lee) y el bloque `#adminPanel`
+  en `index.html`.
+- Supabase: `supabase-panel-origen-v36.sql` → función `admin_origen_resumen()` (solo
+  lectura, solo admin). **Ya aplicada el 24 de octubre.** El valor `formulario-v3` en
+  `negocios_solicitudes.origen` se cuenta como "sin código".
+- Códigos `?ref=` nuevos en uso (24 oct): `ic` (Instagram conocidos), `id` (Instagram
+  desconocidos), `ie` (Instagram especialistas), `carla` (veterinaria que atendió a Max).
+- Plan del mes y mensajes: doc "Plan a 30 días · Mi Mascota Club"
+  (https://claude.ai/artifact/E7hKXq1meVXUPR54P5kiVY). Kit para negocios:
+  https://claude.ai/artifact/DybVdEg376tcParmG9dY4a
+- Pendiente para el próximo push: comuna obligatoria en el registro de dueños (27 de 37
+  socios sin comuna), abrir el registro de negocios, "Condiciones para negocios".
+- Ojo: `ic` tuvo 7 visitas en 3 minutos el 24 de octubre y 0 inscripciones. Pueden ser
+  vistas previas de enlaces de Instagram o pruebas; revisar después de unos días.
+
+## 👉 Dónde quedó todo al 22 de octubre
 
 **Negocios reales:** 2 — un café pet friendly de açaí (Aloha Açaí) y una tienda de comida
 y accesorios para mascotas (Pet Family), en la misma zona. Captación en curso y mensajes:
