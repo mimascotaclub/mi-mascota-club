@@ -767,7 +767,50 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
    marca): botones, menú, inicio, directorio, formularios, Quiénes somos, Planes, paneles.
    Jaime lo define pantalla por pantalla con imágenes. Juntar cambios para gastar pocos pushes.
 
-## 👉 Lo nuevo del 28 de octubre (leer primero)
+## 👉 Lo nuevo del 28 de octubre, noche: "Mi ficha" (leer primero)
+
+**Qué es:** los negocios ya pueden editar su propia ficha desde /mi-negocio, y Jaime
+puede editar cualquier ficha ya publicada desde /mi-panel. Antes el panel del negocio
+solo mostraba visitas y las fichas publicadas no se podían cambiar sin SQL.
+
+**En /mi-negocio** hay dos pestañas: *Visitas* (igual que antes) y *Mi ficha*.
+- **Se publica de inmediato:** WhatsApp, teléfono (opcional), Instagram, TikTok, Facebook,
+  sitio web, días y horario, descripción.
+- **Con revisión:** beneficio, logo, foto y dirección. Quedan como "Cambio en revisión"
+  hasta que Jaime aprueba; mientras, sigue vigente lo publicado. El negocio puede anular
+  su pedido. A Jaime le llega un correo por cada pedido.
+- **No se cambia ahí:** nombre, RUT, razón social, datos del responsable (y comunas de
+  cobertura). El negocio escribe a holamimascotaclub@gmail.com.
+- Textos en español neutro: "Se publica de inmediato", nada de "al tiro".
+
+**En /mi-panel:**
+- "Por hacer" tiene una fila nueva: *Cambios de fichas*. Abre "Cambios de fichas por
+  revisar" con *Hoy publicado* vs *Pide*, y botones Aprobar / Rechazar (pide motivo).
+  Al negocio le llega un correo en ambos casos y ve el resultado en su panel 7 días.
+- Bloque nuevo *Editar fichas publicadas*: buscador + formulario por negocio. Solo envía
+  los campos que cambiaste. Ojo: cambiar el nombre cambia el enlace /negocio/…
+
+**Seguridad / respaldo (parche supabase-mi-ficha-v38.sql, ya aplicado):** solo agrega.
+- Tabla `negocios_cambios` (pedidos) y `negocios_ediciones` (copia completa de la ficha
+  ANTES de cada cambio, quién lo hizo y cuándo → siempre se puede volver atrás).
+- Funciones `negocio_mi_ficha`, `negocio_guardar_ficha`, `negocio_pedir_cambio`,
+  `negocio_anular_cambio` (con la sesión del negocio) y `admin_cambios_pendientes`,
+  `admin_resolver_cambio`, `admin_editar_negocio` (solo admin).
+- Al guardar también se actualizan `contacto`, `redes_sociales`, `meta` y `servicios`
+  igual que al aprobar una ficha, para que el directorio y la ficha muestren lo mismo.
+- Límites: 30 guardados por hora y 15 pedidos por día por negocio.
+
+**Archivos:** `js/mi-ficha.js`, `js/panel-fichas.js`, `css/mmc-mi-ficha.css` (nuevos) e
+`index.html` (pestañas, dos bloques en el panel y los `<script>`). `js/app.js` NO se tocó.
+Ojo técnico: app.js está encerrado en una función, así que sus funciones (negToken,
+toast, slugify…) no se ven desde otros archivos; los archivos nuevos traen las suyas.
+
+**Probado** con NEG0003 (prueba) en celular y escritorio: Visitas igual que antes, guardar,
+errores, doble toque, beneficio, subir logo, dirección, aprobar, rechazar, anular, editar
+publicada, sin scroll horizontal y sin errores. Las funciones SQL se probaron en la base
+real dentro de una transacción que se deshizo (no quedó nada guardado).
+
+## 👉 Lo nuevo del 28 de octubre (mañana y tarde)
 
 **Push del 28 de octubre — arreglo del registro de dueños + teléfono opcional en negocios.**
 - **El error:** en el registro de dueños (`formulario-registro-demo-v3.html`), un doble toque

@@ -53,6 +53,7 @@
 <link rel="stylesheet" href="/css/mmc-vidrio-sitio.css">
 <link rel="stylesheet" href="/css/mmc-bienvenida.css">
 <link rel="stylesheet" href="/css/mmc-panel.css">
+<link rel="stylesheet" href="/css/mmc-mi-ficha.css">
 
 <!-- Librería para generar los códigos QR del carnet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -1189,10 +1190,20 @@
         <button type="button" class="btn btn-sm btn-outline" onclick="salirPanelNegocio()">Salir</button>
       </div>
 
-      <div class="neg-kpis" id="negKpis"></div>
+      <!-- Pestañas (28 oct): Visitas | Mi ficha. Mi ficha la maneja js/mi-ficha.js -->
+      <div class="mf-tabs" id="negTabs" role="tablist">
+        <button type="button" class="mf-tab is-on" data-tab="visitas" role="tab" aria-selected="true">Visitas</button>
+        <button type="button" class="mf-tab" data-tab="ficha" role="tab" aria-selected="false">Mi ficha</button>
+      </div>
 
-      <h4 class="neg-t">Visitas registradas</h4>
-      <div id="negTabla"></div>
+      <div id="negVisitasBox">
+        <div class="neg-kpis" id="negKpis"></div>
+
+        <h4 class="neg-t">Visitas registradas</h4>
+        <div id="negTabla"></div>
+      </div>
+
+      <div id="negFichaBox" hidden></div>
     </div>
   </div>
 </section>
@@ -1387,6 +1398,7 @@
           <ul class="dsh-tareas">
             <li><button type="button" class="dsh-tarea" data-abrir="detVerif" data-fuente="verifCount"><span class="dsh-tarea__i" aria-hidden="true">🐾</span><span class="dsh-tarea__t">Verificaciones</span><span class="dsh-tarea__n">0</span></button></li>
             <li><button type="button" class="dsh-tarea" data-abrir="detFichas" data-fuente="colaCount"><span class="dsh-tarea__i" aria-hidden="true">🏪</span><span class="dsh-tarea__t">Fichas por aprobar</span><span class="dsh-tarea__n">0</span></button></li>
+            <li><button type="button" class="dsh-tarea" data-abrir="detCambios" data-fuente="cambiosCount"><span class="dsh-tarea__i" aria-hidden="true">✏️</span><span class="dsh-tarea__t">Cambios de fichas</span><span class="dsh-tarea__n">0</span></button></li>
             <li><button type="button" class="dsh-tarea" data-abrir="detPagos" data-fuente="fundPendCount"><span class="dsh-tarea__i" aria-hidden="true">💳</span><span class="dsh-tarea__t">Pagos pendientes</span><span class="dsh-tarea__n">0</span></button></li>
             <li><button type="button" class="dsh-tarea" data-abrir="detSug" data-fuente="sugCount"><span class="dsh-tarea__i" aria-hidden="true">💬</span><span class="dsh-tarea__t">Sugerencias nuevas</span><span class="dsh-tarea__n">0</span></button></li>
           </ul>
@@ -1440,6 +1452,20 @@
           <button class="refresh-btn" onclick="cargarColaFichas()">↻ Actualizar</button>
         </h4>
         <div id="colaFichas" class="cola-lista">
+          <div class="cola-vacia">Cargando…</div>
+        </div>
+      </div>
+        </div>
+      </details>
+      <details class="dsh-det" id="detCambios">
+        <summary><span class="dsh-det__ic" aria-hidden="true">✏️</span><span class="dsh-det__t">Cambios de fichas por revisar<small>Lo que piden los negocios desde su panel</small></span><span class="dsh-det__cnt" id="dshCntCambios">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <!-- ===== Cambios pedidos desde /mi-negocio (js/panel-fichas.js) ===== -->
+      <div class="admin-table" id="cambiosWrap">
+        <h4>Cambios por revisar <span id="cambiosCount" class="cola-count" data-cero="1">0</span>
+          <button class="refresh-btn" onclick="mmcCambios.cargar()">↻ Actualizar</button>
+        </h4>
+        <div id="colaCambios" class="cola-lista">
           <div class="cola-vacia">Cargando…</div>
         </div>
       </div>
@@ -1581,6 +1607,18 @@
       </div>
         </div>
       </details>
+      <details class="dsh-det" id="detEditarFichas">
+        <summary><span class="dsh-det__ic" aria-hidden="true">🛠</span><span class="dsh-det__t">Editar fichas publicadas<small>Cambia cualquier ficha que ya está en el directorio</small></span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
+        <div class="dsh-det__body">
+      <div class="admin-table">
+        <h4>Editar fichas publicadas
+          <button class="refresh-btn" onclick="mmcCambios.negocios()">↻ Actualizar</button>
+        </h4>
+        <div class="mf-buscar"><input class="mf-in" id="editFichasBuscar" type="search" placeholder="🔎 Buscar por nombre, código o comuna" autocomplete="off"></div>
+        <div class="mf-lista" id="editFichasLista"><div class="cola-vacia">Cargando…</div></div>
+      </div>
+        </div>
+      </details>
       <details class="dsh-det" id="detCanjes">
         <summary><span class="dsh-det__ic" aria-hidden="true">🧾</span><span class="dsh-det__t">Visitas validadas y resumen por negocio<small>Canjes, montos y ROI</small></span><span class="dsh-det__cnt" id="dshCntCanjes">·</span><span class="dsh-det__flecha" aria-hidden="true">▾</span></summary>
         <div class="dsh-det__body">
@@ -1683,6 +1721,8 @@
 <script src="/js/app.js"></script>
 <script src="/js/avisos.js"></script>
 <script src="/js/panel-dashboard.js"></script>
+<script src="/js/mi-ficha.js"></script>
+<script src="/js/panel-fichas.js"></script>
 <!-- Visor de la cartilla veterinaria. Vive suelto al final del documento a
      propósito: lo usan tanto /mi-panel (para revisar) como /mi-mascota (para
      que el dueño confirme que su foto se lee antes de mandarla), y si viviera
