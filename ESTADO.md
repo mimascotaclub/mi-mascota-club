@@ -1,6 +1,6 @@
 # ESTADO — Mi Mascota Club
 
-**Última actualización: 24 de octubre de 2026**
+**Última actualización: 28 de octubre de 2026**
 
 Esto es lo PRIMERO que hay que leer al empezar una sesión nueva, humana o con una IA.
 `MARCA.md` es el compañero de este archivo: este dice **qué está construido**, aquel dice
@@ -767,6 +767,40 @@ B. **Toda la web al nuevo concepto gráfico** (estilo "vidrio": degradados desen
    marca): botones, menú, inicio, directorio, formularios, Quiénes somos, Planes, paneles.
    Jaime lo define pantalla por pantalla con imágenes. Juntar cambios para gastar pocos pushes.
 
+## 👉 Lo nuevo del 28 de octubre (leer primero)
+
+**Push del 28 de octubre — arreglo del registro de dueños + teléfono opcional en negocios.**
+- **El error:** en el registro de dueños (`formulario-registro-demo-v3.html`), un doble toque
+  en una opción ("Perro", una raza, etc.) o el Enter más el botón llamaban a `avanzar()` dos
+  veces. El formulario se saltaba un paso y el paso "olvidado" nunca se borraba: desde ahí
+  cada pantalla se veía encima de otra (en 12/12 se veían juntos el chip y el plan) y los
+  toques podían caer en la pantalla de atrás. Lo reportaron 2 personas. **No hubo
+  inscripciones de dueños entre el 25 y el 28 de octubre** (la última es del 25 a las 08:04):
+  esas personas tienen que volver a inscribirse.
+- **El arreglo:** bloqueo de 480 ms entre pasos, retiro de cualquier paso viejo al mostrar
+  uno nuevo, el paso que sale ya no recibe toques, el código del correo se revisa una sola
+  vez, y "Confirmar registro" no puede inscribir dos veces. No cambia nada de lo que se
+  guarda en la base (probado campo por campo).
+- **Probado** en una copia local con base simulada, en iPhone y Android: flujo normal, doble
+  toque en opción, en raza, en correo, en "Continuar sin el chip" y en "Confirmar registro",
+  código pegado y autocompletado, doble "Atrás", toque rapidísimo al llegar a un paso y error
+  de la base con reintento.
+- **Teléfono del local opcional** en `formulario-negocio-v3.html`: si lo escriben se valida
+  igual (8 a 11 dígitos). La base ya lo aceptaba vacío y al aprobar la ficha usa el WhatsApp
+  (que sigue siendo obligatorio). Se sacó de la lista de pendientes.
+
+## 👉 Lo nuevo del 25 de octubre
+
+- **Documentos nuevos en el repo:** `MERCADO-MASCOTAS.md` (datos de Chile y España, 8 puntos
+  fuertes con su estrategia), `CALCULO-NEGOCIO.md` (método para calcular metas desde el valor
+  de empresa hacia las ventas diarias) y `VERIFICADO-PET-FRIENDLY.md` (programa de
+  verificación pagada para negocios; es la prioridad actual).
+- **Nombre correcto del segundo negocio: Pet Harmony** (tienda, Ñuñoa, 15% sobre $30.000).
+  Más abajo figura como "Pet Family" por error.
+- **Sección "¿Cuánto gastas en tu mascota al mes?"**: diseñada (cifras de la CNC +
+  calculadora de ahorro con los beneficios reales de Pet Harmony y Aloha Açaí) pero
+  **oculta por decisión de Jaime**. No está en el sitio. Se retoma más adelante.
+
 ## 👉 Lo nuevo del 24 de octubre (leer junto con la sección del 22)
 
 **Push del 24 de octubre — Dashboard de /mi-panel.** Solo cambia cómo se ve el panel
@@ -975,6 +1009,28 @@ está construido (push del 17 de octubre).
 10. Ofrecer el pase al terminar el registro.
 11. Las dos fotos de la landing (Jaime con Max, el carnet).
 12. Preguntar en el grupo de fundadores si quieren el asistente "¿Es urgencia?".
+
+**Plan mensual del dueño $9.990 + box (idea de Jaime, 24 de octubre)**
+Regla de Jaime: **no se baja el precio, se sube el valor.**
+12a. **Plan mensual para dueños a $9.990/mes** (suscripción automática con Mercado Pago
+     Preapproval). Se abre cuando se cumplan las tres condiciones: ~30 fundadores pagados,
+     ~15 negocios con beneficio y 1 veterinaria 24 h aliada. Fecha tentativa: enero-febrero
+     2027. Los fundadores mantienen su precio congelado. Antes: resolver la boleta con el
+     contador.
+12b. **Box mensual del dueño.** Lo ideal es retirarlo en un negocio adherido al club, porque
+     así no hay costo de envío y el retiro le lleva clientes al negocio. El envío a domicilio
+     sería opcional y lo pagaría el dueño. Falta definir qué trae cada mes y su costo.
+12c. **Placa QR para el collar.** Al escanearla se abre la ficha pública de la mascota, con
+     los datos que el dueño elija mostrar, y al dueño le llega un aviso al celular. La
+     ubicación del escaneo solo se puede enviar si la persona que escanea acepta compartirla
+     en su navegador; si no, el aviso dice "escanearon la placa de X" con la hora. Se vende
+     en preventa con el Pase Fundador (entrega en diciembre) y se construye junto con la
+     alerta de mascota perdida.
+12d. **Verificado Pet Friendly por Mi Mascota Club** (idea de Jaime, 25 de octubre). Sello
+     pagado para negocios: verificación $100.000 (visita + kit + fotos) y mensualidad
+     (propuesta $14.990) con reposición de bolsitas y folletos y revisión del kit. Pauta de
+     evaluación, kit, costos y decisiones pendientes en `VERIFICADO-PET-FRIENDLY.md`.
+     Prioridad actual de Jaime.
 
 **Para abrir al público (decisiones)**
 13. Terminar la prueba cerrada con las 5 personas.

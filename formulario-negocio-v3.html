@@ -158,7 +158,7 @@
 
       <div class="grid-2">
         <div class="field" id="f-telefono_local">
-          <label for="telefono_local">Teléfono del local</label>
+          <label for="telefono_local">Teléfono del local <span style="color:var(--mmc-ink-3);font-weight:400">(opcional)</span></label>
           <div class="prefix"><span class="prefix__tag">+56</span><input type="tel" id="telefono_local" placeholder="2 2345 6789" inputmode="tel"></div>
           <div class="field__err">Ingresa un teléfono válido.</div>
         </div>
@@ -750,7 +750,11 @@ function validarPaso(n) {
   if (n === 3) {
     const tl = soloDigitos(val('telefono_local'));
     const wa = soloDigitos(val('whatsapp'));
-    fail('f-telefono_local', tl.length >= 8 && tl.length <= 11, 'Ingresa un teléfono válido.');
+    /* 28 oct: el teléfono del local es opcional. Hay negocios y especialistas sin
+       teléfono fijo, y el WhatsApp (obligatorio) ya sirve de contacto: al aprobar
+       la ficha, si no hay teléfono se usa el WhatsApp. Si lo escriben, se sigue
+       revisando que sea un número válido. */
+    fail('f-telefono_local', tl.length === 0 || (tl.length >= 8 && tl.length <= 11), 'Si lo escribes, revisa que tenga entre 8 y 11 dígitos.');
     fail('f-whatsapp', wa.length === 8, 'Ingresa los 8 dígitos, sin el 9.');
   }
 

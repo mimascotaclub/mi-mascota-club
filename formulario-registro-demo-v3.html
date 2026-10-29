@@ -126,6 +126,9 @@
   }
   .paso.saliendo{
     opacity:0; transform:translateX(-40px);
+    /* 28 oct: un paso que sale ya no recibe toques. Antes seguía "tocable"
+       los 460 ms que dura la salida, y un segundo toque rápido caía en él. */
+    pointer-events:none;
   }
 
   /* flex-shrink:0 es imprescindible: sin él, este bloque es un hijo flexible
@@ -881,7 +884,8 @@ function renderPaso(index, direccion){
         card.classList.add('selected');
         respuestas[q.id] = card.dataset.value;
         btn.classList.add('activo');
-        setTimeout(avanzar, 350);
+        /* Solo avanza si sigue en ESTE paso: un doble toque ya no salta dos. */
+        setTimeout(()=> avanzarDesde(index), 350);
       });
     });
   }
@@ -902,7 +906,7 @@ function renderPaso(index, direccion){
         panel.classList.remove('abierto');
         fake.classList.remove('abierto');
         btn.classList.add('activo');
-        setTimeout(avanzar, 300);
+        setTimeout(()=> avanzarDesde(index), 300);
       });
     });
     if(q.tipo === 'select-buscable'){
@@ -987,9 +991,15 @@ function renderPaso(index, direccion){
       });
     });
 
+    /* 28 oct: si el iPhone rellena el código solo, o se pega, esto se llamaba
+       varias veces seguidas. Ahora se revisa una sola vez a la vez, y nunca de
+       nuevo después de que el correo quedó verificado. */
+    let revisandoCodigo = false, codigoVerificado = false;
     async function chequearCompleto(){
       const codigo = boxes.map(b=>b.value).join('');
       if(codigo.length !== 6) return;
+      if(revisandoCodigo || codigoVerificado) return;
+      revisandoCodigo = true;
       estado.className = 'codigo-estado';
       estado.innerHTML = `<span class="spinner"></span> Verificando...`;
       try{
@@ -1003,16 +1013,19 @@ function renderPaso(index, direccion){
           setTimeout(()=> boxes.forEach(b=> b.classList.remove('error')), 400);
           return;
         }
+        codigoVerificado = true;
         estado.className = 'codigo-estado ok';
         estado.textContent = '¡Correo verificado!';
         mascota.classList.remove('mascota-tapada','mascota-espiando');
         clearInterval(espiandoInterval);
         respuestas.correo_verificado = true;
         btn.classList.add('activo');
-        setTimeout(avanzar, 500);
+        setTimeout(()=> avanzarDesde(index), 500);
       } catch(e){
         estado.className = 'codigo-estado err';
         estado.textContent = 'Error de conexión al verificar.';
+      } finally {
+        revisandoCodigo = false;
       }
     }
     setTimeout(()=> boxes[0].focus(), 300);
@@ -1129,7 +1142,12 @@ function renderPaso(index, direccion){
         respuestas.plan = card.dataset.plan;
       });
     });
+    /* 28 oct: un doble toque en "Confirmar registro" ya no puede inscribir
+       dos veces a la misma mascota. */
+    let registrando = false;
     btn.addEventListener('click', async ()=>{
+      if(registrando || btn.disabled) return;
+      registrando = true;
       btn.textContent = 'Registrando...';
       btn.classList.remove('activo');
       try{
@@ -1157,6 +1175,7 @@ function renderPaso(index, direccion){
           alert('No se pudo registrar: ' + (error?.message || 'error desconocido'));
           btn.textContent = 'Confirmar registro';
           btn.classList.add('activo');
+          registrando = false;
           return;
         }
         respuestas.codigo_socio  = data[0].codigo;
@@ -1222,6 +1241,7 @@ function renderPaso(index, direccion){
         alert('Error de conexión al registrar: ' + e.message);
         btn.textContent = 'Confirmar registro';
         btn.classList.add('activo');
+        registrando = false;
       }
     });
   }
@@ -1234,16 +1254,51 @@ function renderPaso(index, direccion){
   return div;
 }
 
+/* ---------- Navegación entre pasos (corregida el 28 de octubre) ----------
+   El problema: un doble toque (o el Enter más el botón) llamaba a avanzar()
+   dos veces seguidas. El formulario se saltaba un paso y el paso "olvidado"
+   nunca se borraba, así que desde ahí cada pantalla se veía encima de otra
+   (en iPhone se veían juntos el chip y el plan, en 12/12).
+   Ahora:
+     1) Mientras dura una transición (480 ms) se ignora un segundo avance o
+        retroceso.
+     2) Al mostrar un paso nuevo, se retiran TODOS los demás que queden en
+        pantalla, aunque alguno se haya quedado pegado por otra razón.
+   Las respuestas ya escritas no se tocan: viven en "respuestas", no en los
+   pasos que se retiran. */
+let navegando = false;
+function bloquearNavegacion(){
+  navegando = true;
+  setTimeout(()=>{ navegando = false; }, 480);
+}
+/* Para los avances automáticos (opción elegida, raza elegida, código correcto):
+   solo avanza si la persona sigue en el paso que lo pidió, y si justo hay una
+   transición en curso, espera a que termine en vez de perder el avance. */
+function avanzarDesde(i){
+  if(pasoActual !== i) return;
+  if(navegando){ setTimeout(()=> avanzarDesde(i), 120); return; }
+  avanzar();
+}
+function retirarPasosViejos(nuevo){
+  stage.querySelectorAll('.paso').forEach(p=>{
+    if(p === nuevo) return;
+    p.classList.remove('activo');
+    p.classList.add('saliendo');
+    setTimeout(()=>{ if(p.parentNode) p.remove(); }, 460);
+  });
+}
+
 function avanzar(){
-  const actualDiv = stage.querySelector('.paso.activo');
-  if(actualDiv) actualDiv.classList.add('saliendo');
+  if(navegando) return;
+  bloquearNavegacion();
   pasoActual++;
   if(pasoActual >= preguntas.length){
+    retirarPasosViejos(null);
     setTimeout(mostrarFinal, 400);
     return;
   }
   const nuevo = renderPaso(pasoActual, 1);
-  setTimeout(()=>{ if(actualDiv) actualDiv.remove(); }, 460);
+  retirarPasosViejos(nuevo);
 }
 
 function retroceder(){
@@ -1251,11 +1306,11 @@ function retroceder(){
     window.location.href = 'index.html';
     return;
   }
-  const actualDiv = stage.querySelector('.paso.activo');
-  if(actualDiv) actualDiv.classList.add('saliendo');
+  if(navegando) return;
+  bloquearNavegacion();
   pasoActual--;
   const nuevo = renderPaso(pasoActual, -1);
-  setTimeout(()=>{ if(actualDiv) actualDiv.remove(); }, 460);
+  retirarPasosViejos(nuevo);
 }
 
 btnVolver.addEventListener('click', retroceder);
@@ -1363,6 +1418,7 @@ function mostrarFinal(){
     </div>
   `;
   stage.appendChild(div);
+  retirarPasosViejos(div);
   requestAnimationFrame(()=> div.classList.add('activo'));
 
   // El QR lleva la URL de validación, no el código pelado: así el negocio lo
